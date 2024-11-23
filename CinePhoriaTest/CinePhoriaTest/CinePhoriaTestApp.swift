@@ -13,7 +13,7 @@ import SwiftUI
 struct CinePhoriaTestApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            FilmView(film: filmsData[0] )
         }
     }
 }
