@@ -101,5 +101,5 @@ struct SeanceView: View {
 }
 
 #Preview {
-    SeanceView(seance: Seance.sample)
+    SeanceView(seance: Seance.samples[0])
 }
