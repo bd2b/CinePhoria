@@ -15,13 +15,14 @@ struct FutureView: View {
         VStack {
             Text("Présentez le QRCode à votre entrée")
                 .font(customFont(style: .title3))
+                .foregroundStyle(.bleuNuitPrimaire)
                 .multilineTextAlignment(.center)
             Button(action: showQRCode) {
                 Label("QRCode", systemImage: "qrcode")
                     .padding(5)
                     .font(.headline)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.borderedProminent)
         }
         .frame(width: 150, height: 150)
         .padding(10)
@@ -46,13 +47,14 @@ struct ToEvaluateView: View {
         VStack {
             Text("Donnez nous votre avis !")
                 .font(customFont(style: .title3))
+                .foregroundStyle(.bleuNuitPrimaire)
                 .multilineTextAlignment(.center)
             Button(action: evaluateReservation) {
                 Label("Evaluer", systemImage: "questionmark.bubble")
                     .padding(5)
                     .font(.headline)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.borderedProminent)
         }
         .frame(width: 150, height: 150)
         .padding(10)
@@ -79,21 +81,22 @@ struct EvaluatedView: View {
     var body: some View {
         VStack(spacing: 0) {
             Text("Votre évaluation")
-                .font(customFont(style: .title3))
+                .font(customFont(style: .headline))
                 .frame(width: 150, height: 40)
-                .foregroundStyle(.white)
-                .background(.bleuNuitPrimaire) // Remplacez par `.bleuNuitPrimaire`
-                .clipShape(CustomCornerRadiusShape(radius: 10, corners: [.topLeft, .topRight]))
+                .foregroundStyle(.doréAccentuation)
+//                .background(.bleuNuitPrimaire) // Remplacez par `.bleuNuitPrimaire`
+//                .clipShape(CustomCornerRadiusShape(radius: 10, corners: [.topLeft, .topRight]))
 
             VStack(spacing: 0) {
                 if let evaluation = evaluation {
                     ScrollView {
                         Text(evaluation)
-                            .font(customFont(style: .caption2))
                             .multilineTextAlignment(.center)
+                            .font(customFont(style: .caption2))
+                            
                             .bold()
-                            .padding(5)
-                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(10)
+                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                     .frame(width: 150, height: 100) // Limite la hauteur
                 }
@@ -150,18 +153,16 @@ struct ActionsView: View {
 
 
 #Preview {
-    ActionsView(reservation: Reservation(id: 1, seance: Seance.samples[0]))
+    ActionsView(reservation: Reservation.samplesReservation[0])
 }
 
 #Preview {
-    ActionsView(reservation: Reservation(id: 1, seance: Seance.samples[1]))
+    ActionsView(reservation: Reservation.samplesReservation[1])
 }
 
 #Preview {
-    ActionsView(reservation: Reservation(id: 1, seance: Seance.samples[1] , evaluation: "Très bon film", note: 4.5))
+    ActionsView(reservation: Reservation.samplesReservation[2])
 }
 #Preview {
-    ActionsView(reservation: Reservation(id: 1, seance: Seance.samples[1] , evaluation: """
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ullamcorper tincidunt justo id dignissim. Quisque vel erat sit amet augue suscipit cursus. Curabitur tempor elit tellus, nec consequat orci egestas eget. Aenean vitae maximus ex, ac blandit sem. Nulla mattis magna volutpat, rhoncus quam quis, egestas diam. Nunc sit amet fringilla erat, sit amet tincidunt ante. Pellentesque nec urna vestibulum, porta risus at, tempus risus. Aenean vel turpis tincidunt lacus aliquam hendrerit porta nec quam. Maecenas id nunc sollicitudin, mattis velit in, bibendum quam. Maecenas non elementum orci. Aliquam ut dolor erat. Cras quis hendrerit eros. Praesent condimentum magna nec ipsum auctor volutpat. 
-""", note: 4.5))
+    ActionsView(reservation: Reservation.samplesReservation[3])
 }

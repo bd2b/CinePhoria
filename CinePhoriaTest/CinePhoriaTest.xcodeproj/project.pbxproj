@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		ED2B32302CF38EA700A72F54 /* Giffy in Frameworks */ = {isa = PBXBuildFile; productRef = ED2B322F2CF38EA700A72F54 /* Giffy */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		ED35A9DB2CF1C67D00A2145B /* CinePhoriaTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CinePhoriaTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED2B32302CF38EA700A72F54 /* Giffy in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +83,7 @@
 			);
 			name = CinePhoriaTest;
 			packageProductDependencies = (
+				ED2B322F2CF38EA700A72F54 /* Giffy */,
 			);
 			productName = CinePhoriaTest;
 			productReference = ED35A9DB2CF1C67D00A2145B /* CinePhoriaTest.app */;
@@ -107,6 +113,9 @@
 			);
 			mainGroup = ED35A9D22CF1C67D00A2145B;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				ED2B322E2CF38EA700A72F54 /* XCRemoteSwiftPackageReference "Giffy" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ED35A9DC2CF1C67D00A2145B /* Products */;
 			projectDirPath = "";
@@ -339,6 +348,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		ED2B322E2CF38EA700A72F54 /* XCRemoteSwiftPackageReference "Giffy" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tfmart/Giffy";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		ED2B322F2CF38EA700A72F54 /* Giffy */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ED2B322E2CF38EA700A72F54 /* XCRemoteSwiftPackageReference "Giffy" */;
+			productName = Giffy;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = ED35A9D32CF1C67D00A2145B /* Project object */;
 }
