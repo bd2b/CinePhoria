@@ -58,8 +58,27 @@ struct Seance {
         }
         
     }
-    static var sample: Seance {
-        Seance(hourBegin: helper.hourString(from: sampleDateBegin), hourEnd: "16:00", date: sampleDateBegin, location: "Salle 1", qualite: .troisD, bo: .vf)
+    static var sampleDateBeginFutur: Date {
+        let calendar = Calendar.current
+        var dateComponents = DateComponents()
+        dateComponents.year = 2025
+        dateComponents.month = 11
+        dateComponents.day = 23
+        dateComponents.hour = 14
+        dateComponents.minute = 50
+        
+        if let specificDate = calendar.date(from: dateComponents) {
+            return specificDate
+        } else {
+            return .now
+        }
+        
+    }
+    static var samples: [Seance] {
+        [
+            Seance(hourBegin: helper.hourString(from: sampleDateBegin), hourEnd: "16:00", date: sampleDateBegin, location: "Salle 1", qualite: .troisD, bo: .vf),
+            Seance(hourBegin: helper.hourString(from: sampleDateBeginFutur), hourEnd: "16:00", date: sampleDateBeginFutur, location: "Salle 1", qualite: .troisD, bo: .vf)
+        ]
     }
 }
 
