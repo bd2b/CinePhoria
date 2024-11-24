@@ -20,7 +20,7 @@ func customFont(style: Font.TextStyle, fontName: String = "Actor-Regular") -> Fo
     let size = UIFont.preferredFont(forTextStyle: UIFont.TextStyle(style)).pointSize
     
     // Retournez la police
-    return Font.custom(fontName, size: size)
+    return Font.custom(fontName, size: size )
 }
 
 // Extension pour mapper Font.TextStyle à UIFont.TextStyle
