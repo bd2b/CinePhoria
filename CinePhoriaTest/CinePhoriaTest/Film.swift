@@ -22,12 +22,20 @@ enum CategorySeeing: String, Codable {
     case moins18 = "-18"
 }
 
-struct ImageFilm {
+struct ImageFilm: Hashable {
+    var id: UUID = UUID()
     var image1024: ImageResource
     var image128: ImageResource
 }
 
-struct Film {
+struct Film : Identifiable, Hashable {
+    static func == (lhs: Film, rhs: Film) -> Bool {
+        lhs.id == rhs.id
+    }
+    
+    
+    var id: UUID = UUID()
+    
     var titleFilm: String
     var genre: String?
     var duration: String?

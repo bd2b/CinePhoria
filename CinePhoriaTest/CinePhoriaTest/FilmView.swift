@@ -47,8 +47,6 @@ struct FilmView: View {
     
     var body: some View {
         VStack (alignment: .leading) {
-            Text("Description du film")
-                .font(.title.bold())
             ScrollView  {
                 HStack {
                     if let imageFilm = film.imageFilm {
@@ -115,9 +113,12 @@ struct FilmView: View {
                     .strokeBorder ( .argentéTertiaire , lineWidth: 1)
             }
             
+            
         }
+        .navigationTitle(film.titleFilm)
         
     }
+       
 }
 
 #Preview {

@@ -13,9 +13,12 @@ import Giffy
 struct CardsReservationView: View {
     let reservations: [Reservation]
     
-    @State private var currentPage: Int = 0 // Index de la page actuelle
-
+    // Index de la page actuelle qui permet de retrouver la reservation selectionnée
+    @State private var currentPage: Int = 0
+    @StateObject private var viewModel = CardsReservationViewModel()
+    
     var body: some View {
+        
         GeometryReader { geometry in
             VStack {
                 // Titre et logo
@@ -41,22 +44,95 @@ struct CardsReservationView: View {
                     }
                     .frame(height: 150)
                 }
-
+                
                 // Cartes avec TabView
                 TabView(selection: $currentPage) {
                     ForEach(0..<reservations.count, id: \.self) { index in
-                        CardReservationView(reservation: reservations[index], geometry: geometry)
-                            .tag(index) // Associe chaque vue à un index
+                        CardReservationView(reservation: reservations[index],
+                                            geometry: geometry,
+                                            viewModel: viewModel)
+                        .tag(index) // Associe chaque vue à un index
                     }
                 }
                 
                 .tabViewStyle(PageTabViewStyle()) // Style de défilement par page
                 .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
-              
- 
-              //  .padding(.top, 10)
+                .onAppear {
+                    viewModel.updateOrientation(currentSize: geometry.size)
+                }
+                .onChange(of: geometry.size) { newSize , _ in
+                    viewModel.updateOrientation(currentSize: newSize)
+                }
+                
+                
+                //  .padding(.top, 10)
+            }
+            .sheet(isPresented: ($viewModel.isSheetShowing), onDismiss: {
+                viewModel.resetModals()
+            }) {
+                
+                
+                if viewModel.isFilmViewShowing {
+                    FilmView(film: reservations[currentPage].film)
+                } else {
+                    if viewModel.isSeatsViewShowing {
+                        SeatsView()
+                    } else {
+                        if viewModel.isQRCodeViewShowing {
+                            QRCodeView()
+                        } else {
+                            if viewModel.isEvaluationViewShowing {
+                                EvaluationView()
+                            }
+                        }
+                    }
+                    
+                }
             }
         }
+    }
+}
+/// Persistance des états de présentation des modales
+class CardsReservationViewModel: ObservableObject {
+    
+    @Published var isSheetShowing: Bool = false
+    
+    // Si une des modals est affichée, on propage à isSheetViewShowinf
+    // pour avoir une seule variable binding dans .sheet
+    @Published var isFilmViewShowing: Bool = false      // Modal du film
+    { willSet {if newValue {
+        self.isSheetShowing = true
+    } } }
+    
+    @Published var isSeatsViewShowing: Bool = false     // Modal des places
+    { willSet {if newValue {
+        self.isSheetShowing = true
+    } } }
+    
+    @Published var isQRCodeViewShowing: Bool = false   // Modal du QRCode
+    { willSet {if newValue {
+        self.isSheetShowing = true
+    } } }
+    
+    @Published var isEvaluationViewShowing: Bool = false   // Modal de l'évaluation
+    { willSet {if newValue {
+        self.isSheetShowing = true
+    } } }
+    
+   
+    
+    @Published private(set) var lastOrientation: CGSize = .zero // Taille précédente pour détecter les changements
+
+    func updateOrientation(currentSize: CGSize) {
+        if currentSize != lastOrientation {
+            lastOrientation = currentSize
+        }
+    }
+    func resetModals() {
+        isFilmViewShowing = false
+        isSeatsViewShowing = false
+        isEvaluationViewShowing = false
+        isQRCodeViewShowing = false
     }
 }
 
@@ -64,11 +140,15 @@ struct CardsReservationView: View {
 struct CardReservationView: View {
     var reservation: Reservation
     var geometry: GeometryProxy
+   
     @Environment(\.colorScheme) var colorScheme
     
+    @ObservedObject var viewModel: CardsReservationViewModel // Partagé avec la vue parent
 
+    
     var body: some View {
         if geometry.size.width > geometry.size.height {
+            
             // Mode paysage : disposition horizontale
             HStack (spacing: 20) {
                 if let imageFilm = reservation.film.imageFilm {
@@ -78,8 +158,15 @@ struct CardReservationView: View {
                         .frame(width: geometry.size.width * 0.2, height: geometry.size.height * 0.6)
                         .cornerRadius(10)
                         .padding(.trailing, 10)
+                        .onTapGesture {
+                            DispatchQueue.main.async {
+                                viewModel.isFilmViewShowing = true
+                            }
+                        }
+                        
+                    
                 }
-
+                
                 VStack(alignment: .leading, spacing: 10) {
                     if colorScheme == .dark {
                         Text(reservation.film.titleFilm)
@@ -93,10 +180,27 @@ struct CardReservationView: View {
                             .foregroundColor(.bleuNuitPrimaire)
                     }
                     
-
+                    
                     HStack (spacing: 40){
-                        SeanceView(seance: reservation.seance)
+                        
+                            SeanceView(seance: reservation.seance)
+                            .onTapGesture {
+                                DispatchQueue.main.async {
+                                    viewModel.isSeatsViewShowing = true
+                                }
+                            }
                         ActionsView(reservation: reservation)
+                            .onTapGesture {
+                                DispatchQueue.main.async {
+                                    switch reservation.stateReservation {
+                                    case .future:
+                                        viewModel.isQRCodeViewShowing = true
+                                    case .doneUnevaluated:
+                                        viewModel.isEvaluationViewShowing = true
+                                    case .doneEvaluated: break
+                                    }
+                                }
+                            }
                     }
                 }
                 .padding()
@@ -109,6 +213,7 @@ struct CardReservationView: View {
                     .shadow(radius: 5)
             )
             .padding()
+            
         } else {
             // Mode portrait : disposition verticale
             VStack {
@@ -119,6 +224,11 @@ struct CardReservationView: View {
                         .frame(height: geometry.size.height * 0.4)
                         .cornerRadius(10)
                         .padding(.bottom, 10)
+                        .onTapGesture {
+                            DispatchQueue.main.async {
+                                viewModel.isFilmViewShowing = true
+                            }
+                        }
                 }
 
                 if colorScheme == .dark {
@@ -135,7 +245,24 @@ struct CardReservationView: View {
 
                 HStack {
                     SeanceView(seance: reservation.seance)
+                    .onTapGesture {
+                        DispatchQueue.main.async {
+                            viewModel.isSeatsViewShowing = true
+                        }
+                    }
                     ActionsView(reservation: reservation)
+                        .onTapGesture {
+                            DispatchQueue.main.async {
+
+                                switch reservation.stateReservation {
+                                case .future:
+                                    viewModel.isQRCodeViewShowing = true
+                                case .doneUnevaluated:
+                                    viewModel.isEvaluationViewShowing = true
+                                case .doneEvaluated: break
+                                }
+                            }
+                        }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
