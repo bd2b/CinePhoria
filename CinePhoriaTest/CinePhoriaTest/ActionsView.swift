@@ -10,19 +10,12 @@
 import SwiftUI
 
 struct FutureView: View {
-    let showQRCode: () -> Void
     var body: some View {
         VStack {
-            Text("Présentez le QRCode à votre entrée")
+            Text("QRCode à présenter à votre entrée")
                 .font(customFont(style: .title3))
                 .foregroundStyle(.bleuNuitPrimaire)
                 .multilineTextAlignment(.center)
-            Button(action: showQRCode) {
-                Label("QRCode", systemImage: "qrcode")
-                    .padding(5)
-                    .font(.headline)
-            }
-            .buttonStyle(.borderedProminent)
         }
         .frame(width: 150, height: 150)
         .padding(10)
@@ -42,19 +35,12 @@ struct FutureView: View {
 }
 
 struct ToEvaluateView: View {
-    let evaluateReservation: () -> Void
     var body: some View {
         VStack {
             Text("Donnez nous votre avis !")
                 .font(customFont(style: .title3))
                 .foregroundStyle(.bleuNuitPrimaire)
                 .multilineTextAlignment(.center)
-            Button(action: evaluateReservation) {
-                Label("Evaluer", systemImage: "questionmark.bubble")
-                    .padding(5)
-                    .font(.headline)
-            }
-            .buttonStyle(.borderedProminent)
         }
         .frame(width: 150, height: 150)
         .padding(10)
@@ -131,19 +117,13 @@ struct EvaluatedView: View {
 struct ActionsView: View {
     
     var reservation: Reservation
-    @StateObject var viewModel: ActionsViewModel
-    
-    // Initialisateur personnalisé pour créer le ViewModel à partir de la réservation
-    init(reservation: Reservation) {
-        self.reservation = reservation
-        _viewModel = StateObject(wrappedValue: ActionsViewModel(stateReservation: reservation.stateReservation))
-    }
+
     var body: some View {
-        switch viewModel.stateReservation {
+        switch reservation.stateReservation {
         case .future:
-            FutureView(showQRCode: viewModel.showQRCode)
+            FutureView()
         case .doneUnevaluated:
-            ToEvaluateView(evaluateReservation: viewModel.evaluateReservation)
+            ToEvaluateView()
         case .doneEvaluated:
             EvaluatedView(evaluation: reservation.evaluation, note: reservation.note)
         }
