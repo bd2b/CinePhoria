@@ -16,7 +16,29 @@ enum StateReservation: String, Codable, CaseIterable {
     case doneEvaluated // la réservation est passée et il y a une évaluation, on affiche l'évaluation sans action
 }
 
-
+struct SeatsForTarif {
+    var nameTarif: String
+    var price: Double
+    var numberSeats: Int
+    
+    static var samplesSeatsForTarif: [[SeatsForTarif]] {
+        [
+            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 1)
+            ],
+            
+            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 2),
+              SeatsForTarif(nameTarif: "Tarif réduit", price: 8, numberSeats: 1)],
+            
+            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 1),
+              SeatsForTarif(nameTarif: "Tarif Web", price: 9, numberSeats:2) ],
+            
+            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 1),
+              SeatsForTarif(nameTarif: "Tarif réduit", price: 8, numberSeats:2),
+              SeatsForTarif(nameTarif: "Tarif Web", price: 89, numberSeats:1) ]
+        ]
+    }
+    
+}
 
 @Observable class Reservation: Identifiable {
     let id = UUID()
@@ -32,21 +54,26 @@ enum StateReservation: String, Codable, CaseIterable {
         }
     var film: Film
     var seance: Seance
+    var seats: [SeatsForTarif]
+    var numberPMR: Int
     var evaluation: String?
     var note: Double?
-    init(film: Film, seance: Seance, evaluation: String? = nil, note: Double? = nil) {
+    
+    init(film: Film, seance: Seance, seats: [SeatsForTarif], numberPMR: Int, evaluation: String? = nil, note: Double? = nil) {
         self.film = film
         self.seance = seance
+        self.seats = seats
+        self.numberPMR = numberPMR
         self.evaluation = evaluation
         self.note = note
     }
     
     static var samplesReservation: [Reservation] {
         [
-            Reservation( film: Film.filmsSample[0], seance: Seance.samples[0]),
-            Reservation( film: Film.filmsSample[1], seance: Seance.samples[1]),
-            Reservation( film: Film.filmsSample[2], seance: Seance.samples[1],  evaluation: "Très bon film", note: 4.5),
-            Reservation( film: Film.filmsSample[2], seance: Seance.samples[1], evaluation: """
+            Reservation( film: Film.filmsSample[0], seance: Seance.samples[0], seats: SeatsForTarif.samplesSeatsForTarif[0] , numberPMR: 1),
+            Reservation( film: Film.filmsSample[1], seance: Seance.samples[1], seats: SeatsForTarif.samplesSeatsForTarif[1] , numberPMR: 1),
+            Reservation( film: Film.filmsSample[2], seance: Seance.samples[1], seats: SeatsForTarif.samplesSeatsForTarif[0] , numberPMR: 0,  evaluation: "Très bon film", note: 4.5),
+            Reservation( film: Film.filmsSample[2], seance: Seance.samples[1], seats: SeatsForTarif.samplesSeatsForTarif[3] , numberPMR: 1, evaluation: """
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ullamcorper tincidunt justo id dignissim. Quisque vel erat sit amet augue suscipit cursus. Curabitur tempor elit tellus, nec consequat orci egestas eget. Aenean vitae maximus ex, ac blandit sem. Nulla mattis magna volutpat, rhoncus quam quis, egestas diam. Nunc sit amet fringilla erat, sit amet tincidunt ante. Pellentesque nec urna vestibulum, porta risus at, tempus risus. Aenean vel turpis tincidunt lacus aliquam hendrerit porta nec quam. Maecenas id nunc sollicitudin, mattis velit in, bibendum quam. Maecenas non elementum orci. Aliquam ut dolor erat. Cras quis hendrerit eros. Praesent condimentum magna nec ipsum auctor volutpat. 
 """, note: 4.5)
         ]

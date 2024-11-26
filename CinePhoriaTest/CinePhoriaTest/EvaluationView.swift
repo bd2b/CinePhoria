@@ -50,7 +50,6 @@ struct EvaluationView: View {
                     
             }
             
-            Spacer()
             HStack {
                 Button(action: submit) {
                 Label("Valider", systemImage: "checkmark")

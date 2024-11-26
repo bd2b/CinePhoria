@@ -74,7 +74,7 @@ struct CardsReservationView: View {
                     FilmView(film: reservations[currentPage].film)
                 } else {
                     if viewModel.isSeatsViewShowing {
-                        SeatsView()
+                        SeatsView(reservation: reservations[currentPage])
                     } else {
                         if viewModel.isQRCodeViewShowing {
                             QRCodeView()
