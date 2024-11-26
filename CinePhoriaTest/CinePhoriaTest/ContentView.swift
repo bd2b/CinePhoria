@@ -10,8 +10,9 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(DataController.self) private var dataController
     var body: some View {
-        CardsReservationView(reservations: Reservation.samplesReservation)
+        CardsReservationView(reservations: dataController.reservations)
     }
 }
 

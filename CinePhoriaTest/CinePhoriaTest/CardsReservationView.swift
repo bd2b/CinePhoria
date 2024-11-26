@@ -11,7 +11,7 @@ import SwiftUI
 import Giffy
 
 struct CardsReservationView: View {
-    let reservations: [Reservation]
+    var reservations: [Reservation]
     
     // Index de la page actuelle qui permet de retrouver la reservation selectionnée
     @State private var currentPage: Int = 0
@@ -70,8 +70,6 @@ struct CardsReservationView: View {
             .sheet(isPresented: ($viewModel.isSheetShowing), onDismiss: {
                 viewModel.resetModals()
             }) {
-                
-                
                 if viewModel.isFilmViewShowing {
                     FilmView(film: reservations[currentPage].film)
                 } else {
@@ -82,17 +80,21 @@ struct CardsReservationView: View {
                             QRCodeView()
                         } else {
                             if viewModel.isEvaluationViewShowing {
-                                EvaluationView()
+                                EvaluationView(reservation: reservations[currentPage],
+                                    isNewEvaluation: true)
+                            } else {
+                                if viewModel.isEvaluationChangeViewShowing {
+                                    EvaluationView(reservation: reservations[currentPage], isNewEvaluation: false)
+                                }
                             }
                         }
                     }
-                    
                 }
             }
         }
     }
 }
-/// Persistance des états de présentation des modales
+    /// Persistance des états de présentation des modales
 class CardsReservationViewModel: ObservableObject {
     
     @Published var isSheetShowing: Bool = false
@@ -119,10 +121,15 @@ class CardsReservationViewModel: ObservableObject {
         self.isSheetShowing = true
     } } }
     
-   
+    @Published var isEvaluationChangeViewShowing: Bool = false   // Modal de l'évaluation
+    { willSet {if newValue {
+        self.isSheetShowing = true
+    } } }
+    
+    
     
     @Published private(set) var lastOrientation: CGSize = .zero // Taille précédente pour détecter les changements
-
+    
     func updateOrientation(currentSize: CGSize) {
         if currentSize != lastOrientation {
             lastOrientation = currentSize
@@ -132,19 +139,20 @@ class CardsReservationViewModel: ObservableObject {
         isFilmViewShowing = false
         isSeatsViewShowing = false
         isEvaluationViewShowing = false
+        isEvaluationChangeViewShowing = false
         isQRCodeViewShowing = false
     }
 }
-
-// Vue pour une carte avec orientation adaptative
+    
+    // Vue pour une carte avec orientation adaptative
 struct CardReservationView: View {
     var reservation: Reservation
     var geometry: GeometryProxy
-   
+    
     @Environment(\.colorScheme) var colorScheme
     
     @ObservedObject var viewModel: CardsReservationViewModel // Partagé avec la vue parent
-
+    
     
     var body: some View {
         if geometry.size.width > geometry.size.height {
@@ -163,10 +171,7 @@ struct CardReservationView: View {
                                 viewModel.isFilmViewShowing = true
                             }
                         }
-                        
-                    
                 }
-                
                 VStack(alignment: .leading, spacing: 10) {
                     if colorScheme == .dark {
                         Text(reservation.film.titleFilm)
@@ -183,7 +188,7 @@ struct CardReservationView: View {
                     
                     HStack (spacing: 40){
                         
-                            SeanceView(seance: reservation.seance)
+                        SeanceView(seance: reservation.seance)
                             .onTapGesture {
                                 DispatchQueue.main.async {
                                     viewModel.isSeatsViewShowing = true
@@ -197,7 +202,8 @@ struct CardReservationView: View {
                                         viewModel.isQRCodeViewShowing = true
                                     case .doneUnevaluated:
                                         viewModel.isEvaluationViewShowing = true
-                                    case .doneEvaluated: break
+                                    case .doneEvaluated:
+                                        viewModel.isEvaluationChangeViewShowing = true
                                     }
                                 }
                             }
@@ -230,7 +236,7 @@ struct CardReservationView: View {
                             }
                         }
                 }
-
+                
                 if colorScheme == .dark {
                     Text(reservation.film.titleFilm)
                         .font(customFont(style: .title))
@@ -242,24 +248,25 @@ struct CardReservationView: View {
                         .bold()
                         .foregroundColor(.bleuNuitPrimaire)
                 }
-
+                
                 HStack {
                     SeanceView(seance: reservation.seance)
-                    .onTapGesture {
-                        DispatchQueue.main.async {
-                            viewModel.isSeatsViewShowing = true
+                        .onTapGesture {
+                            DispatchQueue.main.async {
+                                viewModel.isSeatsViewShowing = true
+                            }
                         }
-                    }
                     ActionsView(reservation: reservation)
                         .onTapGesture {
                             DispatchQueue.main.async {
-
+                                
                                 switch reservation.stateReservation {
                                 case .future:
                                     viewModel.isQRCodeViewShowing = true
                                 case .doneUnevaluated:
                                     viewModel.isEvaluationViewShowing = true
-                                case .doneEvaluated: break
+                                case .doneEvaluated:
+                                    viewModel.isEvaluationChangeViewShowing = true
                                 }
                             }
                         }
