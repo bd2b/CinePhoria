@@ -11,10 +11,12 @@ import SwiftUI
 
 @main
 struct CinePhoriaTestApp: App {
+    @State private var dataController = DataController()
     var body: some Scene {
         WindowGroup {
          //   FilmView(film: filmsData[0] )
             ContentView()
+                .environment(dataController)
         }
     }
 }
