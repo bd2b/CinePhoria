@@ -50,7 +50,7 @@ struct FilmView: View {
             ScrollView  {
                 HStack {
                     if let imageFilm = film.imageFilm {
-                        Image(imageFilm.image1024)
+                        imageFilm.image1024()
                             .resizable()
                             .scaledToFit()
                     }

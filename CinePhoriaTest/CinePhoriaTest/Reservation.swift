@@ -16,7 +16,7 @@ enum StateReservation: String, Codable, CaseIterable {
     case doneEvaluated // la réservation est passée et il y a une évaluation, on affiche l'évaluation sans action
 }
 
-struct SeatsForTarif {
+struct SeatsForTarif: Codable {
     var nameTarif: String
     var price: Double
     var numberSeats: Int
@@ -40,8 +40,8 @@ struct SeatsForTarif {
     
 }
 
-@Observable class Reservation: Identifiable {
-    let id = UUID()
+class Reservation: Identifiable, Codable {
+    var id = UUID()
     var stateReservation: StateReservation {
         let now = Date.now
         if seance.date < now {

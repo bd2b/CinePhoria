@@ -34,7 +34,7 @@ enum BO : String, Codable {
     case vo = "VO"
 }
 
-struct Seance {
+struct Seance: Codable {
     var hourBegin: String
     var hourEnd: String
     var date: Date
