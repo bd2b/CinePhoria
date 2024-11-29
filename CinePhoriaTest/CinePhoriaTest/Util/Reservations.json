@@ -1,0 +1,169 @@
+[
+  {
+    "id" : "412B6981-0C3C-456B-8026-A73937CDE536",
+    "seance" : {
+      "hourEnd" : "16:00",
+      "hourBegin" : "14:50",
+      "date" : 754062600,
+      "location" : "Salle 1",
+      "qualite" : "3D",
+      "bo" : "VF"
+    },
+    "film" : {
+      "categorySeeing" : "TP",
+      "imageFilm" : {
+        "image128Name" : "15-128",
+        "image1024Name" : "15-1024",
+        "id" : "A3F39B6D-6475-4CF0-9754-A12EFAC5C23A"
+      },
+      "titleFilm" : "A Fond",
+      "note" : 4,
+      "isCoupDeCoeur" : true,
+      "filmDescription" : "Une famille embarque dans son monospace flambant neuf, au petit matin, afin d'éviter les embouteillages pour les vacances d’été. Tom, le père, enclenche son régulateur de vitesse électronique sur 130 km\/h. Au moment où une dernière bourde de Ben, le beau-père, pousse Julia, excédée, à demander qu'on fasse demi-tour, Tom s'aperçoit qu'il ne contrôle plus son véhicule. L'électronique de bord ne répond plus, la vitesse est bloquée à 130 km\/h. Toutes les manœuvres pour ralentir la voiture emballée restent sans effet. Une voiture folle, six passagers au bord de la crise de nerfs et un embouteillage monstre qui les attend à moins de deux cents kilomètres de là...",
+      "filmAuthor" : "De Nicolas Benamou",
+      "filmDistribution" : "Avec José Garcia, André Dussollier, Caroline Vigneaux",
+      "id" : "8D7EB13A-CF10-4FA1-8ADB-1EF2EB7E9EBD",
+      "duration" : "1h51",
+      "linkBO" : "https:\/\/www.youtube.com\/watch?v=NDslM1QXcQg",
+      "genre" : "Action, Comedie"
+    },
+    "seats" : [
+      {
+        "price" : 10,
+        "nameTarif" : "Plein tarif",
+        "numberSeats" : 1
+      }
+    ],
+    "numberPMR" : 1
+  },
+  {
+    "seats" : [
+      {
+        "nameTarif" : "Plein tarif",
+        "price" : 10,
+        "numberSeats" : 2
+      },
+      {
+        "price" : 8,
+        "numberSeats" : 1,
+        "nameTarif" : "Tarif réduit"
+      }
+    ],
+    "seance" : {
+      "hourBegin" : "14:50",
+      "bo" : "VF",
+      "hourEnd" : "16:00",
+      "date" : 785598600,
+      "location" : "Salle 1",
+      "qualite" : "3D"
+    },
+    "numberPMR" : 1,
+    "id" : "E4052CD3-671A-4D8B-8406-49809CF8F291",
+    "film" : {
+      "genre" : "Action, Drame, Romance",
+      "filmDescription" : "A quelques jours de son procès pour les crimes commis sous les traits du Joker, Arthur Fleck rencontre le grand amour et se trouve entraîné dans une folie à deux.",
+      "duration" : "2h19",
+      "filmAuthor" : "De Todd Phillips",
+      "id" : "82FF8D11-9C18-4F33-A3A1-ECC21EFCF920",
+      "note" : 2,
+      "imageFilm" : {
+        "image128Name" : "2-128",
+        "image1024Name" : "2-1024",
+        "id" : "F77D42A2-E918-46C6-BF15-D048568F2567"
+      },
+      "isCoupDeCoeur" : false,
+      "filmDistribution" : "Avec Joaquin Phoenix, Lady Gaga, Brendan Gleeson ",
+      "categorySeeing" : "-16",
+      "linkBO" : "https:\/\/www.youtube.com\/watch?v=OoTx1cYC5u8",
+      "titleFilm" : "Joker"
+    }
+  },
+  {
+    "evaluation" : "Très bon film",
+    "numberPMR" : 0,
+    "film" : {
+      "filmDistribution" : "Avec Catherine Deneuve, Gérard Depardieu, Jean Poiret",
+      "imageFilm" : {
+        "id" : "74A5EAB8-0825-4CE4-B052-62FCBEDDF4F4",
+        "image1024Name" : "14-1024",
+        "image128Name" : "14-128"
+      },
+      "duration" : "2h13",
+      "categorySeeing" : "-12",
+      "linkBO" : "https:\/\/www.youtube.com\/watch?v=hXCUifFwGzc",
+      "isCoupDeCoeur" : true,
+      "filmDescription" : "Paris, septembre 1942. Lucas Steiner, le directeur du théâtre Montmartre a dû fuir parce qu’il est juif. Sa femme Marion Steiner dirige le théâtre et engage Bernard Granger, transfuge du Grand Guignol, pour jouer à ses côtés dans « la Disparue », que met en scène Jean-Louis Cottins. Jusqu’au soir de la générale, la troupe subit les menaces du virulent critique de « Je suis partout », Daxiat, dont l’ambition est de diriger la Comédie-Française. Et si, par amour pour sa femme, Lucas Steiner avait fait semblant de fuir la France et était resté caché dans la cave de son théâtre pendant toute la guerre….",
+      "note" : 5,
+      "genre" : "Drame, Romance, Guerre",
+      "filmAuthor" : "De François Truffaut",
+      "titleFilm" : "Le Dernier Métro",
+      "id" : "55C8288D-9550-4B4D-8EA5-EF4FA97CECFA"
+    },
+    "id" : "A0187309-E200-4857-9071-860AC48A2CA8",
+    "note" : 4.5,
+    "seance" : {
+      "qualite" : "3D",
+      "date" : 785598600,
+      "location" : "Salle 1",
+      "hourBegin" : "14:50",
+      "hourEnd" : "16:00",
+      "bo" : "VF"
+    },
+    "seats" : [
+      {
+        "price" : 10,
+        "nameTarif" : "Plein tarif",
+        "numberSeats" : 1
+      }
+    ]
+  },
+  {
+    "film" : {
+      "linkBO" : "https:\/\/www.youtube.com\/watch?v=hXCUifFwGzc",
+      "note" : 5,
+      "imageFilm" : {
+        "image128Name" : "14-128",
+        "image1024Name" : "14-1024",
+        "id" : "74A5EAB8-0825-4CE4-B052-62FCBEDDF4F4"
+      },
+      "genre" : "Drame, Romance, Guerre",
+      "isCoupDeCoeur" : true,
+      "categorySeeing" : "-12",
+      "filmDistribution" : "Avec Catherine Deneuve, Gérard Depardieu, Jean Poiret",
+      "filmAuthor" : "De François Truffaut",
+      "titleFilm" : "Le Dernier Métro",
+      "filmDescription" : "Paris, septembre 1942. Lucas Steiner, le directeur du théâtre Montmartre a dû fuir parce qu’il est juif. Sa femme Marion Steiner dirige le théâtre et engage Bernard Granger, transfuge du Grand Guignol, pour jouer à ses côtés dans « la Disparue », que met en scène Jean-Louis Cottins. Jusqu’au soir de la générale, la troupe subit les menaces du virulent critique de « Je suis partout », Daxiat, dont l’ambition est de diriger la Comédie-Française. Et si, par amour pour sa femme, Lucas Steiner avait fait semblant de fuir la France et était resté caché dans la cave de son théâtre pendant toute la guerre….",
+      "id" : "55C8288D-9550-4B4D-8EA5-EF4FA97CECFA",
+      "duration" : "2h13"
+    },
+    "evaluation" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam ullamcorper tincidunt justo id dignissim. Quisque vel erat sit amet augue suscipit cursus. Curabitur tempor elit tellus, nec consequat orci egestas eget. Aenean vitae maximus ex, ac blandit sem. Nulla mattis magna volutpat, rhoncus quam quis, egestas diam. Nunc sit amet fringilla erat, sit amet tincidunt ante. Pellentesque nec urna vestibulum, porta risus at, tempus risus. Aenean vel turpis tincidunt lacus aliquam hendrerit porta nec quam. Maecenas id nunc sollicitudin, mattis velit in, bibendum quam. Maecenas non elementum orci. Aliquam ut dolor erat. Cras quis hendrerit eros. Praesent condimentum magna nec ipsum auctor volutpat. ",
+    "seats" : [
+      {
+        "nameTarif" : "Plein tarif",
+        "price" : 10,
+        "numberSeats" : 1
+      },
+      {
+        "price" : 8,
+        "numberSeats" : 2,
+        "nameTarif" : "Tarif réduit"
+      },
+      {
+        "numberSeats" : 1,
+        "price" : 89,
+        "nameTarif" : "Tarif Web"
+      }
+    ],
+    "id" : "D5F19B74-E21E-4AE5-B62A-BE2641B5AAD5",
+    "numberPMR" : 1,
+    "note" : 4.5,
+    "seance" : {
+      "qualite" : "3D",
+      "date" : 785598600,
+      "hourBegin" : "14:50",
+      "hourEnd" : "16:00",
+      "bo" : "VF",
+      "location" : "Salle 1"
+    }
+  }
+]

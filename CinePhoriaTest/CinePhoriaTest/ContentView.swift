@@ -10,12 +10,22 @@
 import SwiftUI
 
 struct ContentView: View {
-    @Environment(DataController.self) private var dataController
+    @Bindable var dataController: DataController
+    
     var body: some View {
-        CardsReservationView(reservations: dataController.reservations)
+        if dataController.isLoggedIn
+           {
+            CardsReservationView(dataController: dataController)
+        } else {
+            LoginView(dataController: dataController) // Affiche la vue de connexion
+                
+        }
+        
     }
 }
 
 #Preview {
-    ContentView()
+    @Previewable @State var dataController = DataController()
+    ContentView(dataController: dataController)
+        .environment(dataController)
 }

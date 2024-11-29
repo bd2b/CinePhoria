@@ -86,8 +86,73 @@ import Foundation
 
 @Observable class DataController: ObservableObject {
     var reservations: [Reservation]
+    var isLoggedIn: Bool = false // État de connexion
+    var numberErrorLogin: Int = 0 {
+        didSet {
+            if numberErrorLogin >= 3 {
+                rememberMe = false
+            }
+        }
+    }
+    var rememberMe: Bool
+//    {
+//        didSet {
+//            UserDefaults.standard.set(rememberMe, forKey: "rememberMe")
+//            if !rememberMe {
+//                UserDefaults.standard.set("", forKey: "lastUserLogin")
+//            }
+//        }
+//    }
+    
+    var userName: String?
+    
     init() {
         self.reservations = Reservation.samplesReservation
+        generateJSON(from: Reservation.samplesReservation, to: "Reservations.json")
+        rememberMe = UserDefaults.standard.bool(forKey: "rememberMe")
+        
+    }
+    
+    func getLastUser() -> String? {
+        return UserDefaults.standard.string(forKey: "lastUserLogin")
+    }
+    
+    func getPassword(for user: String) -> String? {
+        print("GetValue: \(user)")
+        if !user.isEmpty {
+            return try? getValue(for: user, and: "com.db2db.CinePhoriaTest")
+        }
+        return nil
+    }
+    
+    func login(user: String, pwd: String, rememberMe: Bool) -> Bool {
+        
+        let loginSuccess = user == "admin" && pwd == "password"
+        
+        if !loginSuccess { numberErrorLogin += 1 }
+        
+        if loginSuccess {
+            self.userName = user
+            UserDefaults.standard.set(rememberMe, forKey: "rememberMe")
+        }
+        
+        if rememberMe && loginSuccess{
+            do {
+                print ("SetValue: \(user), \(pwd)")
+                try setValue(pwd, for: user, and: "com.db2db.CinePhoriaTest")
+                UserDefaults.standard.set(user, forKey: "lastUserLogin")
+            } catch {
+                print("erreur sur setValue: \(error)")
+            }
+        }
+        return loginSuccess
+        
+    }
+    
+    func forgottenPassword (mail: String) {
+        print("Mode passe oublié pour \(mail)")
     }
     
 }
+    
+

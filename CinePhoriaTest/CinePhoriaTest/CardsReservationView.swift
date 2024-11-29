@@ -11,44 +11,74 @@ import SwiftUI
 import Giffy
 
 struct CardsReservationView: View {
-    var reservations: [Reservation]
+    @Bindable var dataController: DataController
     
-    // Index de la page actuelle qui permet de retrouver la reservation selectionnée
     @State private var currentPage: Int = 0
+    @State private var isShowingAlert: Bool = false
     @StateObject private var viewModel = CardsReservationViewModel()
     
     var body: some View {
-        
         GeometryReader { geometry in
             VStack {
                 // Titre et logo
                 if geometry.size.width > geometry.size.height {
                     // Mode paysage
                     HStack {
-                        Giffy("camera-cinephoria2")
-                            .frame(height: 75)
-                        Spacer()
+                    Giffy("camera-cinephoria2")
+                            .frame( width: 200, height: 75)
+                    Spacer()
+                    Button(action: {
+                        isShowingAlert = true
+                    }){
+                        Image(systemName: "power")
+                            .foregroundColor( .doréAccentuation)
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    HStack (alignment: .lastTextBaseline){
                         Text("Mes réservations")
                             .font(customFont(style: .largeTitle))
                             .multilineTextAlignment(.leading)
+                        Spacer()
+                        Text(dataController.userName ?? "")
+                            .font(customFont(style: .body))
+                    
                     }
-                    .frame( height: 100)
+                    .frame( height: 50)
+                    .padding(.horizontal, 10)
                 } else {
                     // Mode portrait
                     VStack {
+                        HStack {
                         Giffy("camera-cinephoria2")
-                            .frame(height: 50)
-                        Text("Mes réservations")
-                            .font(customFont(style: .largeTitle))
-                            .multilineTextAlignment(.leading)
+                                .frame( width: 200, height: 50)
+                        Spacer()
+                        Button(action: {
+                            isShowingAlert = true
+                        }){
+                            Image(systemName: "power")
+                                .foregroundColor( .doréAccentuation)
+                            }
+                        }
+                        .padding(.horizontal, 10)
+                        Spacer()
+                        HStack (alignment: .lastTextBaseline){
+                            Text("Mes réservations")
+                                .font(customFont(style: .largeTitle))
+                                .multilineTextAlignment(.leading)
+                            Spacer()
+                            Text(dataController.userName ?? "")
+                                .font(customFont(style: .body))
+                        }
                     }
                     .frame(height: 150)
+                    .padding(.horizontal, 10)
                 }
                 
                 // Cartes avec TabView
                 TabView(selection: $currentPage) {
-                    ForEach(0..<reservations.count, id: \.self) { index in
-                        CardReservationView(reservation: reservations[index],
+                    ForEach(0..<dataController.reservations.count, id: \.self) { index in
+                        CardReservationView(reservation: dataController.reservations[index],
                                             geometry: geometry,
                                             viewModel: viewModel)
                         .tag(index) // Associe chaque vue à un index
@@ -71,25 +101,43 @@ struct CardsReservationView: View {
                 viewModel.resetModals()
             }) {
                 if viewModel.isFilmViewShowing {
-                    FilmView(film: reservations[currentPage].film)
+                    FilmView(film: dataController.reservations[currentPage].film)
                 } else {
                     if viewModel.isSeatsViewShowing {
-                        SeatsView(reservation: reservations[currentPage])
+                        SeatsView(reservation: dataController.reservations[currentPage])
                     } else {
                         if viewModel.isQRCodeViewShowing {
                             QRCodeView()
                         } else {
                             if viewModel.isEvaluationViewShowing {
-                                EvaluationView(reservation: reservations[currentPage],
+                                EvaluationView(reservation: dataController.reservations[currentPage],
                                     isNewEvaluation: true)
                             } else {
                                 if viewModel.isEvaluationChangeViewShowing {
-                                    EvaluationView(reservation: reservations[currentPage], isNewEvaluation: false)
+                                    EvaluationView(reservation: dataController.reservations[currentPage], isNewEvaluation: false)
                                 }
                             }
                         }
                     }
                 }
+            }
+            .alert("Choisissez une option pour vous déconnecter", isPresented: $isShowingAlert) {
+                Button("Déconnexion simple") {
+                    isShowingAlert = false
+                    dataController.isLoggedIn = false
+                }
+                .foregroundStyle(.black)
+                Button("Déconnexion et suppression des données du téléphonnes") {
+                    isShowingAlert = false
+                    dataController.isLoggedIn = false
+                    dataController.rememberMe = false
+                }
+                .foregroundStyle(.black)
+                Button("Annuler") {
+                    isShowingAlert = false
+                    dataController.isLoggedIn = true
+                }
+               
             }
         }
     }
@@ -99,7 +147,7 @@ class CardsReservationViewModel: ObservableObject {
     
     @Published var isSheetShowing: Bool = false
     
-    // Si une des modals est affichée, on propage à isSheetViewShowinf
+    // Si une des modals est affichée, on propage à isSheetViewShowing
     // pour avoir une seule variable binding dans .sheet
     @Published var isFilmViewShowing: Bool = false      // Modal du film
     { willSet {if newValue {
@@ -160,7 +208,7 @@ struct CardReservationView: View {
             // Mode paysage : disposition horizontale
             HStack (spacing: 20) {
                 if let imageFilm = reservation.film.imageFilm {
-                    Image(imageFilm.image1024)
+                    imageFilm.image1024()
                         .resizable()
                         .scaledToFit()
                         .frame(width: geometry.size.width * 0.2, height: geometry.size.height * 0.6)
@@ -224,7 +272,7 @@ struct CardReservationView: View {
             // Mode portrait : disposition verticale
             VStack {
                 if let imageFilm = reservation.film.imageFilm {
-                    Image(imageFilm.image1024)
+                    imageFilm.image1024()
                         .resizable()
                         .scaledToFit()
                         .frame(height: geometry.size.height * 0.4)
@@ -286,5 +334,6 @@ struct CardReservationView: View {
 
 
 #Preview {
-    CardsReservationView(reservations: Reservation.samplesReservation)
+    @Previewable @State var dataController = DataController()
+    CardsReservationView(dataController: dataController)
 }
