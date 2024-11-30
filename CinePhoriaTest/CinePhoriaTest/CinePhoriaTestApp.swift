@@ -14,9 +14,10 @@ struct CinePhoriaTestApp: App {
     @State private var dataController = DataController()
     var body: some Scene {
         WindowGroup {
-            //   FilmView(film: filmsData[0] )
             ContentView(dataController: dataController) // Affiche la vue principale si connecté
-                    .environment(dataController)
+                .environment(dataController)
         }
     }
+    
 }
+

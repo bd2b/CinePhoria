@@ -11,7 +11,7 @@ import SwiftUI
 import Giffy
 
 struct LoginView: View {
- //   @Environment(DataController.self) var dataController
+ 
     @Bindable var dataController: DataController
 
     @State private var username: String = ""
@@ -38,22 +38,24 @@ struct LoginView: View {
                         // Affiche un message d'erreur si nécessaire
                         if let error = loginError {
                             Text(error)
+                                .font(customFont(style: .caption))
                                 .foregroundColor(.rougeSombreErreur)
-                                .font(.caption)
                                 .transition(.opacity) // Ajoute une animation lors de l'affichage
                             
                         } else {
                             Text(" ")
                                 .foregroundColor(.rougeSombreErreur)
-                                .font(.caption)
+                                .font(customFont(style: .caption))
                                 .disabled(true)
                         }
                         TextField("Votre email", text: $username)
+                            .font(customFont(style: .body))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .autocapitalization(.none)
                     }
                     // Champ sécurisé pour le mot de passe
                     SecureField("Mot de passe", text: $password)
+                        .font(customFont(style: .body))
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         
                     //    .padding(.horizontal)
@@ -62,6 +64,7 @@ struct LoginView: View {
                     HStack {
                         Toggle(isOn: $dataController.rememberMe) {
                             Text("Se souvenir de moi")
+                                .font(customFont(style: .body))
                         }
                         .toggleStyle(.switch) // Utilisation d'un style de case à cocher
                     }
@@ -71,6 +74,7 @@ struct LoginView: View {
                         login()
                     }) {
                         Text("Se connecter")
+                            .font(customFont(style: .title3))
                             .padding()
                             .frame(maxWidth: .infinity)
                             .background(.doréAccentuation)
@@ -84,6 +88,7 @@ struct LoginView: View {
                             isShowingAlert = true
                         }) {
                             Text("Mot de passe oublié ?")
+                                .font(customFont(style: .body))
                                 .foregroundColor( isValidEmail(username) ? .doréAccentuation : .gray)
                                 
                         }
@@ -98,6 +103,7 @@ struct LoginView: View {
                 Button("Annuler") {
                     isShowingAlert = false
                 }
+                .font(customFont(style: .body))
                 Button("OK") {
                     isShowingAlert = false
                     dataController.forgottenPassword(mail: username)

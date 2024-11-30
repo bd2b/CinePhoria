@@ -20,32 +20,32 @@ struct CardsReservationView: View {
     var body: some View {
         GeometryReader { geometry in
             VStack {
-                // Titre et logo
+                // Mode paysage
                 if geometry.size.width > geometry.size.height {
                     // Mode paysage
-                    HStack {
-                    Giffy("camera-cinephoria2")
-                            .frame( width: 200, height: 75)
-                    Spacer()
-                    Button(action: {
-                        isShowingAlert = true
-                    }){
-                        Image(systemName: "power")
-                            .foregroundColor( .doréAccentuation)
+                    VStack {
+                        HStack {
+                            Giffy("camera-cinephoria2")
+                                .frame( width: 200, height: 75)
+                            Spacer()
+                            Text("Mes réservations")
+                                .font(customFont(style: .largeTitle))
+                                .multilineTextAlignment(.leading)
+                            Spacer()
+                            Text(dataController.userName ?? "")
+                                .font(customFont(style: .body))
+                            Spacer()
+                            Button(action: {
+                                isShowingAlert = true
+                            }){
+                                Image(systemName: "power")
+                                    .foregroundColor( .doréAccentuation)
+                            }
                         }
+                        .padding(.horizontal, 10)
+                        
                     }
-                    .padding(.horizontal, 10)
-                    HStack (alignment: .lastTextBaseline){
-                        Text("Mes réservations")
-                            .font(customFont(style: .largeTitle))
-                            .multilineTextAlignment(.leading)
-                        Spacer()
-                        Text(dataController.userName ?? "")
-                            .font(customFont(style: .body))
                     
-                    }
-                    .frame( height: 50)
-                    .padding(.horizontal, 10)
                 } else {
                     // Mode portrait
                     VStack {
@@ -71,8 +71,9 @@ struct CardsReservationView: View {
                                 .font(customFont(style: .body))
                         }
                     }
-                    .frame(height: 150)
+                    .frame(height: 130)
                     .padding(.horizontal, 10)
+                    .padding(.bottom, 20)
                 }
                 
                 // Cartes avec TabView
@@ -82,8 +83,10 @@ struct CardsReservationView: View {
                                             geometry: geometry,
                                             viewModel: viewModel)
                         .tag(index) // Associe chaque vue à un index
+                        .padding(10)
                     }
                 }
+                
                 
                 .tabViewStyle(PageTabViewStyle()) // Style de défilement par page
                 .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
@@ -107,7 +110,10 @@ struct CardsReservationView: View {
                         SeatsView(reservation: dataController.reservations[currentPage])
                     } else {
                         if viewModel.isQRCodeViewShowing {
-                            QRCodeView()
+                            QRCodeView(isPromoFriandise:
+                                 dataController.reservations[currentPage].isPromoFriandise,
+                                numberSeatsRestingBeforPromoFriandise: dataController.reservations[currentPage].numberSeatsRestingBeforPromoFriandise,
+                                promoFriandiseDiscount: dataController.promoFriandiseDiscount)
                         } else {
                             if viewModel.isEvaluationViewShowing {
                                 EvaluationView(reservation: dataController.reservations[currentPage],
@@ -121,24 +127,27 @@ struct CardsReservationView: View {
                     }
                 }
             }
-            .alert("Choisissez une option pour vous déconnecter", isPresented: $isShowingAlert) {
+            .alert("Choisissez une option pour vous déconnecter", isPresented: $isShowingAlert)
+            {
                 Button("Déconnexion simple") {
                     isShowingAlert = false
                     dataController.isLoggedIn = false
                 }
+                .font(customFont(style: .body))
                 .foregroundStyle(.black)
-                Button("Déconnexion et suppression des données du téléphonnes") {
+                Button("Suppression des données du téléphone") {
                     isShowingAlert = false
-                    dataController.isLoggedIn = false
-                    dataController.rememberMe = false
+                    dataController.reinit()
                 }
+                .font(customFont(style: .body))
                 .foregroundStyle(.black)
                 Button("Annuler") {
                     isShowingAlert = false
-                    dataController.isLoggedIn = true
                 }
+                .font(customFont(style: .body))
                
             }
+            .font(customFont(style: .body))
         }
     }
 }
@@ -206,7 +215,7 @@ struct CardReservationView: View {
         if geometry.size.width > geometry.size.height {
             
             // Mode paysage : disposition horizontale
-            HStack (spacing: 20) {
+            HStack (spacing: 30) {
                 if let imageFilm = reservation.film.imageFilm {
                     imageFilm.image1024()
                         .resizable()
@@ -220,6 +229,7 @@ struct CardReservationView: View {
                             }
                         }
                 }
+               // Spacer()
                 VStack(alignment: .leading, spacing: 10) {
                     if colorScheme == .dark {
                         Text(reservation.film.titleFilm)
@@ -257,16 +267,18 @@ struct CardReservationView: View {
                             }
                     }
                 }
-                .padding()
+                .padding(.horizontal, 20)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            
+            .padding(.horizontal, 20)
             .background(
                 RoundedRectangle(cornerRadius: 15)
                     .fill(.blancCasseSecondaire)
                     .shadow(radius: 5)
             )
-            .padding()
+          //  .padding(.horizontal, 20)
+            .padding(.bottom, 20)
+            
             
         } else {
             // Mode portrait : disposition verticale
@@ -275,7 +287,7 @@ struct CardReservationView: View {
                     imageFilm.image1024()
                         .resizable()
                         .scaledToFit()
-                        .frame(height: geometry.size.height * 0.4)
+                        .frame(height: geometry.size.height * 0.37)
                         .cornerRadius(10)
                         .padding(.bottom, 10)
                         .onTapGesture {
@@ -321,19 +333,25 @@ struct CardReservationView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding()
             .background(
                 RoundedRectangle(cornerRadius: 15)
                     .fill(.blancCasseSecondaire)
                     .shadow(radius: 5)
             )
-            .padding(0)
+            .padding(.bottom , 30)
         }
     }
 }
 
 
 #Preview {
-    @Previewable @State var dataController = DataController()
-    CardsReservationView(dataController: dataController)
+    let dataController = DataController()
+
+    // Initialisation des données
+    dataController.reservations = reservationsDatabase["admin"] ?? []
+    dataController.isLoggedIn = true
+    dataController.isLoadingReservations = false
+    dataController.userName = "admin"
+
+    return CardsReservationView(dataController: dataController)
 }

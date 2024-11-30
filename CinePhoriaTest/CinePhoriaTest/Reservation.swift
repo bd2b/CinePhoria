@@ -23,17 +23,17 @@ struct SeatsForTarif: Codable {
     
     static var samplesSeatsForTarif: [[SeatsForTarif]] {
         [
-            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 1)
+            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 3)
             ],
             
-            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 2),
+            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 4),
               SeatsForTarif(nameTarif: "Tarif réduit", price: 8, numberSeats: 1)],
             
-            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 1),
+            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 3),
               SeatsForTarif(nameTarif: "Tarif Web", price: 9, numberSeats:2) ],
             
-            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 1),
-              SeatsForTarif(nameTarif: "Tarif réduit", price: 8, numberSeats:2),
+            [ SeatsForTarif(nameTarif: "Plein tarif", price: 10, numberSeats: 3),
+              SeatsForTarif(nameTarif: "Tarif réduit", price: 8, numberSeats:3),
               SeatsForTarif(nameTarif: "Tarif Web", price: 89, numberSeats:1) ]
         ]
     }
@@ -58,6 +58,9 @@ class Reservation: Identifiable, Codable {
     var numberPMR: Int
     var evaluation: String?
     var note: Double?
+    
+    var isPromoFriandise: Bool = false
+    var numberSeatsRestingBeforPromoFriandise: Int?
     
     init(film: Film, seance: Seance, seats: [SeatsForTarif], numberPMR: Int, evaluation: String? = nil, note: Double? = nil) {
         self.film = film
