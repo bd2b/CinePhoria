@@ -22,30 +22,39 @@ struct SeatsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 30) {
             Text("Votre réservation")
-                .font(.title)
+                .font(customFont(style: .title))
                 .bold()
                 .padding(.bottom, 10)
                 .padding(.top, 100)
             if reservation.numberPMR > 1 {
                 
                 Text("^[\(reservation.numberPMR) places](inflect: true)")
+                    .font(customFont(style: .body))
                 HStack (spacing:0) {
                     Text("^[\(totalSeats) places](inflect: true)")
+                        .font(customFont(style: .body))
                     Text(" dont ")
+                        .font(customFont(style: .body))
                     Text("^[\(reservation.numberPMR) places](inflect: true)")
+                        .font(customFont(style: .body))
                     Text(" Personne Mobilité Réduite")
+                        .font(customFont(style: .body))
                 }
             } else if reservation.numberPMR == 1 {
                 HStack (spacing:0) {
                     if totalSeats == 1 {
                         Text("1 place Personne Mobilité Réduite")
+                            .font(customFont(style: .body))
                     } else {
                         Text("^[\(totalSeats) places](inflect: true)")
+                            .font(customFont(style: .body))
                         Text(" dont 1 Personne Mobilité Réduite")
+                            .font(customFont(style: .body))
                     }
                 }
             } else {
                 Text("^[\(totalSeats) places](inflect: true)")
+                    .font(customFont(style: .body))
             }
             Divider()
             
@@ -59,10 +68,10 @@ struct SeatsView: View {
             ForEach(reservation.seats, id: \.nameTarif) { seat in
                 HStack {
                     Text(seat.nameTarif)
-                        .font(.headline)
+                        .font(customFont(style: .headline))
                     Spacer()
                     Text("\(seat.numberSeats) x \(seat.price, specifier: "%.2f") €")
-                        .font(.subheadline)
+                        .font(customFont(style: .subheadline))
                 }
             }
             
@@ -75,7 +84,7 @@ struct SeatsView: View {
                 //                    .bold()
                 Spacer()
                 Text("\(totalPrice, specifier: "%.2f") €")
-                    .font(.title2)
+                    .font(customFont(style: .title2))
                     .bold()
             }
         }
@@ -85,7 +94,7 @@ struct SeatsView: View {
             Button(action: { dismiss() } ) {
                 Label("Valider", systemImage: "checkmark")
                     .padding(10)
-                    .font(.title)
+                    .font(customFont(style: .title))
             }
             
             .buttonStyle(.bordered)

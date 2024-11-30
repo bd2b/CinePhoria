@@ -22,14 +22,14 @@ struct EvaluationView: View {
         VStack(spacing: 30) {
             // Titre
             Text("Comment avez-vous trouver ce film ?")
-                .font(.largeTitle)
+                .font(customFont(style: .largeTitle))
                 .bold()
                 .padding()
             
             // Slider gradué
             VStack {
                 Text("Note : \(sliderValue, specifier: "%.1f")")
-                    .font(.title3)
+                    .font(customFont(style: .title3))
                 Slider(value: $sliderValue, in: 0...5, step: 0.5)
                     .padding(.horizontal)
                     
@@ -38,9 +38,10 @@ struct EvaluationView: View {
             // Zone de saisie de texte
             VStack(alignment: .leading, spacing: 10) {
                 Text("Donnez nous votre avis")
-                    .font(.title3)
+                    .font(customFont(style: .title3))
                 
                 TextEditor(text: $userInput)
+                    .font(customFont(style: .body))
                     .frame(height: 150)
                     .border(Color.gray, width: 1)
                     .cornerRadius(8)
