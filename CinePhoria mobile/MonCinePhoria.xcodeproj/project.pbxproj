@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		ED2B32302CF38EA700A72F54 /* Giffy in Frameworks */ = {isa = PBXBuildFile; productRef = ED2B322F2CF38EA700A72F54 /* Giffy */; };
 		ED698BFA2CFC91EB00BC9C73 /* ChangeName.md in Resources */ = {isa = PBXBuildFile; fileRef = ED698BF92CFC91EB00BC9C73 /* ChangeName.md */; };
-		ED81CCE52CFB26B100BF2F25 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = ED81CCE42CFB26B100BF2F25 /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,7 +43,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				ED2B32302CF38EA700A72F54 /* Giffy in Frameworks */,
-				ED81CCE52CFB26B100BF2F25 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,7 +87,6 @@
 			name = MonCinePhoria;
 			packageProductDependencies = (
 				ED2B322F2CF38EA700A72F54 /* Giffy */,
-				ED81CCE42CFB26B100BF2F25 /* Lottie */,
 			);
 			productName = CinePhoriaTest;
 			productReference = ED35A9DB2CF1C67D00A2145B /* MonCinePhoria.app */;
@@ -121,7 +118,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				ED2B322E2CF38EA700A72F54 /* XCRemoteSwiftPackageReference "Giffy" */,
-				ED81CCE32CFB26B100BF2F25 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ED35A9DC2CF1C67D00A2145B /* Products */;
@@ -368,14 +364,6 @@
 				kind = branch;
 			};
 		};
-		ED81CCE32CFB26B100BF2F25 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/airbnb/lottie-ios.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.5.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -383,11 +371,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = ED2B322E2CF38EA700A72F54 /* XCRemoteSwiftPackageReference "Giffy" */;
 			productName = Giffy;
-		};
-		ED81CCE42CFB26B100BF2F25 /* Lottie */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = ED81CCE32CFB26B100BF2F25 /* XCRemoteSwiftPackageReference "lottie-ios" */;
-			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
