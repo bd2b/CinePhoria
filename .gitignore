@@ -8,18 +8,16 @@ DerivedData/
 # Logs
 *.log
 
-# Xcode fichiers projets
-xcuserdata/
-*.xcworkspace/
-*.xcodeproj/project.xcworkspace/
-*.xcuserdatad/
-*.xcuserstate
+# Xcode specific files
+xcuserdata/               # Exclut les préférences utilisateur
+*.xcuserdatad/            # Préférences utilisateur supplémentaires
+*.xcuserstate             # État local de l'utilisateur
+xcdebugger/               # Données de débogage locales
 
 # Swift Package Manager
-.swiftpm/
-Packages/
-*.xcodeproj/
-xcdebugger/
+/.build/                  # Dossiers de construction temporaire
+/.swiftpm/                # Données locales SPM
+!Package.resolved         # Inclure pour garantir des versions reproductibles des dépendances
 
 # Fastlane
 fastlane/report.xml
