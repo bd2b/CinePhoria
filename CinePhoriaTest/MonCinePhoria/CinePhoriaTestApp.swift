@@ -1,5 +1,5 @@
 //
-//	CinePhoriaTestApp.swift
+//	MonCinePhoriaApp.swift
 //	MonCinePhoria
 //
 //  Cree par Bruno DELEBARRE-DEBAY on 23/11/2024.
@@ -10,7 +10,7 @@
 import SwiftUI
 
 @main
-struct CinePhoriaTestApp: App {
+struct MonCinePhoriaApp: App {
     @State private var dataController = DataController()
     var body: some Scene {
         WindowGroup {
