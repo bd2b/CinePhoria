@@ -9,6 +9,7 @@ DerivedData/
 *.log
 
 # Xcode specific files
+CinePhoriai\ mobile/MonCinePhoria.xcodeproj/project.xcworkspace/xcuserdata/*/UserInterfaceState.xcuserstate
 xcuserdata/               # Exclut les préférences utilisateur
 *.xcuserdatad/            # Préférences utilisateur supplémentaires
 *.xcuserstate             # État local de l'utilisateur
