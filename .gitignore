@@ -5,14 +5,15 @@
 build/
 DerivedData/
 
-# Xcode project files
-*.xcworkspace/
-xcuserdata/
-*.xcodeproj/project.xcworkspace/
-*.xcodeproj/xcuserdata/
-
 # Logs
 *.log
+
+# Xcode fichiers projets
+xcuserdata/
+*.xcworkspace/
+*.xcodeproj/project.xcworkspace/
+*.xcuserdatad/
+*.xcuserstate
 
 # Swift Package Manager
 .swiftpm/
