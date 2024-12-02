@@ -12,7 +12,6 @@ import Giffy
 
 struct CardsReservationView: View {
     @Bindable var dataController: DataController
-    let couleur: [Color] = [.bleuNuitPrimaire]
     @State private var currentPage: Int = 0
     @State private var isShowingAlert: Bool = false
     @StateObject private var viewModel = CardsReservationViewModel()
