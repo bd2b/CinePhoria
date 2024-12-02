@@ -83,8 +83,12 @@ struct CardsReservationView: View {
                                             viewModel: viewModel)
                         .tag(index) // Associe chaque vue à un index
                         .padding(10)
+#if DEBUG
+                .accessibilityIdentifier("CardReservationView\(index)")
+#endif
                     }
                 }
+
                 
                 
                 .tabViewStyle(PageTabViewStyle()) // Style de défilement par page
@@ -227,6 +231,9 @@ struct CardReservationView: View {
                                 viewModel.isFilmViewShowing = true
                             }
                         }
+#if DEBUG
+                        .accessibilityIdentifier("ReservationImage")
+#endif
                 }
                // Spacer()
                 VStack(alignment: .leading, spacing: 10) {
@@ -235,11 +242,17 @@ struct CardReservationView: View {
                             .font(customFont(style: .title))
                             .bold()
                             .foregroundColor(.white)
+#if DEBUG
+                        .accessibilityIdentifier("ReservationTitle")
+#endif
                     } else {
                         Text(reservation.film.titleFilm)
                             .font(customFont(style: .title))
                             .bold()
                             .foregroundColor(.bleuNuitPrimaire)
+#if DEBUG
+                        .accessibilityIdentifier("ReservationTitle")
+#endif
                     }
                     
                     
@@ -251,6 +264,9 @@ struct CardReservationView: View {
                                     viewModel.isSeatsViewShowing = true
                                 }
                             }
+#if DEBUG
+                        .accessibilityIdentifier("SeanceView")
+#endif
                         ActionsView(reservation: reservation)
                             .onTapGesture {
                                 DispatchQueue.main.async {
@@ -264,6 +280,9 @@ struct CardReservationView: View {
                                     }
                                 }
                             }
+#if DEBUG
+                        .accessibilityIdentifier("ActionsView")
+#endif
                     }
                 }
                 .padding(.horizontal, 20)
@@ -294,6 +313,9 @@ struct CardReservationView: View {
                                 viewModel.isFilmViewShowing = true
                             }
                         }
+#if DEBUG
+                        .accessibilityIdentifier("ReservationImage")
+#endif
                 }
                 
                 if colorScheme == .dark {
@@ -301,11 +323,17 @@ struct CardReservationView: View {
                         .font(customFont(style: .title))
                         .bold()
                         .foregroundColor(.white)
+#if DEBUG
+                        .accessibilityIdentifier("ReservationTitle")
+#endif
                 } else {
                     Text(reservation.film.titleFilm)
                         .font(customFont(style: .title))
                         .bold()
                         .foregroundColor(.bleuNuitPrimaire)
+#if DEBUG
+                        .accessibilityIdentifier("ReservationTitle")
+#endif
                 }
                 
                 HStack {
@@ -315,6 +343,9 @@ struct CardReservationView: View {
                                 viewModel.isSeatsViewShowing = true
                             }
                         }
+#if DEBUG
+                        .accessibilityIdentifier("SeanceView")
+#endif
                     ActionsView(reservation: reservation)
                         .onTapGesture {
                             DispatchQueue.main.async {
@@ -329,6 +360,9 @@ struct CardReservationView: View {
                                 }
                             }
                         }
+#if DEBUG
+                        .accessibilityIdentifier("ActionsView")
+#endif
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
