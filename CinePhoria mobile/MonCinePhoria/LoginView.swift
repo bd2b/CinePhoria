@@ -67,10 +67,13 @@ struct LoginView: View {
                                 .font(customFont(style: .body))
                         }
                         .toggleStyle(.switch) // Utilisation d'un style de case à cocher
+#if DEBUG
+                        .accessibilityIdentifier("RememberMeToggle")
+#endif
                     }
                     Spacer()
                     // Bouton de connexion
-                    Button(action: {
+                    Button( action: {
                         login()
                     }) {
                         Text("Se connecter")
@@ -81,6 +84,7 @@ struct LoginView: View {
                             .foregroundColor(.white)
                             .cornerRadius(8)
                     }
+
                     // Lien pour "Mot de passe oublié"
                     HStack {
                         Spacer()
