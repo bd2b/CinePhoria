@@ -40,7 +40,7 @@ struct SeatsForTarif: Codable {
     
 }
 
-class Reservation: Identifiable, Codable {
+class Reservation: Identifiable, Codable, ObservableObject {
     var id = UUID()
     var stateReservation: StateReservation {
         let now = Date.now
@@ -56,12 +56,17 @@ class Reservation: Identifiable, Codable {
     var seance: Seance
     var seats: [SeatsForTarif]
     var numberPMR: Int
-    var evaluation: String?
-    var note: Double?
+    @Published var evaluation: String?
+    @Published var note: Double?
     
     
     var isPromoFriandise: Bool = false
     var numberSeatsRestingBeforPromoFriandise: Int?
+    
+    // Clés de codage pour les propriétés persistées
+    enum CodingKeys: String, CodingKey {
+        case id, film, seance, seats, numberPMR, evaluation, note, isPromoFriandise, numberSeatsRestingBeforPromoFriandise
+    }
     
     init(film: Film, seance: Seance, seats: [SeatsForTarif], numberPMR: Int, evaluation: String? = nil, note: Double? = nil) {
         self.film = film
@@ -71,6 +76,34 @@ class Reservation: Identifiable, Codable {
         self.evaluation = evaluation
         self.note = note
     }
+    
+    // MARK: - Conformité à Codable
+        
+        required init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decode(UUID.self, forKey: .id)
+            film = try container.decode(Film.self, forKey: .film)
+            seance = try container.decode(Seance.self, forKey: .seance)
+            seats = try container.decode([SeatsForTarif].self, forKey: .seats)
+            numberPMR = try container.decode(Int.self, forKey: .numberPMR)
+            evaluation = try container.decodeIfPresent(String.self, forKey: .evaluation)
+            note = try container.decodeIfPresent(Double.self, forKey: .note)
+            isPromoFriandise = try container.decode(Bool.self, forKey: .isPromoFriandise)
+            numberSeatsRestingBeforPromoFriandise = try container.decodeIfPresent(Int.self, forKey: .numberSeatsRestingBeforPromoFriandise)
+        }
+        
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(id, forKey: .id)
+            try container.encode(film, forKey: .film)
+            try container.encode(seance, forKey: .seance)
+            try container.encode(seats, forKey: .seats)
+            try container.encode(numberPMR, forKey: .numberPMR)
+            try container.encode(evaluation, forKey: .evaluation)
+            try container.encode(note, forKey: .note)
+            try container.encode(isPromoFriandise, forKey: .isPromoFriandise)
+            try container.encodeIfPresent(numberSeatsRestingBeforPromoFriandise, forKey: .numberSeatsRestingBeforPromoFriandise)
+        }
     
     static var samplesReservation: [Reservation] {
         [
