@@ -67,9 +67,7 @@ struct LoginView: View {
                                 .font(customFont(style: .body))
                         }
                         .toggleStyle(.switch) // Utilisation d'un style de case à cocher
-#if DEBUG
                         .accessibilityIdentifier("RememberMeToggle")
-#endif
                     }
                     Spacer()
                     // Bouton de connexion
