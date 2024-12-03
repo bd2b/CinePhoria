@@ -59,6 +59,7 @@ class Reservation: Identifiable, Codable {
     var evaluation: String?
     var note: Double?
     
+    
     var isPromoFriandise: Bool = false
     var numberSeatsRestingBeforPromoFriandise: Int?
     

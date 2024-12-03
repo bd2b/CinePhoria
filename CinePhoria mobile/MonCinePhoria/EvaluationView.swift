@@ -10,12 +10,16 @@
 import SwiftUI
 
 struct EvaluationView: View {
-    var reservation: Reservation
+
+    @Bindable var dataController: DataController
+    var currentPage: Int
     var isNewEvaluation: Bool
     var isDeletingEvaluation: Bool = false
     
-    @State private var sliderValue: Double = 2.5
-    @State private var userInput: String = "" // Texte saisi par l'utilisateur
+
+    
+//    @State private var sliderValue: Double = 2.5
+//    @State private var userInput: String = "" // Texte saisi par l'utilisateur
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -28,11 +32,13 @@ struct EvaluationView: View {
             
             // Slider gradué
             VStack {
-                Text("Note : \(sliderValue, specifier: "%.1f")")
+                Text("Note : \(String(format: "%.1f", dataController.reservations[currentPage].note ?? 2.5))")
                     .font(customFont(style: .title3))
-                Slider(value: $sliderValue, in: 0...5, step: 0.5)
+                Slider(value: Binding(
+                    get: { dataController.reservations[currentPage].note ?? 2.5 },
+                    set: { dataController.reservations[currentPage].note = $0 }
+                ), in: 0...5, step: 0.5)
                     .padding(.horizontal)
-                    
             }
             
             // Zone de saisie de texte
@@ -40,7 +46,10 @@ struct EvaluationView: View {
                 Text("Donnez nous votre avis")
                     .font(customFont(style: .title3))
                 
-                TextEditor(text: $userInput)
+                TextEditor(text: Binding(
+                    get: { dataController.reservations[currentPage].evaluation ?? "" },
+                    set: { dataController.reservations[currentPage].evaluation = $0 }
+                ))
                     .font(customFont(style: .body))
                     .frame(height: 150)
                     .border(Color.gray, width: 1)
@@ -74,39 +83,40 @@ struct EvaluationView: View {
         }
         .onAppear() {
             if !isNewEvaluation {
-                if let note = reservation.note {
-                    sliderValue = note
-                }
-                if let evaluation = reservation.evaluation {
-                    userInput = evaluation
-                }
+                // Synchroniser les valeurs de la réservation existante
+//                sliderValue = dataController.reservations[currentPage].note ?? 2.5
+//                userInput = dataController.reservations[currentPage].evaluation ?? ""
             }
         }
         .padding()
     }
     func eraseEvaluation() {
-        reservation.evaluation = nil
-        reservation.note = nil
+        dataController.reservations[currentPage].evaluation = nil
+        dataController.reservations[currentPage].note = nil
+//        sliderValue = 2.5
+//        userInput = ""
         
         dismiss()
     }
     func submit() {
-        reservation.evaluation = userInput
-        reservation.note = sliderValue
-        
+//        dataController.reservations[currentPage].evaluation = userInput
+//        dataController.reservations[currentPage].note = sliderValue
         dismiss()
     }
 }
 
 
 #Preview {
-    EvaluationView(reservation: Reservation.samplesReservation[1], isNewEvaluation:  true)
+    @Previewable @State var dataController = DataController()
+    EvaluationView(dataController: dataController, currentPage: 0, isNewEvaluation: true)
 }
 
 #Preview {
-    EvaluationView(reservation: Reservation.samplesReservation[2], isNewEvaluation:  false)
+    @Previewable @State var dataController = DataController()
+    EvaluationView(dataController: dataController, currentPage: 1, isNewEvaluation: false)
 }
-
 #Preview {
-    EvaluationView(reservation: Reservation.samplesReservation[3], isNewEvaluation:  false)
+    @Previewable @State var dataController = DataController()
+    EvaluationView(dataController: dataController, currentPage: 2, isNewEvaluation: false)
+    
 }
