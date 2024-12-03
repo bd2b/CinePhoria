@@ -117,7 +117,7 @@ struct CardsReservationView: View {
                                 EvaluationView(dataController: dataController, currentPage: currentPage, isNewEvaluation: true)
                             } else {
                                 if viewModel.isEvaluationChangeViewShowing {
-                                    EvaluationView(dataController: dataController, currentPage: currentPage, isNewEvaluation: true)
+                                    EvaluationView(dataController: dataController, currentPage: currentPage, isNewEvaluation: false)
                                 }
                             }
                         }
