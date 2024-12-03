@@ -119,7 +119,7 @@ struct EvaluatedView: View {
 ///  doneEvaluated :  la réservation est passée et il y a une évaluation, on affiche l'évaluation sans action
 struct ActionsView: View {
     
-    var reservation: Reservation
+    @ObservedObject var reservation: Reservation
 
     var body: some View {
         switch reservation.stateReservation {

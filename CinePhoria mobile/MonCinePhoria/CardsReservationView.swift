@@ -78,7 +78,8 @@ struct CardsReservationView: View {
                 // Cartes avec TabView
                 TabView(selection: $currentPage) {
                     ForEach(0..<dataController.reservations.count, id: \.self) { index in
-                        CardReservationView(reservation: dataController.reservations[index],
+                        CardReservationView(dataController: dataController,
+                                            reservationIndex: index,
                                             geometry: geometry,
                                             viewModel: viewModel)
                         .tag(index) // Associe chaque vue à un index
@@ -199,7 +200,10 @@ class CardsReservationViewModel: ObservableObject {
     
     // Vue pour une carte avec orientation adaptative
 struct CardReservationView: View {
-    var reservation: Reservation
+    @Bindable var dataController: DataController
+    var reservationIndex: Int
+    var reservation: Reservation { dataController.reservations[reservationIndex] }
+    
     var geometry: GeometryProxy
     
     @Environment(\.colorScheme) var colorScheme
