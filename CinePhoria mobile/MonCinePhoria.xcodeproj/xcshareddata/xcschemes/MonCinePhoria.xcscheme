@@ -50,9 +50,6 @@
                   Identifier = "MonCinePhoriaTests">
                </Test>
                <Test
-                  Identifier = "MonCinePhoriaTests">
-               </Test>
-               <Test
                   Identifier = "MonCinePhoriaTests/example()">
                </Test>
             </SkippedTests>

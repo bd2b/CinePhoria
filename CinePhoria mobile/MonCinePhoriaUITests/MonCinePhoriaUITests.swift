@@ -229,7 +229,7 @@ final class MonCinePhoriaUITests: XCTestCase {
             print("---------")
             
             XCTAssertTrue(app.isElementPresent(label: "Comment avez-vous trouver ce film ?", elementType: app.staticTexts), "Pas d'affichage de la modal Evaluation")
-            XCTAssertTrue(app.isElementPresent(regex: #"Note : (\d+[,.]\d+)"#, elementType: app.staticTexts), "Pas d'affichage de la note")
+            XCTAssertTrue(app.isElementPresent(regex: #"Note: (\d+[,.]\d+)"#, elementType: app.staticTexts), "Pas d'affichage de la note")
             
             // Localiser le slider
             let slider = app.sliders.firstMatch
@@ -249,8 +249,8 @@ final class MonCinePhoriaUITests: XCTestCase {
             
             // Vérifier que la nouvelle valeur est bien entrée
             if let updatedValue = slider.value as? String {
-                newNote = Double(updatedValue) ?? 0.0
-                print("Nouvelle valeur du slider après ajustement : \(updatedValue)")
+                newNote = Double(updatedValue.replacingOccurrences(of: ",", with: ".")  ) ?? 0.0
+                print("Nouvelle valeur du slider après ajustement : \(String(newNote))")
                 
             }
             
@@ -270,9 +270,7 @@ final class MonCinePhoriaUITests: XCTestCase {
             // Vérifier que la nouvelle valeur est bien entrée
             XCTAssertEqual(textView.value as? String, randomValue, "La TextView n'a pas été mise à jour correctement.")
             
-            
-            
-            app.swipeDown(velocity: .fast)
+            app.buttons["checkmark"].tap()
             
             // On va vérifier que les valeur ont bien été enregistrer
             
@@ -289,7 +287,7 @@ final class MonCinePhoriaUITests: XCTestCase {
             print(app.debugDescription)
             print("---------")
             
-            let elementNote = app.element(regex: #"Note : (\d+[,.]\d+)"#, elementType: app.staticTexts)
+            let elementNote = app.element(regex: #"Note: (\d+[,.]\d+)"#, elementType: app.staticTexts)
             
             // Obtenir la valeur du label
             let labelText = elementNote.label

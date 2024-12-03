@@ -32,7 +32,7 @@ struct EvaluationView: View {
             
             // Slider gradué
             VStack {
-                Text("Note : \(String(format: "%.1f", sliderValue))")
+                Text("Note: \(String(format: "%.1f", sliderValue))")
                     .font(customFont(style: .title3))
                 Slider(value: $sliderValue, in: 0...5, step: 0.5)
                     .padding(.horizontal)
