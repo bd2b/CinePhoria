@@ -18,8 +18,8 @@ struct EvaluationView: View {
     
 
     
-//    @State private var sliderValue: Double = 2.5
-//    @State private var userInput: String = "" // Texte saisi par l'utilisateur
+    @State private var sliderValue: Double = 2.5
+    @State private var userInput: String = "" // Texte saisi par l'utilisateur
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -32,12 +32,9 @@ struct EvaluationView: View {
             
             // Slider gradué
             VStack {
-                Text("Note : \(String(format: "%.1f", dataController.reservations[currentPage].note ?? 2.5))")
+                Text("Note : \(String(format: "%.1f", sliderValue))")
                     .font(customFont(style: .title3))
-                Slider(value: Binding(
-                    get: { dataController.reservations[currentPage].note ?? 2.5 },
-                    set: { dataController.reservations[currentPage].note = $0 }
-                ), in: 0...5, step: 0.5)
+                Slider(value: $sliderValue, in: 0...5, step: 0.5)
                     .padding(.horizontal)
             }
             
@@ -46,10 +43,7 @@ struct EvaluationView: View {
                 Text("Donnez nous votre avis")
                     .font(customFont(style: .title3))
                 
-                TextEditor(text: Binding(
-                    get: { dataController.reservations[currentPage].evaluation ?? "" },
-                    set: { dataController.reservations[currentPage].evaluation = $0 }
-                ))
+                TextEditor(text: $userInput)
                     .font(customFont(style: .body))
                     .frame(height: 150)
                     .border(Color.gray, width: 1)
@@ -82,25 +76,25 @@ struct EvaluationView: View {
             }
         }
         .onAppear() {
-            if !isNewEvaluation {
-                // Synchroniser les valeurs de la réservation existante
-//                sliderValue = dataController.reservations[currentPage].note ?? 2.5
-//                userInput = dataController.reservations[currentPage].evaluation ?? ""
+            if let sliderValue = dataController.reservations[currentPage].note {
+                self.sliderValue = sliderValue
             }
-        }
+            if let userInput = dataController.reservations[currentPage].evaluation {
+                self.userInput = userInput
+            }
+      }
         .padding()
     }
     func eraseEvaluation() {
         dataController.reservations[currentPage].evaluation = nil
         dataController.reservations[currentPage].note = nil
-//        sliderValue = 2.5
-//        userInput = ""
         
         dismiss()
     }
     func submit() {
-//        dataController.reservations[currentPage].evaluation = userInput
-//        dataController.reservations[currentPage].note = sliderValue
+        dataController.reservations[currentPage].evaluation = userInput
+        dataController.reservations[currentPage].note = sliderValue
+        
         dismiss()
     }
 }
