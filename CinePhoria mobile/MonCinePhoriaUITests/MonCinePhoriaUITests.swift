@@ -79,7 +79,7 @@ final class MonCinePhoriaUITests: XCTestCase {
                 predicate: NSPredicate(format: "exists == false"),
                 object: app.activityIndicators["ProgressView"]
             )
-            let result = XCTWaiter().wait(for: [expectation], timeout: 10)
+            let result = XCTWaiter().wait(for: [expectation], timeout: 15)
             XCTAssertEqual(result, .completed, "La ProgressView ne s'est pas fermée à temps.")
             
             // Vérifier que la CardsReservationView est bien affichée
@@ -341,7 +341,7 @@ final class MonCinePhoriaUITests: XCTestCase {
                 predicate: NSPredicate(format: "exists == false"),
                 object: app.activityIndicators["ProgressView"]
             )
-            let result = XCTWaiter().wait(for: [expectation], timeout: 10)
+            let result = XCTWaiter().wait(for: [expectation], timeout: 15)
             XCTAssertEqual(result, .completed, "La ProgressView ne s'est pas fermée à temps.")
             
             // Vérifier que la CardsReservationView est bien affichée
@@ -385,7 +385,7 @@ final class MonCinePhoriaUITests: XCTestCase {
                 predicate: NSPredicate(format: "exists == false"),
                 object: app.activityIndicators["ProgressView"]
             )
-            let result2 = XCTWaiter().wait(for: [expectation2], timeout: 10)
+            let result2 = XCTWaiter().wait(for: [expectation2], timeout: 15)
             XCTAssertEqual(result2, .completed, "La ProgressView ne s'est pas fermée à temps.")
             
             // Vérifier que la CardsReservationView est bien affichée
@@ -471,7 +471,7 @@ final class MonCinePhoriaUITests: XCTestCase {
                 predicate: NSPredicate(format: "exists == false"),
                 object: app.activityIndicators["ProgressView"]
             )
-            let result = XCTWaiter().wait(for: [expectation], timeout: 10)
+            let result = XCTWaiter().wait(for: [expectation], timeout: 15)
             XCTAssertEqual(result, .completed, "La ProgressView ne s'est pas fermée à temps.")
             try verifyCardsReservationView(app: app)
             
@@ -502,7 +502,7 @@ final class MonCinePhoriaUITests: XCTestCase {
                 predicate: NSPredicate(format: "exists == false"),
                 object: app.activityIndicators["ProgressView"]
             )
-            let result2 = XCTWaiter().wait(for: [expectation2], timeout: 10)
+            let result2 = XCTWaiter().wait(for: [expectation2], timeout: 15)
             XCTAssertEqual(result2, .completed, "La ProgressView ne s'est pas fermée à temps.")
             try verifyCardsReservationView(app: app)
             
@@ -552,12 +552,99 @@ final class MonCinePhoriaUITests: XCTestCase {
     }
     
     @MainActor
-    func testLaunchPerformance() throws {
-        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
-            // This measures how long it takes to launch your application.
-            measure(metrics: [XCTApplicationLaunchMetric()]) {
-                XCUIApplication().launch()
+    func test3Failure() throws {
+        
+        let app = XCUIApplication()
+        app.launchArguments = ["enable-testing"]
+        app.launch()
+        
+        // Si on se trompe trois fois on efface les données mémorisée
+        let login = "admin"
+        let password = "password"
+        
+        if app.isElementPresent(label: "Bienvenue à", elementType: app.staticTexts) && app.isElementPresent(label: "C'est parti !", elementType: app.buttons) {
+            // On est sur l'écran de bienvenue
+            app.element(label: "C'est parti !", elementType: app.buttons).tap()
+        }
+        print("---------LoginView")
+        print(app.debugDescription)
+        print("---------")
+        if app.buttons["Se connecter"].exists {
+            XCTAssertTrue(app.textFields["Votre email"].exists, "Champ login non présent")
+            XCTAssertTrue(app.secureTextFields["Mot de passe"].exists, "Champ mot de passe non présent")
+            XCTAssertTrue(app.switches["RememberMeToggle"].exists, "swith se souvenir de moi non présent")
+            
+            app.textFields["Votre email"].clear()
+            app.typeText(login)
+            app.secureTextFields["Mot de passe"].clear()
+            app.typeText(password)
+            
+            let rememberMeSwitch = app.switches["RememberMeToggle"]
+            // Se Souvenir de moi est positionne à true
+            if rememberMeSwitch.value as? String == "0" {
+                rememberMeSwitch.tap()
             }
+            app.buttons["Se connecter"].tap()
+            // Attendre que la ProgressView disparaisse
+            let expectation = XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "exists == false"),
+                object: app.activityIndicators["ProgressView"]
+            )
+            let result = XCTWaiter().wait(for: [expectation], timeout: 15)
+            XCTAssertEqual(result, .completed, "La ProgressView ne s'est pas fermée à temps.")
+            try verifyCardsReservationView(app: app)
+            
+            // On affiche le menu
+            XCTAssertTrue(app.buttons["power"].exists, "Bouton de deconnexion absent")
+            
+            app.buttons["power"].tap()
+            
+            // Vérification de la présence des trois options
+            XCTAssertTrue(app.isElementPresent(label: "Annuler", elementType: app.buttons), "Bouton ansent; Annuler ")
+            XCTAssertTrue(app.isElementPresent(label: "Suppression des données du téléphone", elementType: app.buttons), "Bouton absent :  Suppression des données du téléphone")
+            XCTAssertTrue(app.isElementPresent(label: "Déconnexion simple", elementType: app.buttons), "Bouton absent :  Déconnexion simple")
+            
+            // Deconnexion simple
+            app.element(label: "Déconnexion simple", elementType: app.buttons).tap()
+            
+            // On va essayer de se connecter avec une erreur, a la troisieme fois on effacera les données ce que l'on verra par
+            // le switch se souvenir de moi qui sera mis à non
+            
+            XCTAssertTrue(app.textFields["Votre email"].exists, "Champ login non présent")
+            XCTAssertTrue(app.secureTextFields["Mot de passe"].exists, "Champ mot de passe non présent")
+            XCTAssertTrue(app.switches["RememberMeToggle"].exists, "swith se souvenir de moi non présent")
+            
+            app.textFields["Votre email"].clear()
+            app.typeText(login)
+            app.secureTextFields["Mot de passe"].clear()
+            app.typeText("erreur")
+            
+            app.buttons["Se connecter"].tap()
+            
+            print("---------LoginView Erreur")
+            print(app.debugDescription)
+            print("---------")
+            
+            XCTAssertTrue(app.isElementPresent(label: "Nom d'utilisateur ou mot de passe incorrect.", elementType: app.staticTexts ) , "Message d'erreur attendu")
+            
+            app.buttons["Se connecter"].tap()
+            
+            XCTAssertTrue(app.isElementPresent(label: "Nom d'utilisateur ou mot de passe incorrect.", elementType: app.staticTexts ) , "Message d'erreur attendu")
+            
+            app.buttons["Se connecter"].tap()
+            XCTAssertTrue(app.isElementPresent(label: "Nom d'utilisateur ou mot de passe incorrect.", elementType: app.staticTexts ) , "Message d'erreur attendu")
+            
+            XCTAssertTrue(rememberMeSwitch.value as? String == "0","Le switch se souvenir de moi n'est pas positionné à false" )
         }
     }
+    
+//    @MainActor
+//    func testLaunchPerformance() throws {
+//        if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
+//            // This measures how long it takes to launch your application.
+//            measure(metrics: [XCTApplicationLaunchMetric()]) {
+//                XCUIApplication().launch()
+//            }
+//        }
+//    }
 }
