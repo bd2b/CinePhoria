@@ -9,6 +9,7 @@
 
 import Foundation
 import XCTest
+@testable import MonCinePhoria
 
 /// Fonction permettant d'éffacer un TextField afant de le saisir
 extension XCUIElement {

@@ -17,7 +17,6 @@
   },
   "testTargets" : [
     {
-      "parallelizable" : true,
       "skippedTests" : [
         "MonCinePhoriaUITests\/testLaunchPerformance()",
         "MonCinePhoriaUITestsLaunchTests",

@@ -1,10 +1,10 @@
 {
-  "originHash" : "aa94152ba453c25409fbfcbd595d3e518d737155ebdf8c49ee2cc44e06348b2c",
+  "originHash" : "156a2341bb7d4ee093067b43c3380b9693aea1e4dc32ab042926638e9ec9fbd6",
   "pins" : [
     {
       "identity" : "flanimatedimage",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Flipboard/FLAnimatedImage.git",
+      "location" : "https://github.com/Flipboard/FLAnimatedImage",
       "state" : {
         "revision" : "d4f07b6f164d53c1212c3e54d6460738b1981e9f",
         "version" : "1.0.17"
