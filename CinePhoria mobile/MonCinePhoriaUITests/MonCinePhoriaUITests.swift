@@ -101,7 +101,7 @@ final class MonCinePhoriaUITests: XCTestCase {
                 // Accéder à la vue FilmView
                 app.images["ReservationImage"].firstMatch.tap()
                 
-                // Vérifier que SeanceView est bien affichée et retour
+                // Vérifier que FilmView est bien affichée et retour
                 try verifyFilmView(app: app)
                 
                 // Accéder à la vue SeanceView, on prend n'importe quel controle de SeanceView et on tap dessus
@@ -117,18 +117,19 @@ final class MonCinePhoriaUITests: XCTestCase {
                     featureToVerify["AffichageQRCode"] = true
                 }
                 
+                if app.isElementPresent(label: "Votre évaluation", elementType: app.staticTexts) {
+                    print("Votre évaluation")
+                    app.element(label: "Votre évaluation", elementType: app.staticTexts).tap()
+                    try verifyEvaluationView(app: app)
+                    featureToVerify["AffichageEvaluationRealisee"] = true
+                    
+                }
+                
                 if app.isElementPresent(label: "Donnez nous votre avis !", elementType: app.staticTexts) {
                     print("Donnez nous votre avis")
                     app.element(label: "Donnez nous votre avis !", elementType: app.staticTexts).tap()
                     try verifyEvaluationView(app: app)
                     featureToVerify["AffichageEvaluation"] = true
-                }
-                
-                if app.isElementPresent(label: "Votre évaluation", elementType: app.staticTexts) {
-                    print("Votre évaluation")
-                    // app.element(label: "Votre évaluation", elementType: app.staticTexts).tap()
-                    featureToVerify["AffichageEvaluationRealisee"] = true
-                    
                 }
                 
                 // Naviguer vers la page suivante (si ce n'est pas la dernière page)
@@ -259,16 +260,30 @@ final class MonCinePhoriaUITests: XCTestCase {
             let textView = app.textViews.firstMatch
             XCTAssertTrue(textView.exists, "La TextView est absente.")
             
-            // Effacer le contenu
+            let currentValuetextView = textView.value as? String ?? ""
+            print("Valeur actuelle de la TextView : \(currentValuetextView)")
+            
+            textView.tap()
             textView.clear()
+            
+            
+            // Effacer le contenu
+  //          textView.press(forDuration: 1.0)
+  //          app.menuItems["Select All"].tap() // Ou "Tout sélectionner" si l'interface est en français
+            
+            
+    //        textView.clear()
+            
+     //       print("++++" + (textView.value as? String ?? ""))
+     //       XCTAssertEqual(textView.value as? String, "", "Le clear sur la TextView n'a pas été fait, desactiver le clavier Hardware du simulateur.")
             
             // Saisir une valeur aléatoire dans la TextView
             let randomValue = "Valeur aléatoire : \(Int.random(in: 1000...9999))"
             textView.typeText(randomValue)
-            newEvaluation = randomValue
+            newEvaluation = textView.value as? String ?? ""
             
             // Vérifier que la nouvelle valeur est bien entrée
-            XCTAssertEqual(textView.value as? String, randomValue, "La TextView n'a pas été mise à jour correctement.")
+            XCTAssertEqual(textView.value as? String, newEvaluation, "La TextView n'a pas été mise à jour correctement.")
             
             app.buttons["checkmark"].tap()
             
@@ -282,11 +297,8 @@ final class MonCinePhoriaUITests: XCTestCase {
                 XCTFail("Pas de restitution de la note et l'évaluation enregistrées dans les tests")
                 return
             }
-            //   app.element(label: "Votre évaluation", elementType: app.staticTexts).tap()
-            print("---------Apres Evaluation")
-            print(app.debugDescription)
-            print("---------")
             
+            // Vérification de la note
             let elementNote = app.element(regex: #"Note: (\d+[,.]\d+)"#, elementType: app.staticTexts)
             
             // Obtenir la valeur du label
@@ -305,6 +317,13 @@ final class MonCinePhoriaUITests: XCTestCase {
                 }
             } else {
                 XCTFail("Impossible d'extraire la note du label.")
+            }
+            
+            // Verification de la valeur de l'évaluation
+            let elementEvaluation = app.staticTexts["EvaluationValue"].label
+            
+            if newEvaluation != elementEvaluation {
+                XCTFail("L'évaluation extraite \(String(elementEvaluation)) n'est pas la même que l'évaluation saisie \(String(newEvaluation)).")
             }
         }
     }
