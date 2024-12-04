@@ -89,3 +89,10 @@ Créer la target MonCinePhoriaSwiftTesting avec l'environnement Swift Testing
 
 The first step we need to complete is to add a test target to our project, which is where all the code for our tests will reside. 
 To do that, go to the File menu and choose New > Target, filter by “Test”, then select Unit Testing Bundle. You can leave the default settings for this intact, so press Finish.
+
+
+## Dépendance sur les framework
+Si FLAnimatedImage est déjà installé mais pas correctement lié à la cible de test :
+    1.    Allez dans Xcode > Target > Test Target > Build Phases > Link Binary With Libraries.
+    2.    Cliquez sur le bouton +.
+    3.    Recherchez et ajoutez le framework FLAnimatedImage.framework.  --> j'ai glissé depose'

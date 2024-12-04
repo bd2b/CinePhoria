@@ -9,6 +9,7 @@
 
 import Foundation
 import XCTest
+@testable import MonCinePhoria
 
 extension XCUIApplication {
     /// Vérifie si un élément spécifique correspondant à une expression régulière est présent dans l'application.

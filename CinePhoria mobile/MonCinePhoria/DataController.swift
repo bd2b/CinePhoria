@@ -153,7 +153,7 @@ import Foundation
     
     func login(user: String, pwd: String, rememberMe: Bool) -> Bool {
         
-        let userAuthorized = [ "admin", "user@example.com", "vide@example.com", "error@example.com"]
+        let userAuthorized = [ "admin", "user@example.com", "vide@example.com", "error@example.com", "inedit"]
         
         let loginSuccess =  userAuthorized.contains(user) && pwd == "password"
         

@@ -8,6 +8,7 @@
 
 
 import XCTest
+@testable import MonCinePhoria
 
 final class MonCinePhoriaUITestsLaunchTests: XCTestCase {
 

@@ -8,6 +8,9 @@
 
 
 import XCTest
+import SwiftUI
+
+
 
 final class MonCinePhoriaUITests: XCTestCase {
 
@@ -154,23 +157,7 @@ final class MonCinePhoriaUITests: XCTestCase {
         
         
         
-        func verifyCardsReservationView(app: XCUIApplication) throws {
-            // On suppose etre sur la view CardsReservationView
-            print("---------CardsReservationView")
-            print(app.debugDescription)
-            print("---------")
-            
-            // Vérifier que nous sommes sur la bonne vue
-            XCTAssertTrue(app.staticTexts["Mes réservations"].exists, "Le titre 'Mes réservations' est absent.")
-            
-            XCTAssertTrue(app.images["ReservationImage"].exists, "Pas d'image de film")
-            XCTAssertTrue(app.staticTexts["ReservationTitle"].exists, "Pas de titre de film")
-            
-            XCTAssertTrue(app.staticTexts["SeanceView"].firstMatch.exists, "Pas de vue SeanceView")
-            
-            XCTAssertTrue(app.staticTexts["ActionsView"].firstMatch.exists, "Pas de vue ActionsView")
-            
-        }
+        
         
         func verifyFilmView(app: XCUIApplication) throws {
             // On suppose etre sur la Film View
@@ -424,28 +411,146 @@ final class MonCinePhoriaUITests: XCTestCase {
             
         }
         
-        func verifyCardsReservationView(app: XCUIApplication) throws {
-            // On suppose etre sur la view CardsReservationView
-            print("---------CardsReservationView")
-            print(app.debugDescription)
-            print("---------")
-            
-            // Vérifier que nous sommes sur la bonne vue
-            XCTAssertTrue(app.staticTexts["Mes réservations"].exists, "Le titre 'Mes réservations' est absent.")
-            
-            XCTAssertTrue(app.images["ReservationImage"].exists, "Pas d'image de film")
-            XCTAssertTrue(app.staticTexts["ReservationTitle"].exists, "Pas de titre de film")
-            
-            XCTAssertTrue(app.staticTexts["SeanceView"].firstMatch.exists, "Pas de vue SeanceView")
-            
-            XCTAssertTrue(app.staticTexts["ActionsView"].firstMatch.exists, "Pas de vue ActionsView")
-            
-            
-            
-            
-        }
+        
     }
 
+    func verifyCardsReservationView(app: XCUIApplication) throws {
+        // On suppose etre sur la view CardsReservationView
+        print("---------CardsReservationView")
+        print(app.debugDescription)
+        print("---------")
+        
+        // Vérifier que nous sommes sur la bonne vue
+        XCTAssertTrue(app.staticTexts["Mes réservations"].exists, "Le titre 'Mes réservations' est absent.")
+        
+        XCTAssertTrue(app.images["ReservationImage"].exists, "Pas d'image de film")
+        XCTAssertTrue(app.staticTexts["ReservationTitle"].exists, "Pas de titre de film")
+        
+        XCTAssertTrue(app.staticTexts["SeanceView"].firstMatch.exists, "Pas de vue SeanceView")
+        
+        XCTAssertTrue(app.staticTexts["ActionsView"].firstMatch.exists, "Pas de vue ActionsView")
+    }
+    
+    
+    @MainActor
+    func testRememberMe() throws {
+        
+        let app = XCUIApplication()
+        app.launchArguments = ["enable-testing"]
+        app.launch()
+        
+        // Test de mémorisation du login/password
+        let login = "admin"
+        let password = "password"
+        
+        if app.isElementPresent(label: "Bienvenue à", elementType: app.staticTexts) && app.isElementPresent(label: "C'est parti !", elementType: app.buttons) {
+            // On est sur l'écran de bienvenue
+            app.element(label: "C'est parti !", elementType: app.buttons).tap()
+        }
+        print("---------LoginView")
+        print(app.debugDescription)
+        print("---------")
+        if app.buttons["Se connecter"].exists {
+            XCTAssertTrue(app.textFields["Votre email"].exists, "Champ login non présent")
+            XCTAssertTrue(app.secureTextFields["Mot de passe"].exists, "Champ mot de passe non présent")
+            XCTAssertTrue(app.switches["RememberMeToggle"].exists, "swith se souvenir de moi non présent")
+            
+            app.textFields["Votre email"].clear()
+            app.typeText(login)
+            app.secureTextFields["Mot de passe"].clear()
+            app.typeText(password)
+        
+            let rememberMeSwitch = app.switches["RememberMeToggle"]
+            // Se Souvenir de moi est positionne à true
+            if rememberMeSwitch.value as? String == "0" {
+                rememberMeSwitch.tap()
+            }
+            app.buttons["Se connecter"].tap()
+            // Attendre que la ProgressView disparaisse
+            let expectation = XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "exists == false"),
+                object: app.activityIndicators["ProgressView"]
+            )
+            let result = XCTWaiter().wait(for: [expectation], timeout: 10)
+            XCTAssertEqual(result, .completed, "La ProgressView ne s'est pas fermée à temps.")
+            try verifyCardsReservationView(app: app)
+            
+            // On affiche le menu
+            XCTAssertTrue(app.buttons["power"].exists, "Bouton de deconnexion absent")
+            
+            app.buttons["power"].tap()
+            
+            // Vérification de la présence des trois options
+            XCTAssertTrue(app.isElementPresent(label: "Annuler", elementType: app.buttons), "Bouton ansent; Annuler ")
+            XCTAssertTrue(app.isElementPresent(label: "Suppression des données du téléphone", elementType: app.buttons), "Bouton absent :  Suppression des données du téléphone")
+            XCTAssertTrue(app.isElementPresent(label: "Déconnexion simple", elementType: app.buttons), "Bouton absent :  Déconnexion simple")
+            
+            // Deconnexion simple
+            app.element(label: "Déconnexion simple", elementType: app.buttons).tap()
+            
+            // Verifie que le login et le mot de passe sont aux mêmes valeurs. Pour le mot de passe on regarde si le nombre de caractère est identique
+            XCTAssertTrue(app.textFields["Votre email"].value as? String == login, "Login non memorisé")
+            print(app.secureTextFields["Mot de passe"].value as? String ?? "---")
+            XCTAssertTrue(app.secureTextFields["Mot de passe"].value as? String == String(repeating: "•", count: password.count), "Mot de passe non memorisé")
+            
+            // Login et oubli du mot de passe
+            
+            XCTAssertTrue(rememberMeSwitch.value as? String == "1", "Le switch aurait du etre actif")
+            app.buttons["Se connecter"].tap()
+            // Attendre que la ProgressView disparaisse
+            let expectation2 = XCTNSPredicateExpectation(
+                predicate: NSPredicate(format: "exists == false"),
+                object: app.activityIndicators["ProgressView"]
+            )
+            let result2 = XCTWaiter().wait(for: [expectation2], timeout: 10)
+            XCTAssertEqual(result2, .completed, "La ProgressView ne s'est pas fermée à temps.")
+            try verifyCardsReservationView(app: app)
+            
+            XCTAssertTrue(app.buttons["power"].exists, "Bouton de deconnexion absent")
+            app.buttons["power"].tap()
+            
+            // On se deconnecte avec oubli du mot de passe
+            app.element(label: "Suppression des données du téléphone", elementType: app.buttons).tap()
+            
+            // On saute l'écran de bienvenue
+            if app.isElementPresent(label: "Bienvenue à", elementType: app.staticTexts) && app.isElementPresent(label: "C'est parti !", elementType: app.buttons) {
+                // On est sur l'écran de bienvenue
+                app.element(label: "C'est parti !", elementType: app.buttons).tap()
+            }
+            print("---------LoginView a vide")
+            print(app.debugDescription)
+            print("---------")
+            // On vérifie que les champs sont egaux aux placeholder donc vide
+            let loginRetourne = app.textFields["Votre email"].value as? String ?? "---"
+            print("Le champ login doit etre vide : +\(loginRetourne)+")
+            XCTAssertTrue(app.textFields["Votre email"].value as? String == "Votre email", "Le champ Login n'est pas vide")
+            
+            let passwordRetourne = app.secureTextFields["Mot de passe"].value as? String ?? "---"
+            print("Le champ password doit etre vide : +\(passwordRetourne)+")
+            XCTAssertTrue(app.secureTextFields["Mot de passe"].value as? String == "Mot de passe", "Le champ Mot de passe n'est pas vide")
+            
+            // On vérifie que le dernier utilisateur connecté n'est pas renseigner dans UserDefaults
+            
+            if let lastUserLogin = UserDefaults.standard.value(forKey: "lastUserLogin") as? String {
+                XCTAssertTrue(lastUserLogin == "", "Le dernier utilisateur connecté aurait du etre vide \(lastUserLogin)")
+            }
+            
+            // Il faudrait vérifier que le mot de passe n'est pas dans la keychain
+            // On saute ce test car cela nécessite de partager la keyChain entre l'application cible et l'application de test
+            // https://developer.apple.com/documentation/security/sharing-access-to-keychain-items-among-a-collection-of-apps
+            
+            // JE N'Y SUIS PAS ARRIVE
+//            if let passwordKeyChain = try getValue(for: login, and: "com.db2db.MonCinePhoria"),
+//                passwordKeyChain == password {
+//                    XCTFail("Le mot de passe est encore dans la keychain")
+//                } else {
+//                    XCTFail("Un autre mot de passe est encore dans la keychain")
+//                }
+            
+
+        }
+    }
+    
     @MainActor
     func testLaunchPerformance() throws {
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {
