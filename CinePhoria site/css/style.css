@@ -1,0 +1,48 @@
+
+@import url("global.css");
+@import url("sections/header.css");
+@import url("sections/main.css");
+
+
+@font-face {
+    font-family: 'actor';
+    src: url("../assets/actor-regular-webfont.woff2") format('woff2'),
+         url("../assets/actor-regular-webfont.woff") format('woff');
+    font-weight: normal;
+    font-style: normal;
+
+}
+@font-face {
+    font-family: 'digit';
+    src: url("../assets/lcd14-webfont.woff2") format('woff2'),
+         url("../assets/lcd14-webfont.woff") format('woff');
+    font-weight: normal;
+    font-style: normal;
+} 
+
+
+:root {
+
+    --actor: "actor", sans-serif;
+    --digit: "digit", sans-serif;
+
+    --primary-color: 44, 62, 80;  /* Bleu nuit */
+    --secondary-color: 248, 248, 225; /* Blanc cassé */
+    --ternary-color: 192,192,192; /* Argenté */
+    --background-color: 224, 224, 224; /* Gris perlé */
+    --accent-color: 218, 165, 32; /* Doré */
+    --error-color: 178, 34, 34; /* Rouge sombre */
+    --success-color: 34,139, 34; /* Vert foncé */
+
+    --headline-font-size: 42px;
+    --headlibe-font-weight: 700;
+
+    --subheadline-font-size: 22px;
+    --subheadlibe-font-weight: 400;
+
+    --body-font-size: 18px;
+
+    --caption-font-size: 16px;
+
+    
+}
