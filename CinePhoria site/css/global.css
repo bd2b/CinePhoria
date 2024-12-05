@@ -1,0 +1,21 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: var(--actor);
+}
+
+html, body {
+    height: 100%;
+}
+
+[class*="button"] {
+    padding: 10px;
+    min-width: 150px;
+    font-size: var(--body-font-size);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 300ms;
+    background-color: rgb(var(--primary-color));
+    color: rgb(var(--secondary-color));
+}
