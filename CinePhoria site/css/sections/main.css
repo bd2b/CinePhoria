@@ -16,7 +16,7 @@
     justify-content: center;
     background-color: rgb(var(--background-color));
 
-    padding: 0px 10px;
+  /*  padding: 0px 10px; */
 
 }
 
@@ -29,7 +29,7 @@
 
     width: 100%;
     height: 100px;
-    padding: 0px 10px;
+ /*   padding: 0px 10px;*/
 }
 
 .title__left {
@@ -38,12 +38,12 @@
     justify-content: space-between;
     width: 100%;
     height: 100px;
+    padding: 0px 10px;
 
 }
 
 .title__left-h1 {
     font-size: var(--headline-font-size);
-
 }
 
 .title__filters {
@@ -55,6 +55,9 @@
     height: 100px;
     padding: 0px 10px;
 
+}
+.title__filters-visiteur {
+    display: none;
 }
 /* Button dropdown */
 /*
@@ -128,7 +131,9 @@
     scrollbar-width: thin; /* Style de la scrollbar (Firefox) */
     -ms-overflow-style: none; /* Supprimer la scrollbar (IE/Edge) */
 
-    padding: 10px;
+    padding: 30px 0px 60px 00px;
+    gap: 40px;
+
     
 }
 
@@ -136,11 +141,18 @@
     display: none; /* Supprimer la scrollbar (Chrome/Safari) */
 }
 
+.filmsreservation__film {
+    display: flex;
+    padding: 0px 10px;
+    gap: 20px;
+}
+
+
 .film__cardreservation {
     flex: 0 0 auto;
     display: flex;
     flex-direction: column;
-    width: 250px;
+    width: 300px;
     height: auto;
     background-color: rgb(var(--secondary-color));
     border-radius: 10px;
