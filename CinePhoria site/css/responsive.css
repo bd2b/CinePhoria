@@ -1,0 +1,50 @@
+/* HEADER */
+@media (max-width: 768px) {
+    .nav__logo-img {
+        width: 125px;
+    }
+    .nav__actions {
+        display: none;
+    }
+    .nav__mobile-menu {
+        display: block;
+    }
+    .nav__actions-button--link {
+        background-color: rgb(var(--primary-color),0.3);
+
+    }
+}
+
+/* MAIN */
+@media (max-width: 768px) {
+    
+    .title__left-h1 {
+        font-size: var(--subheadline-font-size);
+    }
+    .filmsreservation__film  {
+        flex-direction: column;
+        grid-template-columns: 1fr;
+    }
+
+    .film__cardreservation {
+        justify-content: center;
+    }
+    
+}
+
+/* FOOTER */
+
+@media (max-width: 532px) {
+    .container__legal {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .container__sites {
+        flex-direction: column;
+    }
+
+   
+
+    
+}
