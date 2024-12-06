@@ -27,7 +27,7 @@
     --digit: "digit", sans-serif;
 
     --primary-color: 44, 62, 80;  /* Bleu nuit */
-    --secondary-color: 248, 248, 225; /* Blanc cassé */
+    --secondary-color: 248, 248, 255; /* Blanc cassé */
     --ternary-color: 192,192,192; /* Argenté */
     --background-color: 224, 224, 224; /* Gris perlé */
     --accent-color: 218, 165, 32; /* Doré */
@@ -40,9 +40,10 @@
     --subheadline-font-size: 22px;
     --subheadlibe-font-weight: 400;
 
-    --body-font-size: 18px;
+    --body-font-size: 16px;
 
-    --caption-font-size: 16px;
+    --caption-font-size: 14px;
+    --caption2-font-size: 12px;
 
     
 }

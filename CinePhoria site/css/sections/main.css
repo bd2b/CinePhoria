@@ -14,8 +14,9 @@
 
     align-items:start;
     justify-content: center;
+    background-color: rgb(var(--background-color));
 
-    padding: 0 10px;
+    padding: 0px 10px;
 
 }
 
@@ -24,9 +25,20 @@
     align-items: center;
     justify-content: space-between;
 
+    background-color: rgb(var(--secondary-color));
+
     width: 100%;
     height: 100px;
-    margin-bottom: 20px;
+    padding: 0px 10px;
+}
+
+.title__left {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100px;
+
 }
 
 .title__left-h1 {
@@ -39,6 +51,10 @@
     justify-content: end;
     align-items: center;
     gap: 10px;
+    width: 100%;
+    height: 100px;
+    padding: 0px 10px;
+
 }
 /* Button dropdown */
 /*
@@ -100,13 +116,20 @@
 /* Container des cards de film pour la reservation */
 .container__filmsreservation {
     display: flex;
-    flex-wrap: nowrap; /* Empêcher le retour à la ligne */
-    overflow-x: auto; /* Activer le défilement horizontal */
+    flex-wrap: nowrap;
+    overflow-x: auto;
+
+    max-width: 100%;
+
+    gap: 16px;
+    align-items: flex-start;
+    background-color: rgb(var(--background-color));
+
     scrollbar-width: thin; /* Style de la scrollbar (Firefox) */
     -ms-overflow-style: none; /* Supprimer la scrollbar (IE/Edge) */
-    background-color: rgb(var( --background-color));
 
-    width: 100%;
+    padding: 10px;
+    
 }
 
 .container__filmsreservation::-webkit-scrollbar {
@@ -114,28 +137,74 @@
 }
 
 .film__cardreservation {
+    flex: 0 0 auto;
     display: flex;
     flex-direction: column;
-    width: 200px ; /* Largeur minimale des éléments */
-    height: auto; /* Hauteur des éléments */
-    background-color: rgb(var( --secondary-color));
-    
-    margin-right: 10px; /* Espacement entre les éléments */
+    width: 250px;
+    height: auto;
+    background-color: rgb(var(--secondary-color));
+    border-radius: 10px;
     
     align-items: center;
-    justify-content: start ;
-    border-radius: 5px;
-    padding:  0px  30px 30px 30px  ;
+    justify-content: flex-start;
+
+    gap: 20px;
+
+    padding: 0px 20px 10px 20px;
 }
 .cardreservation__image {
-    width: 100%;
+    width: 80%;
     height: auto;
-    object-fit: contain;
+    
     border-radius: 5px 5px 0 0;
-    padding:  0px  40px 0px 40px  ;
+    padding:  0px  60px 0px 60px  ;
     
 }
 .cardreservation__image-img {
     width: 100%;
     height: auto;
 }
+
+.cardreservation__description {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.description__evaluation {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+}
+
+.evaluation__coupdecoeur {
+    display: flex;
+    
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    gap: 5px;
+    background: rgb(var(--background-color));
+    border-radius: 8px;
+    height: 30px;
+    font-size: var( --caption2-font-size);
+}
+
+.evaluation__coupdecoeur-img {
+    width: 24px;
+    height: 24px;
+}
+
+.evaluation__note {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 5px 10px;
+    gap: 2px;
+    background: rgb(var(--background-color));
+    border-radius: 8px;
+    height: 30px;
+    font-size: var( --caption2-font-size);
+}
+
