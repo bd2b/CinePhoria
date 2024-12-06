@@ -1,5 +1,6 @@
 /* commentaire pour git */
 .main {
+    width: 100%;
     display: flex;
     justify-content: center;
 
@@ -7,7 +8,7 @@
 
 .main__container {
     width: 100%;
-    max-width: 1512px;
+  /*  max-width: 1512px; */
 
     display: flex;
     flex-direction: column;
@@ -16,7 +17,7 @@
     justify-content: center;
     background-color: rgb(var(--background-color));
 
-  /*  padding: 0px 10px; */
+    
 
 }
 
@@ -56,9 +57,11 @@
     padding: 0px 10px;
 
 }
-.title__filters-visiteur {
+
+.title__filters {
     display: none;
 }
+
 /* Button dropdown */
 /*
 <div class="title__filter-dropdown">
@@ -84,7 +87,7 @@
 
 /* Contenu du menu déroulant (caché par défaut) */
 .title__filter-button-drowdown-content {
-    display: none;
+    display: none; 
     position: absolute;
     background-color: rgb(var(--background-color));
     box-shadow: 0 4px 8px rgb(var(--primary-color, 0.1));
@@ -133,8 +136,17 @@
 
     padding: 30px 0px 60px 00px;
     gap: 40px;
+    
+    
 
     
+}
+/* Parametre de l'animation d'apparition */
+.container__filmsreservation
+ {
+    transform: translateY(20px);
+    opacity: 0;
+    transition: opacity 1s ease-in-out , transform 1s ease-out;
 }
 
 .container__filmsreservation::-webkit-scrollbar {

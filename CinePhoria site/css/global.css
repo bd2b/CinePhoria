@@ -12,7 +12,7 @@ html, body {
 
 [class*="button"] {
     padding: 10px;
-    min-width: 150px;
+    min-width: 100px;
     font-size: var(--body-font-size);
     border: none;
     border-radius: 10px;
