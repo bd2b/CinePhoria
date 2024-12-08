@@ -32,6 +32,7 @@
     
 }
 
+
 /* FOOTER */
 
 @media (max-width: 532px) {
@@ -43,8 +44,5 @@
     .container__sites {
         flex-direction: column;
     }
-
-   
-
     
 }

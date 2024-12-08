@@ -1,8 +1,8 @@
 .footer {
     display: flex;
+    
     padding: 0 10px; 
     gap: 20px;
-      
     background: rgb(var(--primary-color)) ;
     color: rgb(var(--secondary-color));
 }
@@ -15,8 +15,10 @@
     
     align-items: center;
     align-content:center;
+    
     padding: 10px;
     gap: 10px;
+   
 }
 
 .container__legal {
