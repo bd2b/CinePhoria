@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/sections/main-reservation.css">
+    <link rel="stylesheet" href="css/sections/reservation-panel.css">
+
     <title>CinePhoria</title>
 </head>
 
@@ -160,8 +162,8 @@
                                 qui vient d'être kidnappé. Mais la mission se révèle bien plus dangereuse que prévu et
                                 Bond se retrouve aux trousses d'un mystérieux ennemi détenant de redoutables armes
                                 technologiques…
-                                
-                                
+
+
                             </p>
                             <p class="right__author-p">De Cary Joji Fukunaga
                             </p>
@@ -169,11 +171,10 @@
 
                         </div>
                     </div>
-                    <button class="reservation__engage-button reservation__engage-button-jereserve">Je reserve</button>
                 </div>
                 <div class="reservation__panel">
                     <div class="panel__tabs">
-                        <p class="tabs__tab-p tabs__tab-nav-p tabs__tab-nav-prec-p">Prec</p>
+                        <p class="tabs__tab-p tabs__tab-nav-p tabs__tab-nav-prec-p">Avant</p>
                         <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">6/11</p>
                         <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">7/11</p>
                         <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">8/11</p>
@@ -181,67 +182,77 @@
                         <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">10/11</p>
                         <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">11/11</p>
                         <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">12/11</p>
-                        <p class="tabs__tab-p tabs__tab-nav-p tab-nav-suiv-p">Suiv</p>
+                        <p class="tabs__tab-p tabs__tab-nav-p tab-nav-suiv-p">Après</p>
                     </div>
                     <div class="panel__seances">
                         <div class="seances__cardseance">
-                            <p class="cardseance__hourbegin-p">19h30</p>
-                            <p class="cardseance__hourend-p">(fin 22h)</p>
+                            <div class="cardseance__horaire">
+                                <p class="horaire__hour horaire__hour-begin-p">19:30</p>
+                                <p class="horaire__hour horaire__hour-end-p">(fin 22h)</p>
+                            </div>
                             <div class="cardseance__datesalle">
                                 <div class="datesalle__date">
                                     <p class="date__month-p">NOV</p>
                                     <p class="date__day-p">21</p>
                                 </div>
                                 <p class="datesalle__salle-p">Salle 1</p>
-                                <div class="cardseance__qualitebo">
-                                    <img src="assets/3D.png" alt="Qualite" class="qualitebo-qualite-img">
-                                    <p class="qualitebo-bo-p">VF</p>
-                                </div>
+                            </div>
+                            <div class="cardseance__qualitebo">
+                                <img src="assets/3D.png" alt="Qualite" class="qualitebo-qualite-img">
+                                <p class="qualitebo-bo-p">VF</p>
                             </div>
                         </div>
+
                         <div class="seances__cardseance">
-                            <p class="cardseance__hourbegin-p">14h30</p>
-                            <p class="cardseance__hourend-p">(fin 17h)</p>
-                            <div class="cardseance__datesalle">
-                                <div class="datesalle__date">
-                                    <p class="date__month-p">NOV</p>
-                                    <p class="date__day-p">21</p>
-                                </div>
-                                <p class="datesalle__salle-p">Salle 1</p>
-                                <div class="cardseance__qualitebo">
-                                    <img src="assets/3D.png" alt="Qualite" class="qualitebo-qualite-img">
-                                    <p class="qualitebo-bo-p">VF</p>
-                                </div>
+                            <div class="cardseance__horaire">
+                                <p class="horaire__hour horaire__hour-begin-p">14:00</p>
+                                <p class="horaire__hour horaire__hour-end-p">(fin 17h)</p>
                             </div>
-                        </div>
-                        <div class="seances__cardseance">
-                            <p class="cardseance__hourbegin-p">16h30</p>
-                            <p class="cardseance__hourend-p">(fin 19h)</p>
                             <div class="cardseance__datesalle">
                                 <div class="datesalle__date">
                                     <p class="date__month-p">NOV</p>
                                     <p class="date__day-p">21</p>
                                 </div>
                                 <p class="datesalle__salle-p">Salle 2</p>
-                                <div class="cardseance__qualitebo">
-                                    <img src="assets/4K.png" alt="Qualite" class="qualitebo-qualite-img">
-                                    <p class="qualitebo-bo-p">VF</p>
-                                </div>
+                            </div>
+                            <div class="cardseance__qualitebo">
+                                <img src="assets/4DX.png" alt="Qualite" class="qualitebo-qualite-img">
+                                <p class="qualitebo-bo-p">VO</p>
                             </div>
                         </div>
+
                         <div class="seances__cardseance">
-                            <p class="cardseance__hourbegin-p">22h00</p>
-                            <p class="cardseance__hourend-p">(fin 23h30h)</p>
+                            <div class="cardseance__horaire">
+                                <p class="horaire__hour horaire__hour-begin-p">17:00</p>
+                                <p class="horaire__hour horaire__hour-end-p">(fin 19h30)</p>
+                            </div>
                             <div class="cardseance__datesalle">
                                 <div class="datesalle__date">
                                     <p class="date__month-p">NOV</p>
                                     <p class="date__day-p">21</p>
                                 </div>
                                 <p class="datesalle__salle-p">Salle 1</p>
-                                <div class="cardseance__qualitebo">
-                                    <img src="assets/4K.png" alt="Qualite" class="qualitebo-qualite-img">
-                                    <p class="qualitebo-bo-p">VF</p>
+                            </div>
+                            <div class="cardseance__qualitebo">
+                                <img src="assets/4DX.png" alt="Qualite" class="qualitebo-qualite-img">
+                                <p class="qualitebo-bo-p">VO</p>
+                            </div>
+                        </div>
+                        <div class="seances__cardseance">
+                            <div class="cardseance__horaire">
+                                <p class="horaire__hour horaire__hour-begin-p">17:00</p>
+                                <p class="horaire__hour horaire__hour-end-p">(fin 19h30)</p>
+                            </div>
+                            <div class="cardseance__datesalle">
+                                <div class="datesalle__date">
+                                    <p class="date__month-p">NOV</p>
+                                    <p class="date__day-p">21</p>
                                 </div>
+                                <p class="datesalle__salle-p">Salle 1</p>
+                            </div>
+                            <div class="cardseance__qualitebo">
+                                <img src="assets/4K.png" alt="Qualite" class="qualitebo-qualite-img">
+                                <p class="qualitebo-bo-p">VO</p>
                             </div>
                         </div>
                     </div>
