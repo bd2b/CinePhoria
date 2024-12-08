@@ -15,7 +15,7 @@
     width: 100%;
     gap: 10px;
 }
-/* column 1 */
+/* --------------------- COLONNE 1 Liste des films */
 .reservation__listFilms {
     flex: 1;
     display: flex;
@@ -70,7 +70,7 @@
     flex-shrink: 1;
 }
 
-/* column 2 */
+/* --------------------- COLONNE 2 Détail du film sélectionné */
 .reservation__detailFilm {
     flex: 2;
 
@@ -214,20 +214,8 @@ border-radius: 10px;
 
 
 
-/* column 3 */
-.reservation__panel {
-    flex: 3;
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    overflow-y: auto;
-    width: 100%;
-    background: rgb(var(--ternary-color),0.5);
-    /* Gray/300 */
-    border: 1px solid #DEE2E6;
-    border-radius: 12px;
-    margin: 10px 10px 20px 0px;
-}
-
+/* --------------------- COLONNE 3 Panneau de réservation */
+/* --------------------- CHOIX DE LA SEANCE */
+/* Voir reservation-panel.css */
 
 
