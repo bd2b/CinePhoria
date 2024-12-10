@@ -457,7 +457,7 @@ border-radius: 12px;
 }
 
 .tabtarif__commande-table tfoot td:last-child {
-    color: rgb(var(--primary-color))) /* Couleur spécifique pour le total final */
+    color: rgb(var(--primary-color)); /* Couleur spécifique pour le total final */
     font-size: 18px;
 }
 
