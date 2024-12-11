@@ -139,3 +139,70 @@ $theme-colors: map-merge($theme-colors, (
 // set changes
 @import "bootstrap";
 ```
+
+# Memo
+## container
+    .container : il définit une largeur maximale à chaque breakpoint. C’est le container par défaut,
+
+    .container-{breakpoint} : la largeur est de 100 % jusqu'au breakpoint spécifié,
+
+    .container-fluid : la largeur est de 100 % à tous les breakpoints.
+
+.container : 100% 
+.container-sm : 100% < 540
+.container-md : 100% < 720
+.container-lg : 100% < 960
+.container-xl : 100% < 1140
+.container-xxl : 100% < 1320
+.container-fluid : 100% 
+
+## Display
+    .d-none : l’élément ne sera pas affiché à partir du plus petit breakpoint (xs), donc pas du tout,
+
+    .d-md-none : l’élément ne sera plus affiché à partir du moment où l’on arrive sur un écran medium autrement dit ≥768px.
+
+    none
+    inline
+    inline-block
+    block
+    grid
+    table
+    table-cell
+    table-row
+    flex
+    inline-flex
+
+## Flexbox
+https://getbootstrap.com/docs/5.3/utilities/flex/
+
+## Margin et padding
+.p ou .m
+    t - pour Top (en haut)
+    b - pour Bottom (en bas)
+    s - pour Start (à gauche)
+    e - pour End (à droite)
+    x - pour gauche et droite
+    y - pour haut et bas
+mt-5 mb-3 pt-5 pb-3 ps-3 pe-5
+
+## Sizing
+.w ou.h pour auto par defaut, 25%, 50%, 75%, 100%
+w-50 ou h-100
+```HTML
+<div class="min-vw-100">Largeur minimum 100% de la largeur du viewport</div>
+<div class="min-vh-100">Hauteur minimum 100% de la hauteur du viewport </div>
+<div class="vw-100"> Largeur 100% de la largeur du viewport </div>
+<div class="vh-100">Hauteur 100% de la hauteur du viewport </div>
+```
+
+# Utilisation de bootstrap
+## Layouts
+A l'usage, utiliser BS pour décrire les layout nécessite de placer du code de présentation dans le HTML. Si on veut éviter cela, il faut faire des extensions de class dans le CSS et compiler cela en Saas. Un peu compliqué.
+
+Du coup, les class CSS n'utilisent pas Bootstrap.
+
+## Modal
+
+## Formulaire de saisie
+
+## Tableau
