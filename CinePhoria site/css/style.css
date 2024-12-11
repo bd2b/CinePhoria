@@ -45,24 +45,6 @@
     --caption-font-size: 14px;
     --caption2-font-size: 12px;
 
-    --bs-primary-color: 44, 62, 80;  /* Bleu nuit */
-    --bs-secondary-color: 248, 248, 255; /* Blanc cassé */
-    --bs-ternary-color: 192,192,192; /* Argenté */
-    --bs-background-color: 224, 224, 224; /* Gris perlé */
-    --bs-accent-color: 218, 165, 32; /* Doré */
-    --bs-error-color: 178, 34, 34; /* Rouge sombre */
-    --bs-success-color: 34,139, 34; /* Vert foncé */
-
-    --bs-headline-font-size: 42px;
-    --bs-headlibe-font-weight: 200;
-
-    --bs-subheadline-font-size: 22px;
-    --bs-subheadlibe-font-weight: 400;
-
-    --bs-body-font-size: 16px;
-
-    --bs-caption-font-size: 14px;
-    --bs-caption2-font-size: 12px;
-
+    
     
 }
