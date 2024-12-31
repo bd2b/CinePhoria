@@ -10,11 +10,18 @@ DECLARE v_ResultTest VARCHAR(100) DEFAULT "OK";
 CALL LogTrace("Test_XXXX - debut");
 
 block_procedure: BEGIN
+DECLARE v_exist INT DEFAULT 0;
+
+-- Appel de XXXX
 
 
-
-
-
+-- Verification
+set v_exist = (SELECT COUNT(*) FROM zzzzzzz WHERE ttttttt);
+if v_exist <> 1 THEN
+	SET v_ResultTest = "KO";
+	CALL LogTrace("Test_XXXX : yyyyyyyy  =  KO");
+    LEAVE block_procedure;
+END IF;
 
 
 END block_procedure;
