@@ -14,8 +14,8 @@ let fontSeance = "DS-DIGI"
 let helper = DateFormatterHelper.shared
 
 enum QualityFilm: String, Codable {
-    case troisD = "3D"
-    case quatreK = "4K"
+    case troisD =   "3D"
+    case quatreK =  "4K"
     case quatreDX = "4DX"
     case standard = "movieclapper"
     
@@ -34,11 +34,14 @@ enum BO : String, Codable {
     case vo = "VO"
 }
 
+typealias Salle = String
+
 struct Seance: Codable {
-    var hourBegin: String
-    var hourEnd: String
+    var id: UUID = UUID()
+    var hourBeginHHSMM: String
+    var hourEndHHSMM: String
     var date: Date
-    var location: String
+    var location: Salle
     var qualite: QualityFilm
     var bo: BO
     
@@ -76,8 +79,8 @@ struct Seance: Codable {
     }
     static var samples: [Seance] {
         [
-            Seance(hourBegin: helper.hourString(from: sampleDateBegin), hourEnd: "16:00", date: sampleDateBegin, location: "Salle 1", qualite: .troisD, bo: .vf),
-            Seance(hourBegin: helper.hourString(from: sampleDateBeginFutur), hourEnd: "16:00", date: sampleDateBeginFutur, location: "Salle 1", qualite: .troisD, bo: .vf)
+            Seance(hourBeginHHSMM: helper.hourString(from: sampleDateBegin), hourEndHHSMM: "16:00", date: sampleDateBegin, location: "Salle 1", qualite: .troisD, bo: .vf),
+            Seance(hourBeginHHSMM: helper.hourString(from: sampleDateBeginFutur), hourEndHHSMM: "16:00", date: sampleDateBeginFutur, location: "Salle 1", qualite: .troisD, bo: .vf)
         ]
     }
 }

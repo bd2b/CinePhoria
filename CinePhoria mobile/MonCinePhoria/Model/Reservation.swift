@@ -11,10 +11,13 @@ import Foundation
 import SwiftUI
 
 enum StateReservation: String, Codable, CaseIterable {
-    case future // la reservation n'est pas passée, on doit présenter le QR Code
-    case doneUnevaluated // la réservation est passée mais il n'y a pas d'évaluation, on doit présenter la saisie d'une évaluation
-    case doneEvaluated // la réservation est passée et il y a une évaluation, on affiche l'évaluation sans action
+    case future = "future"// la reservation n'est pas passée, on doit présenter le QR Code
+    case doneUnevaluated = "doneUnevaluated" // la réservation est passée mais il n'y a pas d'évaluation, on doit présenter la saisie d'une évaluation
+    case doneEvaluated = "doneEvaluated" // la réservation est passée et il y a une évaluation, on affiche l'évaluation sans action
 }
+
+
+
 
 struct SeatsForTarif: Codable {
     var nameTarif: String
@@ -57,7 +60,9 @@ class Reservation: Identifiable, Codable, ObservableObject {
     var seats: [SeatsForTarif]
     var numberPMR: Int
     @Published var evaluation: String?
+    { didSet { isEvaluationMustBeReview = true }}
     @Published var note: Double?
+    var isEvaluationMustBeReview: Bool // Trace si l'évaluation doit etre moderee
     
     
     var isPromoFriandise: Bool = false
@@ -65,7 +70,7 @@ class Reservation: Identifiable, Codable, ObservableObject {
     
     // Clés de codage pour les propriétés persistées
     enum CodingKeys: String, CodingKey {
-        case id, film, seance, seats, numberPMR, evaluation, note, isPromoFriandise, numberSeatsRestingBeforPromoFriandise
+        case id, film, seance, seats, numberPMR, evaluation, note, isEvaluationMustBeReview, isPromoFriandise, numberSeatsRestingBeforPromoFriandise
     }
     
     init(film: Film, seance: Seance, seats: [SeatsForTarif], numberPMR: Int, evaluation: String? = nil, note: Double? = nil) {
@@ -75,6 +80,7 @@ class Reservation: Identifiable, Codable, ObservableObject {
         self.numberPMR = numberPMR
         self.evaluation = evaluation
         self.note = note
+        self.isEvaluationMustBeReview = evaluation != nil
     }
     
     // MARK: - Conformité à Codable
@@ -88,6 +94,7 @@ class Reservation: Identifiable, Codable, ObservableObject {
             numberPMR = try container.decode(Int.self, forKey: .numberPMR)
             evaluation = try container.decodeIfPresent(String.self, forKey: .evaluation)
             note = try container.decodeIfPresent(Double.self, forKey: .note)
+            isEvaluationMustBeReview = try container.decode(Bool.self, forKey: .isEvaluationMustBeReview)
             isPromoFriandise = try container.decode(Bool.self, forKey: .isPromoFriandise)
             numberSeatsRestingBeforPromoFriandise = try container.decodeIfPresent(Int.self, forKey: .numberSeatsRestingBeforPromoFriandise)
         }
@@ -102,6 +109,7 @@ class Reservation: Identifiable, Codable, ObservableObject {
             try container.encode(evaluation, forKey: .evaluation)
             try container.encode(note, forKey: .note)
             try container.encode(isPromoFriandise, forKey: .isPromoFriandise)
+            try container.encode(isEvaluationMustBeReview, forKey: .isEvaluationMustBeReview)
             try container.encodeIfPresent(numberSeatsRestingBeforPromoFriandise, forKey: .numberSeatsRestingBeforPromoFriandise)
         }
     

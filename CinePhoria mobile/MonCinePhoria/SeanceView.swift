@@ -17,10 +17,10 @@ struct SeanceView: View {
     var body: some View {
         
         VStack {
-            Text(seance.hourBegin)
+            Text(seance.hourBeginHHSMM)
                 .font(customFont(style: .title, fontName: "LCD14"))
                 .foregroundColor(.bleuNuitPrimaire)
-            Text("(fin: \(seance.hourEnd))")
+            Text("(fin: \(seance.hourEndHHSMM))")
                 .font(customFont(style: .caption))
                 .foregroundColor(.bleuNuitPrimaire)
             
