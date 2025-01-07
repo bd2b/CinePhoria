@@ -1,7 +1,9 @@
 import mysql from 'mysql2/promise';
 import { Cinema } from "../shared-models/Cinema";
 
-import { dbConfig } from "../config/config"
+import { dbConfig } from "../config/config";
+
+import logger from '../config/configLog';
 
 
 export class CinemaDAO {
@@ -10,7 +12,6 @@ export class CinemaDAO {
     const connection = await mysql.createConnection(dbConfig);
     console.log('Exécution de la requête : SELECT * FROM Cinema');
     const [rows] = await connection.execute('SELECT * FROM Cinema');
-    console.log(rows);
     await connection.end();
 
     // On convertit chaque record en Film

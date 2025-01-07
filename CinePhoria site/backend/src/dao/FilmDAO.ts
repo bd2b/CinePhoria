@@ -10,7 +10,6 @@ export class FilmDAO {
     const connection = await mysql.createConnection(dbConfig);
     console.log('Exécution de la requête : SELECT * FROM Film');
     const [rows] = await connection.execute('SELECT * FROM Film');
-    console.log(rows);
     await connection.end();
 
     // On convertit chaque record en Film
@@ -33,7 +32,6 @@ export class FilmDAO {
     const connection = await mysql.createConnection(dbConfig);
     console.log('Exécution de la requête : SELECT * FROM viewfilmssortiesdelasemaine');
     const [rows] = await connection.execute('SELECT * FROM viewfilmssortiesdelasemaine');
-    console.log(rows);
     await connection.end();
 
     // On convertit chaque record en Film
