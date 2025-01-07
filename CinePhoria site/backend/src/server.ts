@@ -5,6 +5,7 @@ dotenv.config({ path: './.env' });
 import express from 'express';
 
 import filmRoutes from './routes/filmRoutes';
+import cinemaRoutes from './routes/cinemaRoutes';
 import loginRoutes from './routes/publicLoginRoutes';
 import intranetLoginRoutes from './routes/intranetLoginRoutes';
 
@@ -26,6 +27,7 @@ app.use(session(sessionTK));
 app.use(express.json());
 
 app.use('/api/films', filmRoutes);
+app.use('/api/cinemas', cinemaRoutes);
 app.use('/api/login', loginRoutes);
 app.use('/api/intranet', intranetLoginRoutes);
 

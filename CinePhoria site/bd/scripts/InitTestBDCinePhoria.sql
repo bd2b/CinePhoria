@@ -101,17 +101,18 @@ INSERT INTO Cinema
   ville, 
   postalcode, 
   emailCinema, 
-  telCinema) 
+  telCinema,
+  ligne1,
+  ligne2) 
 VALUES 
-  ("Paris", "10 rue de la Paix", "Paris", "F-75000", "cinephoriaParis@mail.fr", "+33 1 45 25 70 00"),
-  ("Toulouse", "10 rue Matabiau", "Toulouse", "F-31000", "cinephoriaToulous@email.fr", "+33 5 40 23 10 12"),
-  ("Nantes", "1, avenue des déportés", "Nantes", "F-44000", "cinephoriaNantes@mail.fr", "+33 4 40 23 10 12"),
-  ("Lille", "10 boulevard du Général de Gaulle", "Lille", "F-59000", "cinephoriaLille@mail.fr", "+33 5 40 23 10 12"),
-  ("Bordeaux", "99 rue Sainte-Catherine", "Bordeaux", "F-33000", "cinephoriaBordeaux@mail.fr", "+33 5 40 23 10 12"),
-  ("Liege", "10 rue de Charleroi", "Liege", "B-0100", "cinephoriaLiege@mail.fr", "+33 5 40 23 10 12"),
-  ("Charleroi", "70 rue de Liege", "Charleroi", "B-0200", "cinephoriaCharleroi@mail.fr", "+33 5 40 23 10 12")
+  ("Paris", "10 rue de la Paix", "Paris", "F-75000", "cinephoriaParis@mail.fr", "+33 1 45 25 70 00","Première séance : 13h","7j sur 7"),
+  ("Toulouse", "10 rue Matabiau", "Toulouse", "F-31000", "cinephoriaToulous@email.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Nantes", "1, avenue des déportés", "Nantes", "F-44000", "cinephoriaNantes@mail.fr", "+33 4 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Lille", "10 boulevard du Général de Gaulle", "Lille", "F-59000", "cinephoriaLille@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Bordeaux", "99 rue Sainte-Catherine", "Bordeaux", "F-33000", "cinephoriaBordeaux@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Liege", "10 rue de Charleroi", "Liege", "B-0100", "cinephoriaLiege@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Charleroi", "70 rue de Liege", "Charleroi", "B-0200", "cinephoriaCharleroi@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7")
   ;
-  
   
 INSERT INTO Compte
   (email, 
