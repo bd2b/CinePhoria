@@ -131,6 +131,27 @@ FROM (
     INNER JOIN Film ON Seance.FilmId = Film.id
 ) AS SubQuery
 GROUP BY FilmTitre, Jour;
+CREATE VIEW `ViewFilmsSortiesDeLaSemaine` AS
+ SELECT 
+        `film`.`titleFilm` AS `titleFilm`,
+        `film`.`filmPitch` AS `filmPitch`,
+        `film`.`duration` AS `duration`,
+        `film`.`genreArray` AS `genreArray`,
+        `film`.`filmDescription` AS `filmDescription`,
+        `film`.`filmAuthor` AS `filmAuthor`,
+        `film`.`filmDistribution` AS `filmDistribution`,
+        `film`.`dateSortieCinePhoria` AS `dateSortieCinePhoria`,
+        `film`.`note` AS `note`,
+        `film`.`isCoupDeCoeur` AS `isCoupDeCoeur`,
+        `film`.`categorySeeing` AS `categorySeeing`,
+        `film`.`linkBO` AS `linkBO`,
+        `film`.`imageFilm128` AS `imageFilm128`,
+        `film`.`imageFilm1024` AS `imageFilm1024`
+        
+    FROM
+        film
+    WHERE
+        (`film`.`dateSortieCinePhoria` = (CURDATE() - INTERVAL (((WEEKDAY(CURDATE()) - 2) + 7) % 7) DAY));
 CREATE VIEW ViewFilmsSortiesRecentes AS
 SELECT
   Seance.id AS seanceId , 

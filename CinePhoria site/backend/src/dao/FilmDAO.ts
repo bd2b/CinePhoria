@@ -28,6 +28,20 @@ export class FilmDAO {
     return data ? new Film(data) : null;
   }
 
+  static async findSortiesDeLaSemaine(): Promise<Film[]> {
+  
+    const connection = await mysql.createConnection(dbConfig);
+    console.log('Exécution de la requête : SELECT * FROM viewfilmssortiesdelasemaine');
+    const [rows] = await connection.execute('SELECT * FROM viewfilmssortiesdelasemaine');
+    console.log(rows);
+    await connection.end();
+
+    // On convertit chaque record en Film
+    return (rows as any[]).map(row => new Film(row));
+   
+  }
+
+
   // Autres méthodes CRUD...
 }
 
