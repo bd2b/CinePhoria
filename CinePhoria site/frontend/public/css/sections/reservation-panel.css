@@ -1,0 +1,482 @@
+/* --------------------- COLONNE 3 Panneau de réservation */
+
+.reservation__panel {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap ;
+    overflow-y:scroll;
+    width: 100%;
+    
+    text-align: center; /* Pour centrer le panel dans son parent */
+    background: rgb(var(--secondary-color)); /* Couleur de fond claire, à ajuster */
+    padding: 20px;
+    border-radius: 8px;
+    margin: 10px 10px 20px 0px;
+    
+    
+}
+/* --------------------- CHOIX DE LA SEANCE */
+/* Conteneur de la barre de navigation (tabs) */
+
+.panel__choix {
+display: none;
+}
+.panel__tabs {
+    display: flex;
+    align-items: end;
+    gap: 2px;
+    background: rgb(var(--secondary-color));
+    border-radius: 8px 8px 0px 0px;
+    overflow: auto;
+    padding: 0px;
+    min-height: 40px;
+    width: 100%;
+}
+
+/* Style de base pour tous les onglets (p) */
+.tabs__tab-p {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 2px;
+    border-radius: 4px;
+    
+    font-size: 14px;
+    color: rgb(var(--secondary-color));
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+    border-radius: 8px 8px 0px 0px;
+    
+}
+
+/* Onglets de jour non sélectionnés */
+.tabs__tab-day-p {
+    background: #3a4154; /* Couleur légèrement différente pour les jours */
+    opacity: 0.8;
+}
+
+/* Onglet du jour sélectionné */
+.tabs__tab-day-p.tabs__tab-day-selected-p {
+    background: rgb(var(--ternary-color),0.5); /* Fond clair pour mettre en évidence */
+    color: #000000;      /* Texte sombre pour contraster */
+    font-weight: bold;
+    opacity: 1;
+    
+    border-top: 1px solid rgb(var(--primary-color), 0.5); 
+    border-left: 1px solid rgb(var(--primary-color), 0.5); 
+    border-right: 1px solid rgb(var(--primary-color), 0.5); 
+}
+
+/* Onglets de navigation "Prec" et "Suiv" */
+.tabs__tab-nav-p {
+    background: #3a4154; 
+    font-weight: bold;
+}
+
+/* Effet au survol */
+.tabs__tab-p:hover {
+    opacity: 1;
+}
+
+.panel__seances {
+    display:flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 30px;
+    padding: 20px;
+    height: auto;
+    justify-content: center;
+    border-bottom: 1px solid rgb(var(--primary-color), 0.1); 
+    border-left: 1px solid rgb(var(--primary-color), 0.1); 
+    border-right: 1px solid rgb(var(--primary-color), 0.1);
+    background: rgb(var(--ternary-color),0.5);
+}
+
+.seances__cardseance {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    padding: 7px;
+    
+    justify-content: space-around;
+    width: 165px;
+    height: 165px;
+    background: linear-gradient(180deg, #FFFFFF 0%, #E4E2E2 100%);
+    border: 2px solid rgb(var(--primary-color) , 0.2);
+    border-radius: 20px;
+}
+
+.seances__cardseance:hover {
+    
+    background: linear-gradient(180deg, #E4E2E2 0%, #FFFFFF 100%);
+    border: 2px solid #F2F2F2;
+    border-radius: 20px;
+}
+
+
+[class*="cardseance__"] {
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 1;
+}
+
+
+/* Horaire */
+.cardseance__horaire {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+    gap: 5px;
+
+}
+
+.horaire_hour {
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+    display: flex;
+    align-items: center;
+}
+
+.horaire__hour-begin-p {
+    font-family: var(--digit);
+    font-size: 32px;
+    font-style: bold;
+    font-weight: 400;
+    line-height: 34px;
+}
+
+.horaire__hour-end-p {
+    font-family: var(--digit);
+    font-size: 12px;
+    line-height: 14px;
+}
+
+.cardseance__datesalle {
+
+    
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0px;
+    gap: 10px;
+    width: 100%;
+    height: 30px;
+
+}
+
+.datesalle__date {
+    flex: none;
+    align-self: stretch;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0px;
+
+    margin: 0 auto;
+    width: 40px;
+    height: 40px;
+}
+.date__month-p {
+    flex: none;
+    flex-grow: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    padding: 2px 0px;
+
+    width: 40px;
+    height: 12px;
+
+    background: rgb(var(--accent-color));
+    border-radius: 8px 8px 0px 0px;
+
+    font-size: 10px;
+    line-height: 12px;
+    color: #F8F8FF;
+}
+
+.date__day-p {
+    flex: none;
+    flex-grow: 0;
+
+    box-sizing: border-box;
+
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 5px;
+    gap: 10px;
+    display: flex;
+
+    height: 28px;
+    width: 40px;
+
+    border: 0.5px solid #C0C0C0;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 0px 0px 8px 8px;
+    
+    font-size: 24px;
+    line-height: 28px;
+    text-align: center;
+    letter-spacing: 0.02em;
+    color: rgb(var(--primary-color));
+    background: #F8F8FF;
+
+}
+
+.datesalle__salle-p {
+    /* NomSalle */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+justify-content: center;
+padding: 0px 8px;
+gap: 8px;
+
+margin: 0 auto;
+width: 64px;
+height: 40px;
+color: rgb(var(--secondary-color));
+background: rgb(var(--accent-color));
+border-radius: 12px;
+
+font-size: 16px;
+line-height: 12px;
+text-align: center;
+letter-spacing: 0.02em;
+
+}
+.cardseance__qualitebo {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0px;
+    gap: 10px;
+    width: 100%;
+    height: 30px;
+}
+.qualitebo-qualite-img{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    gap: 10px;
+
+    width: auto;
+    height: 30px;
+
+    
+}
+.qualitebo-bo-p {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    gap: 10px;
+
+    width: 30px;
+    height: auto;
+
+    font-size: 14px;
+    line-height: 19px;
+    color: #F8F8FF;
+
+background: linear-gradient(180deg, #2C3E50 0%, #C0C0C0 100%);
+box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+border-radius: 12px;
+}
+
+.panel__choixseance-button {
+    margin: 20px 10px;
+}
+
+/* --------------------- CHOIX DES TARIFS ET PLACES */
+.panel__reserve {
+    display: block;
+}
+@media (max-width: 768px) {
+    .twocolumns__left {
+        display: none;
+        }
+    .right__caractFilm {
+        flex-direction: column;
+    }
+    
+}
+
+/* RESERVATION PANEL SEANCE */
+
+.panel__reserve {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* desactive le hover du panel choix */
+.seances__cardseance-selected:hover {
+    border: 2px solid rgb(var(--primary-color) , 0.2);
+}
+.seances__cardseance-selected {
+    border: 2px solid rgb(var(--success-color) , 0.8);
+
+}
+
+
+.reserve__form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgb(var(--primary-color) , 0.2);
+    border-radius: 12px;
+    padding: 10px;
+    gap:10px;
+}
+.content-num-td,
+.content__num-pmr {
+    display: flex;
+    gap: 5px;
+}
+
+
+.num__add-button , 
+.num__remove-button {
+    display: flex; /* Active Flexbox */
+    align-items: center; /* Centre verticalement */
+    justify-content: center; /* Centre horizontalement */
+    text-align: center; /* Utile pour s'assurer que le texte est bien aligné */
+    min-width:20px ;
+    text-align:justify;
+    width: 25px;
+    height:25px;
+    border-radius: 20px;
+    padding: 0;
+    margin: O;
+}
+
+/* Table principale */
+.tabtarif__commande-table {
+    width: 100%;
+    margin-top: 10px;
+    font-size: 16px;
+    color: rgb(var(--primary-color));
+}
+
+/* En-tête de la table */
+.tabtarif__commande-table thead th {
+    text-align: left;
+    padding: 10px 15px;
+    background-color: rgb(var(--ternary-color), 0.5); /* Fond clair */
+    border-bottom: 2px solid #dee2e6; /* Bordure inférieure */
+    font-weight: bold;
+    color: #000; /* Couleur de l'en-tête */
+}
+
+/* Cellules du contenu */
+.tabtarif__commande-table tbody td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #dee2e6; /* Ligne séparatrice */
+    border-left: 1px solid #dee2e6; /* Ligne séparatrice */
+    
+    border-right: 1px solid #dee2e6; /* Ligne séparatrice */
+    border-top: 1px solid #dee2e6; /* Ligne séparatrice */
+    vertical-align: middle; /* Alignement vertical au centre */
+    text-align: center; /* Centré horizontalement */
+}
+
+/* Colonnes spécifiques */
+.tabtarif__commande-table .content-id-td {
+    font-weight: bold;
+    text-align: left;
+}
+
+.tabtarif__commande-table .content-tarif-td {
+    text-align: left; /* Alignement à gauche pour les textes */
+}
+
+.tabtarif__commande-table .content-price-td {
+    font-weight: bold;
+    color: #000; /* Texte noir pour le total */
+}
+
+/* Boutons */
+.num__add-button,
+.num__remove-button {
+    background-color: rgb(var(--accent-color) , 0.8);/* Couleur de fond */
+    border: none;
+    border-radius: 50%; /* Rond */
+    width: 30px;
+    height: 30px;
+    color: #000; /* Couleur du texte */
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.num__add-button:hover,
+.num__remove-button:hover {
+    background-color: #e0b85c; /* Couleur au survol */
+}
+
+.num__num-span {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 5px 10px; /* Espacement autour du nombre */
+    font-family: Arial, sans-serif;
+}
+
+/* Ligne de total */
+.tabtarif__commande-table tfoot td {
+    padding: 10px 15px;
+    font-weight: bold;
+    font-size: var(--subheadline-font-size );
+    color: #000;
+    text-align: right; /* Alignement à droite */
+    border-bottom: 1px solid #dee2e6;
+}
+
+.tabtarif__commande-table tfoot td:last-child {
+    color: rgb(var(--primary-color)); /* Couleur spécifique pour le total final */
+    font-size: 18px;
+}
+
+.pmr__content {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 10px;
+}
+
+.commande__mail {
+    display: flex;
+    gap: 10px;
+}
+
+.reserve__actions {
+    display:flex ;
+    align-items: center;
+    justify-items: center;
+}
+
+

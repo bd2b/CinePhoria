@@ -1,0 +1,128 @@
+
+/* masquage des boutons filtre */
+.titre__filter-dropdown-genre {
+    display: none;
+}
+
+.titre__filter-dropdown-complexe {
+    display: none;
+}
+
+
+
+
+/* Container des cards de film pour la reservation */
+.container__filmsreservation {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+
+    max-width: 100%;
+
+    gap: 16px;
+    align-items: flex-start;
+    background-color: rgb(var(--background-color));
+
+    scrollbar-width: thin; /* Style de la scrollbar (Firefox) */
+    -ms-overflow-style: none; /* Supprimer la scrollbar (IE/Edge) */
+
+    padding: 30px 0px 60px 00px;
+    gap: 40px;
+    
+    
+
+    
+}
+/* Parametre de l'animation d'apparition */
+.container__filmsreservation
+ {
+    transform: translateY(20px);
+    opacity: 0;
+    transition: opacity 1s ease-in-out , transform 1s ease-out;
+}
+
+.container__filmsreservation::-webkit-scrollbar {
+    display: none; /* Supprimer la scrollbar (Chrome/Safari) */
+}
+
+.filmsreservation__film {
+    display: flex;
+    padding: 0px 10px;
+    gap: 20px;
+}
+
+
+.film__cardreservation {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    width: 300px;
+    height: auto;
+    background-color: rgb(var(--secondary-color));
+    border-radius: 10px;
+    
+    align-items: center;
+    justify-content: flex-start;
+
+    gap: 20px;
+
+    padding: 0px 20px 10px 20px;
+}
+.cardreservation__image {
+    width: 80%;
+    height: auto;
+    
+    border-radius: 5px 5px 0 0;
+    padding:  0px  60px 0px 60px  ;
+    
+}
+.cardreservation__image-img {
+    width: 100%;
+    height: auto;
+}
+
+.cardreservation__description {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+}
+
+.description__evaluation {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+}
+
+.evaluation__coupdecoeur {
+    display: flex;
+    
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    gap: 5px;
+    background: rgb(var(--background-color));
+    border-radius: 8px;
+    height: 30px;
+    font-size: var( --caption2-font-size);
+}
+
+.evaluation__coupdecoeur-img {
+    width: 24px;
+    height: 24px;
+}
+
+.evaluation__note {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    gap: 2px;
+    background: rgb(var(--background-color));
+    border-radius: 8px;
+    height: 30px;
+    font-size: var( --caption2-font-size);
+}
+
