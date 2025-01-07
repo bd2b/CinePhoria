@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="css/sections/main-reservation.css">
     <link rel="stylesheet" href="css/sections/reservation-panel.css">
 
+    <script src="dist/ViewReservation.js" defer></script>
+    <script src="dist/ViewFooter.js" defer></script>
+    <script src="dist/main.js" defer></script>
 
     <title>CinePhoria</title>
 </head>
@@ -57,14 +60,14 @@
                     <div class="title__filter-dropdown">
                         <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">Choisissez votre
                             complexe <span class="chevron">▼</span></button><!-- Boutons de sélection-->
-                        <div class="title__filter-button-drowdown-content">
-                            <a href="#">Paris</a>
-                            <a href="#">Bordeaux</a>
-                            <a href="#">Nantes</a>
-                            <a href="#">Lille</a>
-                            <a href="#">Toulouse</a>
-                            <a href="#">Charleroi</a>
-                            <a href="#">Liège</a>
+                        <div class="title__filter-button-drowdown-content title__filter-button-drowdown-content-complexe">
+                            <a href="#" data-cinema="Paris">Paris</a>
+                            <a href="#" data-cinema="Bordeaux">Bordeaux</a>
+                            <a href="#" data-cinema="Nantes">Nantes</a>
+                            <a href="#" data-cinema="Lille">Lille</a>
+                            <a href="#" data-cinema="Toulouse">Toulouse</a>
+                            <a href="#" data-cinema="Charleroi">Charleroi</a>
+                            <a href="#" data-cinema="Liège">Liège</a>
                         </div>
                     </div>
                 </div>
@@ -352,144 +355,27 @@
         </div>
         </div>
     </main>
-    <footer class="footer">
-        <div class="footer__container">
-            <div class="container__legal">
-                <a href="#" class="container__legal-a">Mentions légales</a>
-                <a href="#" class="container__legal-a">Politique de confidentialité</a>
-                <a href="#" class="container__legal-a">&copy; 2024 - Tous droits réservés</a>
-            </div>
-
-            <div class="container__sites">
-                <div class="container__site"> <!-- Chaque site  -->
-                    <div class="site__title">
-                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
-                        <h1 class="site__title-h1">Paris</h1>
-                    </div>
-                    <div class="site__adresse">
-                        <p class="site_adresse-p">13 rue de la paix <br> 75000 Paris</p>
-                    </div>
-                    <div class="site__telephone">
-                        <img src="assets/tel.svg" class="site__telephone-img">
-                        <p class="site__telephone-p">01 02 03 04 05</p>
-                    </div>
-                    <div class="site__seance">
-                        <p class="site__seance-p">Première séance : 13h</p>
-                        <p class="site__seance-p"> 7j sur 7</p>
-                    </div>
-                </div>
-
-                <div class="container__site"> <!-- Chaque site  -->
-                    <div class="site__title">
-                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
-                        <h1 class="site__title-h1">Toulouse</h1>
-                    </div>
-                    <div class="site__adresse">
-                        <p class="site_adresse-p">10 rue Matabiau <br> 31000 Paris</p>
-                    </div>
-                    <div class="site__telephone">
-                        <img src="assets/tel.svg" class="site__telephone-img">
-                        <p class="site__telephone-p">01 02 03 04 05</p>
-                    </div>
-                    <div class="site__seance">
-                        <p class="site__seance-p">Première séance : 14h</p>
-                        <p class="site__seance-p"> 7j sur 7</p>
-                    </div>
-                </div>
-
-                <div class="container__site"> <!-- Chaque site  -->
-                    <div class="site__title">
-                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
-                        <h1 class="site__title-h1">Bordeaux</h1>
-                    </div>
-                    <div class="site__adresse">
-                        <p class="site_adresse-p">9 rue Sainte-Catherine<br> 75000 Paris</p>
-                    </div>
-                    <div class="site__telephone">
-                        <img src="assets/tel.svg" class="site__telephone-img">
-                        <p class="site__telephone-p">01 02 03 04 05</p>
-                    </div>
-                    <div class="site__seance">
-                        <p class="site__seance-p">Première séance : 13h</p>
-                        <p class="site__seance-p"> 7j sur 7</p>
-                    </div>
-                </div>
-
-                <div class="container__site"> <!-- Chaque site  -->
-                    <div class="site__title">
-                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
-                        <h1 class="site__title-h1">Nantes</h1>
-                    </div>
-                    <div class="site__adresse">
-                        <p class="site_adresse-p">25 avenue des déportés<br>44000 Nantes</p>
-                    </div>
-                    <div class="site__telephone">
-                        <img src="assets/tel.svg" class="site__telephone-img">
-                        <p class="site__telephone-p">01 02 03 04 05</p>
-                    </div>
-                    <div class="site__seance">
-                        <p class="site__seance-p">Première séance : 13h</p>
-                        <p class="site__seance-p"> 7j sur 7</p>
-                    </div>
-                </div>
-
-                <div class="container__site"> <!-- Chaque site  -->
-                    <div class="site__title">
-                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
-                        <h1 class="site__title-h1">Lille</h1>
-                    </div>
-                    <div class="site__adresse">
-                        <p class="site_adresse-p">13 rue de la paix <br> 59000 Lille</p>
-                    </div>
-                    <div class="site__telephone">
-                        <img src="assets/tel.svg" class="site__telephone-img">
-                        <p class="site__telephone-p">01 02 03 04 05</p>
-                    </div>
-                    <div class="site__seance">
-                        <p class="site__seance-p">Première séance : 13h</p>
-                        <p class="site__seance-p"> 7j sur 7</p>
-                    </div>
-                </div>
-
-                <div class="container__site"> <!-- Chaque site  -->
-                    <div class="site__title">
-                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
-                        <h1 class="site__title-h1">Charleroi</h1>
-                    </div>
-                    <div class="site__adresse">
-                        <p class="site_adresse-p">13 rue de la paix <br> 75000 Paris</p>
-                    </div>
-                    <div class="site__telephone">
-                        <img src="assets/tel.svg" class="site__telephone-img">
-                        <p class="site__telephone-p">01 02 03 04 05</p>
-                    </div>
-                    <div class="site__seance">
-                        <p class="site__seance-p">Première séance : 13h</p>
-                        <p class="site__seance-p"> 7j sur 7</p>
-                    </div>
-                </div>
-
-                <div class="container__site"> <!-- Chaque site  -->
-                    <div class="site__title">
-                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
-                        <h1 class="site__title-h1">Liège</h1>
-                    </div>
-                    <div class="site__adresse">
-                        <p class="site_adresse-p">13 rue de la paix <br> 75000 Paris</p>
-                    </div>
-                    <div class="site__telephone">
-                        <img src="assets/tel.svg" class="site__telephone-img">
-                        <p class="site__telephone-p">01 02 03 04 05</p>
-                    </div>
-                    <div class="site__seance">
-                        <p class="site__seance-p">Première séance : 13h</p>
-                        <p class="site__seance-p"> 7j sur 7</p>
-                    </div>
-                </div>
+    <footer class="footer" id="footer">
+    </footer>
+<!-- Modale -->
+<div id="modal" class="modal">
+    <div class="modal-content">
+        <h2>Veuillez choisir votre complexe</h2>
+        <div class="title__filter-dropdown">
+            <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">Choisissez votre
+                complexe <span class="chevron">▼</span></button>
+                <div class="title__filter-button-drowdown-content title__filter-button-drowdown-content-complexe">
+                <a href="#" data-cinema="Paris">Paris</a>
+                <a href="#" data-cinema="Bordeaux">Bordeaux</a>
+                <a href="#" data-cinema="Nantes">Nantes</a>
+                <a href="#" data-cinema="Lille">Lille</a>
+                <a href="#" data-cinema="Toulouse">Toulouse</a>
+                <a href="#" data-cinema="Charleroi">Charleroi</a>
+                <a href="#" data-cinema="Liège">Liège</a>
             </div>
         </div>
-    </footer>
-    <script src="js/main.js"></script>
+    </div>
+</div>
 </body>
 
 </html>
