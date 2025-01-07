@@ -19,9 +19,10 @@ interface Film {
 
   }
 
-  async function chargerFilms() {
+
+  async function chargerFilmsSortiesSemaine() {
     try {
-      const response = await fetch('http://localhost:3000/api/films');
+      const response = await fetch('http://localhost:3000/api/films/sorties');
       const films: Film[] = await response.json();
   
       const container = document.getElementById('films-container');
@@ -63,4 +64,4 @@ interface Film {
     }
   }
   
-  document.addEventListener('DOMContentLoaded', chargerFilms);
+  document.addEventListener('DOMContentLoaded', chargerFilmsSortiesSemaine);
