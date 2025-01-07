@@ -10,12 +10,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 function chargerCinemaSites() {
     return __awaiter(this, void 0, void 0, function* () {
+        const footerElement = document.getElementById('footer');
+        if (!footerElement)
+            return;
+        footerElement.innerHTML = `
+  <div class="footer__container">
+      <div class="container__legal">
+          <a href="#" class="container__legal-a">Mentions légales</a>
+              <a href="#" class="container__legal-a">Politique de confidentialité</a>
+              <a href="#" class="container__legal-a">&copy; 2024 - Tous droits réservés</a>
+      </div>
+      
+      <div class="container__sites" id="container__sites">  
+      </div>
+  </div>
+  `;
+        footerElement.offsetHeight; // Force un reflow
         try {
             const response = yield fetch('http://localhost:3000/api/cinemas');
             const cinemas = yield response.json();
             const container = document.getElementById('container__sites');
-            if (!container)
+            if (!container) {
+                console.log("pas de container__sites");
                 return;
+            }
+            ;
             container.innerHTML = '';
             cinemas.forEach((cinema) => {
                 const cinemaElement = document.createElement('div');
@@ -42,7 +61,7 @@ function chargerCinemaSites() {
             });
         }
         catch (error) {
-            console.error('Erreur lors du chargement des films', error);
+            console.error('Erreur lors du chargement des cinemas', error);
         }
     });
 }
