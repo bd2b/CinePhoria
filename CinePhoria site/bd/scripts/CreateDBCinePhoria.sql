@@ -5,6 +5,8 @@ CREATE TABLE Cinema (
   postalcode  varchar(100) NOT NULL comment 'AU format incluant le pays, ex : F-75010', 
   emailCinema varchar(100) NOT NULL, 
   telCinema   varchar(255) NOT NULL, 
+  ligne1      varchar(100) NOT NULL, 
+  ligne2      varchar(100) NOT NULL, 
   PRIMARY KEY (nameCinema));
 CREATE TABLE Compte (
   email             varchar(100) NOT NULL, 
