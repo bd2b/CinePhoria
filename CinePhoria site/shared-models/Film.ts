@@ -22,7 +22,7 @@ export class Film {
 export interface FilmInterface {
        id: string;
        titleFilm: string;
-       filmPitch: string
+       filmPitch: string;
    
        genreArray?: string;
        duration?: string;

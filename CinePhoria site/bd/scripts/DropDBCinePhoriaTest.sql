@@ -21,6 +21,7 @@ ALTER TABLE Connexions DROP FOREIGN KEY `se connecte`;
 ALTER TABLE Employe_Cinema DROP FOREIGN KEY `travail au`;
 DROP VIEW IF EXISTS ViewFilmsSortiesRecentes;
 DROP VIEW IF EXISTS ViewFilmsSortiesDeLaSemaine;
+DROP VIEW IF EXISTS ViewFilmsSeancesSalle;
 DROP VIEW IF EXISTS ViewFilmReservationDate;
 DROP TABLE IF EXISTS Cinema;
 DROP TABLE IF EXISTS Compte;
