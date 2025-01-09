@@ -1,7 +1,6 @@
-export class Cinema {
+export class Seance {
     constructor(data) {
         Object.assign(this, data);
     }
 }
-;
 ;
