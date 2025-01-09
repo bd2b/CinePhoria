@@ -17,15 +17,15 @@ export class SeanceDAO {
    
   }
 
-  static async findByCinemas(nameCinemaList: string): Promise<Seance | null> {
+  static async findByCinemas(nameCinemaList: string): Promise<Seance[]> {
     const connection = await mysql.createConnection(dbConfig);
     const requete = `SELECT * FROM ViewFilmsSeancesSalle WHERE nameCinema in (${nameCinemaList})`;
     console.log(`Exécution de la requête : ${requete}`);
+    
     const [rows] = await connection.execute(requete);
     await connection.end();
 
-    const data = (rows as any[])[0];
-    return data ? new Seance(data) : null;
-
+    // Map des lignes pour les convertir en instances de Seance
+    return (rows as any[]).map((row) => new Seance(row));
   }
 }

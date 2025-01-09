@@ -1,42 +1,45 @@
 export class Seance {
-    seanceId!: string; 
-    filmId?: string;
-    salleId?: string; 
-    seancedateJour?: string; 
-    seancehourBeginHHSMM?: string; 
-    seancehourEndHHSMM?: string; 
-    seancequalite?: string; 
-    seancebo?: string;
-    seancenumFreeSeats?: string;
-    seancenumFreePMR?: string;
-    seancealertAvailibility?: string;
-    filmtitleFilm?: string;
-    filmfilmPitch?: string;
-    filmduration?: string; 
-    filmgenreArray?: string;
-    filmfilmDescription?: string; 
-    filmfilmAuthor?: string; 
-    filmfilmDistribution?: string;
-    filmdateSortieCinePhoria?: string;
-    filmnote?: string; 
-    filmisCoupDeCoeur?: string;
-    filmcategorySeeing?: string;    
-    filmlinkBO?: string; 
-    filmimageFilm128?: string;
-    filmimageFilm1024?: string;
-    sallenameSalle?: string; 
-    sallenameCinema?: string; 
-    sallecapacity?: string; 
-    sallenumPMR?: string;
-    cinemaadresse?: string; 
-    cinemaville?: string; 
-    cinemapostalcode?: string; 
-    cinemaemailCinema?: string; 
-    cinematelCinema?: string;  
+  seanceId!: string; 
+  filmId?: string;
+  salleId?: string; 
+  dateJour?: string; 
+  hourBeginHHSMM?: string; 
+  hourEndHHSMM?: string; 
+  qualite?: string; 
+  bo?: string;
+  numFreeSeats?: string;
+  numFreePMR?: string;
+  alertAvailibility?: string;
+  titleFilm?: string;
+  filmPitch?: string;
+  duration?: string; 
+  genreArray?: string;
+  filmDescription?: string; 
+  filmAuthor?: string; 
+  filmDistribution?: string;
+  dateSortieCinePhoria?: string;
+  note?: string; 
+  isCoupDeCoeur?: string;
+  categorySeeing?: string;    
+  linkBO?: string; 
+  imageFilm128?: string;
+  imageFilm1024?: string;
+  nameSalle?: string; 
+  nameCinema?: string; 
+  capacity?: string; 
+  numPMR?: string;
+  adresse?: string; 
+  ville?: string; 
+  postalcode?: string; 
+  emailCinema?: string; 
+  telCinema?: string;  
 
  constructor(data: Partial<Seance>) {
     Object.assign(this, data);
   }
+//   static isValid(data: any): boolean {
+//     return typeof data.seanceId === 'string' && typeof data.filmtitleFilm === 'string';
+// }
 };
 
 export interface SeanceInterface {
@@ -74,5 +77,4 @@ export interface SeanceInterface {
  cinemapostalcode?: string; 
  cinemaemailCinema?: string; 
  cinematelCinema?: string;
-
 }

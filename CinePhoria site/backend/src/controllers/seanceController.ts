@@ -23,7 +23,7 @@ export class SeanceController {
       }
   
       const seances = await SeanceDAO.findByCinemas(cinemasList);
-      if (!seances) {
+      if (seances.length === 0) {
         return res.status(404).json({ message: `Seances non trouvées pour ${cinemasList}` });
       }
   
@@ -31,7 +31,7 @@ export class SeanceController {
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
-  };
+  }
 
   
 }
