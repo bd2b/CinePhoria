@@ -4,24 +4,33 @@
  * Aux chargements on recupère la valeur du cookie
  * On peut changer cette valeur via le dropdown button droit sur le titre
  */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+// Fonction pour obtenir la valeur d'un cookie
+function getCookie(name) {
+    var _a;
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2)
+        return (_a = parts.pop()) === null || _a === void 0 ? void 0 : _a.split(';').shift();
+}
+// Fonction pour définir un cookie
+function setCookie(name, value, days) {
+    const date = new Date();
+    date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+    document.cookie = `${name}=${value}; path=/; expires=${date.toUTCString()}`;
+}
 document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById('modal');
     const dropdownButtons = document.querySelectorAll('.titre__filter-dropdown-complexe');
     const dropdownContents = document.querySelectorAll('.title__filter-button-drowdown-content-complexe');
-    // Fonction pour obtenir la valeur d'un cookie
-    function getCookie(name) {
-        var _a;
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2)
-            return (_a = parts.pop()) === null || _a === void 0 ? void 0 : _a.split(';').shift();
-    }
-    // Fonction pour définir un cookie
-    function setCookie(name, value, days) {
-        const date = new Date();
-        date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-        document.cookie = `${name}=${value}; path=/; expires=${date.toUTCString()}`;
-    }
     // Mettre à jour l'affichage du bouton du dropdown
     function updateDropdownDisplay(selectedCinema) {
         dropdownButtons.forEach((button) => {
@@ -61,3 +70,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+document.addEventListener('DOMContentLoaded', () => __awaiter(void 0, void 0, void 0, function* () {
+    const selectedCinema = getCookie('selectedCinema'); // déjà géré
+    if (!selectedCinema)
+        return;
+    try {
+        const response = yield fetch(`http://localhost:3000/api/reservations?cinema=${selectedCinema}`);
+        const seances = yield response.json();
+        // Filtrer/trier pour trouver le film le plus récent + meilleure note
+        const filmCandidat = trouverFilmCandidat(seances);
+        afficherListeFilms(seances, filmCandidat);
+        afficherSeancesDuJour(seances, filmCandidat);
+    }
+    catch (err) {
+        console.error('Erreur de chargement des séances', err);
+    }
+}));

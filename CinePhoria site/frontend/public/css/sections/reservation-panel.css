@@ -20,7 +20,7 @@
 /* Conteneur de la barre de navigation (tabs) */
 
 .panel__choix {
-display: none;
+display: block;
 }
 .panel__tabs {
     display: flex;

@@ -133,6 +133,51 @@ FROM (
     INNER JOIN Film ON Seance.FilmId = Film.id
 ) AS SubQuery
 GROUP BY FilmTitre, Jour;
+CREATE VIEW ViewFilmsSeancesSalle AS
+
+SELECT
+  Seance.id AS seanceId , 
+  Seance.Filmid AS filmId,
+  Seance.Salleid AS salleId, 
+  Seance.dateJour, 
+  Seance.hourBeginHHSMM, 
+  Seance.hourEndHHSMM, 
+  Seance.qualite, 
+  Seance.bo,
+  Seance.numFreeSeats,
+  Seance.numFreePMR,
+  Seance.alertAvailibility,
+  Film.titleFilm,
+  Film.filmPitch,
+  Film.duration, 
+  Film.genreArray,
+  Film.filmDescription, 
+  Film.filmAuthor, 
+  Film.filmDistribution,
+  Film.dateSortieCinePhoria,
+  Film.note, 
+  Film.isCoupDeCoeur,
+  Film.categorySeeing,    
+  Film.linkBO, 
+  Film.imageFilm128,
+  Film.imageFilm1024,
+  Salle.nameSalle, 
+  Salle.nameCinema, 
+  Salle.capacity, 
+  Salle.numPMR,
+  Cinema.adresse, 
+  Cinema.ville, 
+  Cinema.postalcode, 
+  Cinema.emailCinema, 
+  Cinema.telCinema 
+  
+FROM Seance
+INNER JOIN Film ON Seance.Filmid = Film.id
+INNER JOIN Salle ON Seance.Salleid = Salle.id
+INNER JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
+WHERE
+       ( Seance.dateJour  >= CURRENT_DATE)
+;
 CREATE VIEW `ViewFilmsSortiesDeLaSemaine` AS
  SELECT 
         `film`.`titleFilm` AS `titleFilm`,

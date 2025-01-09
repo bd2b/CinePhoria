@@ -5,8 +5,10 @@
 // Charger les variables d'environnement depuis le fichier .env
 // dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+import logger from '../config/configLog'
+
 export const currentEnv = process.env.NODE_ENV || 'development';
-console.log(`Environnement actif : '${currentEnv}'`);
+logger.info(`Environnement actif : '${currentEnv}'`);
 
 // Exporter la configuration de la base de données
 export const dbConfig = {
@@ -15,17 +17,34 @@ export const dbConfig = {
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'mydatabase'
 };
-console.log('Configuration DB chargée :', dbConfig);
+
+// copie de l'objet pour masquer la valeur de "password"
+const maskeddbConfig = {
+  ...dbConfig,
+  password: "*".repeat(dbConfig.password.length), // Remplace la valeur par des étoiles
+};
+logger.info('Configuration DB chargée :' + JSON.stringify(maskeddbConfig));
+
+
 
 export const sessionTK = {
     secret: process.env.SESSION_SECRET || 'secretsession',
     resave: false,
     saveUninitialized: false,
 }
-console.log('Configuration secret Session :', sessionTK);
+// copie de l'objet pour masquer la valeur de "secret"
+const maskedSessionTK = {
+  ...sessionTK,
+  secret: "*".repeat(sessionTK.secret.length), // Remplace la valeur par des étoiles
+};
+logger.info('Configuration secret Session :' + JSON.stringify(maskedSessionTK));
+
 
 export const jwtTK = process.env.JWT_SECRET || 'secretjws';
-console.log('Configuration secret JWS :', jwtTK);
+// copie de l'objet pour masquer la valeur
+const masquedjwtTK = "*".repeat(jwtTK.length); // Remplace la valeur par des étoiles
+logger.info('Configuration secret JWS :'+ masquedjwtTK);
+
 
 
 // Autres configs (port, secrets JWT, etc.)
