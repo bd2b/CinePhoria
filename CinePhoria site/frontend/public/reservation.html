@@ -8,9 +8,10 @@
     <link rel="stylesheet" href="css/sections/main-reservation.css">
     <link rel="stylesheet" href="css/sections/reservation-panel.css">
 
-    <script type="module" src="dist/ViewReservation.js" defer></script>
+    
     <script type="module" src="dist/ViewFooter.js" defer></script>
     <script type="module" src="dist/main.js" defer></script>
+    <script type="module" src="dist/ViewReservation.js" defer></script>
 
     <title>CinePhoria</title>
 </head>
@@ -46,7 +47,7 @@
         <div class="main__container">
             <div class="container__title"> <!--- Titre -->
                 <div class="title__left">
-                    <h1 class="title__left-h1">Réservez au CinéPhoria</h1>
+                    <h1 class="title__left-h1" id="titleLeft">Réservez au CinéPhoria</h1>
                 </div>
                 <div class="title__filters title__filters-visiteur">
                     <div class="title__filter-dropdown titre__filter-dropdown-genre">
@@ -60,7 +61,8 @@
                     <div class="title__filter-dropdown">
                         <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">Choisissez votre
                             complexe <span class="chevron">▼</span></button><!-- Boutons de sélection-->
-                        <div class="title__filter-button-drowdown-content title__filter-button-drowdown-content-complexe">
+                        <div
+                            class="title__filter-button-drowdown-content title__filter-button-drowdown-content-complexe">
                             <a href="#" data-cinema="Paris">Paris</a>
                             <a href="#" data-cinema="Bordeaux">Bordeaux</a>
                             <a href="#" data-cinema="Nantes">Nantes</a>
@@ -336,10 +338,10 @@
                                         </div>
                                     </div>
                                     <div class="commande__mail">
-                                    <p class="commande__mail">Pour accéder à vos billets, renseignez votre email</p>
-                                    <label for="email"><span style="color: red;">*</span></label>
-                                    <input type="email" id="commande__mail-input" name="commande__mail-input" required
-                                        class="commande__mail-input">
+                                        <p class="commande__mail">Pour accéder à vos billets, renseignez votre email</p>
+                                        <label for="email"><span style="color: red;">*</span></label>
+                                        <input type="email" id="commande__mail-input" name="commande__mail-input"
+                                            required class="commande__mail-input">
                                     </div>
                                 </div>
                             </form>
@@ -357,25 +359,36 @@
     </main>
     <footer class="footer" id="footer">
     </footer>
-<!-- Modale -->
-<div id="modal" class="modal">
-    <div class="modal-content">
-        <h2>Veuillez choisir votre complexe</h2>
-        <div class="title__filter-dropdown">
-            <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">Choisissez votre
-                complexe <span class="chevron">▼</span></button>
+    <!-- Modale -->
+    <div id="modal" class="modalcinema">
+        <div class="modalcinema-content">
+            <h2>Veuillez choisir votre complexe</h2>
+            <div class="title__filter-dropdown">
+                <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">Choisissez votre
+                    complexe <span class="chevron">▼</span></button>
                 <div class="title__filter-button-drowdown-content title__filter-button-drowdown-content-complexe">
-                <a href="#" data-cinema="Paris">Paris</a>
-                <a href="#" data-cinema="Bordeaux">Bordeaux</a>
-                <a href="#" data-cinema="Nantes">Nantes</a>
-                <a href="#" data-cinema="Lille">Lille</a>
-                <a href="#" data-cinema="Toulouse">Toulouse</a>
-                <a href="#" data-cinema="Charleroi">Charleroi</a>
-                <a href="#" data-cinema="Liège">Liège</a>
+                    <a href="#" data-cinema="Paris">Paris</a>
+                    <a href="#" data-cinema="Bordeaux">Bordeaux</a>
+                    <a href="#" data-cinema="Nantes">Nantes</a>
+                    <a href="#" data-cinema="Lille">Lille</a>
+                    <a href="#" data-cinema="Toulouse">Toulouse</a>
+                    <a href="#" data-cinema="Charleroi">Charleroi</a>
+                    <a href="#" data-cinema="Liège">Liège</a>
+                </div>
             </div>
         </div>
     </div>
-</div>
+    <!-- Modal -->
+    <div id="videoModal" class="modalyoutube">
+        <div class="modalyoutube-content">
+            <span class="closeyoutube">&times;</span>
+            <!-- Vidéo YouTube -->
+            <iframe id="youtubeVideo" width="560" height="315" src="" title="YouTube video player" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+            </iframe>
+        </div>
+    </div>
 </body>
 
 </html>

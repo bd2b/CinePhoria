@@ -5,6 +5,7 @@ export class Film {
     genreArray?: string;
     duration?: string;
     linkBO?: string;
+    dateSortieCinePhoria?: string;
     categorySeeing?: string;
     note?: number;
     isCoupDeCoeur?: boolean;
@@ -27,6 +28,7 @@ export interface FilmInterface {
        genreArray?: string;
        duration?: string;
        linkBO?: string;
+       dateSortieCinePhoria?: string;
        categorySeeing?: string;
    
        note: number;

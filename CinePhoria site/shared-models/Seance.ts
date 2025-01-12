@@ -37,9 +37,6 @@ export class Seance {
  constructor(data: Partial<Seance>) {
     Object.assign(this, data);
   }
-//   static isValid(data: any): boolean {
-//     return typeof data.seanceId === 'string' && typeof data.filmtitleFilm === 'string';
-// }
 };
 
 export interface SeanceInterface {
