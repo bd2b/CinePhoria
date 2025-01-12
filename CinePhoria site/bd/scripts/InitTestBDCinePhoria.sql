@@ -95,6 +95,34 @@ DECLARE UUIDTarifQualite10 VARCHAR(100) DEFAULT UUID();
 DECLARE UUIDTarifQualite11 VARCHAR(100) DEFAULT UUID();
 DECLARE UUIDTarifQualite12 VARCHAR(100) DEFAULT UUID();
 
+/***********************************************************************
+   *  D) Déclarations nécessaires pour sp_generate_seances
+   ***********************************************************************/
+  DECLARE v_start DATE;
+  DECLARE v_end DATE;
+  DECLARE v_day DATE;
+
+  DECLARE v_day_offset INT;     
+  DECLARE v_week_index INT;     
+  DECLARE v_film_idx INT;       
+  DECLARE v_time_set INT;       
+
+  DECLARE v_cinema_counter INT; 
+  DECLARE v_cinema_code VARCHAR(1);
+
+  DECLARE v_bo VARCHAR(2);      
+  DECLARE v_qualite VARCHAR(4); 
+
+  DECLARE v_salle_counter INT;  
+  DECLARE v_salle_varName VARCHAR(50);  -- ex: "UUIDSalle1P"
+  DECLARE v_salle_realId VARCHAR(100);  -- ex: <valeur de la variable>
+
+  DECLARE v_numFreeSeats INT;   
+  DECLARE v_numFreePMR INT;
+
+  DECLARE v_film_varName VARCHAR(50);   -- ex: "UUIDFilm3"
+  DECLARE v_film_realId VARCHAR(100);   -- ex: <valeur>
+
 INSERT INTO Cinema
   (nameCinema, 
   adresse, 
@@ -201,11 +229,11 @@ VALUES
   "Bond a quitté les services secrets et coule des jours heureux en Jamaïque. Mais sa tranquillité est de courte durée car son vieil ami Felix Leiter de la CIA débarque pour solliciter son aide : il s'agit de sauver un scientifique qui vient d'être kidnappé. Mais la mission se révèle bien plus dangereuse que prévu et Bond se retrouve aux trousses d'un mystérieux ennemi détenant de redoutables armes technologiques…",
   "De Cary Joji Fukunaga",
   "Avec Daniel Craig, Léa Seydoux, Rami Malek",
-  "2025-01-01",
+  "2024-12-25",
    5.0, 
   "1", 
   "TP", 
-  "https://www.youtube.com/watch?v=Q0EiAfDmqx0",
+  "https://www.youtube.com/embed/Q0EiAfDmqx0",
   "1-128.jpg",
   "1-1024.jpg"
   ), 
@@ -221,7 +249,7 @@ VALUES
    2.5, 
   "0", 
   "TP", 
-  "https://www.youtube.com/watch?v=OoTx1cYC5u8",
+  "https://www.youtube.com/embed/OoTx1cYC5u8",
   "2-128.jpg",
   "2-1024.jpg"
   ),
@@ -237,7 +265,7 @@ VALUES
  3.5, 
   "0", 
   "-18", 
-  "https://www.youtube.com/watch?v=8xx91zoASLY",
+  "https://www.youtube.com/embed/8xx91zoASLY",
   "3-128.jpg",
   "3-1024.jpg"),
   (UUIDFilm4,
@@ -252,7 +280,7 @@ VALUES
  3.5, 
   "0", 
   "TP", 
-  "https://www.youtube.com/watch?v=BC9uXuXf3o8",
+  "https://www.youtube.com/embed/BC9uXuXf3o8",
   "4-128.jpg",
   "4-1024.jpg"),
   (UUIDFilm5,
@@ -267,7 +295,7 @@ VALUES
  5.0, 
   "0", 
   "-16", 
-  "https://www.youtube.com/watch?v=h9041zYF5ZA",
+  "https://www.youtube.com/embed/h9041zYF5ZA",
   "5-128.jpg",
   "5-1024.jpg"),
   (UUIDFilm6,
@@ -282,7 +310,7 @@ VALUES
  5.0, 
   "0", 
   "-12", 
-  "https://www.youtube.com/watch?v=JELm6NkF7yY",
+  "https://www.youtube.com/embed/JELm6NkF7yY",
   "6-128.jpg",
   "6-1024.jpg"),
   (UUIDFilm7,
@@ -297,7 +325,7 @@ VALUES
  3.5, 
   "0", 
   "-12", 
-  "https://www.youtube.com/watch?v=Tkej_ULljR8",
+  "https://www.youtube.com/embed/Tkej_ULljR8",
   "7-128.jpg",
   "7-1024.jpg"),
   (UUIDFilm8,
@@ -312,7 +340,7 @@ VALUES
  4.5, 
   "0", 
   "TP", 
-  "https://www.youtube.com/watch?v=Te3YDaOcPqk",
+  "https://www.youtube.com/embed/Te3YDaOcPqk",
   "8-128.jpg",
   "8-1024.jpg"),
   (UUIDFilm9,
@@ -327,7 +355,7 @@ VALUES
  5.0, 
   "1", 
   "-12", 
-  "https://www.youtube.com/watch?v=PZDO1hrV16I",
+  "https://www.youtube.com/embed/PZDO1hrV16I",
   "9-128.jpg",
   "9-1024.jpg"),
   (UUIDFilm10,
@@ -342,7 +370,7 @@ VALUES
  5.0, 
   "1", 
   "TP", 
-  "https://www.youtube.com/watch?v=60ArLSCgjSU",
+  "https://www.youtube.com/embed/60ArLSCgjSU",
   "10-128.jpg",
   "10-1024.jpg"),
   (UUIDFilm11,
@@ -357,7 +385,7 @@ VALUES
  5.0, 
   "1", 
   "-16", 
-  "https://www.youtube.com/watch?v=04aw2ymZedw",
+  "https://www.youtube.com/embed/04aw2ymZedw",
   "11-128.jpg",
   "11-1024.jpg"),
   (UUIDFilm12,
@@ -372,7 +400,7 @@ VALUES
  4.5, 
   "0", 
   "TP", 
-  "https://www.youtube.com/watch?v=yBdxN_dN6F0",
+  "https://www.youtube.com/embed/yBdxN_dN6F0",
   "12-128.jpg",
   "12-1024.jpg"),
   (UUIDFilm13,
@@ -387,7 +415,7 @@ VALUES
  4.0, 
   "0", 
   "TP", 
-  "https://www.youtube.com/watch?v=bVaetxYZrCk",
+  "https://www.youtube.com/embed/bVaetxYZrCk",
   "13-128.jpg",
   "13-1024.jpg"),
   (UUIDFilm14,
@@ -402,7 +430,7 @@ VALUES
  5.0, 
   "1", 
   "-16", 
-  "https://www.youtube.com/watch?v=hXCUifFwGzc",
+  "https://www.youtube.com/embed/hXCUifFwGzc",
   "14-128.jpg",
   "14-1024.jpg"),
   (UUIDFilm15,
@@ -417,10 +445,11 @@ VALUES
  4.0, 
   "0", 
   "TP", 
-  "https://www.youtube.com/watch?v=NDslM1QXcQg",
+  "https://www.youtube.com/embed/NDslM1QXcQg",
   "15-128.jpg",
   "15-1024.jpg")
   ;
+
 
 INSERT INTO Salle
   (id,
@@ -492,27 +521,200 @@ VALUES
   (12,UUIDSalle1C, 202515, "En cours", "Fauteuil cassé", "Le fauteil n° 18 est cassé il ne se rabat plus",     "2024-12-02 13:12:45", null),
   (13,UUIDSalle2C, 202515, "Resolu", "Fauteuil cassé", "Le fauteil n° 12 est cassé il ne se rabat plus", "2024-12-03 13:12:45", "2024-12-06 12:12:00")
   ;
+
   
-INSERT INTO Seance
-  (id, 
-  Filmid, 
-  Salleid, 
-  dateJour, 
-  hourBeginHHSMM, 
-  hourEndHHSMM, 
-  qualite, 
-  bo,
-  numFreeSeats,
-  numFreePMR,
-  alertAvailibility
-  ) 
-VALUES 
-  (UUIDSeance1, UUIDFilm1, UUIDSalle1P , "2025-03-01", "14:00", "17:03", "", "VO",200,10,null),
-  (UUIDSeance2, UUIDFilm2, UUIDSalle2P , "2024-08-15", "17:00", "20:03", "3D", "VO",200,10,null),
-  (UUIDSeance3, UUIDFilm3, UUIDSalle3P , "2024-06-01", "19:00", "21:03", "4DX", "VF",50,4,"Dernieres places"),
-  (UUIDSeance4, UUIDFilm1, UUIDSalle1P , "2025-03-01", "18:00", "21:03", "", "VO",200,10,null),
-  (UUIDSeance5, UUIDFilm1, UUIDSalle1P , "2025-03-01", "22:00", "00:03", "", "VO",200,10,null)
+  /***********************************************************************
+   *  C) Création d'une table temporaire de mapping pour évaluer les
+   *     variables de salle et de film (ex. "UUIDSalle1P" => contenu).
+   ***********************************************************************/
+   
+  DROP TABLE IF EXISTS tmp_mapping;
+  CREATE TEMPORARY TABLE tmp_mapping (
+    varName VARCHAR(50) PRIMARY KEY,
+    varValue VARCHAR(100)
+  );
+  
+  /* Insérez ici toutes vos paires (varName, varValue).
+     Par exemple, pour 2 films et 2 salles seulement :
+     A vous d'enchainer pour les 15 films, 28 salles, etc.
+  */
+  INSERT INTO tmp_mapping (varName, varValue) VALUES
+('UUIDFilm1', UUIDFilm1),
+('UUIDFilm2', UUIDFilm2),
+('UUIDFilm3', UUIDFilm3),
+('UUIDFilm4', UUIDFilm4),
+('UUIDFilm5', UUIDFilm5),
+('UUIDFilm6', UUIDFilm6),
+('UUIDFilm7', UUIDFilm7),
+('UUIDFilm8', UUIDFilm8),
+('UUIDFilm9', UUIDFilm9),
+('UUIDFilm10', UUIDFilm10),
+('UUIDFilm11', UUIDFilm11),
+('UUIDFilm12', UUIDFilm12),
+('UUIDFilm13', UUIDFilm13),
+('UUIDFilm14', UUIDFilm14),
+('UUIDFilm15', UUIDFilm15),
+('UUIDSalle1P', UUIDSalle1P ),
+('UUIDSalle2P', UUIDSalle2P ),
+('UUIDSalle3P', UUIDSalle3P ),
+('UUIDSalle4P', UUIDSalle4P ),
+('UUIDSalle1T', UUIDSalle1T ),
+('UUIDSalle2T', UUIDSalle2T ),
+('UUIDSalle3T', UUIDSalle3T ),
+('UUIDSalle4T', UUIDSalle4T ),
+('UUIDSalle1N', UUIDSalle1N ),
+('UUIDSalle2N', UUIDSalle2N ),
+('UUIDSalle3N', UUIDSalle3N ),
+('UUIDSalle4N', UUIDSalle4N ),
+('UUIDSalle1B', UUIDSalle1B ),
+('UUIDSalle2B', UUIDSalle2B ),
+('UUIDSalle3B', UUIDSalle3B ),
+('UUIDSalle4B', UUIDSalle4B ),
+('UUIDSalle1L', UUIDSalle1L ),
+('UUIDSalle2L', UUIDSalle2L ),
+('UUIDSalle3L', UUIDSalle3L ),
+('UUIDSalle4L', UUIDSalle4L ),
+('UUIDSalle1C', UUIDSalle1C ),
+('UUIDSalle2C', UUIDSalle2C ),
+('UUIDSalle3C', UUIDSalle3C ),
+('UUIDSalle4C', UUIDSalle4C ),
+('UUIDSalle1G', UUIDSalle1G ),
+('UUIDSalle2G', UUIDSalle2G ),
+('UUIDSalle3G', UUIDSalle3G ),
+('UUIDSalle4G', UUIDSalle4G )
   ;
+  
+  
+   /***********************************************************************
+   *  Génération de séances : sur les 7 cinemas, 4 salles, 4 séances par jour par salle, un film différent dans chaque salle, de la veille à 21 jours
+   ***********************************************************************/
+  sp_generate_seances : BEGIN
+  
+    -- 1) Détermination des bornes
+    SET v_start = DATE_SUB(CURDATE(), INTERVAL 1 DAY);
+    SET v_end   = DATE_ADD(CURDATE(), INTERVAL 21 DAY);
+
+    WHILE DAYOFWEEK(v_end) <> 3 DO
+        SET v_end = DATE_ADD(v_end, INTERVAL 1 DAY);
+    END WHILE;
+
+    -- 2) Boucle de v_day = v_start à v_end
+    SET v_day = v_start;
+    WHILE v_day <= v_end DO
+
+      SET v_day_offset  = DATEDIFF(v_day, v_start);
+      SET v_week_index  = FLOOR(v_day_offset / 7);
+-- 	  SET v_film_idx    = (v_week_index MOD 15) + 1;
+	  SET v_film_idx    = 1 ;
+      SET v_time_set    = (v_day_offset MOD 2);
+
+      -- 3) Boucle sur 7 cinémas
+      SET v_cinema_counter = 1;
+      WHILE v_cinema_counter <= 7 DO
+
+        CASE v_cinema_counter
+          WHEN 1 THEN SET v_cinema_code = 'P';
+          WHEN 2 THEN SET v_cinema_code = 'T';
+          WHEN 3 THEN SET v_cinema_code = 'B';
+          WHEN 4 THEN SET v_cinema_code = 'L';
+          WHEN 5 THEN SET v_cinema_code = 'N';
+          WHEN 6 THEN SET v_cinema_code = 'C';
+          WHEN 7 THEN SET v_cinema_code = 'G';
+        END CASE;
+
+        IF ((v_film_idx + v_cinema_counter) MOD 2 = 0) THEN
+          SET v_bo = 'VF';
+        ELSE
+          SET v_bo = 'VO';
+        END IF;
+
+        CASE ((v_film_idx + v_cinema_counter) MOD 4)
+          WHEN 0 THEN SET v_qualite = '3D';
+          WHEN 1 THEN SET v_qualite = '4K';
+          WHEN 2 THEN SET v_qualite = '4DX';
+          WHEN 3 THEN SET v_qualite = '';
+        END CASE;
+
+        -- 4) Boucle sur les 4 salles
+        SET v_salle_counter = 1;
+        WHILE v_salle_counter <= 4 DO
+
+          -- (a) Construire le nom "UUIDSalle1P", etc.
+          SET v_salle_varName = CONCAT('UUIDSalle', v_salle_counter, v_cinema_code);
+
+          -- (b) Récupérer la VRAIE valeur depuis tmp_mapping
+          SELECT varValue INTO v_salle_realId
+            FROM tmp_mapping
+           WHERE varName = v_salle_varName
+           LIMIT 1; -- devrais renvoyer 1 row
+
+          CASE v_salle_counter
+            WHEN 1 THEN
+              SET v_numFreeSeats = 200;
+              SET v_numFreePMR   = 5;
+            WHEN 2 THEN
+              SET v_numFreeSeats = 150;
+              SET v_numFreePMR   = 3;
+            WHEN 3 THEN
+              SET v_numFreeSeats = 150;
+              SET v_numFreePMR   = 3;
+            WHEN 4 THEN
+              SET v_numFreeSeats = 50;
+              SET v_numFreePMR   = 1;
+          END CASE;
+
+		 -- (c) Récupérer la valeur pour le film
+         -- Calculer un v_film_idx dépendant de (v_week_index, v_cinema_counter, v_salle_counter)
+		  SET v_film_idx = ((v_week_index + v_cinema_counter + v_salle_counter - 1) MOD 15) + 1;
+          call logTrace(CONCAT("Valeur de l'index",v_film_idx));
+          SET v_film_varName = CONCAT('UUIDFilm', v_film_idx);
+         
+          SELECT varValue INTO v_film_realId
+            FROM tmp_mapping
+           WHERE varName = v_film_varName
+           LIMIT 1;
+		 
+         IF v_film_realId IS NULL THEN
+				-- Attribuer une valeur par défaut, ici 'UUIDFilm1'
+				SET v_film_realId = UUIDFilm1;
+		 END IF;
+         
+          -- (d) Insertion selon le set horaire
+          IF v_time_set = 0 THEN
+            -- SET 1
+            INSERT INTO Seance
+            (id, Filmid, Salleid, dateJour, hourBeginHHSMM, hourEndHHSMM,
+             qualite, bo, numFreeSeats, numFreePMR, alertAvailibility)
+            VALUES
+            (UUID(), v_film_realId, v_salle_realId, v_day, '14:00', '17:00', v_qualite, v_bo, v_numFreeSeats, v_numFreePMR, NULL),
+            (UUID(), v_film_realId, v_salle_realId, v_day, '17:30', '19:00', v_qualite, v_bo, v_numFreeSeats, v_numFreePMR, NULL),
+            (UUID(), v_film_realId, v_salle_realId, v_day, '19:30', '22:00', v_qualite, v_bo, v_numFreeSeats, v_numFreePMR, NULL),
+            (UUID(), v_film_realId, v_salle_realId, v_day, '22:15', '00:30', v_qualite, v_bo, v_numFreeSeats, v_numFreePMR, NULL);
+
+          ELSE
+            -- SET 2
+            INSERT INTO Seance
+            (id, Filmid, Salleid, dateJour, hourBeginHHSMM, hourEndHHSMM,
+             qualite, bo, numFreeSeats, numFreePMR, alertAvailibility)
+            VALUES
+            (UUID(), v_film_realId, v_salle_realId, v_day, '13:30', '16:30', v_qualite, v_bo, v_numFreeSeats, v_numFreePMR, NULL),
+            (UUID(), v_film_realId, v_salle_realId, v_day, '17:00', '18:30', v_qualite, v_bo, v_numFreeSeats, v_numFreePMR, NULL),
+            (UUID(), v_film_realId, v_salle_realId, v_day, '19:00', '21:30', v_qualite, v_bo, v_numFreeSeats, v_numFreePMR, NULL),
+            (UUID(), v_film_realId, v_salle_realId, v_day, '21:45', '00:00', v_qualite, v_bo, v_numFreeSeats, v_numFreePMR, NULL);
+          END IF;
+
+          SET v_salle_counter = v_salle_counter + 1;
+          SET v_film_idx = (v_film_idx MOD 15) + 1;
+        END WHILE;
+
+        SET v_cinema_counter = v_cinema_counter + 1;
+      END WHILE;
+
+      SET v_day = DATE_ADD(v_day, INTERVAL 1 DAY);
+    END WHILE;
+  
+  END sp_generate_seances;
+  
 
 INSERT INTO Reservation
   (Id, 
@@ -575,8 +777,3 @@ VALUES
 DELIMITER ;
 
 call InitBaseTest();
-  
-
-
-  
-  
