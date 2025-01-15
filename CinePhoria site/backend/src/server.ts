@@ -46,4 +46,4 @@ app.listen(PORT, () => {
   logger.info(`Backend démarré sur le port ${PORT}`);
 });
 
-logger.info('Serveur TypeScript en cours d’exécution...');
+logger.info('Serveur TypeScript en cours d’exécution...');  

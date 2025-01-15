@@ -28,6 +28,7 @@ import { Seance } from './shared-models/Seance.js'; // extension en .js car le c
 import { Film } from './shared-models/Film.js';
 import { getCookie, setCookie } from './Helpers.js';
 import { formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
+import { updateContentPage } from './ViewReservation.js';
 export class DataController {
     // Getter pour toutes les séances
     get allSeances() {
@@ -61,16 +62,28 @@ export class DataController {
             // this.chargerDepuisAPI();
         }
     }
-    // Getter pour selectedFilm
+    // Getter pour selectedFilmUID
     get selectedFilmUUID() {
         return this._selectedFilmUUID || undefined;
     }
-    // Setter pour selectedFilm
+    // Setter pour selectedFilmUUID
     set selectedFilmUUID(value) {
-        if (isUUID(value)) {
+        if (!isUUID(value)) {
             throw new Error("L'id du film n'est pas conforme.");
         }
         this._selectedFilmUUID = value;
+        // Appeler ici les fonctions de mise à jour
+        updateContentPage(this);
+    }
+    // Getter pour selectedFilm
+    get selectedFilm() {
+        if (this._selectedFilmUUID) {
+            return this.filmUUID(this._selectedFilmUUID);
+        }
+        else {
+            console.error("selectedFilm : Film non trouvé, premier film pris");
+            return this._films[0]; // ne doit pas se produire
+        }
     }
     constructor(nameCinema) {
         this._seances = [];
@@ -129,6 +142,8 @@ export class DataController {
             const filmId = seance.filmId;
             if (!filmId)
                 return; // Ignorer si filmId est absent
+            //   console.log("iteration 2" , !filmMap.has(filmId), (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) === formatDateLocalYYYYMMDD(date)))
+            //   console.log(formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')), " = " , formatDateLocalYYYYMMDD(date)) 
             if (!filmMap.has(filmId) &&
                 (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) === formatDateLocalYYYYMMDD(date))) {
                 filmMap.set(filmId, new Film({
@@ -188,6 +203,16 @@ export class DataController {
         });
         // Retourner les films uniques sous forme de tableau
         return Array.from(filmMap.values());
+    }
+    filmUUID(filmId) {
+        const film = this._films.find((film) => {
+            return film.id == filmId;
+        });
+        if (!film) {
+            console.error("filmUUID : Film non trouvé, premier film pris");
+            return this._films[0]; // ne doit jamais se produire
+        }
+        return film;
     }
     sauver() {
         localStorage.setItem(DataController.nomStorage, JSON.stringify(this._seances));
