@@ -1,4 +1,4 @@
-/* Modal de selection du cinema */
+/* -------------------- Modal de selection du cinema */
 .modalcinema {
     display: none;
     position: fixed;
@@ -94,30 +94,70 @@
     
     
 }
+.reservation__listFilms {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-y: auto; /* Zone de défilement vertical */
+    width: 100%;
+    gap: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
 .listFilms__simpleCard {
     display: flex;
     flex-direction: row;
     align-items: center;
-    padding: 0px;
+    padding: 10px;
 
-    width: 100%;
+    width: 90%; /* Pleine largeur par défaut */
     height: 128px;
 
-    gap:10px;
+    gap: 10px;
     background: rgb(var(--secondary-color));
-    border: 1px solid rgb(var(--primary-color), 0.3);
     border-radius: 12px;
 
     cursor: pointer;
+    transition: all 0.3s ease; /* Transition fluide pour la largeur, la hauteur, et autres changements */
+    box-shadow: none; /* Pas d'ombre par défaut */
 }
 
 .listFilms__simpleCard:hover {
     background: rgb(var(--ternary-color));
 }
 
-.listFilms__simpleCard:selected {
-    background: rgb(var(--ternary-color));
-    border: 3px solid rgb(var(--primary-color), 0.6);
+.listFilms__simpleCard.selected {
+    background: rgb(var(--accent-color)); /* Couleur dorée */
+    color: whitesmoke;
+    font-size: 1.5em; /* Taille de police normale */
+    height: 80px; /* Réduction de la hauteur */
+    width: 85%; /* Réduction de la largeur */
+    margin: 0 auto; /* Centrer horizontalement */
+    padding: 5px 15px; /* Ajustement du padding */
+    justify-content: center; /* Centre le texte horizontalement */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombre subtile */
+}
+
+.listFilms__simpleCard.selected .listFilms__simpleCard-img {
+    display: none; /* Masquer l'image */
+}
+
+.listFilms__simpleCard.selected .listFilms__simpleCard-p {
+    flex-grow: 1; /* Étendre le titre pour occuper tout l'espace */
+    text-align: center; /* Centrer le texte horizontalement */
+}
+
+
+@keyframes highlight {
+    from {
+        transform: scale(1);
+    }
+    to {
+        transform: scale(0.90); /* Léger zoom */
+    }
 }
 
 

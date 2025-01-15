@@ -173,7 +173,7 @@ function trouverFilmSeancesCandidat(dataController) {
 /**
 * Affiche la liste des films dans la zone .reservation__listFilms
 */
-function afficherListeFilms(dataController) {
+function afficherListeFilms2(dataController) {
     const container = document.querySelector('.reservation__listFilms');
     if (!container)
         return;
@@ -212,6 +212,52 @@ function afficherListeFilms(dataController) {
         // Mettre en surbrillance si c'est le film "cible"
         if (film.id === dataController.selectedFilmUUID) {
             divCard.style.border = '2px solid gray';
+        }
+        container.appendChild(divCard);
+    });
+}
+function afficherListeFilms(dataController) {
+    const container = document.querySelector('.reservation__listFilms');
+    if (!container)
+        return;
+    // Extraire les films uniques
+    const filmsUniques = dataController.allFilms;
+    const seances = dataController.seancesFutures;
+    console.log("Nombre de films dans la liste : ", filmsUniques.length, " nombre de seances =", seances.length);
+    container.innerHTML = '';
+    filmsUniques.forEach((film) => {
+        var _a;
+        const divCard = document.createElement('div');
+        divCard.classList.add('listFilms__simpleCard');
+        // Créer l'image
+        const img = document.createElement('img');
+        img.classList.add('listFilms__simpleCard-img');
+        img.src = "assets/static/" + film.imageFilm128;
+        img.alt = (_a = film.titleFilm) !== null && _a !== void 0 ? _a : 'Affiche';
+        // Titre
+        const pTitre = document.createElement('p');
+        pTitre.classList.add('listFilms__simpleCard-p');
+        pTitre.textContent = film.titleFilm || '';
+        // Ajouter au DOM
+        divCard.appendChild(img);
+        divCard.appendChild(pTitre);
+        // Gérer la sélection
+        divCard.addEventListener('click', () => {
+            // Désélectionner la carte précédemment sélectionnée
+            const previouslySelected = container.querySelector('.listFilms__simpleCard.selected');
+            if (previouslySelected) {
+                previouslySelected.classList.remove('selected');
+            }
+            // Sélectionner la nouvelle carte
+            divCard.classList.add('selected');
+            // Mettre à jour le film sélectionné dans le dataController
+            dataController.selectedFilmUUID = film.id;
+            // Rafraîchir la page ou effectuer des actions supplémentaires
+            updateContentPage(dataController);
+        });
+        // Mettre en surbrillance si c'est le film actuellement sélectionné
+        if (film.id === dataController.selectedFilmUUID) {
+            divCard.classList.add('selected');
         }
         container.appendChild(divCard);
     });
