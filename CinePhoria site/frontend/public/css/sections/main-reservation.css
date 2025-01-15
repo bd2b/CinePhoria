@@ -131,7 +131,7 @@
 
 .listFilms__simpleCard.selected {
     background: rgb(var(--accent-color)); /* Couleur dorée */
-    color: whitesmoke;
+    color:  rgb(var(--primary-color));
     font-size: 1.5em; /* Taille de police normale */
     height: 80px; /* Réduction de la hauteur */
     width: 85%; /* Réduction de la largeur */

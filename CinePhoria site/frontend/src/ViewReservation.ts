@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Verification dataController
   console.log(`dataController.nameCinema = ${dataController.nameCinema} nombre de séances = ${dataController.allSeances.length}`);
 
-  // Définitiion des interactions dans les dropdowns (celui de la modale ou celui du titre droit)
+  // Définitiion des interactions dans les dropdowns de selection de cinema (celui de la modale ou celui du titre droit)
   dropdownContents.forEach((content) => {
     const links = content.querySelectorAll<HTMLAnchorElement>('a');
     links.forEach((link) => {
@@ -191,54 +191,6 @@ function trouverFilmSeancesCandidat(dataController: DataController): Seance[] {
 /**
 * Affiche la liste des films dans la zone .reservation__listFilms 
 */
-function afficherListeFilms2(dataController: DataController): void {
-  const container = document.querySelector('.reservation__listFilms');
-  if (!container) return;
-
-  // Extraire les films uniques
-  const filmsUniques = dataController.allFilms;
-  const seances = dataController.seancesFutures;
-  console.log("Nombre de films dans la liste : ", filmsUniques.length, " nombre de seances =", seances.length);
-
-  container.innerHTML = '';
-  filmsUniques.forEach((film) => {
-    const divCard = document.createElement('div');
-    divCard.classList.add('listFilms__simpleCard');
-    // On met un eventListener pour changer de film sélectionné, etc.
-    divCard.addEventListener('click', () => {
-      // afficherSeancesDuJour(allSeances, filmSeance);
-      // ... afficher détails du film, etc.
-    });
-
-    divCard.addEventListener('click', () => {
-      // Au clic, on change le film sélectionné dans le dataController
-      dataController.selectedFilmUUID = film.id
-      // On raffrachi la page contenu
-      updateContentPage(dataController);
-    });
-
-    // Créer l'image
-    const img = document.createElement('img');
-    img.classList.add('listFilms__simpleCard-img');
-    img.src = "assets/static/" + film.imageFilm128;
-    img.alt = film.titleFilm ?? 'Affiche';
-
-    // Titre
-    const pTitre = document.createElement('p');
-    pTitre.classList.add('listFilms__simpleCard-p');
-    pTitre.textContent = film.titleFilm || '';
-
-    // Ajouter au DOM
-    divCard.appendChild(img);
-    divCard.appendChild(pTitre);
-
-    // Mettre en surbrillance si c'est le film "cible"
-    if (film.id === dataController.selectedFilmUUID) {
-      divCard.style.border = '2px solid gray';
-    }
-    container.appendChild(divCard);
-  });
-}
 
 function afficherListeFilms(dataController: DataController): void {
   const container = document.querySelector('.reservation__listFilms');
@@ -371,12 +323,15 @@ function afficherDetailsFilm(dataController: DataController): void {
 
 /**
 * Affiche les onglets de la semaine dans la div .panel__tabs
-* @param dateDebut Date de début (par défaut : aujourd'hui)
+* @param dateDebut de la plage Date de début (par défaut : aujourd'hui) ou un mercredi
 * @param isInitial Indique si c'est la première fois (affichage jusqu'au mardi)
 */
 function afficherSemaines(dataController: DataController, dateDebut: Date = new Date(), isInitial = true): void {
   const panelTabs = document.querySelector('.panel__tabs');
   if (!panelTabs) return;
+
+  if (!dataController.selectedFilmUUID) return;
+  const filmId = dataController.selectedFilmUUID;
 
   // Vider le contenu
   panelTabs.innerHTML = '';
@@ -388,9 +343,10 @@ function afficherSemaines(dataController: DataController, dateDebut: Date = new 
   // Calcul de la date de fin : 
   //   - Soit jusqu'au mardi suivant (cas initial)
   //   - Soit +6 jours (7 jours) dans les autres cas
-  const finAffichage = isInitial
-    ? dateProchainMardi(dAujourdhui)
-    : ajouterJours(dDebut, 6);
+  const finAffichage = isInitial ? dateProchainMardi(dAujourdhui) : ajouterJours(dDebut, 6);
+
+  // Si on n'a pas de seance pour le film dans la semaine, on ne fait rien.
+  if (dataController.seancesFilmDureeJour(filmId, dDebut, 6).length === 0) return;
 
   // === Bouton "Avant" ===
   // On ne l’affiche pas pour le cas initial
@@ -402,47 +358,82 @@ function afficherSemaines(dataController: DataController, dateDebut: Date = new 
     avant.addEventListener('click', () => {
       const dateAvant = ajouterJours(dDebut, -7);
       // Si on revient sur ou avant aujourd’hui, on repasse en mode initial
+      // On affiche la semaine ou le debut de semaine dans tab
+      // On se positionne sur le premier jour de la semaine
       if (dateAvant.getTime() <= dAujourdhui.getTime()) {
         afficherSemaines(dataController, dAujourdhui, true);
+        afficherSeancesDuJour(dataController, dAujourdhui);
       } else {
         afficherSemaines(dataController, dateAvant, false);
+        afficherSeancesDuJour(dataController, dateAvant);
       }
+
     });
     panelTabs.appendChild(avant);
   }
 
   // === Boucle d’affichage des jours ===
-  let current = new Date(dDebut.getTime()); // copie
+  let current = new Date(dDebut.getTime());
+  let nJourAvecSeance = 0;
+
+
   while (current.getTime() <= finAffichage.getTime()) {
     // On n’affiche jamais avant aujourd’hui
     if (current.getTime() >= dAujourdhui.getTime()) {
-      const jourItem = document.createElement('p');
-      jourItem.classList.add('tabs__tab-p', 'tabs__tab-day-p', 'tabs__tab-day-unselected-p');
 
-      jourItem.textContent = formatDateJJMM(current);
+      if (dataController.seancesFilmJour(dataController.selectedFilmUUID, current).length > 0) {
+        // Il y a au moins une séance pour ce film ce jour
+        nJourAvecSeance += 1;
+        const jourItem = document.createElement('p');
+        jourItem.classList.add('tabs__tab-p', 'tabs__tab-day-p');
 
-      // Capturer la date dans une closure pour éviter le décalage
-      const dateForHandler = new Date(current.getTime());
-      jourItem.addEventListener('click', () => {
-        afficherSeancesDuJour(dataController, dateForHandler);
-      });
+        jourItem.textContent = formatDateJJMM(current);
 
-      panelTabs.appendChild(jourItem);
+        // Capturer la date dans une closure pour éviter le décalage
+        const dateForHandler = new Date(current.getTime());
+        jourItem.addEventListener('click', () => {
+
+          // // Désélectionner les tabulations de la semaine précédemment sélectionnée
+          // const previouslySelected = panelTabs.querySelector('.tabs__tab-day-p.selected');
+          // if (previouslySelected) {
+          //   previouslySelected.classList.remove('selected');
+          // }
+
+          // // Sélectionner la nouvelle carte
+          // jourItem.classList.add('selected');
+
+          // Mettre à jour le film sélectionné dans le dataController
+          // dataController.selectedFilmUUID = film.id;
+
+
+
+
+          afficherSeancesDuJour(dataController, dateForHandler);
+        });
+
+        panelTabs.appendChild(jourItem);
+      }
     }
     // Passer au jour suivant, toujours en local
     current = ajouterJours(current, 1);
   }
 
   // === Bouton "Après" ===
-  const apres = document.createElement('p');
-  apres.classList.add('tabs__tab-p', 'tabs__tab-nav-p', 'tabs__tab-nav-suiv-p');
-  apres.textContent = 'Après';
-  apres.addEventListener('click', () => {
-    // Début de la semaine suivante = finAffichage + 1
-    const dateApres = ajouterJours(finAffichage, 1);
-    afficherSemaines(dataController, dateApres, false);
-  });
-  panelTabs.appendChild(apres);
+  // On passe à la semaine d'après si on a au moins unséance prévue
+  if (dataController.seancesFilmDureeJour(filmId, ajouterJours(finAffichage, 1), 7).length > 0) {
+    const apres = document.createElement('p');
+    apres.classList.add('tabs__tab-p', 'tabs__tab-nav-p', 'tabs__tab-nav-suiv-p');
+    apres.textContent = 'Après';
+    apres.addEventListener('click', () => {
+      // Début de la semaine suivante = finAffichage + 1
+      const dateApres = ajouterJours(finAffichage, 1);
+      console.log("Apres = ", dateApres)
+      dataController.selectedSeanceDate = dateApres;
+      afficherSemaines(dataController, dateApres, false);
+      afficherSeancesDuJour(dataController, dateApres);
+    });
+    panelTabs.appendChild(apres);
+  }
 }
 
 
@@ -452,6 +443,27 @@ function afficherSemaines(dataController: DataController, dateDebut: Date = new 
 * pour un filmId donné à une date précise.
 */
 function afficherSeancesDuJour(dataController: DataController, dateSelectionnee: Date): void {
+
+  // Moment le plus pratique pour capter la mise à jour de la date selectionnee dans le panel de tabs de jour
+  dataController.selectedSeanceDate = dateSelectionnee;
+
+  // Indication de selection de la date dans le panel tabs
+  const panelTabs = document.querySelector('.panel__tabs');
+  if (panelTabs) {
+    const tabs = panelTabs.querySelectorAll(".tabs__tab-day-p");
+    tabs.forEach(tab => {
+      if (tab.textContent) {
+        if (tab.textContent.trim() === formatDateJJMM(dateSelectionnee).trim()) {
+          // Ajouter la classe "selected" à l'élément correspondant
+          tab.classList.add('selected');
+        } else {
+          // Optionnel : retirer la classe "selected" des autres éléments
+          tab.classList.remove('selected');
+        }
+      }
+    });
+  }
+
   // Conteneur dans lequel on va injecter les cartes
   const panelChoix = document.querySelector('.panel__seances');
   if (!panelChoix) return;
@@ -539,6 +551,20 @@ function afficherSeancesDuJour(dataController: DataController, dateSelectionnee:
     // Au clic sur la séance => exemple : basculer sur panel__reserve
     card.addEventListener('click', () => {
       console.log(`Séance cliquée : ${seance.seanceId}`);
+      // Suppression de la selection dans les séances
+      const panelSeances = document.querySelector('.panel__seances');
+      if (panelSeances) {
+        const seances = panelSeances.querySelectorAll(".seances__cardseance");
+        seances.forEach(seanceItem => {
+          seanceItem.classList.remove("selected");
+        });
+      }
+      // Ajout de la selection sur la seancecourante
+      card.classList.add('selected');
+
+      // Memorisation de la seance
+      dataController.selectedSeanceUUID = seance.seanceId;
+      
       // basculerPanelReserve(seance);
     });
 
