@@ -27,6 +27,8 @@ export class DataController {
     private _films: Film[] = [];
     private _nameCinema: string;
     private _selectedFilmUUID?: string; // UUID du film actuellement selectionne
+    private _selectedSeanceDate?: Date; // date du jour actuellement selectionnee
+    private _selectedSeanceUUID?: string // UUID de la séance selectionnée
 
     private static validiteCache: number = 1; // Apres validiteCache heure on force le rechargement des données
     private static nomCookieDateAccess: string = 'dateAccess'; // Nom du cookie pour stocker la date de mise à jour
@@ -69,8 +71,6 @@ export class DataController {
             console.log(`Seter nameCinema 1 - Changement de cinema : ${cinemaActuel} remplace par ${this._nameCinema}`)
             setCookie(DataController.nomCookieDateAccess, " ", -1);
             console.log(`Seter nameCinema 2 - Expiration du cookie de date de mise à jour`)
-
-            // this.chargerDepuisAPI();
         }
 
     }
@@ -98,6 +98,26 @@ export class DataController {
             console.error("selectedFilm : Film non trouvé, premier film pris");
             return this._films[0] // ne doit pas se produire
         }
+    }
+
+    // Getter pour selectedSeanceDate
+    public get selectedSeanceDate(): Date | undefined {
+        return this._selectedSeanceDate || undefined;
+    }
+
+    // Setter pour selectedSeanceDate
+    public set selectedSeanceDate(value: Date) {
+        this._selectedSeanceDate = value;
+    }
+
+    // Getter pour selectedSeanceUUID
+    public get selectedSeanceUUID(): string | undefined {
+        return this._selectedSeanceUUID || undefined;
+    }
+
+    // Setter pour selectedSeanceUUID
+    public set selectedSeanceUUID(value: string) {
+        this._selectedSeanceUUID = value;
     }
 
 
@@ -197,9 +217,22 @@ export class DataController {
         );
     }
 
+    public seancesFilmDureeJour(filmId: string, dateDeb: Date = new Date(), nombreJours: number): Seance[] {
+        return this._seances.filter((s) =>
+            s.filmId === filmId &&
+            formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) >= formatDateLocalYYYYMMDD(dateDeb) &&
+            formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) < formatDateLocalYYYYMMDD(ajouterJours(dateDeb,nombreJours))
+        );
+    }
+
     public seancesJour(date: Date = new Date()): Seance[] {
         return this._seances.filter((s) =>
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date)
+        );
+    }
+    public seancesFilm(filmId: string): Seance[] {
+        return this._seances.filter((s) =>
+            s.filmId === filmId
         );
     }
 

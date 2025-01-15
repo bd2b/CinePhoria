@@ -27,7 +27,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { Seance } from './shared-models/Seance.js'; // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { Film } from './shared-models/Film.js';
 import { getCookie, setCookie } from './Helpers.js';
-import { formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
+import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { updateContentPage } from './ViewReservation.js';
 export class DataController {
     // Getter pour toutes les séances
@@ -59,7 +59,6 @@ export class DataController {
             console.log(`Seter nameCinema 1 - Changement de cinema : ${cinemaActuel} remplace par ${this._nameCinema}`);
             setCookie(DataController.nomCookieDateAccess, " ", -1);
             console.log(`Seter nameCinema 2 - Expiration du cookie de date de mise à jour`);
-            // this.chargerDepuisAPI();
         }
     }
     // Getter pour selectedFilmUID
@@ -84,6 +83,22 @@ export class DataController {
             console.error("selectedFilm : Film non trouvé, premier film pris");
             return this._films[0]; // ne doit pas se produire
         }
+    }
+    // Getter pour selectedSeanceDate
+    get selectedSeanceDate() {
+        return this._selectedSeanceDate || undefined;
+    }
+    // Setter pour selectedSeanceDate
+    set selectedSeanceDate(value) {
+        this._selectedSeanceDate = value;
+    }
+    // Getter pour selectedSeanceUUID
+    get selectedSeanceUUID() {
+        return this._selectedSeanceUUID || undefined;
+    }
+    // Setter pour selectedSeanceUUID
+    set selectedSeanceUUID(value) {
+        this._selectedSeanceUUID = value;
     }
     constructor(nameCinema) {
         this._seances = [];
@@ -173,8 +188,16 @@ export class DataController {
         return this._seances.filter((s) => s.filmId === filmId &&
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date));
     }
+    seancesFilmDureeJour(filmId, dateDeb = new Date(), nombreJours) {
+        return this._seances.filter((s) => s.filmId === filmId &&
+            formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) >= formatDateLocalYYYYMMDD(dateDeb) &&
+            formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) < formatDateLocalYYYYMMDD(ajouterJours(dateDeb, nombreJours)));
+    }
     seancesJour(date = new Date()) {
         return this._seances.filter((s) => formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date));
+    }
+    seancesFilm(filmId) {
+        return this._seances.filter((s) => s.filmId === filmId);
     }
     filmsJour(date = new Date()) {
         // Utilisation d'une Map pour éviter les doublons

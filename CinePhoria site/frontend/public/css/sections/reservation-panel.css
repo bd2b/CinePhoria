@@ -59,7 +59,7 @@ display: block;
 }
 
 /* Onglet du jour sélectionné */
-.tabs__tab-day-p.tabs__tab-day-selected-p {
+.tabs__tab-day-p.selected {
     background: rgb(var(--ternary-color),0.5); /* Fond clair pour mettre en évidence */
     color: #000000;      /* Texte sombre pour contraster */
     font-weight: bold;
@@ -117,6 +117,13 @@ display: block;
     border: 2px solid #F2F2F2;
     border-radius: 20px;
 }
+
+.seances__cardseance.selected {
+/* Auto layout */
+background: linear-gradient(180deg, #E4E2E2 0%, #FFFFFF 100%);
+border: 3px solid #2C3E50;
+}
+
 
 
 [class*="cardseance__"] {
