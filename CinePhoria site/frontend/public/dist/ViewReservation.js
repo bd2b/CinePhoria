@@ -60,6 +60,12 @@ document.addEventListener('DOMContentLoaded', () => __awaiter(void 0, void 0, vo
             titleLeft.innerText = `Réservez au CinePhoria de ${selectedCinema}`;
         }
     }
+    // Identifier le film par defaut dans le cas où on n'affiche pour la première fois le contenu de la page
+    const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
+    if (!filmSeancesCandidat[0].filmId)
+        return;
+    // Mettre a jour le film selection dans le dataController
+    dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
     // Mise a jour de la page
     updateContentPage(dataController);
     // Verification dataController
@@ -86,6 +92,12 @@ document.addEventListener('DOMContentLoaded', () => __awaiter(void 0, void 0, vo
                     dataController.nameCinema = cinema;
                     // Chargement des données
                     yield dataController.chargerDepuisAPI();
+                    // Identifier le film par defaut
+                    const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
+                    if (!filmSeancesCandidat[0].filmId)
+                        return;
+                    // Mettre a jour le film selection dans le dataController
+                    dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
                     // Mise à jour de la page
                     updateContentPage(dataController);
                     // Fermeture de la modale
@@ -102,17 +114,19 @@ document.addEventListener('DOMContentLoaded', () => __awaiter(void 0, void 0, vo
 /**
  * Fonction de mise à jour de la page
  * @param dataController
+ * @param selectedFilmUUID // film selectionné
  * @returns rien
  */
-function updateContentPage(dataController) {
+export function updateContentPage(dataController) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("UCP 1 - Update content page");
-        // Identifier le film par defaut
-        const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
-        if (!filmSeancesCandidat)
+        const activeSelectedFilmUUID = dataController.selectedFilmUUID;
+        if (!activeSelectedFilmUUID)
             return;
-        console.log("UCP 2 - Film par defaut = ", filmSeancesCandidat[0].titleFilm, " Nombre de séances", filmSeancesCandidat.length, " Date : ", formatDateLocalYYYYMMDD(new Date(filmSeancesCandidat[0].dateJour || '')));
-        const seanceData = filmSeancesCandidat.map(seance => ({
+        const activeSelectedFilm = dataController.selectedFilm;
+        const seancesFilm = dataController.seancesFilmJour(activeSelectedFilmUUID);
+        console.log("UCP 2 - Film par defaut = ", activeSelectedFilm.titleFilm, " Nombre de séances", dataController.seancesFilmJour(activeSelectedFilm.id).length, " Date : ", formatDateLocalYYYYMMDD(new Date(seancesFilm[0].dateJour || '')));
+        const seanceData = seancesFilm.map(seance => ({
             titre: seance.titleFilm,
             salle: seance.nameSalle,
             date: seance.dateJour,
@@ -120,17 +134,17 @@ function updateContentPage(dataController) {
         }));
         console.log("UCP 3 - Liste des séances du film candidat = ", seanceData);
         // Afficher la liste de tous les films
-        afficherListeFilms(dataController, filmSeancesCandidat[0].filmId || '');
-        console.log("UCP 4 - Liste des films affichés");
+        afficherListeFilms(dataController);
+        console.log("UCP 5 - Liste des films affichés");
         // Afficher les détails du film selectionné
-        afficherDetailsFilm(dataController, filmSeancesCandidat[0].filmId || '');
-        console.log("UCP 5 - Detail du film selectionné affichés");
+        afficherDetailsFilm(dataController);
+        console.log("UCP 6 - Detail du film selectionné affichés");
         // Composer la ligne de tabulation du panel de choix des séances
-        afficherSemaines(dataController, filmSeancesCandidat[0].filmId || '');
-        console.log("UCP 6 - Lignes de tabulation des jours affichées");
+        afficherSemaines(dataController);
+        console.log("UCP 7 - Lignes de tabulation des jours affichées");
         // Afficher les séances du jour pour le film sélectionné
-        afficherSeancesDuJour(dataController, filmSeancesCandidat[0].filmId || '', new Date(filmSeancesCandidat[0].dateJour || ''));
-        console.log(`UCP 7 - Séances affichées pour ${filmSeancesCandidat[0].titleFilm} le ${new Date(filmSeancesCandidat[0].dateJour || '')}`);
+        afficherSeancesDuJour(dataController, new Date(seancesFilm[0].dateJour || ''));
+        console.log(`UCP 8 - Séances affichées pour ${activeSelectedFilm.titleFilm} le ${new Date(seancesFilm[0].dateJour || '')}`);
     });
 }
 /**
@@ -159,7 +173,7 @@ function trouverFilmSeancesCandidat(dataController) {
 /**
 * Affiche la liste des films dans la zone .reservation__listFilms
 */
-function afficherListeFilms(dataController, filmIdSelected) {
+function afficherListeFilms(dataController) {
     const container = document.querySelector('.reservation__listFilms');
     if (!container)
         return;
@@ -177,6 +191,12 @@ function afficherListeFilms(dataController, filmIdSelected) {
             // afficherSeancesDuJour(allSeances, filmSeance);
             // ... afficher détails du film, etc.
         });
+        divCard.addEventListener('click', () => {
+            // Au clic, on change le film sélectionné dans le dataController
+            dataController.selectedFilmUUID = film.id;
+            // On raffrachi la page contenu
+            updateContentPage(dataController);
+        });
         // Créer l'image
         const img = document.createElement('img');
         img.classList.add('listFilms__simpleCard-img');
@@ -190,7 +210,7 @@ function afficherListeFilms(dataController, filmIdSelected) {
         divCard.appendChild(img);
         divCard.appendChild(pTitre);
         // Mettre en surbrillance si c'est le film "cible"
-        if (film.id === filmIdSelected) {
+        if (film.id === dataController.selectedFilmUUID) {
             divCard.style.border = '2px solid gray';
         }
         container.appendChild(divCard);
@@ -201,12 +221,12 @@ function afficherListeFilms(dataController, filmIdSelected) {
  * @param dataController L'objet gérant les données (dont la liste des films)
  * @param filmId L'identifiant du film à afficher
  */
-function afficherDetailsFilm(dataController, filmId) {
+function afficherDetailsFilm(dataController) {
     var _a, _b, _c, _d, _e, _f, _g;
     const container = document.querySelector('.reservation__detailFilm');
     if (!container)
         return;
-    const film = dataController.allFilms.find((f) => f.id === filmId);
+    const film = dataController.selectedFilm;
     if (!film) {
         container.innerHTML = '<p>Film introuvable.</p>';
         return;
@@ -267,7 +287,7 @@ function afficherDetailsFilm(dataController, filmId) {
 * @param dateDebut Date de début (par défaut : aujourd'hui)
 * @param isInitial Indique si c'est la première fois (affichage jusqu'au mardi)
 */
-function afficherSemaines(dataController, selectedFilmId, dateDebut = new Date(), isInitial = true) {
+function afficherSemaines(dataController, dateDebut = new Date(), isInitial = true) {
     const panelTabs = document.querySelector('.panel__tabs');
     if (!panelTabs)
         return;
@@ -293,10 +313,10 @@ function afficherSemaines(dataController, selectedFilmId, dateDebut = new Date()
             const dateAvant = ajouterJours(dDebut, -7);
             // Si on revient sur ou avant aujourd’hui, on repasse en mode initial
             if (dateAvant.getTime() <= dAujourdhui.getTime()) {
-                afficherSemaines(dataController, selectedFilmId, dAujourdhui, true);
+                afficherSemaines(dataController, dAujourdhui, true);
             }
             else {
-                afficherSemaines(dataController, selectedFilmId, dateAvant, false);
+                afficherSemaines(dataController, dateAvant, false);
             }
         });
         panelTabs.appendChild(avant);
@@ -312,7 +332,7 @@ function afficherSemaines(dataController, selectedFilmId, dateDebut = new Date()
             // Capturer la date dans une closure pour éviter le décalage
             const dateForHandler = new Date(current.getTime());
             jourItem.addEventListener('click', () => {
-                afficherSeancesDuJour(dataController, selectedFilmId, dateForHandler);
+                afficherSeancesDuJour(dataController, dateForHandler);
             });
             panelTabs.appendChild(jourItem);
         }
@@ -326,7 +346,7 @@ function afficherSemaines(dataController, selectedFilmId, dateDebut = new Date()
     apres.addEventListener('click', () => {
         // Début de la semaine suivante = finAffichage + 1
         const dateApres = ajouterJours(finAffichage, 1);
-        afficherSemaines(dataController, selectedFilmId, dateApres, false);
+        afficherSemaines(dataController, dateApres, false);
     });
     panelTabs.appendChild(apres);
 }
@@ -334,7 +354,7 @@ function afficherSemaines(dataController, selectedFilmId, dateDebut = new Date()
 * Affiche la liste des séances dans la zone .panel__choix .panel__seances
 * pour un filmId donné à une date précise.
 */
-function afficherSeancesDuJour(dataController, filmId, dateSelectionnee) {
+function afficherSeancesDuJour(dataController, dateSelectionnee) {
     var _a, _b;
     // Conteneur dans lequel on va injecter les cartes
     const panelChoix = document.querySelector('.panel__seances');
@@ -343,7 +363,10 @@ function afficherSeancesDuJour(dataController, filmId, dateSelectionnee) {
     // Vider le contenu de la div
     panelChoix.innerHTML = '';
     // Filtrer les séances du film sélectionné pour la date choisie
-    const seancesFilmDuJour = dataController.seancesFilmJour(filmId, dateSelectionnee);
+    if (!dataController.selectedFilmUUID)
+        return;
+    const filmId = dataController.selectedFilmUUID;
+    const seancesFilmDuJour = dataController.seancesFilmJour(dataController.selectedFilmUUID, dateSelectionnee);
     // Si aucune séance n'est trouvée, afficher le message d'absence
     if (seancesFilmDuJour.length === 0) {
         // Récupérer au moins une séance du film pour accéder au titre / nom du cinéma (sinon valeur par défaut)

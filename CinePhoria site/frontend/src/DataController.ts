@@ -20,6 +20,7 @@ import { Film } from './shared-models/Film.js';
 import { getCookie, setCookie } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 
+import { updateContentPage } from './ViewReservation.js'
 
 export class DataController {
     private _seances: Seance[] = [];
@@ -68,24 +69,37 @@ export class DataController {
             console.log(`Seter nameCinema 1 - Changement de cinema : ${cinemaActuel} remplace par ${this._nameCinema}`)
             setCookie(DataController.nomCookieDateAccess, " ", -1);
             console.log(`Seter nameCinema 2 - Expiration du cookie de date de mise à jour`)
-            
+
             // this.chargerDepuisAPI();
         }
 
     }
 
-    // Getter pour selectedFilm
+    // Getter pour selectedFilmUID
     public get selectedFilmUUID(): string | undefined {
         return this._selectedFilmUUID || undefined;
     }
 
-    // Setter pour selectedFilm
+    // Setter pour selectedFilmUUID
     public set selectedFilmUUID(value: string) {
-        if (isUUID(value)) {
+        if (!isUUID(value)) {
             throw new Error("L'id du film n'est pas conforme.");
         }
         this._selectedFilmUUID = value;
+        // Appeler ici les fonctions de mise à jour
+        updateContentPage(this);
     }
+
+    // Getter pour selectedFilm
+    public get selectedFilm(): Film {
+        if (this._selectedFilmUUID) {
+            return this.filmUUID(this._selectedFilmUUID);
+        } else {
+            console.error("selectedFilm : Film non trouvé, premier film pris");
+            return this._films[0] // ne doit pas se produire
+        }
+    }
+
 
     constructor(nameCinema: string) {
         this._nameCinema = nameCinema;
@@ -113,7 +127,7 @@ export class DataController {
     // Méthode asynchrone pour initialiser les données depuis l'API
     public async chargerDepuisAPI(): Promise<void> {
         try {
-            
+
             if (this._nameCinema !== "Selectionnez un cinema") {
                 const response = await fetch(`http://localhost:3000/api/seances/filter?cinemasList="${this.nameCinema}"`);
                 const rawData = await response.json();
@@ -145,11 +159,11 @@ export class DataController {
     private extractFilmsFromSeances(date: Date = new Date()) {
         // Utiliser une Map pour éviter les duplications (clé : filmId)
         const filmMap = new Map<string, Film>();
-
         this._seances.forEach((seance) => {
             const filmId = seance.filmId;
             if (!filmId) return; // Ignorer si filmId est absent
-
+            //   console.log("iteration 2" , !filmMap.has(filmId), (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) === formatDateLocalYYYYMMDD(date)))
+            //   console.log(formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')), " = " , formatDateLocalYYYYMMDD(date)) 
             if (!filmMap.has(filmId) &&
                 (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) === formatDateLocalYYYYMMDD(date))) {
                 filmMap.set(filmId, new Film({
@@ -219,6 +233,21 @@ export class DataController {
 
         // Retourner les films uniques sous forme de tableau
         return Array.from(filmMap.values());
+    }
+
+    public filmUUID(filmId: string): Film {
+        const film = this._films.find((film) => {
+            return film.id == filmId;
+        });
+        
+
+        if (!film) {
+            console.error("filmUUID : Film non trouvé, premier film pris");
+            return this._films[0]; // ne doit jamais se produire
+        }
+
+        return film;
+
     }
 
 
