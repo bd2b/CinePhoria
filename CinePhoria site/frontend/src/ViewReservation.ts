@@ -100,6 +100,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           // Mettre a jour le film selection dans le dataController
           dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
 
+          // Bascule vers le panel choix
+          basculerPanelChoix();
           // Mise à jour de la page
           updateContentPage(dataController);
 
@@ -237,6 +239,9 @@ function afficherListeFilms(dataController: DataController): void {
 
       // Rafraîchir la page ou effectuer des actions supplémentaires
       updateContentPage(dataController);
+
+      // Basculer vers le panel choix
+      basculerPanelChoix();
 
     });
 
@@ -445,7 +450,17 @@ function afficherSemaines(dataController: DataController, dateDebut: Date = new 
 function afficherSeancesDuJour(dataController: DataController, dateSelectionnee: Date): void {
 
   // Moment le plus pratique pour capter la mise à jour de la date selectionnee dans le panel de tabs de jour
+  // et effacer la mémorisation d'une éventuelle sélection
   dataController.selectedSeanceDate = dateSelectionnee;
+  dataController.selectedSeanceUUID = undefined;
+
+  // Changement du libelle du bouton
+  const buttonPanel = document.getElementById("panel__choixseance-button");
+  if (buttonPanel) {
+    buttonPanel.textContent = "Choisissez votre séance";
+    buttonPanel.classList.add("inactif");
+
+  }
 
   // Indication de selection de la date dans le panel tabs
   const panelTabs = document.querySelector('.panel__tabs');
@@ -564,12 +579,49 @@ function afficherSeancesDuJour(dataController: DataController, dateSelectionnee:
 
       // Memorisation de la seance
       dataController.selectedSeanceUUID = seance.seanceId;
-      
+
+      // Changement du libelle du bouton
+      const buttonPanel = document.getElementById("panel__choixseance-button");
+      if (buttonPanel) {
+        buttonPanel.classList.remove("inactif");
+        buttonPanel.textContent = "Je réserve !";
+        // Configuration du passage à l'étape de choix des places
+        buttonPanel.addEventListener('click', () => {
+          basculerPanelReserve();
+          
+        })
+      }
+
       // basculerPanelReserve(seance);
     });
 
     panelChoix.appendChild(card);
   });
 }
+/**
+ * Bascule du panel choix vers le panel reserve
+ */
+function basculerPanelReserve () {
 
+  const panelChoix = document.querySelector('.panel__choix') as HTMLDivElement | null;
+          const panelReservation = document.querySelector('.panel__reserve') as HTMLDivElement | null;
+          if ((panelChoix) && (panelReservation)) {
+            panelChoix.style.display = 'none';
+            panelReservation.style.display = 'flex';
+          }
 
+}
+
+/**
+ * Bascule vers le panel Choix
+ */
+function basculerPanelChoix () {
+
+  const panelChoix = document.querySelector('.panel__choix') as HTMLDivElement | null;
+          const panelReservation = document.querySelector('.panel__reserve') as HTMLDivElement | null;
+          if ((panelChoix) && (panelReservation)) {
+            panelChoix.style.display = 'block';
+            panelReservation.style.display = 'none';
+          }
+          
+}

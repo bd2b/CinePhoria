@@ -98,6 +98,8 @@ document.addEventListener('DOMContentLoaded', () => __awaiter(void 0, void 0, vo
                         return;
                     // Mettre a jour le film selection dans le dataController
                     dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
+                    // Bascule vers le panel choix
+                    basculerPanelChoix();
                     // Mise à jour de la page
                     updateContentPage(dataController);
                     // Fermeture de la modale
@@ -211,6 +213,8 @@ function afficherListeFilms(dataController) {
             dataController.selectedFilmUUID = film.id;
             // Rafraîchir la page ou effectuer des actions supplémentaires
             updateContentPage(dataController);
+            // Basculer vers le panel choix
+            basculerPanelChoix();
         });
         // Mettre en surbrillance si c'est le film actuellement sélectionné
         if (film.id === dataController.selectedFilmUUID) {
@@ -388,7 +392,15 @@ function afficherSemaines(dataController, dateDebut = new Date(), isInitial = tr
 function afficherSeancesDuJour(dataController, dateSelectionnee) {
     var _a, _b;
     // Moment le plus pratique pour capter la mise à jour de la date selectionnee dans le panel de tabs de jour
+    // et effacer la mémorisation d'une éventuelle sélection
     dataController.selectedSeanceDate = dateSelectionnee;
+    dataController.selectedSeanceUUID = undefined;
+    // Changement du libelle du bouton
+    const buttonPanel = document.getElementById("panel__choixseance-button");
+    if (buttonPanel) {
+        buttonPanel.textContent = "Choisissez votre séance";
+        buttonPanel.classList.add("inactif");
+    }
     // Indication de selection de la date dans le panel tabs
     const panelTabs = document.querySelector('.panel__tabs');
     if (panelTabs) {
@@ -493,8 +505,40 @@ function afficherSeancesDuJour(dataController, dateSelectionnee) {
             card.classList.add('selected');
             // Memorisation de la seance
             dataController.selectedSeanceUUID = seance.seanceId;
+            // Changement du libelle du bouton
+            const buttonPanel = document.getElementById("panel__choixseance-button");
+            if (buttonPanel) {
+                buttonPanel.classList.remove("inactif");
+                buttonPanel.textContent = "Je réserve !";
+                // Configuration du passage à l'étape de choix des places
+                buttonPanel.addEventListener('click', () => {
+                    basculerPanelReserve();
+                });
+            }
             // basculerPanelReserve(seance);
         });
         panelChoix.appendChild(card);
     });
+}
+/**
+ * Bascule du panel choix vers le panel reserve
+ */
+function basculerPanelReserve() {
+    const panelChoix = document.querySelector('.panel__choix');
+    const panelReservation = document.querySelector('.panel__reserve');
+    if ((panelChoix) && (panelReservation)) {
+        panelChoix.style.display = 'none';
+        panelReservation.style.display = 'flex';
+    }
+}
+/**
+ * Bascule vers le panel Choix
+ */
+function basculerPanelChoix() {
+    const panelChoix = document.querySelector('.panel__choix');
+    const panelReservation = document.querySelector('.panel__reserve');
+    if ((panelChoix) && (panelReservation)) {
+        panelChoix.style.display = 'block';
+        panelReservation.style.display = 'none';
+    }
 }

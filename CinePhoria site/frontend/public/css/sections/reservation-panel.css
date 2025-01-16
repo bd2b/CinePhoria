@@ -288,8 +288,6 @@ letter-spacing: 0.02em;
 
     width: auto;
     height: 30px;
-
-    
 }
 .qualitebo-bo-p {
     display: flex;
@@ -315,9 +313,7 @@ border-radius: 12px;
 }
 
 /* --------------------- CHOIX DES TARIFS ET PLACES */
-.panel__reserve {
-    display: block;
-}
+
 @media (max-width: 768px) {
     .twocolumns__left {
         display: none;
@@ -331,7 +327,8 @@ border-radius: 12px;
 /* RESERVATION PANEL SEANCE */
 
 .panel__reserve {
-    display: flex;
+   /* display: flex; */
+    display: none;
     flex-direction: column;
     align-items: center;
     gap: 20px;

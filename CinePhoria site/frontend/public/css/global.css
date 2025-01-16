@@ -35,3 +35,8 @@ body {
 [class*="button"]:hover {
     background-color: rgb(var(--primary-color), 0.8);
 }
+
+[class*="button"].inactif {
+    background-color: rgb(var(--ternary-color), 0.8);
+    color: rgb(var(--primary-color));
+}
