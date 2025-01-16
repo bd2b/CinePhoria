@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { getCookie, setCookie } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD } from './Helpers.js';
-import { DataController } from './DataController.js';
+import { DataController, ReservationState } from './DataController.js';
 // Persistence des données 
 let dataController;
 /** Chargement ou raffraichissement de la page
@@ -100,6 +100,8 @@ document.addEventListener('DOMContentLoaded', () => __awaiter(void 0, void 0, vo
                     dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
                     // Bascule vers le panel choix
                     basculerPanelChoix();
+                    // Mise à jour de l'état
+                    dataController.reservationState = ReservationState.PendingChoiceSeance;
                     // Mise à jour de la page
                     updateContentPage(dataController);
                     // Fermeture de la modale
@@ -141,12 +143,26 @@ export function updateContentPage(dataController) {
         // Afficher les détails du film selectionné
         afficherDetailsFilm(dataController);
         console.log("UCP 6 - Detail du film selectionné affichés");
-        // Composer la ligne de tabulation du panel de choix des séances
-        afficherSemaines(dataController);
-        console.log("UCP 7 - Lignes de tabulation des jours affichées");
-        // Afficher les séances du jour pour le film sélectionné
-        afficherSeancesDuJour(dataController, new Date(seancesFilm[0].dateJour || ''));
-        console.log(`UCP 8 - Séances affichées pour ${activeSelectedFilm.titleFilm} le ${new Date(seancesFilm[0].dateJour || '')}`);
+        if (dataController.reservationState === ReservationState.PendingChoiceSeance) {
+            // Composer la ligne de tabulation du panel de choix des séances
+            afficherSemaines(dataController);
+            console.log("UCP 7 - Lignes de tabulation des jours affichées");
+            // Afficher les séances du jour pour le film sélectionné
+            afficherSeancesDuJour(dataController, new Date(seancesFilm[0].dateJour || ''));
+            console.log(`UCP 8 - Séances affichées pour ${activeSelectedFilm.titleFilm} le ${new Date(seancesFilm[0].dateJour || '')}`);
+        }
+        else if (dataController.reservationState = ReservationState.PendingChoiceSeats) {
+            // On met a jour le panel de choix des places
+            // Mise à jour de la seance selectionnée
+            const container = document.querySelector('.panel__reserve');
+            if (!container)
+                return;
+            container.innerHTML = '';
+            // Affichage de la seance selectionnee
+            container.appendChild(seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate));
+            // Affichage du tableau de tarifs
+            // Affichage des boutons : changer de séance et je confirme ma reservation
+        }
     });
 }
 /**
@@ -351,15 +367,6 @@ function afficherSemaines(dataController, dateDebut = new Date(), isInitial = tr
                 // Capturer la date dans une closure pour éviter le décalage
                 const dateForHandler = new Date(current.getTime());
                 jourItem.addEventListener('click', () => {
-                    // // Désélectionner les tabulations de la semaine précédemment sélectionnée
-                    // const previouslySelected = panelTabs.querySelector('.tabs__tab-day-p.selected');
-                    // if (previouslySelected) {
-                    //   previouslySelected.classList.remove('selected');
-                    // }
-                    // // Sélectionner la nouvelle carte
-                    // jourItem.classList.add('selected');
-                    // Mettre à jour le film sélectionné dans le dataController
-                    // dataController.selectedFilmUUID = film.id;
                     afficherSeancesDuJour(dataController, dateForHandler);
                 });
                 panelTabs.appendChild(jourItem);
@@ -443,53 +450,8 @@ function afficherSeancesDuJour(dataController, dateSelectionnee) {
     // Générer les cartes de séances
     console.log("Film = ", seancesFilmDuJour[0].titleFilm, " / nombre de seances = ", seancesFilmDuJour.length, " / date = ", formatDateLocalYYYYMMDD(dateSelectionnee));
     seancesFilmDuJour.forEach(seance => {
-        var _a, _b;
-        const card = document.createElement('div');
-        card.classList.add('seances__cardseance');
-        // === Horaire ===
-        const horaireDiv = document.createElement('div');
-        horaireDiv.classList.add('cardseance__horaire');
-        const pHourBegin = document.createElement('p');
-        pHourBegin.classList.add('horaire__hour', 'horaire__hour-begin-p');
-        pHourBegin.textContent = seance.hourBeginHHSMM || '';
-        const pHourEnd = document.createElement('p');
-        pHourEnd.classList.add('horaire__hour', 'horaire__hour-end-p');
-        pHourEnd.textContent = seance.hourEndHHSMM || '';
-        horaireDiv.appendChild(pHourBegin);
-        horaireDiv.appendChild(pHourEnd);
-        // === Salle + date ===
-        const dateSalleDiv = document.createElement('div');
-        dateSalleDiv.classList.add('cardseance__datesalle');
-        const dateInnerDiv = document.createElement('div');
-        dateInnerDiv.classList.add('datesalle__date');
-        const pMonth = document.createElement('p');
-        pMonth.classList.add('date__month-p');
-        pMonth.textContent = extraireMoisLettre(dateSelectionnee); // "JAN", "FEV"...
-        const pDay = document.createElement('p');
-        pDay.classList.add('date__day-p');
-        pDay.textContent = String(dateSelectionnee.getDate());
-        dateInnerDiv.appendChild(pMonth);
-        dateInnerDiv.appendChild(pDay);
-        const salleP = document.createElement('p');
-        salleP.classList.add('datesalle__salle-p');
-        salleP.textContent = (_a = seance.nameSalle) !== null && _a !== void 0 ? _a : 'Salle ?';
-        dateSalleDiv.appendChild(dateInnerDiv);
-        dateSalleDiv.appendChild(salleP);
-        // === Qualité/VO/VF ===
-        const qualiteDiv = document.createElement('div');
-        qualiteDiv.classList.add('cardseance__qualitebo');
-        const imgQualite = document.createElement('img');
-        imgQualite.classList.add('qualitebo-qualite-img');
-        imgQualite.src = `assets/${seance.qualite}.png`;
-        const pBo = document.createElement('p');
-        pBo.classList.add('qualitebo-bo-p');
-        pBo.textContent = (_b = seance.bo) !== null && _b !== void 0 ? _b : 'VF';
-        qualiteDiv.appendChild(imgQualite);
-        qualiteDiv.appendChild(pBo);
-        // === Assemblage final de la carte ===
-        card.appendChild(horaireDiv);
-        card.appendChild(dateSalleDiv);
-        card.appendChild(qualiteDiv);
+        // Générer la card
+        const card = seanceCardView(seance, dateSelectionnee);
         // Au clic sur la séance => exemple : basculer sur panel__reserve
         card.addEventListener('click', () => {
             console.log(`Séance cliquée : ${seance.seanceId}`);
@@ -513,12 +475,71 @@ function afficherSeancesDuJour(dataController, dateSelectionnee) {
                 // Configuration du passage à l'étape de choix des places
                 buttonPanel.addEventListener('click', () => {
                     basculerPanelReserve();
+                    // On change l'état
+                    dataController.reservationState = ReservationState.PendingChoiceSeats;
+                    // On met a jour la page
+                    updateContentPage(dataController);
                 });
             }
             // basculerPanelReserve(seance);
         });
         panelChoix.appendChild(card);
     });
+}
+/**
+ * Fonction de définition d'un card de seance utilisé soit dans le choix d'un seance soit pour rappeler la seance choisi
+ * @param seance
+ * @returns HTMLDivElement reprenant toute la présentation de la séance
+ */
+function seanceCardView(seance, dateSelectionne) {
+    var _a, _b;
+    const card = document.createElement('div');
+    card.classList.add('seances__cardseance');
+    // === Horaire ===
+    const horaireDiv = document.createElement('div');
+    horaireDiv.classList.add('cardseance__horaire');
+    const pHourBegin = document.createElement('p');
+    pHourBegin.classList.add('horaire__hour', 'horaire__hour-begin-p');
+    pHourBegin.textContent = seance.hourBeginHHSMM || '';
+    const pHourEnd = document.createElement('p');
+    pHourEnd.classList.add('horaire__hour', 'horaire__hour-end-p');
+    pHourEnd.textContent = seance.hourEndHHSMM || '';
+    horaireDiv.appendChild(pHourBegin);
+    horaireDiv.appendChild(pHourEnd);
+    // === Salle + date ===
+    const dateSalleDiv = document.createElement('div');
+    dateSalleDiv.classList.add('cardseance__datesalle');
+    const dateInnerDiv = document.createElement('div');
+    dateInnerDiv.classList.add('datesalle__date');
+    const pMonth = document.createElement('p');
+    pMonth.classList.add('date__month-p');
+    pMonth.textContent = extraireMoisLettre(dateSelectionne); // "JAN", "FEV"...
+    const pDay = document.createElement('p');
+    pDay.classList.add('date__day-p');
+    pDay.textContent = String(dateSelectionne.getDate());
+    dateInnerDiv.appendChild(pMonth);
+    dateInnerDiv.appendChild(pDay);
+    const salleP = document.createElement('p');
+    salleP.classList.add('datesalle__salle-p');
+    salleP.textContent = (_a = seance.nameSalle) !== null && _a !== void 0 ? _a : 'Salle ?';
+    dateSalleDiv.appendChild(dateInnerDiv);
+    dateSalleDiv.appendChild(salleP);
+    // === Qualité/VO/VF ===
+    const qualiteDiv = document.createElement('div');
+    qualiteDiv.classList.add('cardseance__qualitebo');
+    const imgQualite = document.createElement('img');
+    imgQualite.classList.add('qualitebo-qualite-img');
+    imgQualite.src = `assets/${seance.qualite}.png`;
+    const pBo = document.createElement('p');
+    pBo.classList.add('qualitebo-bo-p');
+    pBo.textContent = (_b = seance.bo) !== null && _b !== void 0 ? _b : 'VF';
+    qualiteDiv.appendChild(imgQualite);
+    qualiteDiv.appendChild(pBo);
+    // === Assemblage final de la carte ===
+    card.appendChild(horaireDiv);
+    card.appendChild(dateSalleDiv);
+    card.appendChild(qualiteDiv);
+    return card;
 }
 /**
  * Bascule du panel choix vers le panel reserve

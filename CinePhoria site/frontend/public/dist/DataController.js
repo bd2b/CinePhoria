@@ -29,7 +29,23 @@ import { Film } from './shared-models/Film.js';
 import { getCookie, setCookie } from './Helpers.js';
 import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { updateContentPage } from './ViewReservation.js';
+export var ReservationState;
+(function (ReservationState) {
+    ReservationState["PendingChoiceSeance"] = "PendingChoiceSeance";
+    ReservationState["PendingChoiceSeats"] = "PendingChoiceSeats";
+    ReservationState["Reserved"] = "Reserved";
+    ReservationState["Confirmed"] = "Confirmed";
+    ReservationState["PendingMailVerification"] = "PendingMailVerification"; // La reservation est enregistree, il y a assez de place (sieges et PMR) mais l'email doit etre enregistre
+})(ReservationState || (ReservationState = {}));
 export class DataController {
+    // Getter pour reservationState
+    get reservationState() {
+        return this._reservationState;
+    }
+    // Setter pour selectedSeanceUUID
+    set reservationState(value) {
+        this._reservationState = value;
+    }
     // Getter pour toutes les séances
     get allSeances() {
         return this._seances;
@@ -101,6 +117,7 @@ export class DataController {
         this._selectedSeanceUUID = value;
     }
     constructor(nameCinema) {
+        this._reservationState = ReservationState.PendingChoiceSeance;
         this._seances = [];
         this._films = [];
         this._nameCinema = nameCinema;
@@ -236,6 +253,9 @@ export class DataController {
             return this._films[0]; // ne doit jamais se produire
         }
         return film;
+    }
+    seanceSelected() {
+        return this._seances.filter((s) => s.seanceId === this._selectedSeanceUUID)[0];
     }
     sauver() {
         localStorage.setItem(DataController.nomStorage, JSON.stringify(this._seances));

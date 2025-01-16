@@ -22,7 +22,17 @@ import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, f
 
 import { updateContentPage } from './ViewReservation.js'
 
+export enum ReservationState {
+    PendingChoiceSeance = "PendingChoiceSeance",    // Choix de seance en cours , le panel choix est affiché
+    PendingChoiceSeats = "PendingChoiceSeats",      // Choix de tarifs en cours, le panel reserve est affiché
+    Reserved = "Reserved",                          // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués)
+    Confirmed = "Confirmed",                        // La reservation est confirmé, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
+    PendingMailVerification = "PendingMailVerification" // La reservation est enregistree, il y a assez de place (sieges et PMR) mais l'email doit etre enregistre
+  }
+
 export class DataController {
+
+    private _reservationState: ReservationState = ReservationState.PendingChoiceSeance;
     private _seances: Seance[] = [];
     private _films: Film[] = [];
     private _nameCinema: string;
@@ -35,6 +45,16 @@ export class DataController {
     private static nomStorage: string = 'storage'; // Nom du storage pour stocker toutes les SeancesFilmsSalle du cinema
 
 
+    // Getter pour reservationState
+    public get reservationState(): ReservationState {
+        return this._reservationState;
+    }
+
+    // Setter pour selectedSeanceUUID
+    public set reservationState(value: ReservationState) {
+        this._reservationState = value;
+    }
+    
     // Getter pour toutes les séances
     get allSeances(): Seance[] {
         return this._seances;
@@ -72,7 +92,6 @@ export class DataController {
             setCookie(DataController.nomCookieDateAccess, " ", -1);
             console.log(`Seter nameCinema 2 - Expiration du cookie de date de mise à jour`)
         }
-
     }
 
     // Getter pour selectedFilmUID
@@ -281,6 +300,12 @@ export class DataController {
 
         return film;
 
+    }
+
+    public seanceSelected(): Seance {
+        return this._seances.filter((s) =>
+            s.seanceId === this._selectedSeanceUUID
+        )[0];
     }
 
 
