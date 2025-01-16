@@ -28,7 +28,7 @@ export class DataController {
     private _nameCinema: string;
     private _selectedFilmUUID?: string; // UUID du film actuellement selectionne
     private _selectedSeanceDate?: Date; // date du jour actuellement selectionnee
-    private _selectedSeanceUUID?: string // UUID de la séance selectionnée
+    private _selectedSeanceUUID?: string | undefined // UUID de la séance selectionnée
 
     private static validiteCache: number = 1; // Apres validiteCache heure on force le rechargement des données
     private static nomCookieDateAccess: string = 'dateAccess'; // Nom du cookie pour stocker la date de mise à jour
@@ -116,7 +116,7 @@ export class DataController {
     }
 
     // Setter pour selectedSeanceUUID
-    public set selectedSeanceUUID(value: string) {
+    public set selectedSeanceUUID(value: string | undefined) {
         this._selectedSeanceUUID = value;
     }
 
