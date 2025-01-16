@@ -203,6 +203,7 @@ function trouverFilmSeancesCandidat(dataController: DataController): Seance[] {
       (currentDate.getTime() === bestDate.getTime() && (currentFilm.note || 0) > (bestFilm.note || 0))
     ) {
       return currentFilm;
+      //
     }
     return bestFilm;
   }, filmsDuJour[0]);
