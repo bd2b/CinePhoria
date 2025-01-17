@@ -33,5 +33,16 @@ export class SeanceController {
     }
   }
 
+  static async getTarifs(req: Request, res: Response) {
+    try {
+     
+      const tarifs = await SeanceDAO.findTarifs();
+      res.json(tarifs);
+      
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
   
 }

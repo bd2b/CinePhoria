@@ -1,5 +1,5 @@
 import mysql from 'mysql2/promise';
-import { Seance } from "../shared-models/Seance";
+import { Seance , TarifQualite } from "../shared-models/Seance";
 
 import { dbConfig } from "../config/config"
 
@@ -27,5 +27,18 @@ export class SeanceDAO {
 
     // Map des lignes pour les convertir en instances de Seance
     return (rows as any[]).map((row) => new Seance(row));
+  }
+
+  static async findTarifs (): Promise<TarifQualite[]> {
+    const connection = await mysql.createConnection(dbConfig);
+    const requete = `SELECT * FROM TarifQualite`;
+    console.log(`Exécution de la requête : ${requete}`);
+    
+    const [rows] = await connection.execute(requete);
+    await connection.end();
+
+    // Map des lignes pour les convertir en instances de Seance
+    return (rows as any[]).map((row) => new TarifQualite(row));
+
   }
 }

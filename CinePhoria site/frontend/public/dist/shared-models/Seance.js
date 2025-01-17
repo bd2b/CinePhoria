@@ -4,3 +4,9 @@ export class Seance {
     }
 }
 ;
+export class TarifQualite {
+    constructor(data) {
+        Object.assign(this, data);
+    }
+}
+;
