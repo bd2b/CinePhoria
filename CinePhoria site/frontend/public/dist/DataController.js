@@ -24,7 +24,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
  * - Toutes les séances sur lesquels on a des helpers , séancesFutures, Séances d'un jour pour un film....
  * - Tous les films avec des helpers également
  */
-import { Seance } from './shared-models/Seance.js'; // extension en .js car le compilateur ne fait pas l'ajout de l'extension
+import { Seance, TarifQualite } from './shared-models/Seance.js'; // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { Film } from './shared-models/Film.js';
 import { getCookie, setCookie } from './Helpers.js';
 import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
@@ -55,6 +55,10 @@ export class DataController {
         return this._seances.filter(s => new Date(s.dateJour || '') >= new Date());
     }
     // Getter pour tous les films
+    get allTarifQualite() {
+        return this._tarifQualite;
+    }
+    // Getter pour tous les tarifQualite
     get allFilms() {
         return this._films;
     }
@@ -120,6 +124,7 @@ export class DataController {
         this._reservationState = ReservationState.PendingChoiceSeance;
         this._seances = [];
         this._films = [];
+        this._tarifQualite = [];
         this._nameCinema = nameCinema;
         // Charger les données depuis localStorage si elles existent
         const saved = localStorage.getItem(DataController.nomStorage);
@@ -132,9 +137,10 @@ export class DataController {
             }
         }
         if (saved && !mustReload) {
-            this._seances = JSON.parse(saved).map((s) => (Object.assign(Object.assign({}, s), { date: new Date(s.date) })));
+            this.charger();
             this.extractFilmsFromSeances();
             console.log(`Utilisation du stockage local : ${this._seances.length} séances, ${this._films.length} films`);
+            console.log(`Utilisation du stockage local : ${this._tarifQualite.length} tarifs`);
         }
     }
     // Méthode asynchrone pour initialiser les données depuis l'API
@@ -151,6 +157,15 @@ export class DataController {
                     this._seances = rawData.map((d) => new Seance(d));
                     this.extractFilmsFromSeances();
                     console.log(`Pour ${this.nameCinema} : chargement depuis l'API : ${this._seances.length} séances, ${this._films.length} films`);
+                    // On recupere les tarifs
+                    const responseTarif = yield fetch(`http://localhost:3000/api/seances/tarif`);
+                    const rawDataTarif = yield responseTarif.json();
+                    if (!Array.isArray(rawDataTarif)) {
+                        throw new Error('La réponse de l’API n’est pas un tableau.');
+                    }
+                    // Convertir les données brutes en instances de Tarif
+                    this._tarifQualite = rawDataTarif.map((t) => new TarifQualite(t));
+                    console.log(`Pour ${this.nameCinema} : chargement depuis l'API : ${this._tarifQualite.length} tarifs`);
                     // Enregistrement de la date 
                     setCookie(DataController.nomCookieDateAccess, (new Date()).toISOString(), 1);
                     // Sauvegarder dans localStorage
@@ -258,7 +273,25 @@ export class DataController {
         return this._seances.filter((s) => s.seanceId === this._selectedSeanceUUID)[0];
     }
     sauver() {
-        localStorage.setItem(DataController.nomStorage, JSON.stringify(this._seances));
+        const dataToSave = {
+            seances: this._seances,
+            tarifQualite: this._tarifQualite
+        };
+        localStorage.setItem(DataController.nomStorage, JSON.stringify(dataToSave));
+    }
+    charger() {
+        const saved = localStorage.getItem(DataController.nomStorage);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            // Restaurer les séances
+            this._seances = (parsed.seances || []).map((s) => (Object.assign(Object.assign({}, s), { date: new Date(s.date) // Convertir les dates en objets `Date`
+             })));
+            // Restaurer les films
+            this._tarifQualite = parsed.tarifQualite || [];
+        }
+        else {
+            console.warn("Aucune donnée trouvée dans le localStorage.");
+        }
     }
 }
 DataController.validiteCache = 1; // Apres validiteCache heure on force le rechargement des données

@@ -22,4 +22,11 @@ router.get('/filter', (req, res) => {
     SeanceController.getSeanceByCinemas(req, res)
 });
 
+/** 
+ * Récupération des tarifs
+ */
+router.get('/tarif', (req, res) => { 
+    SeanceController.getTarifs(req, res)
+});
+
 export default router;

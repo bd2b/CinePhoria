@@ -39,6 +39,17 @@ export class Seance {
   }
 };
 
+export class TarifQualite {
+  id!: string;  
+  qualite?: string;
+  nameTarif?: string;
+  price?: string
+
+  constructor(data: Partial<TarifQualite>) {
+    Object.assign(this, data);
+  }
+};
+
 export interface SeanceInterface {
  seanceId: string; 
  filmId?: string;
