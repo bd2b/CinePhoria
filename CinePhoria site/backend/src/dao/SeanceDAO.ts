@@ -1,5 +1,6 @@
 import mysql from 'mysql2/promise';
 import { Seance , TarifQualite } from "../shared-models/Seance";
+import logger from '../config/configLog';
 
 import { dbConfig } from "../config/config"
 
@@ -8,7 +9,7 @@ export class SeanceDAO {
   static async findAll(): Promise<Seance[]> {
   
     const connection = await mysql.createConnection(dbConfig);
-    console.log('Exécution de la requête : SELECT * FROM ViewFilmsSeancesSalle');
+    logger.info('Exécution de la requête : SELECT * FROM ViewFilmsSeancesSalle');
     const [rows] = await connection.execute('SELECT * FROM ViewFilmsSeancesSalle');
     await connection.end();
 
@@ -20,7 +21,7 @@ export class SeanceDAO {
   static async findByCinemas(nameCinemaList: string): Promise<Seance[]> {
     const connection = await mysql.createConnection(dbConfig);
     const requete = `SELECT * FROM ViewFilmsSeancesSalle WHERE nameCinema in (${nameCinemaList})`;
-    console.log(`Exécution de la requête : ${requete}`);
+    logger.info(`Exécution de la requête : ${requete}`);
     
     const [rows] = await connection.execute(requete);
     await connection.end();
@@ -32,7 +33,7 @@ export class SeanceDAO {
   static async findTarifs (): Promise<TarifQualite[]> {
     const connection = await mysql.createConnection(dbConfig);
     const requete = `SELECT * FROM TarifQualite`;
-    console.log(`Exécution de la requête : ${requete}`);
+    logger.info(`Exécution de la requête : ${requete}`);
     
     const [rows] = await connection.execute(requete);
     await connection.end();

@@ -1,14 +1,15 @@
 import mysql from 'mysql2/promise';
 import { Film } from "../shared-models/Film";
 
-import { dbConfig } from "../config/config"
+import { dbConfig } from "../config/config";
+import logger from '../config/configLog';
 
 
 export class FilmDAO {
   static async findAll(): Promise<Film[]> {
   
     const connection = await mysql.createConnection(dbConfig);
-    console.log('Exécution de la requête : SELECT * FROM Film');
+    logger.info('Exécution de la requête : SELECT * FROM Film');
     const [rows] = await connection.execute('SELECT * FROM Film');
     await connection.end();
 
@@ -19,7 +20,7 @@ export class FilmDAO {
 
   static async findById(id: string): Promise<Film | null> {
     const connection = await mysql.createConnection(dbConfig);
-    console.log('Connexion réussie à la base de données');
+    logger.info('Connexion réussie à la base de données');
     const [rows] = await connection.execute('SELECT * FROM Film WHERE id = ?', [id]);
     await connection.end();
 
@@ -30,7 +31,7 @@ export class FilmDAO {
   static async findSortiesDeLaSemaine(): Promise<Film[]> {
   
     const connection = await mysql.createConnection(dbConfig);
-    console.log('Exécution de la requête : SELECT * FROM viewfilmssortiesdelasemaine');
+    logger.info('Exécution de la requête : SELECT * FROM viewfilmssortiesdelasemaine');
     const [rows] = await connection.execute('SELECT * FROM viewfilmssortiesdelasemaine');
     await connection.end();
 
