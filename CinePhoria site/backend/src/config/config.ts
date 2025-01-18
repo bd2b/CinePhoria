@@ -15,7 +15,8 @@ export const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_DATABASE || 'mydatabase'
+  database: process.env.DB_DATABASE || 'mydatabase',
+  multipleStatements: true // Autorise plusieurs requêtes dans une seule commande
 };
 
 // copie de l'objet pour masquer la valeur de "password"

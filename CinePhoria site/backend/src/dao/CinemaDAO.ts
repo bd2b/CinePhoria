@@ -10,7 +10,7 @@ export class CinemaDAO {
   static async findAll(): Promise<Cinema[]> {
   
     const connection = await mysql.createConnection(dbConfig);
-    console.log('Exécution de la requête : SELECT * FROM Cinema');
+    logger.info('Exécution de la requête : SELECT * FROM Cinema');
     const [rows] = await connection.execute('SELECT * FROM Cinema');
     await connection.end();
 

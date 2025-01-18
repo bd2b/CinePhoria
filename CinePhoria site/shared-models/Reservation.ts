@@ -1,0 +1,29 @@
+export class Reservation {
+    id!: string;                                    
+    Utilisateurid?: string;                         
+    Seanceid?: string;                              
+    stateReservation?: string;                      
+    numberPMR?: string;                             
+    evaluation?: string;                            
+    isEvaluationMustBeReview?: boolean;             
+    note?: number;                                  
+    isPromoFriandise?: boolean;                     
+    numberSeatsRestingBeforPromoFriandise?: number;
+    imageQRCode?: string;                           
+    timeStampCreate?: Date;  
+    constructor(data: Partial<Reservation>) {
+       Object.assign(this, data);
+     }
+  };
+
+  export class SeatsForTarif {
+    ID!: string;             // de type auto increment
+    TarifQualiteid?: string;
+    ReservationId?: string; 
+    numberSeats?: number;   
+    Price?: number;
+    constructor(data: Partial<Reservation>) {
+        Object.assign(this, data);
+      }
+    }
+

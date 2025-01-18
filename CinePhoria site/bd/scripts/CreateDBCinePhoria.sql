@@ -101,7 +101,6 @@ CREATE TABLE SeatsForTarif (
   TarifQualiteid varchar(100) NOT NULL, 
   ReservationId  varchar(100) NOT NULL, 
   numberSeats    int(1) NOT NULL, 
-  Price          double NOT NULL, 
   PRIMARY KEY (ID));
 CREATE TABLE TableTrace (
   idInt      INT AUTO_INCREMENT NOT NULL, 
