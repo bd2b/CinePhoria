@@ -27,7 +27,7 @@ function chargerCinemaSites() {
   `;
         footerElement.offsetHeight; // Force un reflow
         try {
-            const response = yield fetch('http://localhost:3000/api/cinemas');
+            const response = yield fetch('http://localhost:3500/api/cinemas');
             const cinemas = yield response.json();
             const container = document.getElementById('container__sites');
             if (!container) {

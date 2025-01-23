@@ -19,7 +19,6 @@ import session from 'express-session'; // pour la gestion de session si besoin
 
 import sanitizeQueryMiddleware from './middlewares/sanitiseQueryMiddleware'
 
-
 const app = express();
 app.use(express.json());
 app.use(cors());

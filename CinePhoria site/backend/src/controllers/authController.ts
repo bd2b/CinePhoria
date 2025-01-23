@@ -27,4 +27,10 @@ export class AuthController {
     res.json({ token });
     
   }
+
+  static confirmUser(req: Request, res: Response) : void {
+    const { utilisateurId, displayName, password} = req.body;
+
+    
+  }
 }

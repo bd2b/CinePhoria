@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/sections/main-reservation.css">
     <link rel="stylesheet" href="css/sections/reservation-panel.css">
 
-    
+
     <script type="module" src="dist/ViewFooter.js" defer></script>
     <script type="module" src="dist/main.js" defer></script>
     <script type="module" src="dist/ViewReservation.js" defer></script>
@@ -264,7 +264,8 @@
                             </div>
 
                         </div>
-                        <button class="panel__choixseance-button inactif" id="panel__choixseance-button">Choisissez votre séance</button>
+                        <button class="panel__choixseance-button inactif" id="panel__choixseance-button">Choisissez
+                            votre séance</button>
                     </div>
                     <div class="panel__reserve">
                         <div class="seances__cardseance seances__cardseance-selected" id="seances__cardseance-selected">
@@ -387,6 +388,81 @@
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
             </iframe>
+        </div>
+    </div>
+    <!-- Modale confirmMail -->
+    <div id="modal-confirmMail" class="modal">
+        <div class="modal__content-wrapper">
+            <div class="modal__title">
+                <div class="title-h2">
+                    <h2>Création du compte</h2>
+                </div>
+                <!-- Bouton (X) ou autre mécanisme pour fermer la modale si besoin -->
+                <span class="close-modal" id="close-confirmMail">×</span>
+            </div>
+            <div class="modal__content">
+                <div class="title-p">
+                    <p>Pour récupérer le QRCode de votre réservation, vous devez créer un compte CinePhoria en
+                        enregistrant
+                        les
+                        informations suivantes :</p>
+                </div>
+                <!-- Saisie du displayName -->
+                <div class="form__group">
+                    <label for="confirmMail-displayName">Nom ou pseudo :</label>
+                    <input type="text" id="confirmMail-displayName" class="input__text" />
+                </div>
+                <!-- Saisie de l'email -->
+                <div class="form__group">
+                    <label for="confirmMail-email">Email :</label>
+                    <input type="email" id="confirmMail-email" class="input__mail" />
+                </div>
+
+                <!-- Mot de passe 1 -->
+                <div class="form__group">
+                    <label for="confirmMail-password1">Mot de passe :</label>
+                    <input type="password" id="confirmMail-password1" />
+                </div>
+
+                <!-- Mot de passe 2 -->
+                <div class="form__group">
+                    <label for="confirmMail-password2">Confirmer le mot de passe :</label>
+                    <input type="password" id="confirmMail-password2" />
+                </div>
+
+                <!-- Bouton de validation -->
+                <button id="confirmMail-submit" class="button button-primary">
+                    Création du compte
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale loginWithEmail -->
+    <div id="modal-loginEmail" class="modal">
+        <div class="modal-content">
+            <!-- Bouton (X) ou autre mécanisme pour fermer la modale si besoin -->
+            <span class="close-modal" id="close-loginEmail">×</span>
+
+            <h2>Connexion</h2>
+            <p>Veuillez vous connecter pour valider la réservation.</p>
+
+            <!-- Email non modifiable -->
+            <div class="form__group">
+                <label for="loginEmail-email">Email :</label>
+                <input type="email" id="loginEmail-email" class="input__mail" readonly />
+            </div>
+
+            <!-- Mot de passe -->
+            <div class="form__group">
+                <label for="loginEmail-password">Mot de passe :</label>
+                <input type="password" id="loginEmail-password" />
+            </div>
+
+            <!-- Bouton de validation -->
+            <button id="loginEmail-submit" class="btn btn-primary">
+                Connexion
+            </button>
         </div>
     </div>
 </body>

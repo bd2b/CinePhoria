@@ -260,24 +260,32 @@ DELIMITER $$
 CREATE PROCEDURE CheckAvailabilityAndReserve(
     IN p_email VARCHAR(100),
     IN p_SeanceId VARCHAR(100),
-    IN p_UtilisateurId VARCHAR(100),
     IN p_TarifSeats JSON,
     IN p_PMRSeats INT,
     OUT p_Result VARCHAR(255) -- Chaine ("StatutEmail", "StatutReservation")
 )
 -- Création d'une reservation avec des places sur tarif et un nombre de place PMR
 -- La reservation doit etre confirmée en mettant à null timeStampCreate
--- Resultat = chaine de caractere composé de utilisateurId et de reservationId ou d'un chaine de caractère avec Erreur :
+-- Resultat = chaine de caractere composé de 
+-- statut, utilisateurId et de reservationId dans lequel statut= 'Compte Provisoire' ou 'Compte Confirme' 
+-- ou d'un chaine de caractère avec Erreur :
+-- Suppression du parametre utilisateurID : si le mail n'existe pas dans compte, on cree un utilisateur a la volee
 
 BEGIN
     DECLARE v_utilisateur_exist INT;
     DECLARE v_utilisateurID VARCHAR(100);
+    DECLARE v_timeStampCreate TIMESTAMP ;
+    DECLARE v_return VARCHAR(100);
+    DECLARE v_statut_compte VARCHAR(100);
     DECLARE v_available_seats INT;
     DECLARE v_available_pmr INT;
     DECLARE v_alert_status VARCHAR(100);
     DECLARE v_statut_email VARCHAR(100) DEFAULT "Erreur : email pas evalue";
     DECLARE v_statut_reservation VARCHAR(100);
     DECLARE v_newReservationId VARCHAR(100) DEFAULT UUID();
+    
+    DECLARE v_message_erreur VARCHAR(255);
+    DECLARE v_num INT;
 
     -- Variables pour JSON_TABLE
     DECLARE v_key_index INT DEFAULT 0;
@@ -290,8 +298,8 @@ BEGIN
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
 	BEGIN
     -- En cas d'erreur SQL, effectuer un rollback
-    ROLLBACK;
-		SET p_Result =  CONCAT(v_statut_email, ",", "Erreur : erreur interne.");
+	ROLLBACK;
+	SET p_Result =  CONCAT(v_statut_email, ",", "Erreur : erreur interne SQL = ",v_message_erreur);
 	END;
     
     -- Calculer le nombre de clés dans le JSON
@@ -302,12 +310,26 @@ BEGIN
 
     -- Initialiser le résultat de la procedure
     SET p_Result = "Ok";
+    
+    -- Initialiser le statut du compte utilisateur
+    SET v_statut_compte = 'Compte Confirme';
 	
     -- Début de la transaction
     START TRANSACTION;
     
     -- Début d'un bloc labellisé
     block_label: BEGIN
+    
+		-- Vérification des parametres
+        SELECT COUNT(*) INTO  v_num from Seance where id = p_SeanceId;
+        
+        IF  v_num = 0  THEN
+            SET v_statut_reservation = "Erreur : Parametre seance_id non valide";
+            SET p_Result = CONCAT("NA",",",v_statut_email, ",", v_statut_reservation);
+            ROLLBACK;
+            LEAVE block_label;
+        END IF;
+        
 
         -- Récupérer l'alerte de disponibilité et le nombre de places disponibles et verrouillage de la ligne
         SELECT numFreeSeats, numFreePMR, alertAvailibility
@@ -319,6 +341,8 @@ BEGIN
   --      DO SLEEP(10); -- Simule une attente de 10 secondes
 
         -- Recherche de l'email et de l'id Utilisateur
+        -- Si il n'existe pas on le cree
+        -- Si l'utilisateur est provisoire on modifie le statut_compte
         SET v_utilisateur_exist = (
             SELECT COUNT(*)
             FROM Utilisateur
@@ -326,20 +350,42 @@ BEGIN
         );
 
         IF v_utilisateur_exist = 0 THEN
-            SET v_statut_email = "Erreur : email inconnu";
+            CALL CreateUtilisateur(p_email, UUID(), "Compte provisoire", v_return);
+            IF LEFT(v_return, 6) = "Erreur"  THEN
+				-- Procedure en erreur, on remonte l'erreur
+				SET v_statut_email = CONCAT('Erreur : createuser ->' , v_return);
+                SET p_Result = CONCAT("NA",",",v_statut_email, ",", v_statut_reservation);
+				ROLLBACK;
+				LEAVE block_label;
+			ELSE
+				-- Utilisateur provisoire cree
+				SET v_statut_email = v_return;
+                SET v_utilisateurID = v_return;
+                SET v_statut_compte = 'Compte Provisoire';
+            END IF;
+            
         ELSE
-            SET v_utilisateurID = (
-                SELECT id
-                FROM Utilisateur
-                WHERE Utilisateur.email = p_email
-            );
+			
+            SELECT id, timeStampCreate
+			INTO v_utilisateurID, v_timeStampCreate
+			FROM Utilisateur
+			WHERE Utilisateur.email = p_email;
+            
             SET v_statut_email = v_utilisateurID;
+	
+            
+            if v_timeStampCreate is not null THEN
+				SET v_statut_compte = 'Compte Provisoire';
+             END IF;   
+            
         END IF;
+        
+        
 
 		-- Si on n'a pas de JSON bien forme
         IF v_key_count = 0 THEN
-            SET v_statut_reservation = "Erreur : parametre invalide";
-            SET p_Result = CONCAT(v_statut_email, ",", v_statut_reservation);
+            SET v_statut_reservation = "Erreur : parametre SeatsForTarif invalide";
+            SET p_Result = CONCAT(v_statut_compte,',',v_statut_email, ",", v_statut_reservation);
             ROLLBACK;
             LEAVE block_label;
         END IF;
@@ -348,7 +394,7 @@ BEGIN
         -- Si la séance est "Sold out", renvoyer directement "Pas assez de place"
         IF v_alert_status = 'Sold out' THEN
             SET v_statut_reservation = "Erreur : pas assez de place";
-            SET p_Result = CONCAT(v_statut_email, ",", v_statut_reservation);
+            SET p_Result = CONCAT(v_statut_compte,',',v_statut_compte,',',v_statut_email, ",", v_statut_reservation);
             ROLLBACK;
             LEAVE block_label;
         END IF;
@@ -360,6 +406,15 @@ BEGIN
 			SET v_current_key = JSON_UNQUOTE(
             JSON_EXTRACT(JSON_KEYS(p_TarifSeats), CONCAT('$[', v_key_index, ']'))
 			);
+            
+            -- Verification de l'existence du tarif
+            SELECT count(*) INTO  v_num from TarifQualite where id = v_current_key;
+			IF  v_num = 0  THEN
+				SET v_statut_reservation = "Erreur : Parametre TarifQualite non valide";
+				SET p_Result = CONCAT(v_statut_compte,",",v_statut_email, ",", v_statut_reservation);
+				ROLLBACK;
+				LEAVE block_label;
+			END IF;
 
 			-- Extraire la valeur associée à cette clé
 			SET v_current_value = CAST(
@@ -377,7 +432,7 @@ BEGIN
         -- Vérifier la disponibilité des places générales
         IF v_total_sum > v_available_seats THEN
             SET v_statut_reservation = "Erreur : pas assez de place";
-            SET p_Result = CONCAT(v_statut_email, ",", v_statut_reservation);
+            SET p_Result = CONCAT(v_statut_compte,',',v_statut_email, ",", v_statut_reservation);
             ROLLBACK;
             LEAVE block_label;
         END IF;
@@ -385,12 +440,13 @@ BEGIN
         -- Vérifier la disponibilité des places PMR
         IF p_PMRSeats > v_available_pmr THEN
             SET v_statut_reservation = "Erreur : pas assez de place PMR";
-            SET p_Result = CONCAT(v_statut_email, ",", v_statut_reservation);
+            SET p_Result = CONCAT(v_statut_compte,',',v_statut_email, ",", v_statut_reservation);
             ROLLBACK;
             LEAVE block_label;
         END IF;
 
         -- Si les places sont disponibles, les réserver en mettant à jour la table Seance
+        SET v_message_erreur = "Mise a jour Seance : ajout des places";
 		UPDATE Seance
 			SET 
 				numFreeSeats = numFreeSeats - v_total_sum,
@@ -399,10 +455,11 @@ BEGIN
             ;
 
 			-- Générer une nouvelle réservation
+			SET v_message_erreur = "Mise a jour Reservation : insertion";
 			INSERT INTO Reservation
 				(Id, Utilisateurid, seanceid, stateReservation, numberPMR,timeStampCreate)
 			VALUES
-				(v_newReservationId, p_UtilisateurId, p_SeanceId, "future", p_PMRSeats, CURRENT_TIMESTAMP);
+				(v_newReservationId, v_utilisateurID, p_SeanceId, "future", p_PMRSeats, CURRENT_TIMESTAMP);
 			-- Insérer les données dans SeatsForTarif pour chaque élément du dictionnaire JSON
 			SET v_key_index = 0;
 			WHILE v_key_index < v_key_count DO
@@ -417,6 +474,7 @@ BEGIN
 					JSON_UNQUOTE(JSON_EXTRACT(p_TarifSeats, CONCAT('$."', v_current_key, '"')))
 					AS UNSIGNED
 				);
+                SET v_message_erreur = "Mise a jour SeatsForTarif : Insertion";
 				INSERT INTO SeatsForTarif
 					(TarifQualiteid, ReservationId, numberSeats)
 				VALUES
@@ -431,12 +489,15 @@ BEGIN
             
 			-- Retourne l'id de réservation
 			SET v_statut_reservation = v_newReservationId;
-			SET p_Result = CONCAT(v_statut_email, ",", v_statut_reservation);
+            
+            -- Retourne le resultat complet
+			SET p_Result = CONCAT(v_statut_compte,",",v_statut_email, ",", v_statut_reservation);
 		
-        
 		END block_label;
 END $$
 DELIMITER ;
+-- Select pour gérer le point virgule de fin
+SELECT 1 ;
 -- Select pour gérer le point virgule de fin
 SELECT 1 ;
 DROP PROCEDURE IF EXISTS CreateUtilisateur;
@@ -514,12 +575,17 @@ DELIMITER ;
 select 1;
 DROP PROCEDURE IF EXISTS ConfirmUtilisateur;
 DELIMITER $$
-CREATE PROCEDURE confirmUtilisateur(
+CREATE PROCEDURE ConfirmUtilisateur(
     IN p_utilisateurId VARCHAR(100),
+    IN p_displayName VARCHAR(100),
+    IN p_password VARCHAR(100),  -- doit etre verifié et hashé à la source
      OUT p_Result VARCHAR(255)
      )
      -- L'utilisateur est confirmé en mettant le timeStampCreate a null et le compte est valider en mettant isValidated à 1
-     -- Retour "OK" ou "Erreur : erreur interne procedure." ou "Erreur : utilisateurId non valide." ou "Warning : Utilisateur deja confirme."
+     -- On met à jour le displayName de l'utilisateur
+     -- Retour "OK" ou "Erreur : xxxxxxxxx" ou "Warning : yyyyyyyyy"
+	 -- xxx = "erreur interne procedure." , "utilisateurId non valide." 
+     -- yyy = "utilisateur deja confirme."
      
      BEGIN
      
@@ -559,12 +625,14 @@ CREATE PROCEDURE confirmUtilisateur(
         END IF;
     
      UPDATE Utilisateur
-     SET timeStampCreate = NULL
+     SET timeStampCreate = NULL,
+			 displayName = p_displayName
      WHERE email = v_email;
      
      UPDATE Compte
-     SET isValidated = 1
-     WHERE email = v_email;
+     SET isValidated = 1,
+			passwordText = p_password
+	 WHERE email = v_email;
      
      Commit;
      SET p_Result = "OK";

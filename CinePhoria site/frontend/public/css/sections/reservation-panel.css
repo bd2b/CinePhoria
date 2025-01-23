@@ -118,12 +118,17 @@ display: block;
     border-radius: 20px;
 }
 
-.seances__cardseance.selected {
+.seances__cardseance-selected {
 /* Auto layout */
 background: linear-gradient(180deg, #E4E2E2 0%, #FFFFFF 100%);
 border: 3px solid #2C3E50;
 }
 
+.seances__cardseance-selected:hover {
+    /* Auto layout */
+    background: linear-gradient(180deg, #E4E2E2 0%, #FFFFFF 100%);
+    border: 3px solid #2C3E50;
+    }
 
 
 [class*="cardseance__"] {
@@ -334,14 +339,7 @@ border-radius: 12px;
     gap: 20px;
 }
 
-/* desactive le hover du panel choix */
-.seances__cardseance-selected:hover {
-    border: 2px solid rgb(var(--primary-color) , 0.2);
-}
-.seances__cardseance-selected {
-    border: 2px solid rgb(var(--success-color) , 0.8);
 
-}
 
 
 .reserve__form {
