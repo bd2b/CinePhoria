@@ -1,6 +1,6 @@
 import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { getCookie, setCookie } from './Helpers.js';
-import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD } from './Helpers.js';
+import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID } from './Helpers.js';
 import { DataController, ReservationState } from './DataController.js';
 import { Film } from './shared-models/Film.js';
 
@@ -14,6 +14,7 @@ let dataController: DataController
  */
 document.addEventListener('DOMContentLoaded', async () => {
   console.log("Traitement de DOMContentLoaded");
+
   /**
    * Initialisation
    */
@@ -66,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
 
   // Mise a jour de la page
-  updateContentPage(dataController);
+  await updateContentPage(dataController);
 
   // Verification dataController
   console.log(`dataController.nameCinema = ${dataController.nameCinema} nombre de séances = ${dataController.allSeances.length}`);
@@ -122,6 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
+
 /**
  * Fonction de mise à jour de la page
  * @param dataController 
@@ -160,6 +162,7 @@ export async function updateContentPage(dataController: DataController) {
   console.log("UCP 6 - Detail du film selectionné affichés");
 
   if (dataController.reservationState === ReservationState.PendingChoiceSeance) {
+    console.log("ETAT : choix de la séance");
     // Composer la ligne de tabulation du panel de choix des séances
     afficherSemaines(dataController);
     console.log("UCP 7 - Lignes de tabulation des jours affichées");
@@ -167,30 +170,365 @@ export async function updateContentPage(dataController: DataController) {
     afficherSeancesDuJour(dataController, new Date(seancesFilm[0].dateJour || ''));
     console.log(`UCP 8 - Séances affichées pour ${activeSelectedFilm.titleFilm} le ${new Date(seancesFilm[0].dateJour || '')}`);
   } else if (dataController.reservationState = ReservationState.PendingChoiceSeats) {
-    // On met a jour le panel de choix des places
-    // Mise à jour de la seance selectionnée
-    const container = document.querySelector('.panel__reserve');
-    if (!container) return;
-    if (container.firstChild) {
-      console.log("remplacement");
-     const first = container.firstChild;
-      const seanceSelectionnee = seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate!)
-      container.replaceChild(seanceSelectionnee, first);
-      container.appendChild(seanceSelectionnee);
-      container.insertBefore(seanceSelectionnee,first );
+
+    console.log("ETAT : choix des places");
+    // 1) Mettre à jour le bloc .seances__cardseance seances__cardseance-selected
+    //    pour afficher la séance choisie
+
+    const containerSelectedSeance = document.getElementById('seances__cardseance-selected');
+    // const containerSelectedSeance = document.querySelector('.seances__cardseance-selected');
+    if (!containerSelectedSeance) {
+      console.log("Pas de carte selectionnée")
+      return;
     }
-    
-    // Affichage du tableau de tarifs
+    const selectedSeance = seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate!, "seances__cardseance-selected")
+    containerSelectedSeance.replaceWith(selectedSeance);
+
+
+    // 2) Afficher le tableau de tarifs selon la qualite
     const containerTable = document.querySelector('.commande__tabtarif');
     if (!containerTable) return;
     containerTable.innerHTML = '';
     const qualiteFilm = dataController.seanceSelected().qualite;
     if (qualiteFilm) containerTable.appendChild(updateTableContent(qualiteFilm));
-    
 
-    // Affichage des boutons : changer de séance et je confirme ma reservation
+    // 3) Gestion du bouton "Changer de séance" -> basculerPanelChoix()
+    const btnChanger = document.querySelector('.panel__changer-button') as HTMLButtonElement;
+    if (btnChanger) {
+      btnChanger.addEventListener('click', (evt: MouseEvent) => {
+        evt.preventDefault();
+        evt.stopPropagation();
+        basculerPanelChoix();
+      });
+    }
+    // 4) Gestion du bouton "Je réserve"
+    setReservation();
+  }
+
+  function setReservation() {
+    const btnReserve = document.querySelector('.panel__jereserve-button') as HTMLButtonElement;
+    btnReserve.textContent = "Je choisis ces places";
+    if (btnReserve) {
+      btnReserve.addEventListener('click', async (evt: MouseEvent) => {
+        evt.preventDefault();
+        evt.stopPropagation();
+
+        // a) Récupérer le nombre total de places et la répartition par tarif
+        const { totalPlaces, tarifSeatsMap } = collectTarifSeatsAndTotal('.tabtarif__commande-table');
+        console.log(`Nombre de places total = ${totalPlaces}, Répartition = ${tarifSeatsMap}`);
+
+        // b) Récupérer la valeur PMR
+        const pmrSeats = collectPMR('.commande__pmr');
+        console.log(`Nombre de PMR = ${pmrSeats}`);
+
+        // c) Récupérer l'email
+        const email = collectEmail('.commande__mail-input');
+        console.log(`email = ${email}`);
+
+        // d) Vérifications
+        if (totalPlaces < 1) {
+          alert('Vous devez sélectionner au moins une place.');
+          return;
+        }
+        if (!email) {
+          alert('Veuillez renseigner un email valide.');
+          return;
+        }
+
+        // e) Appel à l’API /api/reservation
+        try {
+          const seanceId = dataController.seanceSelected().seanceId;
+          // Construction du body
+          const body = {
+            email,
+            seanceId,
+            tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
+            pmrSeats
+          };
+
+          const response = await fetch('http://localhost:3500/api/reservation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+
+          if (!response.ok) {
+            const errData = await response.json();
+            alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
+            return;
+          }
+
+          // Réponse OK -> { statut, utilisateurId, reservationId }
+          const { statut, utilisateurId, reservationId } = await response.json();
+
+          // f) Contrôles de cohérence
+          //   - Vérifier seanceId identique
+          //   - Vérifier si utilisateurId est un UUID
+          //   - Gérer statut
+          let messageError = "";
+          if (!isUUID(reservationId)) {
+            messageError += `ReservationID invalide.`;
+          }
+          if (!isUUID(utilisateurId)) {
+            messageError += `UtilisateurId invalide.`;
+          }
+          if (statut == 'NA') {
+            messageError = `Une erreur s'est produite côté serveur (NA).`;
+          }
+          if (utilisateurId.startsWith('Erreur')) {
+            messageError += " Erreur utilisateur : " + utilisateurId;
+          }
+          if (reservationId.startsWith('Erreur')) {
+            messageError += " Erreur reservation : " + reservationId;
+          }
+          if (messageError !== "") {
+            alert(`Une erreur s'est produite : ${messageError}`);
+            return;
+          }
+
+          dataController.selectedUtilisateurUUID = utilisateurId;
+          dataController.selectedReservationUUID = reservationId;
+
+          switch (statut) {
+            case 'Compte Provisoire':
+              // L'email est inconnu -> compte créé en provisoire
+              console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
+              confirmMail(dataController, email);
+              break;
+
+            case 'Compte Confirme':
+              // L'email correspond à un compte valide
+              console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
+              //  loginWithEmail(dataController, email);
+              break;
+
+            default:
+              // Cas imprévu
+              alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
+              break;
+          }
+
+        } catch (error: any) {
+          console.error('Erreur lors de la création de la réservation', error);
+          alert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
+        }
+      });
+    }
   }
 }
+
+/** 
+ * Récupère le total de places et la répartition par tarif 
+ * @param tableSelector Sélecteur de la table (.tabtarif__commande-table)
+ * @return { totalPlaces, tarifSeatsMap } 
+ *    - totalPlaces : somme des places
+ *    - tarifSeatsMap : objet { [tarifId]: numberOfSeats }
+ */
+function collectTarifSeatsAndTotal(tableSelector: string) {
+  const table = document.querySelector(tableSelector) as HTMLTableElement | null;
+  let totalPlaces = 0;
+  const tarifSeatsMap: Record<string, number> = {};
+
+  if (!table) return { totalPlaces: 0, tarifSeatsMap };
+
+  // Hypothèse : on stocke l'ID du tarifQualite dans un data-attribute 
+  // => <tr data-tarifid="xxx"> ...
+  const rows = table.querySelectorAll('tr.body__content-tr');
+  rows.forEach((row) => {
+    const tarifId = (row as HTMLElement).dataset['tarifid'] || '';
+    console.log("TarifId = ", tarifId);
+    const spanPlace = row.querySelector('.num__num-span#num__place') as HTMLSpanElement | null;
+    const quantity = spanPlace ? parseInt(spanPlace.textContent ?? '0', 10) : 0;
+    if (quantity > 0 && tarifId) {
+      tarifSeatsMap[tarifId] = quantity;
+    }
+    totalPlaces += quantity;
+  });
+  return { totalPlaces, tarifSeatsMap };
+}
+
+/**
+ * Récupère le nombre PMR dans .commande__pmr
+ */
+function collectPMR(selector: string): number {
+  const pmrContainer = document.querySelector(selector);
+  if (!pmrContainer) return 0;
+  const spanPmr = pmrContainer.querySelector('.num__num-span#num__pmr') as HTMLSpanElement | null;
+  return spanPmr ? parseInt(spanPmr.textContent ?? '0', 10) : 0;
+}
+
+/**
+ * Récupère l'email
+ */
+function collectEmail(selector: string): string {
+  const input = document.querySelector(selector) as HTMLInputElement | null;
+  if (!input) return '';
+  return input.value.trim();
+}
+
+/**
+ * Récupère une chaine de caractère
+ */
+function collectString(selector: string): string {
+  const input = document.querySelector(selector) as HTMLInputElement | null;
+  if (!input) return '';
+  return input.value.trim();
+}
+
+/**
+ * Quand on reçoit "Compte Provisoire" => on exécute confirmMail
+ * - On met dataController.reservationState = ReservationState.PendingMailVerification
+ * - On affiche une modale demandant la saisie du mail et deux champs mot de passe
+ */
+function confirmMail(dataController: DataController, email: string) {
+  dataController.reservationState = ReservationState.PendingMailVerification;
+  // TODO : Afficher une modale "confirmMail"
+  //        avec :
+  //   - un texte "Pour récupérer le QRCode..."
+  //   - la resaisie de l'email
+  //   - deux champs de saisie du mot de passe
+  //   - un bouton valider "Création du compte"
+  console.log('===> confirmMail action, email =', email);
+  const modalConfirm = document.getElementById('modal-confirmMail') as HTMLDivElement | null;
+  const closeModalBtn = document.getElementById("close-confirmMail") as HTMLButtonElement | null;
+  const confirmModalBtn = document.getElementById("confirmMail-submit") as HTMLButtonElement | null;
+
+  if (modalConfirm && closeModalBtn && confirmModalBtn) {
+    modalConfirm.style.display = 'flex';
+
+    const closeModal = () => {
+      modalConfirm.style.display = 'none';
+    };
+
+    closeModalBtn.addEventListener('click', closeModal);
+
+    modalConfirm.addEventListener('click', (event: MouseEvent) => {
+      if (event.target === modalConfirm) closeModal();
+    });
+
+    confirmModalBtn.addEventListener('click', async (evt: MouseEvent) => {
+      evt.preventDefault();
+      evt.stopPropagation();
+      confirmCreationCompte();
+    });
+
+
+  } else {
+    console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal modal-confirmMail sont introuvables.');
+  }
+
+  async function confirmCreationCompte() {
+    console.log("Recupération de la modal");
+    return;
+
+    // a) Recupérer le displayName
+    const displayName = collectString('confirmMail-displayName');
+
+
+
+    // a) Récupérer le nombre total de places et la répartition par tarif
+    const { totalPlaces, tarifSeatsMap } = collectTarifSeatsAndTotal('.tabtarif__commande-table');
+    console.log(`Nombre de places total = ${totalPlaces}, Répartition = ${tarifSeatsMap}`);
+
+    // b) Récupérer la valeur PMR
+    const pmrSeats = collectPMR('.commande__pmr');
+    console.log(`Nombre de PMR = ${pmrSeats}`);
+
+    // c) Récupérer l'email
+    const email = collectEmail('.commande__mail-input');
+    console.log(`email = ${email}`);
+
+    // d) Vérifications
+    if (totalPlaces < 1) {
+      alert('Vous devez sélectionner au moins une place.');
+      return;
+    }
+    if (!email) {
+      alert('Veuillez renseigner un email valide.');
+      return;
+    }
+
+    // e) Appel à l’API /api/reservation
+    try {
+      const seanceId = dataController.seanceSelected().seanceId;
+      // Construction du body
+      const body = {
+        email,
+        seanceId,
+        tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
+        pmrSeats
+      };
+
+      const response = await fetch('http://localhost:3500/api/reservation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
+        return;
+      }
+
+      // Réponse OK -> { statut, utilisateurId, reservationId }
+      const { statut, utilisateurId, reservationId } = await response.json();
+
+      // f) Contrôles de cohérence
+      //   - Vérifier seanceId identique
+      //   - Vérifier si utilisateurId est un UUID
+      //   - Gérer statut
+      let messageError = "";
+      if (!isUUID(reservationId)) {
+        messageError += `ReservationID invalide.`;
+      }
+      if (!isUUID(utilisateurId)) {
+        messageError += `UtilisateurId invalide.`;
+      }
+      if (statut == 'NA') {
+        messageError = `Une erreur s'est produite côté serveur (NA).`;
+      }
+      if (utilisateurId.startsWith('Erreur')) {
+        messageError += " Erreur utilisateur : " + utilisateurId;
+      }
+      if (reservationId.startsWith('Erreur')) {
+        messageError += " Erreur reservation : " + reservationId;
+      }
+      if (messageError !== "") {
+        alert(`Une erreur s'est produite : ${messageError}`);
+        return;
+      }
+
+      dataController.selectedUtilisateurUUID = utilisateurId;
+      dataController.selectedReservationUUID = reservationId;
+
+      switch (statut) {
+        case 'Compte Provisoire':
+          // L'email est inconnu -> compte créé en provisoire
+          console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
+          confirmMail(dataController, email);
+          break;
+
+        case 'Compte Confirme':
+          // L'email correspond à un compte valide
+          console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
+          //  loginWithEmail(dataController, email);
+          break;
+
+        default:
+          // Cas imprévu
+          alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
+          break;
+      }
+
+    } catch (error: any) {
+      console.error('Erreur lors de la création de la réservation', error);
+      alert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
+    }
+  }
+}
+
+
 
 /**
 * Trouve un film « le plus récent + meilleure note » à partir d'un tableau de séances
@@ -272,7 +610,7 @@ function afficherListeFilms(dataController: DataController): void {
       dataController.selectedFilmUUID = film.id;
 
       // Rafraîchir la page ou effectuer des actions supplémentaires
-      updateContentPage(dataController);
+      // updateContentPage(dataController);
 
       // Basculer vers le panel choix
       basculerPanelChoix();
@@ -525,11 +863,11 @@ function afficherSeancesDuJour(dataController: DataController, dateSelectionnee:
 
   // Générer les cartes de séances
   console.log("Film = ", seancesFilmDuJour[0].titleFilm, " / nombre de seances = ", seancesFilmDuJour.length, " / date = ", formatDateLocalYYYYMMDD(dateSelectionnee));
-  seancesFilmDuJour.forEach(seance => {
 
+  seancesFilmDuJour.forEach(seance => {
     // Générer la card
     const card = seanceCardView(seance, dateSelectionnee);
-
+    card.classList.remove("seances__cardseance-selected");
 
     // Au clic sur la séance => exemple : basculer sur panel__reserve
     card.addEventListener('click', () => {
@@ -537,36 +875,36 @@ function afficherSeancesDuJour(dataController: DataController, dateSelectionnee:
       // Suppression de la selection dans les séances
       const panelSeances = document.querySelector('.panel__seances');
       if (panelSeances) {
-        const seances = panelSeances.querySelectorAll(".seances__cardseance");
+        const seances = panelSeances.querySelectorAll(".seances__cardseance-selected");
         seances.forEach(seanceItem => {
-          seanceItem.classList.remove("selected");
+          console.log(`Suppression la class selected `);
+          seanceItem.classList.remove("seances__cardseance-selected");
         });
       }
       // Ajout de la selection sur la seancecourante
-      card.classList.add('selected');
+      card.classList.add('seances__cardseance-selected');
 
       // Memorisation de la seance
       dataController.selectedSeanceUUID = seance.seanceId;
+      console.log("SeanceId selectionnee = " + dataController.selectedSeanceUUID + ", seance = " + JSON.stringify(dataController.seanceSelected()));
 
-      // Changement du libelle du bouton
+
+      // Changement du libelle du bouton 
       const buttonPanel = document.getElementById("panel__choixseance-button");
       if (buttonPanel) {
-        buttonPanel.classList.remove("inactif");
-        buttonPanel.textContent = "Je réserve !";
+        // Remplacer l'élément par une copie de lui-même (supprime les écouteurs existants)
+        const newButtonPanel = buttonPanel.cloneNode(true) as HTMLElement;
+        newButtonPanel.classList.remove("inactif");
+        newButtonPanel.textContent = "Je réserve pour cette séance !";
+        buttonPanel.replaceWith(newButtonPanel);
         // Configuration du passage à l'étape de choix des places
-        buttonPanel.addEventListener('click', () => {
-          basculerPanelReserve();
-          
-          // On change l'état
-          dataController.reservationState = ReservationState.PendingChoiceSeats
 
-          // On met a jour la page
-          updateContentPage(dataController);
-
+        newButtonPanel.addEventListener('click', () => {
+          if (buttonPanel) {
+            basculerPanelReserve();
+          }
         })
       }
-
-      // basculerPanelReserve(seance);
     });
 
     panelChoix.appendChild(card);
@@ -578,10 +916,14 @@ function afficherSeancesDuJour(dataController: DataController, dateSelectionnee:
  * @param seance  
  * @returns HTMLDivElement reprenant toute la présentation de la séance
  */
-function seanceCardView(seance: Seance, dateSelectionne: Date): HTMLDivElement {
+function seanceCardView(seance: Seance, dateSelectionne: Date, id: string = ""): HTMLDivElement {
   const card = document.createElement('div') as HTMLDivElement;
   card.classList.add('seances__cardseance');
   card.classList.add('seances__cardseance-selected');
+  // Ajout d'un id si fournit en parametre
+  if (id !== "") {
+    card.id = id;
+  }
 
   // === Horaire ===
   const horaireDiv = document.createElement('div');
@@ -650,6 +992,8 @@ function basculerPanelReserve() {
   if ((panelChoix) && (panelReservation)) {
     panelChoix.style.display = 'none';
     panelReservation.style.display = 'flex';
+    dataController.reservationState = ReservationState.PendingChoiceSeats
+    updateContentPage(dataController);
   }
 }
 
@@ -662,6 +1006,8 @@ function basculerPanelChoix() {
   if ((panelChoix) && (panelReservation)) {
     panelChoix.style.display = 'block';
     panelReservation.style.display = 'none';
+    dataController.reservationState = ReservationState.PendingChoiceSeance;
+    updateContentPage(dataController);
   }
 
 }
@@ -673,7 +1019,7 @@ function basculerPanelChoix() {
  * @param qualite La valeur de qualite à filtrer (ex: "3D", "4DX", etc.)
  * @returns Un élément <table> 
  */
-export function updateTableContent(qualite: string): HTMLTableElement {
+function updateTableContent(qualite: string): HTMLTableElement {
   // 1) Créer l'élément <table> et sa structure de base
   const table = document.createElement('table');
   table.classList.add('tabtarif__commande-table');
@@ -716,6 +1062,8 @@ export function updateTableContent(qualite: string): HTMLTableElement {
   let lineIndex = 1;
   filteredTarifs.forEach((tarif) => {
     const tr = document.createElement('tr');
+
+    tr.setAttribute('data-tarifid', tarif.id);
     tr.classList.add('body__content-tr');
 
     // Colonne #

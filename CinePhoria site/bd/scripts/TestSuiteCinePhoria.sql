@@ -6,17 +6,18 @@ DELIMITER $$
 CREATE PROCEDURE Test_CheckAvailabilityAndReserve()
 
 -- CREATE PROCEDURE CheckAvailabilityAndReserve(
---     IN p_email VARCHAR(100),
---     IN p_SeanceId VARCHAR(100),
---     IN p_UtilisateurId VARCHAR(100),
---     IN p_TarifSeats JSON,
---     IN p_PMRSeats INT,
---     OUT p_Result VARCHAR(255) -- Chaine ("StatutEmail", "StatutReservation")
+--    IN p_email VARCHAR(100),
+--    IN p_SeanceId VARCHAR(100),
+--    IN p_TarifSeats JSON,
+--    IN p_PMRSeats INT,
+--    OUT p_Result VARCHAR(255) -- Chaine ("StatutEmail", "StatutReservation")
 -- )
--- -- Création d'une reservation avec des places sur tarif et un nombre de place PMR
--- -- La reservation doit etre confirmée en mettant à null timeStampCreate
--- -- Resultat = chaine de caractere composé de utilisateurId et de reservationId ou d'un chaine de caractère avec Erreur :
-
+-- Création d'une reservation avec des places sur tarif et un nombre de place PMR
+-- La reservation doit etre confirmée en mettant à null timeStampCreate
+-- Resultat = chaine de caractere composé de 
+-- statut, utilisateurId et de reservationId dans lequel statut= 'Compte Provisoire' ou 'Compte Confirme' 
+-- ou d'un chaine de caractère avec Erreur :
+-- Suppression du parametre utilisateurID : si le mail n'existe pas dans compte, on cree un utilisateur a la volee
 BEGIN
 
 DECLARE v_ResultTest VARCHAR(100) DEFAULT "";
@@ -42,8 +43,9 @@ DECLARE v_numCount INT DEFAULT 0;
 
 CALL LogTrace("Test_CheckAvailabilityAndReserve - debut");
 
+-- Cas1 : l'utilisateur existe mais n'est pas confirme
 -- Creation de l'utilisateur
-set v_email = CONCAT(UUID(),"&gmail.com");
+set v_email = CONCAT(UUID(),"@gmail.com");
 CALL CreateUtilisateur( v_email, "password", "Zorro", v_Result);
 set v_UtilisateurId = v_Result;
 
@@ -73,23 +75,24 @@ END IF;
 set v_TarifSeats =CONCAT(v_TarifSeats,'}');
 
 set v_PMRSeats = 0;
-call CheckAvailabilityAndReserve( v_email, v_SeanceId, v_UtilisateurId, v_TarifSeats, v_PMRSeats, v_Result);
--- Verification que l'on a un resultat compose de deux UUID separé par une ,
+call CheckAvailabilityAndReserve( v_email, v_SeanceId, v_TarifSeats, v_PMRSeats, v_Result);
+-- Verification que l'on a un resultat compose du statut Provisoire et de deux UUID separé par une ,
 set v_conforme = (
 SELECT v_Result
-REGEXP '^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12},[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' AS v_IsValid
+REGEXP '^Compte Provisoire,[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12},[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' AS v_IsValid
 )
 ;
+
 IF v_conforme = 1 THEN
 	SET v_ResultTest = "OK";
 ELSE
 	SET v_ResultTest = "KO";
-    call LogTrace(CONCAT("Erreur = ",v_Result));
+    call LogTrace(CONCAT("Test_CheckAvailabilityAndReserve : Erreur = ",v_Result));
     LEAVE block_procedure;
 END IF;
 
 -- Verification de la creation de reservation et des SeatsForTarif
-set v_newReservation = SUBSTRING_INDEX(SUBSTRING_INDEX(v_Result, ',', 2), ',', -1);
+set v_newReservation = SUBSTRING_INDEX(SUBSTRING_INDEX(v_Result, ',', 3), ',', -1);
 
 set v_numCount = 0;
 SET v_numCount = (select count(*) from Reservation where id = v_newReservation);
@@ -106,6 +109,47 @@ if v_numCount = 0 then
 	CALL LogTrace("Test_CheckAvailabilityAndReserve : SeatsForTarif cree =  KO");
     LEAVE block_procedure;
 end if;
+
+-- cas 2 l'utilisateur existe mais est confirme
+
+call confirmUtilisateur(v_UtilisateurId, v_Result);
+if v_Result <> "OK" then
+	SET v_ResultTest = "KO";
+	CALL LogTrace("Test_CheckAvailabilityAndReserve : Cas 2 confirmation utilisateur =  KO");
+    LEAVE block_procedure;
+end if;
+call CheckAvailabilityAndReserve( v_email, v_SeanceId, v_TarifSeats, v_PMRSeats, v_Result);
+
+-- Verification que l'on a un resultat compose du statut confirme et de deux UUID separé par une ,
+set v_conforme = (
+SELECT v_Result
+REGEXP '^Compte Confirme,[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12},[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' AS v_IsValid
+)
+;
+IF v_conforme = 1 THEN
+	SET v_ResultTest = "OK";
+ELSE
+	SET v_ResultTest = "KO";
+    call LogTrace(CONCAT("Test_CheckAvailabilityAndReserve : Cas 2 reponse non conforme  =  KO",v_Result));
+    LEAVE block_procedure;
+END IF;
+
+-- cas 3 l'utilisateur n'existe pas
+call CheckAvailabilityAndReserve( CONCAT(UUID(),'@gmail2.com'), v_SeanceId, v_TarifSeats, v_PMRSeats, v_Result);
+
+-- Verification que l'on a un resultat compose du statut Provisoire et de deux UUID separé par une ,
+set v_conforme = (
+SELECT v_Result
+REGEXP '^Compte Provisoire,[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12},[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$' AS v_IsValid
+)
+;
+IF v_conforme = 1 THEN
+	SET v_ResultTest = "OK";
+ELSE
+	SET v_ResultTest = "KO";
+    call LogTrace(CONCAT("Test_CheckAvailabilityAndReserve : Cas 3 reponse non conforme  =  KO",v_Result));
+    LEAVE block_procedure;
+END IF;
 
 END block_procedure;
 

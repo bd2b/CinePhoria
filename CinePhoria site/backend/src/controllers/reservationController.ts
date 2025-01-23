@@ -7,10 +7,10 @@ import { ReservationDAO } from '../dao/reservationDAO';
 export class ReservationController {
   static async createReservation(req: Request, res: Response): Promise<void> {
     try {
-      const { email, seanceId, utilisateurId, tarifSeats, pmrSeats } = req.body;
+      const { email, seanceId, tarifSeats, pmrSeats } = req.body;
 
       // Validation des données d'entrée
-      if (!email || !seanceId || !utilisateurId || !tarifSeats || pmrSeats === undefined) {
+      if (!email || !seanceId || !tarifSeats || pmrSeats === undefined) {
         res.status(400).json({ message: 'Données manquantes ou invalides.' });
         return;
       }
@@ -19,7 +19,6 @@ export class ReservationController {
       const result = await ReservationDAO.checkAvailabilityAndReserve(
         email,
         seanceId,
-        utilisateurId,
         tarifSeats,
         pmrSeats
       );
@@ -28,9 +27,9 @@ export class ReservationController {
       if (result.startsWith('Erreur')) {
         res.status(400).json({ message: result });
       } else {
-        const [utilisateurId, reservationId] = result.split(',');
-        res.status(201).json({ utilisateurId, reservationId });
-        logger.info("Resultat =", [utilisateurId, reservationId]);
+        const [statut , utilisateurId, reservationId] = result.split(',');
+        res.status(201).json({ statut, utilisateurId, reservationId });
+        logger.info("Resultat =", [statut, utilisateurId, reservationId]);
       }
     } catch (error) {
       console.error('Erreur dans createReservation:', error);

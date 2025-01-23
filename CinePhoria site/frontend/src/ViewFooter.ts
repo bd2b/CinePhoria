@@ -28,7 +28,7 @@ async function chargerCinemaSites() {
   footerElement.offsetHeight; // Force un reflow
 
     try {
-      const response = await fetch('http://localhost:3000/api/cinemas');
+      const response = await fetch('http://localhost:3500/api/cinemas');
       const cinemas: Cinema[] = await response.json();
   
       const container = document.getElementById('container__sites');

@@ -25,21 +25,25 @@ import { updateContentPage } from './ViewReservation.js'
 export enum ReservationState {
     PendingChoiceSeance = "PendingChoiceSeance",    // Choix de seance en cours , le panel choix est affiché
     PendingChoiceSeats = "PendingChoiceSeats",      // Choix de tarifs en cours, le panel reserve est affiché
-    Reserved = "Reserved",                          // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués)
+    ReserveToConfirm = "ReserveToConfirm",                          // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués)
     Confirmed = "Confirmed",                        // La reservation est confirmé, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
     PendingMailVerification = "PendingMailVerification" // La reservation est enregistree, il y a assez de place (sieges et PMR) mais l'email doit etre enregistre
-  }
+}
 
 export class DataController {
 
     private _reservationState: ReservationState = ReservationState.PendingChoiceSeance;
     private _seances: Seance[] = [];
     private _films: Film[] = [];
-    private _tarifQualite: TarifQualite[] =[];
+    private _tarifQualite: TarifQualite[] = [];
     private _nameCinema: string;
     private _selectedFilmUUID?: string; // UUID du film actuellement selectionne
     private _selectedSeanceDate?: Date; // date du jour actuellement selectionnee
     private _selectedSeanceUUID?: string | undefined // UUID de la séance selectionnée
+    private _selectedUtilisateurUUID?: string | undefined // UUID de l'utilisateur
+    private _selectedReservationUUID?: string | undefined // UUID de la reservation
+
+
 
     private static validiteCache: number = 1; // Apres validiteCache heure on force le rechargement des données
     private static nomCookieDateAccess: string = 'dateAccess'; // Nom du cookie pour stocker la date de mise à jour
@@ -55,7 +59,7 @@ export class DataController {
     public set reservationState(value: ReservationState) {
         this._reservationState = value;
     }
-    
+
     // Getter pour toutes les séances
     get allSeances(): Seance[] {
         return this._seances;
@@ -145,6 +149,25 @@ export class DataController {
         this._selectedSeanceUUID = value;
     }
 
+    // Getter pour selectedUtilisateurUUID
+    public get selectedUtilisateurUUID(): string | undefined {
+        return this._selectedUtilisateurUUID || undefined;
+    }
+
+    // Setter pour selectedUtilisateurUUID
+    public set selectedUtilisateurUUID(value: string | undefined) {
+        this._selectedUtilisateurUUID = value;
+    }
+
+    // Getter pour selectedReservationUUID
+    public get selectedReservationUUID(): string | undefined {
+        return this._selectedReservationUUID || undefined;
+    }
+
+    // Setter pour selectedReservationUUID
+    public set selectedReservationUUID(value: string | undefined) {
+        this._selectedReservationUUID = value;
+    }
 
     constructor(nameCinema: string) {
         this._nameCinema = nameCinema;
@@ -159,11 +182,11 @@ export class DataController {
             }
         }
         if (saved && !mustReload) {
-            this.charger() 
+            this.charger()
             this.extractFilmsFromSeances();
             console.log(`Utilisation du stockage local : ${this._seances.length} séances, ${this._films.length} films`);
             console.log(`Utilisation du stockage local : ${this._tarifQualite.length} tarifs`);
-            
+
         }
     }
 
@@ -172,7 +195,7 @@ export class DataController {
         try {
 
             if (this._nameCinema !== "Selectionnez un cinema") {
-                const response = await fetch(`http://localhost:3000/api/seances/filter?cinemasList="${this.nameCinema}"`);
+                const response = await fetch(`http://localhost:3500/api/seances/filter?cinemasList="${this.nameCinema}"`);
                 const rawData = await response.json();
 
                 if (!Array.isArray(rawData)) {
@@ -183,9 +206,9 @@ export class DataController {
                 this._seances = rawData.map((d: any) => new Seance(d));
                 this.extractFilmsFromSeances();
                 console.log(`Pour ${this.nameCinema} : chargement depuis l'API : ${this._seances.length} séances, ${this._films.length} films`);
-                
+
                 // On recupere les tarifs
-                const responseTarif = await fetch(`http://localhost:3000/api/seances/tarif`);
+                const responseTarif = await fetch(`http://localhost:3500/api/seances/tarif`);
                 const rawDataTarif = await responseTarif.json();
 
                 if (!Array.isArray(rawDataTarif)) {
@@ -256,7 +279,7 @@ export class DataController {
         return this._seances.filter((s) =>
             s.filmId === filmId &&
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) >= formatDateLocalYYYYMMDD(dateDeb) &&
-            formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) < formatDateLocalYYYYMMDD(ajouterJours(dateDeb,nombreJours))
+            formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) < formatDateLocalYYYYMMDD(ajouterJours(dateDeb, nombreJours))
         );
     }
 
@@ -307,7 +330,7 @@ export class DataController {
         const film = this._films.find((film) => {
             return film.id == filmId;
         });
-        
+
 
         if (!film) {
             console.error("filmUUID : Film non trouvé, premier film pris");
@@ -335,16 +358,16 @@ export class DataController {
 
     public charger(): void {
         const saved = localStorage.getItem(DataController.nomStorage);
-    
+
         if (saved) {
             const parsed = JSON.parse(saved);
-    
+
             // Restaurer les séances
             this._seances = (parsed.seances || []).map((s: any) => ({
                 ...s,
                 date: new Date(s.date) // Convertir les dates en objets `Date`
             }));
-    
+
             // Restaurer les films
             this._tarifQualite = parsed.tarifQualite || [];
         } else {

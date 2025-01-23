@@ -33,7 +33,7 @@ export var ReservationState;
 (function (ReservationState) {
     ReservationState["PendingChoiceSeance"] = "PendingChoiceSeance";
     ReservationState["PendingChoiceSeats"] = "PendingChoiceSeats";
-    ReservationState["Reserved"] = "Reserved";
+    ReservationState["ReserveToConfirm"] = "ReserveToConfirm";
     ReservationState["Confirmed"] = "Confirmed";
     ReservationState["PendingMailVerification"] = "PendingMailVerification"; // La reservation est enregistree, il y a assez de place (sieges et PMR) mais l'email doit etre enregistre
 })(ReservationState || (ReservationState = {}));
@@ -120,6 +120,22 @@ export class DataController {
     set selectedSeanceUUID(value) {
         this._selectedSeanceUUID = value;
     }
+    // Getter pour selectedUtilisateurUUID
+    get selectedUtilisateurUUID() {
+        return this._selectedUtilisateurUUID || undefined;
+    }
+    // Setter pour selectedUtilisateurUUID
+    set selectedUtilisateurUUID(value) {
+        this._selectedUtilisateurUUID = value;
+    }
+    // Getter pour selectedReservationUUID
+    get selectedReservationUUID() {
+        return this._selectedReservationUUID || undefined;
+    }
+    // Setter pour selectedReservationUUID
+    set selectedReservationUUID(value) {
+        this._selectedReservationUUID = value;
+    }
     constructor(nameCinema) {
         this._reservationState = ReservationState.PendingChoiceSeance;
         this._seances = [];
@@ -148,7 +164,7 @@ export class DataController {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 if (this._nameCinema !== "Selectionnez un cinema") {
-                    const response = yield fetch(`http://localhost:3000/api/seances/filter?cinemasList="${this.nameCinema}"`);
+                    const response = yield fetch(`http://localhost:3500/api/seances/filter?cinemasList="${this.nameCinema}"`);
                     const rawData = yield response.json();
                     if (!Array.isArray(rawData)) {
                         throw new Error('La réponse de l’API n’est pas un tableau.');
@@ -158,7 +174,7 @@ export class DataController {
                     this.extractFilmsFromSeances();
                     console.log(`Pour ${this.nameCinema} : chargement depuis l'API : ${this._seances.length} séances, ${this._films.length} films`);
                     // On recupere les tarifs
-                    const responseTarif = yield fetch(`http://localhost:3000/api/seances/tarif`);
+                    const responseTarif = yield fetch(`http://localhost:3500/api/seances/tarif`);
                     const rawDataTarif = yield responseTarif.json();
                     if (!Array.isArray(rawDataTarif)) {
                         throw new Error('La réponse de l’API n’est pas un tableau.');
