@@ -1,8 +1,6 @@
 import { Request, Response } from 'express';
-import { SeanceDAO } from '../dao/SeanceDAO';
 import logger from '../config/configLog';
-
-import { ReservationDAO } from '../dao/reservationDAO';
+import { ReservationDAO } from '../dao/ReservationDAO';
 
 export class ReservationController {
   static async createReservation(req: Request, res: Response): Promise<void> {

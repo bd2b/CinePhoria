@@ -405,10 +405,13 @@ function confirmMail(dataController: DataController, email: string) {
     modalConfirm.addEventListener('click', (event: MouseEvent) => {
       if (event.target === modalConfirm) closeModal();
     });
-
+    // Appel de la fonction de gestion du formulaire 
+    gestionFormulaire();
     confirmModalBtn.addEventListener('click', async (evt: MouseEvent) => {
       evt.preventDefault();
       evt.stopPropagation();
+
+      
       confirmCreationCompte();
     });
 
@@ -417,114 +420,177 @@ function confirmMail(dataController: DataController, email: string) {
     console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal modal-confirmMail sont introuvables.');
   }
 
-  async function confirmCreationCompte() {
+  async function gestionFormulaire() {
+
+    // Sélection des éléments du formulaire avec un typage strict
+
+    const displayNameInput = document.getElementById('confirmMail-displayName') as HTMLInputElement;
+    const emailInput = document.getElementById('confirmMail-email') as HTMLInputElement;
+    const password1Input = document.getElementById('confirmMail-password1') as HTMLInputElement;
+    const password2Input = document.getElementById('confirmMail-password2') as HTMLInputElement;
+    const submitButton = document.getElementById('confirmMail-submit') as HTMLButtonElement;
+    const emailError = document.getElementById('email-error') as HTMLSpanElement;
+    const passwordError = document.getElementById('password-error') as HTMLSpanElement;
+
+    /**
+     * Vérifie la validité d'un email.
+     * @param email - L'email à valider.
+     * @returns boolean - True si l'email est valide, sinon False.
+     */
+    function validateEmail(email: string): boolean {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+      return emailRegex.test(email);
+    }
+
+    /**
+     * Vérifie si les mots de passe sont identiques.
+     * @returns boolean - True si les mots de passe correspondent, sinon False.
+     */
+    function passwordsMatch(): boolean {
+      return password1Input.value === password2Input.value && password1Input.value.length > 0;
+    }
+
+    /**
+     * Vérifie si tous les champs sont remplis.
+     * @returns boolean - True si tous les champs sont remplis, sinon False.
+     */
+    function areAllFieldsFilled(): boolean {
+      return (
+        displayNameInput.value.trim() !== "" &&
+        emailInput.value.trim() !== "" &&
+        password1Input.value.trim() !== "" &&
+        password2Input.value.trim() !== ""
+      );
+    }
+
+    /**
+     * Valide l'ensemble du formulaire et active/désactive le bouton de soumission.
+     */
+    function validateForm(): void {
+      const emailValid = validateEmail(emailInput.value);
+      const passwordsAreValid = passwordsMatch();
+      const fieldsFilled = areAllFieldsFilled();
+      // Activation/désactivation du bouton de soumission
+      submitButton.disabled = !(emailValid && passwordsAreValid && fieldsFilled);
+    }
+
+    // Gestion du message d'erreur pour l'email lors du blur (perte de focus)
+    emailInput.addEventListener('blur', () => {
+      if (!validateEmail(emailInput.value)) {
+        emailError.textContent = "Email invalide (exemple: utilisateur@domaine.com)";
+        emailError.style.color = "red";
+      } else {
+        emailError.textContent = "";
+      }
+    });
+
+    // Gestion du message d'erreur pour les mots de passe lors du blur
+    password2Input.addEventListener('blur', () => {
+      if (!passwordsMatch()) {
+        passwordError.textContent = "Les mots de passe ne correspondent pas.";
+        passwordError.style.color = "red";
+      } else {
+        passwordError.textContent = "";
+      }
+    });
+
+    // Ajout d'écouteurs d'événements pour la validation en temps réel
+    displayNameInput.addEventListener('input', validateForm);
+    emailInput.addEventListener('input', validateForm);
+    password1Input.addEventListener('input', validateForm);
+    password2Input.addEventListener('input', validateForm);
+
+    // Gestion de la soumission du formulaire
+    submitButton.addEventListener('click', () => {
+      alert(`Compte créé avec succès ! ${displayNameInput.value.trim()} ${emailInput.value.trim()} ${password1Input.value.trim()} `);
+     });
+
+
+
+  }
+  async function confirmCreationCompte( displayName: string , email: string, password: string ) {
     console.log("Recupération de la modal");
-    return;
-
-    // a) Recupérer le displayName
-    const displayName = collectString('confirmMail-displayName');
 
 
 
-    // a) Récupérer le nombre total de places et la répartition par tarif
-    const { totalPlaces, tarifSeatsMap } = collectTarifSeatsAndTotal('.tabtarif__commande-table');
-    console.log(`Nombre de places total = ${totalPlaces}, Répartition = ${tarifSeatsMap}`);
 
-    // b) Récupérer la valeur PMR
-    const pmrSeats = collectPMR('.commande__pmr');
-    console.log(`Nombre de PMR = ${pmrSeats}`);
+    // // e) Appel à l’API /api/reservation
+    // try {
+    //   const seanceId = dataController.seanceSelected().seanceId;
+    //   // Construction du body
+    //   const body = {
+    //     email,
+    //     seanceId,
+    //     tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
+    //     pmrSeats
+    //   };
 
-    // c) Récupérer l'email
-    const email = collectEmail('.commande__mail-input');
-    console.log(`email = ${email}`);
+    //   const response = await fetch('http://localhost:3500/api/reservation', {
+    //     method: 'POST',
+    //     headers: { 'Content-Type': 'application/json' },
+    //     body: JSON.stringify(body)
+    //   });
 
-    // d) Vérifications
-    if (totalPlaces < 1) {
-      alert('Vous devez sélectionner au moins une place.');
-      return;
-    }
-    if (!email) {
-      alert('Veuillez renseigner un email valide.');
-      return;
-    }
+    //   if (!response.ok) {
+    //     const errData = await response.json();
+    //     alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
+    //     return;
+    //   }
 
-    // e) Appel à l’API /api/reservation
-    try {
-      const seanceId = dataController.seanceSelected().seanceId;
-      // Construction du body
-      const body = {
-        email,
-        seanceId,
-        tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
-        pmrSeats
-      };
+    //   // Réponse OK -> { statut, utilisateurId, reservationId }
+    //   const { statut, utilisateurId, reservationId } = await response.json();
 
-      const response = await fetch('http://localhost:3500/api/reservation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
+    //   // f) Contrôles de cohérence
+    //   //   - Vérifier seanceId identique
+    //   //   - Vérifier si utilisateurId est un UUID
+    //   //   - Gérer statut
+    //   let messageError = "";
+    //   if (!isUUID(reservationId)) {
+    //     messageError += `ReservationID invalide.`;
+    //   }
+    //   if (!isUUID(utilisateurId)) {
+    //     messageError += `UtilisateurId invalide.`;
+    //   }
+    //   if (statut == 'NA') {
+    //     messageError = `Une erreur s'est produite côté serveur (NA).`;
+    //   }
+    //   if (utilisateurId.startsWith('Erreur')) {
+    //     messageError += " Erreur utilisateur : " + utilisateurId;
+    //   }
+    //   if (reservationId.startsWith('Erreur')) {
+    //     messageError += " Erreur reservation : " + reservationId;
+    //   }
+    //   if (messageError !== "") {
+    //     alert(`Une erreur s'est produite : ${messageError}`);
+    //     return;
+    //   }
 
-      if (!response.ok) {
-        const errData = await response.json();
-        alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
-        return;
-      }
+    //   dataController.selectedUtilisateurUUID = utilisateurId;
+    //   dataController.selectedReservationUUID = reservationId;
 
-      // Réponse OK -> { statut, utilisateurId, reservationId }
-      const { statut, utilisateurId, reservationId } = await response.json();
+    //   switch (statut) {
+    //     case 'Compte Provisoire':
+    //       // L'email est inconnu -> compte créé en provisoire
+    //       console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
+    //       confirmMail(dataController, email);
+    //       break;
 
-      // f) Contrôles de cohérence
-      //   - Vérifier seanceId identique
-      //   - Vérifier si utilisateurId est un UUID
-      //   - Gérer statut
-      let messageError = "";
-      if (!isUUID(reservationId)) {
-        messageError += `ReservationID invalide.`;
-      }
-      if (!isUUID(utilisateurId)) {
-        messageError += `UtilisateurId invalide.`;
-      }
-      if (statut == 'NA') {
-        messageError = `Une erreur s'est produite côté serveur (NA).`;
-      }
-      if (utilisateurId.startsWith('Erreur')) {
-        messageError += " Erreur utilisateur : " + utilisateurId;
-      }
-      if (reservationId.startsWith('Erreur')) {
-        messageError += " Erreur reservation : " + reservationId;
-      }
-      if (messageError !== "") {
-        alert(`Une erreur s'est produite : ${messageError}`);
-        return;
-      }
+    //     case 'Compte Confirme':
+    //       // L'email correspond à un compte valide
+    //       console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
+    //       //  loginWithEmail(dataController, email);
+    //       break;
 
-      dataController.selectedUtilisateurUUID = utilisateurId;
-      dataController.selectedReservationUUID = reservationId;
+    //     default:
+    //       // Cas imprévu
+    //       alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
+    //       break;
+    //   }
 
-      switch (statut) {
-        case 'Compte Provisoire':
-          // L'email est inconnu -> compte créé en provisoire
-          console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
-          confirmMail(dataController, email);
-          break;
-
-        case 'Compte Confirme':
-          // L'email correspond à un compte valide
-          console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
-          //  loginWithEmail(dataController, email);
-          break;
-
-        default:
-          // Cas imprévu
-          alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
-          break;
-      }
-
-    } catch (error: any) {
-      console.error('Erreur lors de la création de la réservation', error);
-      alert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
-    }
+    // } catch (error: any) {
+    //   console.error('Erreur lors de la création de la réservation', error);
+    //   alert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
+    // }
   }
 }
 

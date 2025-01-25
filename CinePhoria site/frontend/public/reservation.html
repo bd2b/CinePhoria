@@ -410,29 +410,31 @@
                 <!-- Saisie du displayName -->
                 <div class="form__group">
                     <label for="confirmMail-displayName">Nom ou pseudo :</label>
-                    <input type="text" id="confirmMail-displayName" class="input__text" />
+                    <input type="text" id="confirmMail-displayName" class="input__text" required />
                 </div>
                 <!-- Saisie de l'email -->
                 <div class="form__group">
                     <label for="confirmMail-email">Email :</label>
-                    <input type="email" id="confirmMail-email" class="input__mail" />
+                    <input type="email" id="confirmMail-email" class="input__mail" required>
+                    <span id="email-error" class="error-message"></span>
                 </div>
 
                 <!-- Mot de passe 1 -->
                 <div class="form__group">
                     <label for="confirmMail-password1">Mot de passe :</label>
-                    <input type="password" id="confirmMail-password1" />
+                    <input type="password" id="confirmMail-password1" required />
                 </div>
 
                 <!-- Mot de passe 2 -->
                 <div class="form__group">
                     <label for="confirmMail-password2">Confirmer le mot de passe :</label>
-                    <input type="password" id="confirmMail-password2" />
+                    <input type="password" id="confirmMail-password2" required />
+                    <span id="password-error" class="error-message"></span>
                 </div>
 
                 <!-- Bouton de validation -->
-                <button id="confirmMail-submit" class="button button-primary">
-                    Création du compte
+                <button id="confirmMail-submit" class="button button-primary" disabled>
+                    Valider
                 </button>
             </div>
         </div>

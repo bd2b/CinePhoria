@@ -9,11 +9,12 @@ CREATE TABLE Cinema (
   ligne2      varchar(100) NOT NULL, 
   PRIMARY KEY (nameCinema));
 CREATE TABLE Compte (
-  email             varchar(100) NOT NULL, 
-  isValidated       int(1) DEFAULT 0 NOT NULL, 
-  passwordText      varchar(100), 
-  datePassword      datetime NULL comment 'Date de dernier changement du mot de passe', 
-  oldpasswordsArray longtext comment 'Liste des mots de passe deja utilise', 
+  email                 varchar(100) NOT NULL, 
+  isValidated           int(1) DEFAULT 0 NOT NULL, 
+  passwordText          varchar(100), 
+  datePassword          datetime NULL comment 'Date de dernier changement du mot de passe', 
+  oldpasswordsArray     longtext comment 'Liste des mots de passe deja utilise', 
+  dateDerniereConnexion datetime NULL, 
   PRIMARY KEY (email), 
   UNIQUE INDEX (email));
 CREATE TABLE Connexions (
