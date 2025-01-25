@@ -8,6 +8,7 @@ import filmRoutes from './routes/filmRoutes';
 import cinemaRoutes from './routes/cinemaRoutes';
 import seanceRoutes from './routes/seanceRoutes';
 import reservationRoutes from './routes/reservationRoutes';
+import utilisateurRoutes from'./routes/utilisateurRoutes';
 
 
 import loginRoutes from './routes/publicLoginRoutes';
@@ -41,7 +42,7 @@ app.use('/api/login', loginRoutes);
 app.use('/api/intranet', intranetLoginRoutes);
 app.use('/api/reservation', reservationRoutes);
 
-
+app.use('/api/utilisateur', utilisateurRoutes);
 
 
 const PORT = process.env.PORT || 3000;

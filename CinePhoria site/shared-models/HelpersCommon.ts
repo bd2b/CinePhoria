@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 
 /**
  * Fonction de hachage d'un mot de passe avec bcrypt et une valeur de salage
