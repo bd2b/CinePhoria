@@ -1,32 +1,38 @@
-import { dataController, seanceCardView, basculerPanelChoix } from './ViewReservation';
-import { ReservationState } from './DataController';
+import { dataController, seanceCardView, basculerPanelChoix } from './ViewReservation.js';
+import { ReservationState } from './DataController.js';
 import { isUUID } from './Helpers.js';
+import { TarifForSeats } from './shared-models/Reservation';
+import { reservationApi } from './NetworkController.js';
 
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
  * @returns 
  */
 export function updateContentPlace() {
-    // 1) Mettre à jour le bloc .seances__cardseance seances__cardseance-selected pour afficher la séance choisie
-    const containerSelectedSeance = document.getElementById('seances__cardseance-selected');
-    if (!containerSelectedSeance) {
-        console.log("Pas de carte selectionnée")
-        return;
-    }
-    const selectedSeance = seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate!, "seances__cardseance-selected")
-    containerSelectedSeance.replaceWith(selectedSeance);
+    try {
+        // 1) Mettre à jour le bloc .seances__cardseance seances__cardseance-selected pour afficher la séance choisie
+        const containerSelectedSeance = document.getElementById('seances__cardseance-selected');
+        if (!containerSelectedSeance) {
+            console.log("Pas de carte selectionnée")
+            return;
+        }
+        const selectedSeance = seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate!, "seances__cardseance-selected")
+        containerSelectedSeance.replaceWith(selectedSeance);
 
-    // 2) Gestion du bouton "Changer de séance" -> basculerPanelChoix()
-    const btnChanger = document.querySelector('.panel__changer-button') as HTMLButtonElement;
-    if (btnChanger) {
-        btnChanger.addEventListener('click', (evt: MouseEvent) => {
-            evt.preventDefault();
-            evt.stopPropagation();
-            basculerPanelChoix();
-        });
+        // 2) Gestion du bouton "Changer de séance" -> basculerPanelChoix()
+        const btnChanger = document.querySelector('.panel__changer-button') as HTMLButtonElement;
+        if (btnChanger) {
+            btnChanger.addEventListener('click', (evt: MouseEvent) => {
+                evt.preventDefault();
+                evt.stopPropagation();
+                basculerPanelChoix();
+            });
+        }
+        // 3) Gestion de la table des tarifs, de la saisie du nombre PMR, de la saisie de l'email et du bouton "Je reserve pour cette seance"
+        setReservation();
+    } catch (error) {
+        console.error("Erreur lors de l'affichage du content de selection des places : ", error);
     }
-    // 3) Gestion de la table des tarifs, de la saisie de l'email et du bouton "Je reserve pour cette seance"
-    setReservation();
 
 }
 
@@ -40,7 +46,13 @@ function setReservation() {
     if (qualiteFilm) containerTable.appendChild(updateTableContent(qualiteFilm));
 
     // Gere les boutons + et - du champ PMR
-    updateInputPMR();
+    const containerPMR = document.querySelector('.commande__pmr')
+    const contentPMR = updateInputPMR();
+    
+    if (!containerPMR) throw new Error("updateInputPMT");
+    containerPMR.innerHTML = '';
+    containerPMR.appendChild(contentPMR);
+
 
     // Gere la complétude de l'email avec un message d'erreur associ
     const emailInput = document.getElementById('commande__mail-input') as HTMLInputElement;
@@ -120,53 +132,8 @@ function setReservation() {
         // d) Appel à l’API /api/reservation
         try {
             const seanceId = dataController.seanceSelected().seanceId;
-            // Construction du body
-            const body = {
-                email,
-                seanceId,
-                tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
-                pmrSeats
-            };
 
-            const response = await fetch('http://localhost:3500/api/reservation', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
-
-            if (!response.ok) {
-                const errData = await response.json();
-                alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
-                return;
-            }
-
-            // Réponse OK -> { statut, utilisateurId, reservationId }
-            const { statut, utilisateurId, reservationId } = await response.json();
-
-            // f) Contrôles de cohérence
-            //   - Vérifier seanceId identique
-            //   - Vérifier si utilisateurId est un UUID
-            //   - Gérer statut
-            let messageError = "";
-            if (!isUUID(reservationId)) {
-                messageError += `ReservationID invalide.`;
-            }
-            if (!isUUID(utilisateurId)) {
-                messageError += `UtilisateurId invalide.`;
-            }
-            if (statut == 'NA') {
-                messageError = `Une erreur s'est produite côté serveur (NA).`;
-            }
-            if (utilisateurId.startsWith('Erreur')) {
-                messageError += " Erreur utilisateur : " + utilisateurId;
-            }
-            if (reservationId.startsWith('Erreur')) {
-                messageError += " Erreur reservation : " + reservationId;
-            }
-            if (messageError !== "") {
-                alert(`Une erreur s'est produite : ${messageError}`);
-                return;
-            }
+            const { statut, utilisateurId, reservationId } = await reservationApi(email, seanceId, tarifSeatsMap, pmrSeats);
 
             dataController.selectedUtilisateurUUID = utilisateurId;
             dataController.selectedReservationUUID = reservationId;
@@ -209,7 +176,7 @@ function setReservation() {
 function collectTarifSeatsAndTotal(tableSelector: string) {
     const table = document.querySelector(tableSelector) as HTMLTableElement | null;
     let totalPlaces = 0;
-    const tarifSeatsMap: Record<string, number> = {};
+    const tarifSeatsMap: TarifForSeats = {};
 
     if (!table) return { totalPlaces: 0, tarifSeatsMap };
 
@@ -406,15 +373,53 @@ function updateTableContent(qualite: string): HTMLTableElement {
 /**
 * Génere les controls associés au nombre de place PMR
 */
-function updateInputPMR() {
+function updateInputPMR(): HTMLDivElement {
 
-    const btnAddPMR = document.querySelector('.num__add-pmr') as HTMLButtonElement;
-    const btnRemovePMR = document.querySelector('.num__remove-pmr') as HTMLButtonElement;
-    const spanPMR = document.getElementById('num__pmr');
+    // const btnAddPMR = document.querySelector('.num__add-pmr') as HTMLButtonElement;
+    // const btnRemovePMR = document.querySelector('.num__remove-pmr') as HTMLButtonElement;
+    // const spanPMR = document.getElementById('num__pmr');
 
-    if (!btnAddPMR || !btnRemovePMR || !spanPMR) return;
+    // 1) Créer l'élément PMR et sa structure de base
+    const pmrContent = document.createElement('div');
+    pmrContent.classList.add('pmr__content');
+
+//     pmrContent.innerHTML = `
+//     <p class="content__libelle-p">Personne à mobilité réduite :</p>
+//     <div class="content__num-pmr">
+//         <button class="num__add-button num__add-pmr">+</button>
+//         <span class="num__num-span num__numpmr-span" id="num__pmr">0</span>
+//         <button class="num__remove-button num__remove-pmr">-</button>
+//     </div>
+//   `;
+    const contentLibelle = document.createElement('p');
+    contentLibelle.classList.add('content__libelle-p');
+    contentLibelle.textContent = 'Personne à mobilité réduite :';
+    
+
+    const contentNumPMR = document.createElement('div');
+    contentNumPMR.classList.add('content__num-pmr');
+
+    const btnAddPMR = document.createElement('button');
+    btnAddPMR.classList.add('num__add-button', 'num__add-pmr');
+    btnAddPMR.textContent = '+';
+
+    const spanPMR = document.createElement('span');
+    spanPMR.classList.add('num__num-span', 'num__numpmr-span');
+    spanPMR.id = 'num__pmr';
+    spanPMR.textContent = '0';
+
+    const btnRemovePMR = document.createElement('button');
+    btnRemovePMR.classList.add('num__remove-button', 'num__remove-pmr');
+    btnRemovePMR.textContent = '-';
+    
+    if (!btnAddPMR || !btnRemovePMR || !spanPMR) throw new Error('Erreur updateInputPMR');;
+    btnAddPMR.removeEventListener('click', (event: MouseEvent) => { });
+    btnRemovePMR.removeEventListener('click', (event: MouseEvent) => { });
+    spanPMR.textContent = '0';
 
     // Incrémente la quantité (max 4)
+
+
     btnAddPMR.addEventListener('click', (event: MouseEvent) => {
         event.preventDefault();
         event.stopPropagation();
@@ -435,6 +440,17 @@ function updateInputPMR() {
             spanPMR.textContent = String(currentVal);
         }
     });
+
+    contentNumPMR.appendChild(btnAddPMR);
+    contentNumPMR.appendChild(spanPMR);
+    contentNumPMR.appendChild(btnRemovePMR);
+
+    pmrContent.appendChild(contentLibelle);
+    pmrContent.appendChild(contentNumPMR);
+
+    console.log(JSON.stringify(pmrContent));
+
+    return pmrContent;
 
 };
 
