@@ -323,7 +323,7 @@
                                             <tfoot class="commande__foot-tfoot">
                                                 <tr class="foot__content-tr">
                                                     <td colspan="3"></td>
-                                                    <td class="content-td content-totalprice-td">28 €</td>
+                                                    <td class="content-td content-totalprice-td" id="content-totalprice">28 €</td>
                                                 </tr>
                                             </tfoot>
                                         </table>
@@ -332,9 +332,9 @@
                                         <div class="pmr__content">
                                             <p class="content__libelle-p">Personne à mobilité réduite :</p>
                                             <div class="content__num-pmr">
-                                                <button class="num__add-button">+</button>
+                                                <button class="num__add-button num__add-pmr">+</button>
                                                 <span class="num__num-span" id="num__pmr">0</span>
-                                                <button class="num__remove-button">-</button>
+                                                <button class="num__remove-button num__remove-pmr">-</button>
                                             </div>
                                         </div>
                                     </div>
@@ -343,6 +343,7 @@
                                         <label for="email"><span style="color: red;">*</span></label>
                                         <input type="email" id="commande__mail-input" name="commande__mail-input"
                                             required class="commande__mail-input">
+                                        <span id="commande__mail-error" class="error-message"></span>
                                     </div>
                                 </div>
                             </form>
@@ -350,7 +351,7 @@
                         <div class="reserve__actions">
                             <button class="panel__changer-button">Changer de séance</button>
                             <button class="panel__jereserve-button">Je réserve</button>
-                            <p class="panel__verifemail-p">Vérification de votre email...</p>
+                            <p class="panel__message-p">Vérification de votre email...</p>
                         </div>
                     </div>
                 </div>
@@ -407,17 +408,19 @@
                         les
                         informations suivantes :</p>
                 </div>
-                <!-- Saisie du displayName -->
-                <div class="form__group">
-                    <label for="confirmMail-displayName">Nom ou pseudo :</label>
-                    <input type="text" id="confirmMail-displayName" class="input__text" required />
-                </div>
                 <!-- Saisie de l'email -->
                 <div class="form__group">
                     <label for="confirmMail-email">Email :</label>
                     <input type="email" id="confirmMail-email" class="input__mail" required>
                     <span id="email-error" class="error-message"></span>
                 </div>
+
+                <!-- Saisie du displayName -->
+                <div class="form__group">
+                    <label for="confirmMail-displayName">Nom ou pseudo :</label>
+                    <input type="text" id="confirmMail-displayName" class="input__text" required />
+                </div>
+
 
                 <!-- Mot de passe 1 -->
                 <div class="form__group">

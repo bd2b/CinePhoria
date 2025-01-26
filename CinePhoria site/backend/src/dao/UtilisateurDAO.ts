@@ -27,7 +27,7 @@ export class UtilisateurDAO {
         [email, passwordHashed, displayName]
       );
       logger.info("Execution de la procedure CreateUtilisateur ")
-      logger.info("Paramètres :", { email, passwordHashed, displayName });
+      logger.info("Paramètres :", { email,  displayName } , "et mot de passe hashé");
 
       // Forcer TypeScript à comprendre la structure des résultats
       const callResults = results as any[][];  // Correction du typage
@@ -69,7 +69,7 @@ export class UtilisateurDAO {
         [utilisateurId, passwordHashed, displayName]
       );
       logger.info("Execution de la procedure ConfirmUtilisateur ")
-      logger.info("Parametre =", [utilisateurId, passwordHashed, displayName]);
+      logger.info("Parametre =", {utilisateurId, displayName} , "et mot de passe hashé");
       // Forcer TypeScript à comprendre la structure des résultats
       const callResults = results as any[][];  // Correction du typage
       const selectResult = callResults[0][1] as Array<{ result: string }>;

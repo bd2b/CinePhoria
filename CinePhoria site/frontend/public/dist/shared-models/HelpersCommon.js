@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 /**
  * Fonction de hachage d'un mot de passe avec bcrypt et une valeur de salage
  * @param password
