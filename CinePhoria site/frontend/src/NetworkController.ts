@@ -60,6 +60,10 @@ export async function confirmUtilisateurApi ( id: string, password: string, disp
         const errData = await response.json();
         throw new Error(errData.message || 'Erreur inconnue');
     }
-return "couco"
+
+    // Examen de la reponse
+    const responseJSON = await response.json();
+    console.log("Message retour",responseJSON);
+    return responseJSON;
 
 }
