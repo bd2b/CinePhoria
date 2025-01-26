@@ -157,22 +157,13 @@ export function updateContentPage(dataController) {
             // 1) Mettre à jour le bloc .seances__cardseance seances__cardseance-selected
             //    pour afficher la séance choisie
             const containerSelectedSeance = document.getElementById('seances__cardseance-selected');
-            // const containerSelectedSeance = document.querySelector('.seances__cardseance-selected');
             if (!containerSelectedSeance) {
                 console.log("Pas de carte selectionnée");
                 return;
             }
             const selectedSeance = seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate, "seances__cardseance-selected");
             containerSelectedSeance.replaceWith(selectedSeance);
-            // 2) Afficher le tableau de tarifs selon la qualite
-            const containerTable = document.querySelector('.commande__tabtarif');
-            if (!containerTable)
-                return;
-            containerTable.innerHTML = '';
-            const qualiteFilm = dataController.seanceSelected().qualite;
-            if (qualiteFilm)
-                containerTable.appendChild(updateTableContent(qualiteFilm));
-            // 3) Gestion du bouton "Changer de séance" -> basculerPanelChoix()
+            // 2) Gestion du bouton "Changer de séance" -> basculerPanelChoix()
             const btnChanger = document.querySelector('.panel__changer-button');
             if (btnChanger) {
                 btnChanger.addEventListener('click', (evt) => {
@@ -181,105 +172,171 @@ export function updateContentPage(dataController) {
                     basculerPanelChoix();
                 });
             }
-            // 4) Gestion du bouton "Je réserve"
+            // 4) Gestion de la table des tarifs, de la saisie de l'email et du bouton "Je reserve pour cette seance"
             setReservation();
         }
         function setReservation() {
+            const qualiteFilm = dataController.seanceSelected().qualite;
+            // Afficher le tableau de tarifs selon la qualite
+            const containerTable = document.querySelector('.commande__tabtarif');
+            if (!containerTable)
+                return;
+            containerTable.innerHTML = '';
+            if (qualiteFilm)
+                containerTable.appendChild(updateTableContent(qualiteFilm));
+            // Gere les boutons + et - du champ PMR
+            updateInputPMR();
+            // Gere la complétude de l'email avec un message d'erreur associ
+            const emailInput = document.getElementById('commande__mail-input');
+            const emailError = document.getElementById('commande__mail-error');
+            if (!emailInput || !emailError)
+                return;
+            emailInput.addEventListener('blur', () => {
+                if (!validateEmail(emailInput.value)) {
+                    emailError.textContent = "Email invalide (exemple: utilisateur@domaine.com)";
+                    emailError.style.color = "red";
+                }
+                else {
+                    emailError.textContent = "";
+                }
+            });
+            // Gestion du bouton de reservation
             const btnReserve = document.querySelector('.panel__jereserve-button');
+            // Initialement desactivé
+            btnReserve.classList.add("inactif");
+            btnReserve.disabled = true;
             btnReserve.textContent = "Je choisis ces places";
-            if (btnReserve) {
-                btnReserve.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
-                    evt.preventDefault();
-                    evt.stopPropagation();
-                    // a) Récupérer le nombre total de places et la répartition par tarif
-                    const { totalPlaces, tarifSeatsMap } = collectTarifSeatsAndTotal('.tabtarif__commande-table');
-                    console.log(`Nombre de places total = ${totalPlaces}, Répartition = ${tarifSeatsMap}`);
-                    // b) Récupérer la valeur PMR
-                    const pmrSeats = collectPMR('.commande__pmr');
-                    console.log(`Nombre de PMR = ${pmrSeats}`);
-                    // c) Récupérer l'email
-                    const email = collectEmail('.commande__mail-input');
-                    console.log(`email = ${email}`);
-                    // d) Vérifications
-                    if (totalPlaces < 1) {
-                        alert('Vous devez sélectionner au moins une place.');
-                        return;
-                    }
-                    if (!email) {
-                        alert('Veuillez renseigner un email valide.');
-                        return;
-                    }
-                    // e) Appel à l’API /api/reservation
-                    try {
-                        const seanceId = dataController.seanceSelected().seanceId;
-                        // Construction du body
-                        const body = {
-                            email,
-                            seanceId,
-                            tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
-                            pmrSeats
-                        };
-                        const response = yield fetch('http://localhost:3500/api/reservation', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(body)
-                        });
-                        if (!response.ok) {
-                            const errData = yield response.json();
-                            alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
-                            return;
-                        }
-                        // Réponse OK -> { statut, utilisateurId, reservationId }
-                        const { statut, utilisateurId, reservationId } = yield response.json();
-                        // f) Contrôles de cohérence
-                        //   - Vérifier seanceId identique
-                        //   - Vérifier si utilisateurId est un UUID
-                        //   - Gérer statut
-                        let messageError = "";
-                        if (!isUUID(reservationId)) {
-                            messageError += `ReservationID invalide.`;
-                        }
-                        if (!isUUID(utilisateurId)) {
-                            messageError += `UtilisateurId invalide.`;
-                        }
-                        if (statut == 'NA') {
-                            messageError = `Une erreur s'est produite côté serveur (NA).`;
-                        }
-                        if (utilisateurId.startsWith('Erreur')) {
-                            messageError += " Erreur utilisateur : " + utilisateurId;
-                        }
-                        if (reservationId.startsWith('Erreur')) {
-                            messageError += " Erreur reservation : " + reservationId;
-                        }
-                        if (messageError !== "") {
-                            alert(`Une erreur s'est produite : ${messageError}`);
-                            return;
-                        }
-                        dataController.selectedUtilisateurUUID = utilisateurId;
-                        dataController.selectedReservationUUID = reservationId;
-                        switch (statut) {
-                            case 'Compte Provisoire':
-                                // L'email est inconnu -> compte créé en provisoire
-                                console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
-                                confirmMail(dataController, email);
-                                break;
-                            case 'Compte Confirme':
-                                // L'email correspond à un compte valide
-                                console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
-                                //  loginWithEmail(dataController, email);
-                                break;
-                            default:
-                                // Cas imprévu
-                                alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
-                                break;
-                        }
-                    }
-                    catch (error) {
-                        console.error('Erreur lors de la création de la réservation', error);
-                        alert(`Une erreur s'est produite : ${(error === null || error === void 0 ? void 0 : error.message) || 'inconnue'}`);
-                    }
-                }));
+            if (!btnReserve)
+                return;
+            // Recuperer le nombre total de place
+            const totalPlaces = document.getElementById('content-totalprice');
+            if (!totalPlaces)
+                return;
+            /**
+            * Valide l'ensemble du formulaire et active/désactive le bouton de reservation de places.
+            */
+            function validateForm() {
+                // Verification que l'email est conforme
+                const emailValid = validateEmail(emailInput.value);
+                // Verification que l'on commande au moins une pkace
+                const commandeMinValid = parseInt((totalPlaces === null || totalPlaces === void 0 ? void 0 : totalPlaces.textContent) || '0', 10) > 0;
+                // Activation/désactivation du bouton de soumission
+                if (!(emailValid && commandeMinValid)) {
+                    btnReserve.classList.add("inactif");
+                    btnReserve.disabled = true;
+                }
+                else {
+                    btnReserve.classList.remove("inactif");
+                    btnReserve.disabled = false;
+                }
             }
+            // Ajout d'écouteurs d'événements pour la validation en temps réel
+            // email
+            emailInput.addEventListener('input', validateForm);
+            // Comme la modification du nombre total de place est faite par programme, l'écouteur est basé sur un changement du DOM
+            const totalPriceElement = document.getElementById('content-totalprice');
+            if (!totalPriceElement)
+                return;
+            const observer = new MutationObserver(() => { console.log("Changement...."); validateForm(); });
+            // Configurer l'observation pour surveiller les modifications de contenu
+            observer.observe(totalPriceElement, { characterData: true, // Surveille les modifications du texte
+                childList: true, // Surveille les modifications des enfants (ajout/suppression)
+                subtree: true // Surveille aussi dans les sous-éléments
+            });
+            // Gestion de la reservation
+            btnReserve.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                evt.preventDefault();
+                evt.stopPropagation();
+                // a) Récupérer le nombre total de places et la répartition par tarif
+                const { totalPlaces, tarifSeatsMap } = collectTarifSeatsAndTotal('.tabtarif__commande-table');
+                console.log(`Nombre de places total = ${totalPlaces}, Répartition = ${tarifSeatsMap}`);
+                // b) Récupérer la valeur PMR
+                const pmrSeats = collectPMR('.commande__pmr');
+                console.log(`Nombre de PMR = ${pmrSeats}`);
+                // c) Récupérer l'email
+                const email = collectEmail('.commande__mail-input');
+                console.log(`email = ${email}`);
+                // d) Vérifications
+                if (totalPlaces < 1) {
+                    alert('Vous devez sélectionner au moins une place.');
+                    return;
+                }
+                if (!email) {
+                    alert('Veuillez renseigner un email valide.');
+                    return;
+                }
+                // e) Appel à l’API /api/reservation
+                try {
+                    const seanceId = dataController.seanceSelected().seanceId;
+                    // Construction du body
+                    const body = {
+                        email,
+                        seanceId,
+                        tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
+                        pmrSeats
+                    };
+                    const response = yield fetch('http://localhost:3500/api/reservation', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                    if (!response.ok) {
+                        const errData = yield response.json();
+                        alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
+                        return;
+                    }
+                    // Réponse OK -> { statut, utilisateurId, reservationId }
+                    const { statut, utilisateurId, reservationId } = yield response.json();
+                    // f) Contrôles de cohérence
+                    //   - Vérifier seanceId identique
+                    //   - Vérifier si utilisateurId est un UUID
+                    //   - Gérer statut
+                    let messageError = "";
+                    if (!isUUID(reservationId)) {
+                        messageError += `ReservationID invalide.`;
+                    }
+                    if (!isUUID(utilisateurId)) {
+                        messageError += `UtilisateurId invalide.`;
+                    }
+                    if (statut == 'NA') {
+                        messageError = `Une erreur s'est produite côté serveur (NA).`;
+                    }
+                    if (utilisateurId.startsWith('Erreur')) {
+                        messageError += " Erreur utilisateur : " + utilisateurId;
+                    }
+                    if (reservationId.startsWith('Erreur')) {
+                        messageError += " Erreur reservation : " + reservationId;
+                    }
+                    if (messageError !== "") {
+                        alert(`Une erreur s'est produite : ${messageError}`);
+                        return;
+                    }
+                    dataController.selectedUtilisateurUUID = utilisateurId;
+                    dataController.selectedReservationUUID = reservationId;
+                    switch (statut) {
+                        case 'Compte Provisoire':
+                            // L'email est inconnu -> compte créé en provisoire
+                            console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
+                            dataController.reservationState = ReservationState.ReserveCompteToConfirm;
+                            confirmMail(dataController, email);
+                            break;
+                        case 'Compte Confirme':
+                            // L'email correspond à un compte valide
+                            console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
+                            dataController.reservationState = ReservationState.ReserveToConfirm;
+                            //  loginWithEmail(dataController, email);
+                            break;
+                        default:
+                            // Cas imprévu
+                            alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
+                            break;
+                    }
+                }
+                catch (error) {
+                    console.error('Erreur lors de la création de la réservation', error);
+                    alert(`Une erreur s'est produite : ${(error === null || error === void 0 ? void 0 : error.message) || 'inconnue'}`);
+                }
+            }));
         }
     });
 }
@@ -335,11 +392,18 @@ function collectEmail(selector) {
 /**
  * Récupère une chaine de caractère
  */
-function collectString(selector) {
+function collectStringString(selector) {
     const input = document.querySelector(selector);
     if (!input)
         return '';
     return input.value.trim();
+}
+function collectStringNumber(selector) {
+    var _a;
+    const input = document.querySelector(selector);
+    if (!input)
+        return 0;
+    return parseInt((_a = input.value.trim()) !== null && _a !== void 0 ? _a : '0', 10);
 }
 /**
  * Quand on reçoit "Compte Provisoire" => on exécute confirmMail
@@ -347,188 +411,197 @@ function collectString(selector) {
  * - On affiche une modale demandant la saisie du mail et deux champs mot de passe
  */
 function confirmMail(dataController, email) {
-    dataController.reservationState = ReservationState.PendingMailVerification;
-    // TODO : Afficher une modale "confirmMail"
-    //        avec :
-    //   - un texte "Pour récupérer le QRCode..."
-    //   - la resaisie de l'email
-    //   - deux champs de saisie du mot de passe
-    //   - un bouton valider "Création du compte"
-    console.log('===> confirmMail action, email =', email);
-    const modalConfirm = document.getElementById('modal-confirmMail');
-    const closeModalBtn = document.getElementById("close-confirmMail");
-    const confirmModalBtn = document.getElementById("confirmMail-submit");
-    if (modalConfirm && closeModalBtn && confirmModalBtn) {
-        modalConfirm.style.display = 'flex';
-        const closeModal = () => {
-            modalConfirm.style.display = 'none';
-        };
-        closeModalBtn.addEventListener('click', closeModal);
-        modalConfirm.addEventListener('click', (event) => {
-            if (event.target === modalConfirm)
-                closeModal();
-        });
-        // Appel de la fonction de gestion du formulaire 
-        gestionFormulaire();
-        confirmModalBtn.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
-            evt.preventDefault();
-            evt.stopPropagation();
-            confirmCreationCompte();
-        }));
-    }
-    else {
-        console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal modal-confirmMail sont introuvables.');
-    }
-    function gestionFormulaire() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // Sélection des éléments du formulaire avec un typage strict
-            const displayNameInput = document.getElementById('confirmMail-displayName');
-            const emailInput = document.getElementById('confirmMail-email');
-            const password1Input = document.getElementById('confirmMail-password1');
-            const password2Input = document.getElementById('confirmMail-password2');
-            const submitButton = document.getElementById('confirmMail-submit');
-            const emailError = document.getElementById('email-error');
-            const passwordError = document.getElementById('password-error');
-            /**
-             * Vérifie la validité d'un email.
-             * @param email - L'email à valider.
-             * @returns boolean - True si l'email est valide, sinon False.
-             */
-            function validateEmail(email) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
-                return emailRegex.test(email);
-            }
-            /**
-             * Vérifie si les mots de passe sont identiques.
-             * @returns boolean - True si les mots de passe correspondent, sinon False.
-             */
-            function passwordsMatch() {
-                return password1Input.value === password2Input.value && password1Input.value.length > 0;
-            }
-            /**
-             * Vérifie si tous les champs sont remplis.
-             * @returns boolean - True si tous les champs sont remplis, sinon False.
-             */
-            function areAllFieldsFilled() {
-                return (displayNameInput.value.trim() !== "" &&
-                    emailInput.value.trim() !== "" &&
-                    password1Input.value.trim() !== "" &&
-                    password2Input.value.trim() !== "");
-            }
-            /**
-             * Valide l'ensemble du formulaire et active/désactive le bouton de soumission.
-             */
-            function validateForm() {
-                const emailValid = validateEmail(emailInput.value);
-                const passwordsAreValid = passwordsMatch();
-                const fieldsFilled = areAllFieldsFilled();
-                // Activation/désactivation du bouton de soumission
-                submitButton.disabled = !(emailValid && passwordsAreValid && fieldsFilled);
-            }
-            // Gestion du message d'erreur pour l'email lors du blur (perte de focus)
-            emailInput.addEventListener('blur', () => {
-                if (!validateEmail(emailInput.value)) {
-                    emailError.textContent = "Email invalide (exemple: utilisateur@domaine.com)";
-                    emailError.style.color = "red";
-                }
-                else {
-                    emailError.textContent = "";
-                }
+    return __awaiter(this, void 0, void 0, function* () {
+        // Afficher la modale
+        // Execution de la fonction interne gestionFormulaire (valeur de l'email saisie)
+        //  Reprise de la valeur de l'email du formulaire précédent
+        //  Verification des champs email/password/displayname, si OK activation du bouton
+        //  Bouton submit qui enclenche la confirmation de la création du compte confirmCreationCompte
+        //    Appel de l'API Rest
+        //    Si Ok lancement de la fonction de login
+        console.log('===> confirmMail action, email =', email);
+        const modalConfirm = document.getElementById('modal-confirmMail');
+        const closeModalBtn = document.getElementById("close-confirmMail");
+        const confirmModalBtn = document.getElementById("confirmMail-submit");
+        if (modalConfirm && closeModalBtn && confirmModalBtn) {
+            modalConfirm.style.display = 'flex';
+            const closeModal = () => {
+                modalConfirm.style.display = 'none';
+            };
+            closeModalBtn.addEventListener('click', closeModal);
+            modalConfirm.addEventListener('click', (event) => {
+                if (event.target === modalConfirm)
+                    closeModal();
             });
-            // Gestion du message d'erreur pour les mots de passe lors du blur
-            password2Input.addEventListener('blur', () => {
-                if (!passwordsMatch()) {
-                    passwordError.textContent = "Les mots de passe ne correspondent pas.";
-                    passwordError.style.color = "red";
+            // Appel de la fonction de gestion du formulaire et récupération des données -> on est sur d'avoir ces données car la vérification
+            // des valeurs du formulaire conditionne le submit qui exécute cette fonction
+            yield gestionFormulaireModal(email);
+        }
+        else {
+            console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal modal-confirmMail sont introuvables.');
+        }
+        /**
+         * Met en place toute la gestion de la modal
+         *
+         * @param emailInitial sert a in itialiser l'input du mail
+         *
+         */
+        function gestionFormulaireModal(emailInitial) {
+            return __awaiter(this, void 0, void 0, function* () {
+                // Sélection des éléments de la modal avec un typage strict
+                const displayNameInput = document.getElementById('confirmMail-displayName');
+                const emailInput = document.getElementById('confirmMail-email');
+                const password1Input = document.getElementById('confirmMail-password1');
+                const password2Input = document.getElementById('confirmMail-password2');
+                const submitButton = document.getElementById('confirmMail-submit');
+                const emailError = document.getElementById('email-error');
+                const passwordError = document.getElementById('password-error');
+                /**
+                 * Vérifie si les mots de passe sont identiques.
+                 * @returns boolean - True si les mots de passe correspondent, sinon False.
+                 */
+                function passwordsMatch() {
+                    return password1Input.value === password2Input.value && password1Input.value.length > 0;
                 }
-                else {
-                    passwordError.textContent = "";
+                /**
+                 * Vérifie si tous les champs sont remplis.
+                 * @returns boolean - True si tous les champs sont remplis, sinon False.
+                 */
+                function areAllFieldsFilled() {
+                    return (displayNameInput.value.trim() !== "" &&
+                        emailInput.value.trim() !== "" &&
+                        password1Input.value.trim() !== "" &&
+                        password2Input.value.trim() !== "");
                 }
+                /**
+                 * Valide l'ensemble du formulaire et active/désactive le bouton de soumission.
+                 */
+                function validateForm() {
+                    const emailValid = validateEmail(emailInput.value);
+                    const passwordsAreValid = passwordsMatch();
+                    const fieldsFilled = areAllFieldsFilled();
+                    // Activation/désactivation du bouton de soumission
+                    if (!(emailValid && passwordsAreValid && fieldsFilled)) {
+                        submitButton.classList.add("inactif");
+                        submitButton.disabled = true;
+                    }
+                    else {
+                        submitButton.classList.remove("inactif");
+                        submitButton.disabled = false;
+                    }
+                }
+                // Ajout de la valeur d'email saisi dans le formulaire de réservation
+                emailInput.value = emailInitial; // Définir une valeur par défaut
+                // Le bouton de validation est inactif au chargement
+                submitButton.classList.add("inactif");
+                // Gestion du message d'erreur pour l'email lors du blur (perte de focus)
+                emailInput.addEventListener('blur', () => {
+                    if (!validateEmail(emailInput.value)) {
+                        emailError.textContent = "Email invalide (exemple: utilisateur@domaine.com)";
+                        emailError.style.color = "red";
+                    }
+                    else {
+                        emailError.textContent = "";
+                    }
+                });
+                // Gestion du message d'erreur pour les mots de passe lors du blur
+                password2Input.addEventListener('blur', () => {
+                    if (!passwordsMatch()) {
+                        passwordError.textContent = "Les mots de passe ne correspondent pas.";
+                        passwordError.style.color = "red";
+                    }
+                    else {
+                        passwordError.textContent = "";
+                    }
+                });
+                // Ajout d'écouteurs d'événements pour la validation en temps réel
+                displayNameInput.addEventListener('input', validateForm);
+                emailInput.addEventListener('input', validateForm);
+                password1Input.addEventListener('input', validateForm);
+                password2Input.addEventListener('input', validateForm);
+                // Gestion de la soumission de la modale
+                submitButton.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    confirmCreationCompte(displayNameInput.value.trim(), emailInput.value.trim(), password1Input.value.trim());
+                }));
             });
-            // Ajout d'écouteurs d'événements pour la validation en temps réel
-            displayNameInput.addEventListener('input', validateForm);
-            emailInput.addEventListener('input', validateForm);
-            password1Input.addEventListener('input', validateForm);
-            password2Input.addEventListener('input', validateForm);
-            // Gestion de la soumission du formulaire
-            submitButton.addEventListener('click', () => {
-                alert(`Compte créé avec succès ! ${displayNameInput.value.trim()} ${emailInput.value.trim()} ${password1Input.value.trim()} `);
+        }
+        function confirmCreationCompte(displayName, email, password) {
+            return __awaiter(this, void 0, void 0, function* () {
+                console.log("Recupération de la modal");
+                alert("Soumission de displayName = " + displayName + " email = " + email + " password = " + password);
+                // // e) Appel à l’API /api/reservation
+                // try {
+                //   const seanceId = dataController.seanceSelected().seanceId;
+                //   // Construction du body
+                //   const body = {
+                //     email,
+                //     seanceId,
+                //     tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
+                //     pmrSeats
+                //   };
+                //   const response = await fetch('http://localhost:3500/api/reservation', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify(body)
+                //   });
+                //   if (!response.ok) {
+                //     const errData = await response.json();
+                //     alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
+                //     return;
+                //   }
+                //   // Réponse OK -> { statut, utilisateurId, reservationId }
+                //   const { statut, utilisateurId, reservationId } = await response.json();
+                //   // f) Contrôles de cohérence
+                //   //   - Vérifier seanceId identique
+                //   //   - Vérifier si utilisateurId est un UUID
+                //   //   - Gérer statut
+                //   let messageError = "";
+                //   if (!isUUID(reservationId)) {
+                //     messageError += `ReservationID invalide.`;
+                //   }
+                //   if (!isUUID(utilisateurId)) {
+                //     messageError += `UtilisateurId invalide.`;
+                //   }
+                //   if (statut == 'NA') {
+                //     messageError = `Une erreur s'est produite côté serveur (NA).`;
+                //   }
+                //   if (utilisateurId.startsWith('Erreur')) {
+                //     messageError += " Erreur utilisateur : " + utilisateurId;
+                //   }
+                //   if (reservationId.startsWith('Erreur')) {
+                //     messageError += " Erreur reservation : " + reservationId;
+                //   }
+                //   if (messageError !== "") {
+                //     alert(`Une erreur s'est produite : ${messageError}`);
+                //     return;
+                //   }
+                //   dataController.selectedUtilisateurUUID = utilisateurId;
+                //   dataController.selectedReservationUUID = reservationId;
+                //   switch (statut) {
+                //     case 'Compte Provisoire':
+                //       // L'email est inconnu -> compte créé en provisoire
+                //       console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
+                //       confirmMail(dataController, email);
+                //       break;
+                //     case 'Compte Confirme':
+                //       // L'email correspond à un compte valide
+                //       console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
+                //       //  loginWithEmail(dataController, email);
+                //       break;
+                //     default:
+                //       // Cas imprévu
+                //       alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
+                //       break;
+                //   }
+                // } catch (error: any) {
+                //   console.error('Erreur lors de la création de la réservation', error);
+                //   alert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
+                // }
             });
-        });
-    }
-    function confirmCreationCompte(displayName, email, password) {
-        return __awaiter(this, void 0, void 0, function* () {
-            console.log("Recupération de la modal");
-            // // e) Appel à l’API /api/reservation
-            // try {
-            //   const seanceId = dataController.seanceSelected().seanceId;
-            //   // Construction du body
-            //   const body = {
-            //     email,
-            //     seanceId,
-            //     tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
-            //     pmrSeats
-            //   };
-            //   const response = await fetch('http://localhost:3500/api/reservation', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(body)
-            //   });
-            //   if (!response.ok) {
-            //     const errData = await response.json();
-            //     alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
-            //     return;
-            //   }
-            //   // Réponse OK -> { statut, utilisateurId, reservationId }
-            //   const { statut, utilisateurId, reservationId } = await response.json();
-            //   // f) Contrôles de cohérence
-            //   //   - Vérifier seanceId identique
-            //   //   - Vérifier si utilisateurId est un UUID
-            //   //   - Gérer statut
-            //   let messageError = "";
-            //   if (!isUUID(reservationId)) {
-            //     messageError += `ReservationID invalide.`;
-            //   }
-            //   if (!isUUID(utilisateurId)) {
-            //     messageError += `UtilisateurId invalide.`;
-            //   }
-            //   if (statut == 'NA') {
-            //     messageError = `Une erreur s'est produite côté serveur (NA).`;
-            //   }
-            //   if (utilisateurId.startsWith('Erreur')) {
-            //     messageError += " Erreur utilisateur : " + utilisateurId;
-            //   }
-            //   if (reservationId.startsWith('Erreur')) {
-            //     messageError += " Erreur reservation : " + reservationId;
-            //   }
-            //   if (messageError !== "") {
-            //     alert(`Une erreur s'est produite : ${messageError}`);
-            //     return;
-            //   }
-            //   dataController.selectedUtilisateurUUID = utilisateurId;
-            //   dataController.selectedReservationUUID = reservationId;
-            //   switch (statut) {
-            //     case 'Compte Provisoire':
-            //       // L'email est inconnu -> compte créé en provisoire
-            //       console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
-            //       confirmMail(dataController, email);
-            //       break;
-            //     case 'Compte Confirme':
-            //       // L'email correspond à un compte valide
-            //       console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
-            //       //  loginWithEmail(dataController, email);
-            //       break;
-            //     default:
-            //       // Cas imprévu
-            //       alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
-            //       break;
-            //   }
-            // } catch (error: any) {
-            //   console.error('Erreur lors de la création de la réservation', error);
-            //   alert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
-            // }
-        });
-    }
+        }
+    });
 }
 /**
 * Trouve un film « le plus récent + meilleure note » à partir d'un tableau de séances
@@ -942,6 +1015,38 @@ function basculerPanelChoix() {
     }
 }
 /**
+ * Génere les controls associés au nombre de place PMR
+ */
+function updateInputPMR() {
+    const btnAddPMR = document.querySelector('.num__add-pmr');
+    const btnRemovePMR = document.querySelector('.num__remove-pmr');
+    const spanPMR = document.getElementById('num__pmr');
+    if (!btnAddPMR || !btnRemovePMR || !spanPMR)
+        return;
+    // Incrémente la quantité (max 4)
+    btnAddPMR.addEventListener('click', (event) => {
+        var _a;
+        event.preventDefault();
+        event.stopPropagation();
+        let currentVal = parseInt((_a = spanPMR.textContent) !== null && _a !== void 0 ? _a : '0', 10) || 0;
+        if (currentVal < 4) {
+            currentVal++;
+            spanPMR.textContent = String(currentVal);
+        }
+    });
+    // Décrémente la quantité (min 0)
+    btnRemovePMR.addEventListener('click', (event) => {
+        var _a;
+        event.preventDefault();
+        event.stopPropagation();
+        let currentVal = parseInt((_a = spanPMR.textContent) !== null && _a !== void 0 ? _a : '0', 10) || 0;
+        if (currentVal > 0) {
+            currentVal--;
+            spanPMR.textContent = String(currentVal);
+        }
+    });
+}
+/**
  * Génère le contenu d'un tableau des tarifs en fonction d'une qualité spécifiée.
  * Les tarifs sont pris dans le dataController
  * @param qualite La valeur de qualite à filtrer (ex: "3D", "4DX", etc.)
@@ -973,7 +1078,7 @@ function updateTableContent(qualite) {
     tfoot.innerHTML = `
     <tr class="foot__content-tr">
       <td colspan="3"></td>
-      <td class="content-td content-totalprice-td">0 €</td>
+      <td class="content-td content-totalprice-td" id = "content-totalprice">0 €</td>
     </tr>
   `;
     table.appendChild(tfoot);
@@ -1075,4 +1180,13 @@ function updateTableContent(qualite) {
         totalPriceTd.textContent = `${grandTotal} €`;
     }
     return table;
+}
+/**
+     * Vérifie la validité d'un email.
+     * @param email - L'email à valider.
+     * @returns boolean - True si l'email est valide, sinon False.
+     */
+function validateEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
 }

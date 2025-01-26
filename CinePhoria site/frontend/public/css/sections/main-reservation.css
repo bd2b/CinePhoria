@@ -175,6 +175,8 @@
       display: flex; 
   }
 
+/* -------------------------- Fin Modale */
+
 /* Affichage masquage des boutons filtre */
 .titre__filter-dropdown-genre {
     display: none;

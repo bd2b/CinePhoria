@@ -25,10 +25,12 @@ import { updateContentPage } from './ViewReservation.js'
 export enum ReservationState {
     PendingChoiceSeance = "PendingChoiceSeance",    // Choix de seance en cours , le panel choix est affiché
     PendingChoiceSeats = "PendingChoiceSeats",      // Choix de tarifs en cours, le panel reserve est affiché
-    ReserveToConfirm = "ReserveToConfirm",                          // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués)
-    Confirmed = "Confirmed",                        // La reservation est confirmé, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
-    PendingMailVerification = "PendingMailVerification" // La reservation est enregistree, il y a assez de place (sieges et PMR) mais l'email doit etre enregistre
-}
+    ReserveCompteToConfirm = "ReserveCompteToConfirm",    // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués) 
+                                                    // avec un email qui a créé ou est relatif à un compte provisoire qu'il faut confirmer
+    ReserveToConfirm = "ReserveToConfirm",          // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués) 
+                                                    // avec un email qui est celui d'un compte existant                                     
+    Confirmed = "Confirmed"                        // La reservation est confirmé après login sur un compte existant, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
+    }
 
 export class DataController {
 

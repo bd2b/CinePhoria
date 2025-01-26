@@ -33,9 +33,11 @@ export var ReservationState;
 (function (ReservationState) {
     ReservationState["PendingChoiceSeance"] = "PendingChoiceSeance";
     ReservationState["PendingChoiceSeats"] = "PendingChoiceSeats";
+    ReservationState["ReserveCompteToConfirm"] = "ReserveCompteToConfirm";
+    // avec un email qui a créé ou est relatif à un compte provisoire qu'il faut confirmer
     ReservationState["ReserveToConfirm"] = "ReserveToConfirm";
-    ReservationState["Confirmed"] = "Confirmed";
-    ReservationState["PendingMailVerification"] = "PendingMailVerification"; // La reservation est enregistree, il y a assez de place (sieges et PMR) mais l'email doit etre enregistre
+    // avec un email qui est celui d'un compte existant                                     
+    ReservationState["Confirmed"] = "Confirmed"; // La reservation est confirmé après login sur un compte existant, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
 })(ReservationState || (ReservationState = {}));
 export class DataController {
     // Getter pour reservationState
