@@ -9,3 +9,4 @@ export class SeatsForTarif {
         Object.assign(this, data);
     }
 }
+;
