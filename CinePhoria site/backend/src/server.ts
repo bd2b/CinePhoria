@@ -37,12 +37,12 @@ app.use(express.json());
 app.use('/api/films', filmRoutes);
 app.use('/api/cinemas', cinemaRoutes);
 app.use('/api/seances', seanceRoutes);
+app.use('/api/reservation', reservationRoutes);
+app.use('/api/utilisateur', utilisateurRoutes);
 
 app.use('/api/login', loginRoutes);
 app.use('/api/intranet', intranetLoginRoutes);
-app.use('/api/reservation', reservationRoutes);
 
-app.use('/api/utilisateur', utilisateurRoutes);
 
 
 const PORT = process.env.PORT || 3000;

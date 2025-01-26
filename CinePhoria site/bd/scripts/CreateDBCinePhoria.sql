@@ -515,6 +515,7 @@ BEGIN
 	DECLARE v_utilisateur_exist INT;
     DECLARE v_compte_exist INT;
     DECLARE v_utilisateurId VARCHAR(100);
+    DECLARE v_codeConfirmMail VARCHAR(100);
 
  -- Gestion des erreurs
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
@@ -548,6 +549,9 @@ block_label: BEGIN
 		SET p_Result = "Erreur : email existant";
 		LEAVE block_label;
 	END IF;
+    
+    -- Generation du code de confirmation du mail qu'on va stocker dans oldpasswordarray
+    SET v_codeConfirmMail = LPAD(FLOOR(RAND() * 1000000), 6, '0');
         
 	-- Début de la transaction
     START TRANSACTION;
@@ -555,7 +559,7 @@ block_label: BEGIN
     INSERT INTO Compte
 		(email,  isValidated, passwordText, datePassword, oldpasswordsArray) 
 	VALUES 
-		(p_email, 0, p_passwordText, NOW(), "")
+		(p_email, 0, p_passwordText, NOW(), v_codeConfirmMail)
 	;
         
 	set v_utilisateurId = UUID();
@@ -578,12 +582,13 @@ DROP PROCEDURE IF EXISTS ConfirmUtilisateur;
 DELIMITER $$
 CREATE PROCEDURE ConfirmUtilisateur(
     IN p_utilisateurId VARCHAR(100),
-    IN p_displayName VARCHAR(100),
     IN p_password VARCHAR(100),  -- doit etre verifié et hashé à la source
+    IN p_displayName VARCHAR(100),
      OUT p_Result VARCHAR(255)
      )
      -- L'utilisateur est confirmé en mettant le timeStampCreate a null et le compte est valider en mettant isValidated à 1
      -- On met à jour le displayName de l'utilisateur
+     -- On ne met pas a jour la table compte car le mail doit etre confirmé
      -- Retour "OK" ou "Erreur : xxxxxxxxx" ou "Warning : yyyyyyyyy"
 	 -- xxx = "erreur interne procedure." , "utilisateurId non valide." 
      -- yyy = "utilisateur deja confirme."
@@ -630,10 +635,6 @@ CREATE PROCEDURE ConfirmUtilisateur(
 			 displayName = p_displayName
      WHERE email = v_email;
      
-     UPDATE Compte
-     SET isValidated = 1,
-			passwordText = p_password
-	 WHERE email = v_email;
      
      Commit;
      SET p_Result = "OK";
@@ -642,6 +643,100 @@ CREATE PROCEDURE ConfirmUtilisateur(
 END$$
 DELIMITER ;
 select 1;
+DROP PROCEDURE IF EXISTS ConfirmCompte;
+DELIMITER $$
+CREATE PROCEDURE ConfirmCompte(
+    IN p_email VARCHAR(100),
+    IN p_codeConfirmMail VARCHAR(100), 
+     OUT p_Result VARCHAR(255)
+     )
+     -- L'utilisateur demande la confirmation de son mail en saisissant un code qu'il reçoit par email
+     -- La valeut de ce code est stockée dans oldpasswordarray
+     -- La confirmation verifie que le code fournit est egal à la valeur stockée pour le compte de l'email
+     -- En cas d'echec on memorise le nombre de tentative dans oldpasswordarray en rajoutant un digit de 1 à 9 apres une ',' 
+     -- Si on atteint 9, on bloque en retournant systematiquement l'erreur "nombre maximal de tentative atteint" 
+     -- Retour "OK" ou "Erreur : xxxxxxxxx" 
+	 -- xxx = "email inconnu." , "code non valide" , "nombre maximal de tentative atteint" , "compte deja valide"
+     
+     
+     BEGIN
+     
+     DECLARE v_codeConfirmMailStocke VARCHAR(100);
+     DECLARE v_codeStocke VARCHAR(100);
+     DECLARE v_nombreTentative INT;
+     DECLARE v_isValidated INT;
+     
+     -- Gestion des erreurs
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- En cas d'erreur SQL, effectuer un rollback
+        ROLLBACK;
+        SET p_Result =  "Erreur : erreur interne procedure";
+	END;
+    
+    START transaction;
+    
+     -- Début d'un bloc labellisé
+    block_label: BEGIN
+    
+     -- Recherche du code stocke
+       
+            SELECT oldpasswordsArray, isValidated
+            FROM Compte
+            WHERE Compte.email  = p_email
+			INTO v_codeStocke, v_isValidated
+        ;
+
+		IF v_isValidated = 1 THEN
+            SET p_Result = CONCAT("Erreur : compte deja valide -> ", p_email);
+            ROLLBACK;
+			LEAVE block_label;
+        END IF;
+        
+        IF v_codeStocke is null THEN
+            SET p_Result = CONCAT("Erreur : email inconnu -> ", p_email);
+            ROLLBACK;
+			LEAVE block_label;
+        END IF;
+        
+        -- Extraire les 6 premiers caractères
+		SET v_codeConfirmMailStocke = LEFT(v_codeStocke, 6);
+        
+        -- Extraire la deuxième partie après la virgule si elle existe, sinon assigner 0
+		SET v_nombreTentative = IF(LOCATE(',', v_codeStocke) > 0, 
+                         CAST(SUBSTRING_INDEX(v_codeStocke, ',', -1) AS UNSIGNED), 
+                         0);
+        
+        IF v_nombreTentative = 9 THEN
+			SET p_Result = "Erreur : nombre maximal de tentative atteint";
+            LEAVE block_label;
+        END IF;
+        
+        
+        IF v_codeConfirmMailStocke <> p_codeConfirmMail THEN
+			-- Code fourni errone
+			SET v_nombreTentative = v_nombreTentative + 1;
+			SET p_Result = CONCAT("Erreur : code non valide -> ", p_codeConfirmMail, " nombre tentative = ", v_nombreTentative);
+            
+            -- On met a jour la valkeur stockée
+            UPDATE Compte
+            SET oldpasswordsArray = CONCAT(v_codeConfirmMailStocke,",",v_nombreTentative)
+            WHERE email = p_email;
+            
+            LEAVE block_label;
+        END IF;
+     -- Le code est valide, on confirme le mail
+     UPDATE Compte
+     SET 	isValidated = 1,
+				oldpasswordsArray = ""
+     WHERE email = p_email;
+     
+     Commit;
+     SET p_Result = "OK";
+      -- fin d'un bloc labellisé
+    END block_label ;
+END$$
+DELIMITER ;;
 DROP PROCEDURE IF EXISTS PurgeOldUsers;
 DELIMITER $$
 
