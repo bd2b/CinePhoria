@@ -112,7 +112,7 @@ end if;
 
 -- cas 2 l'utilisateur existe mais est confirme
 
-call confirmUtilisateur(v_UtilisateurId, v_Result);
+call confirmUtilisateur(v_UtilisateurId,"password","Compte test suite", v_Result);
 if v_Result <> "OK" then
 	SET v_ResultTest = "KO";
 	CALL LogTrace("Test_CheckAvailabilityAndReserve : Cas 2 confirmation utilisateur =  KO");
@@ -319,17 +319,21 @@ DROP PROCEDURE IF EXISTS Test_confirmUtilisateur;
 
 DELIMITER $$
 CREATE PROCEDURE Test_confirmUtilisateur()
--- CREATE PROCEDURE confirmUtilisateur(
+-- CREATE PROCEDURE ConfirmUtilisateur(
 --     IN p_utilisateurId VARCHAR(100),
+--     IN p_displayName VARCHAR(100),
+--     IN p_password VARCHAR(100),  -- doit etre verifié et hashé à la source
 --      OUT p_Result VARCHAR(255)
 --      )
---      -- L'utilisateur est confirmé en mettant le timeStampCreate a null et le compte est valider en mettant isValidated à 1
---      -- Retour "OK" ou "Erreur : erreur interne procedure." ou "Erreur : utilisateurId non valide." ou "Warning : Utilisateur deja confirme."
-
+     -- L'utilisateur est confirmé en mettant le timeStampCreate a null et le compte est valider en mettant isValidated à 1
+     -- On met à jour le displayName de l'utilisateur
+     -- Retour "OK" ou "Erreur : xxxxxxxxx" ou "Warning : yyyyyyyyy"
+	 -- xxx = "erreur interne procedure." , "utilisateurId non valide." 
+     -- yyy = "utilisateur deja confirme."
 
 BEGIN
 DECLARE v_ResultTest VARCHAR(100) DEFAULT "OK";
-CALL LogTrace("Test_confirmUtilisateur - debut");
+CALL LogTrace("Test_confirmUtilisateur et Compte - debut");
 
 block_procedure: BEGIN
 DECLARE v_email VARCHAR(100) ;
@@ -337,6 +341,7 @@ DECLARE v_UtilisateurId VARCHAR(100);
 DECLARE v_exist INT DEFAULT 0 ;
 DECLARE v_Result VARCHAR(100);
 DECLARE v_timeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+DECLARE v_codeConfirmMail VARCHAR(100);
 
 
 -- On regarde si il y a des utilisateurs à confirmer
@@ -349,7 +354,7 @@ END IF;
 
 set v_UtilisateurId = ( SELECT id FROM Utilisateur WHERE timeStampCreate is not null LIMIT 1);
 
-call ConfirmUtilisateur(v_UtilisateurId,v_Result);
+call ConfirmUtilisateur(v_UtilisateurId,"password","Compte test suite",v_Result);
 
 if v_Result <> "OK" THEN
 	SET v_ResultTest = "KO";
@@ -365,6 +370,30 @@ if v_timeStamp is not null THEN
     LEAVE block_procedure;
 END IF;
 
+
+-- Verifier confirmCompte
+set v_email = (SELECT email FROM Utilisateur WHERE id = v_UtilisateurId);
+set v_codeConfirmMail = (SELECT oldpasswordsarray FROM Compte WHERE email = v_email);
+set v_codeConfirmMail = LEFT(v_codeConfirmMail,6);
+
+-- Premier appel qui doit donner KO
+call ConfirmCompte(v_email, '000000',v_Result);
+
+if LEFT(v_Result,6) <> 'Erreur' THEN
+	SET v_ResultTest = "KO";
+    CALL LogTrace("Test_confirmCompte : confirmation Compte devrait etre KO =  KO");
+    LEAVE block_procedure;
+END IF;
+
+-- Deuxieme appel qui doit etre OK
+call ConfirmCompte(v_email, v_codeConfirmMail,v_Result);
+if LEFT(v_Result,6) <> 'OK' THEN
+	SET v_ResultTest = "KO";
+    CALL LogTrace("Test_confirmCompte : confirmation Compte devrait etre OK =  KO");
+    LEAVE block_procedure;
+END IF;
+
+
 set v_exist = (SELECT isValidated FROM Compte WHERE email IN (SELECT email FROM Utilisateur WHERE id = v_UtilisateurId));
 if v_exist = 0 THEN
 	SET v_ResultTest = "KO";
@@ -373,7 +402,7 @@ if v_exist = 0 THEN
 END IF;
 
 END block_procedure;
-CALL LogTrace(CONCAT("Test_confirmUtilisateur = ", v_ResultTest));
+CALL LogTrace(CONCAT("Test_confirmUtilisateur et Compte = ", v_ResultTest));
 END$$
 
 DELIMITER ;

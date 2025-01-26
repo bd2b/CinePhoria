@@ -55,7 +55,35 @@ export class UtilisateurController {
       } else {
         res.status(200).json({ statut: result })};
     } catch (error) {
-      console.error('Erreur dans createUtilisateur:', error);
+      console.error('Erreur dans confirmUtilisateur:', error);
+      res.status(500).json({ message: 'Erreur interne du serveur.' });
+    }
+  };
+
+  static async confirmCompte(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, codeConfirm } = req.body;
+      console.log(email, codeConfirm);
+
+      // Validation des données d'entrée
+      if (!email || !codeConfirm ) {
+        res.status(400).json({ message: 'Données manquantes ou invalides.' });
+        return;
+      }
+
+      // Appel au DAO pour exécuter la procédure stockée
+      const result = await UtilisateurDAO.confirmCompte(
+        email,
+        codeConfirm
+      );
+
+      // Gestion du résultat
+      if (result.startsWith('Erreur')) {
+        res.status(400).json({ message: result });
+      } else {
+        res.status(200).json({ statut: result })};
+    } catch (error) {
+      console.error('Erreur dans confirmCompte:', error);
       res.status(500).json({ message: 'Erreur interne du serveur.' });
     }
   };

@@ -26,10 +26,11 @@ export enum ReservationState {
     PendingChoiceSeance = "PendingChoiceSeance",    // Choix de seance en cours , le panel choix est affiché
     PendingChoiceSeats = "PendingChoiceSeats",      // Choix de tarifs en cours, le panel reserve est affiché
     ReserveCompteToConfirm = "ReserveCompteToConfirm",    // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués) 
-                                                    // avec un email qui a créé ou est relatif à un compte provisoire qu'il faut confirmer
+                                                    // avec un compte provisoire qu'il faut confirmer
+    ReserveMailToConfirm = "ReserveMailToConfirm",  // Le compte a été confirmé, il faut maintenant confirmer le mail en saisissant le code reçu dans la modal
     ReserveToConfirm = "ReserveToConfirm",          // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués) 
                                                     // avec un email qui est celui d'un compte existant                                     
-    Confirmed = "Confirmed"                        // La reservation est confirmé après login sur un compte existant, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
+    ReserveConfirmed = "ReserveConfirmed"           // La reservation est confirmé après login sur un compte existant, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
     }
 
 export class DataController {
@@ -43,6 +44,8 @@ export class DataController {
     private _selectedSeanceDate?: Date; // date du jour actuellement selectionnee
     private _selectedSeanceUUID?: string | undefined // UUID de la séance selectionnée
     private _selectedUtilisateurUUID?: string | undefined // UUID de l'utilisateur
+    private _selectedUtilisateurMail?: string | undefined // Mail de l'utilisateur
+    private _selectedUtilisateurDisplayName?: string | undefined // displayName de l'utilisateur
     private _selectedReservationUUID?: string | undefined // UUID de la reservation
 
 
@@ -159,6 +162,26 @@ export class DataController {
     // Setter pour selectedUtilisateurUUID
     public set selectedUtilisateurUUID(value: string | undefined) {
         this._selectedUtilisateurUUID = value;
+    }
+
+    // Getter pour selectedUtilisateurMail
+    public get selectedUtilisateurMail(): string | undefined {
+        return this._selectedUtilisateurMail || undefined;
+    }
+
+    // Setter pour selectedUtilisateurMail
+    public set selectedUtilisateurMail(value: string | undefined) {
+        this._selectedUtilisateurMail = value;
+    }
+
+    // Getter pour selectedUtilisateurDisplayName
+    public get selectedUtilisateurDisplayName(): string | undefined {
+        return this._selectedUtilisateurDisplayName || undefined;
+    }
+
+    // Setter pour selectedUtilisateurDisplayName
+    public set selectedUtilisateurDisplayName(value: string | undefined) {
+        this._selectedUtilisateurDisplayName = value;
     }
 
     // Getter pour selectedReservationUUID

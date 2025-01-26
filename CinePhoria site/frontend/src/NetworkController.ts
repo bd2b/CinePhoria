@@ -49,7 +49,7 @@ export async function reservationApi (
     return responseJSON;
 }
 
-export async function confirmUtilisateurApi ( id: string, password: string, displayName: string): Promise<string> {
+export async function confirmUtilisateurApi ( id: string, password: string, displayName: string): Promise<{ statut: string } > {
     const body = { id, password, displayName };
     const response = await fetch('http://localhost:3500/api/utilisateur/confirm', {
         method: 'POST',

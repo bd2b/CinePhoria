@@ -93,6 +93,43 @@ export class UtilisateurDAO {
     }
   }
 
+  static async confirmCompte(
+    email: string,
+    codeConfirm: string
+  ): Promise<string> {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+      // Exécution de la procédure stockée avec @result
+      const results = await connection.query(
+        `CALL ConfirmCompte(?, ?, @result);
+         SELECT @result AS result;`,
+        [email, codeConfirm]
+      );
+      logger.info("Execution de la procedure ConfirmCompte ")
+      logger.info("Parametre =", {email, codeConfirm});
+      // Forcer TypeScript à comprendre la structure des résultats
+      const callResults = results as any[][];  // Correction du typage
+      const selectResult = callResults[0][1] as Array<{ result: string }>;
+
+      // Vérification et extraction du résultat
+      if (selectResult && selectResult.length > 0 && selectResult[0].result) {
+        const statut = selectResult[0].result;
+        logger.info("Résultat = " + statut);
+
+        // Retourner uniquement la chaîne utilisateurId
+        return statut;
+      } else {
+        logger.error("Erreur : Résultat non disponible.");
+        throw new Error('Erreur : Résultat non disponible.');
+      }
+    } catch (error) {
+      logger.error('Erreur dans ConfirmCompte', error);
+      throw new Error('Erreur lors de l’exécution de la procédure stockée.');
+    } finally {
+      await connection.end();
+    }
+  }
+
 
   static async findById(id: string): Promise<UtilisateurCompte | null> {
     const connection = await mysql.createConnection(dbConfig);

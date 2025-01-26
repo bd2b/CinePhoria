@@ -40,6 +40,10 @@ export function updateContentPlace() {
         console.error("Erreur lors de l'affichage du content de selection des places : ", error);
     }
 }
+/**
+ * Affiche le bloc de choix de places, et de renseignement de l'adresse mail
+ * @returns
+ */
 function setReservation() {
     const qualiteFilm = dataController.seanceSelected().qualite;
     // Afficher le tableau de tarifs selon la qualite
@@ -49,14 +53,14 @@ function setReservation() {
     containerTable.innerHTML = '';
     if (qualiteFilm)
         containerTable.appendChild(updateTableContent(qualiteFilm));
-    // Gere les boutons + et - du champ PMR
+    // Afficher le champ de renseignement du nombre de place PMR et gestion des boutons + et -
     const containerPMR = document.querySelector('.commande__pmr');
     const contentPMR = updateInputPMR();
     if (!containerPMR)
         throw new Error("updateInputPMT");
     containerPMR.innerHTML = '';
     containerPMR.appendChild(contentPMR);
-    // Gere la complétude de l'email avec un message d'erreur associ
+    // Gere la complétude de l'email avec un message d'erreur associé
     const emailInput = document.getElementById('commande__mail-input');
     const emailError = document.getElementById('commande__mail-error');
     if (!emailInput || !emailError)
@@ -101,9 +105,9 @@ function setReservation() {
         }
     }
     // Ajout d'écouteurs d'événements pour la validation en temps réel
-    // email
+    // Sur l'email
     emailInput.addEventListener('input', validateForm);
-    // Comme la modification du nombre total de place est faite par programme, l'écouteur est basé sur un changement du DOM
+    // Sur le nombre total de place est faite par programme, l'écouteur est basé sur un changement du DOM
     const observer = new MutationObserver(() => { console.log("Changement...."); validateForm(); });
     // Configurer l'observation pour surveiller les modifications de contenu
     observer.observe(totalPlaces, {
@@ -112,6 +116,7 @@ function setReservation() {
         subtree: true // Surveille aussi dans les sous-éléments
     });
     // Gestion de la reservation
+    // La validation des saisies est faites par la fonction de validation validateForm
     btnReserve.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
         evt.preventDefault();
         evt.stopPropagation();
@@ -124,7 +129,7 @@ function setReservation() {
         // c) Récupérer l'email
         const email = collectEmail('.commande__mail-input');
         console.log(`email = ${email}`);
-        // d) Appel à l’API /api/reservation
+        // d) Appel à l’API /api/reservation et traitement des résultats
         try {
             const seanceId = dataController.seanceSelected().seanceId;
             const { statut, utilisateurId, reservationId } = yield reservationApi(email, seanceId, tarifSeatsMap, pmrSeats);
@@ -132,16 +137,16 @@ function setReservation() {
             dataController.selectedReservationUUID = reservationId;
             switch (statut) {
                 case 'Compte Provisoire':
-                    // L'email est inconnu -> compte créé en provisoire
+                    // L'email est inconnu -> compte créé en provisoire : il faudra confirmer le compte et se logguer
                     console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
                     dataController.reservationState = ReservationState.ReserveCompteToConfirm;
-                    confirmMail(email);
+                    confirmUtilisateur(email);
                     break;
                 case 'Compte Confirme':
-                    // L'email correspond à un compte valide
+                    // L'email correspond à un compte valide : il faudra se logguer
                     console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
                     dataController.reservationState = ReservationState.ReserveToConfirm;
-                    //  loginWithEmail(dataController, email);
+                    loginWithEmail();
                     break;
                 default:
                     // Cas imprévu
@@ -422,10 +427,9 @@ function validateEmail(email) {
 ;
 /**
  * Quand on reçoit "Compte Provisoire" => on exécute confirmMail
- * - On met dataController.reservationState = ReservationState.PendingMailVerification
  * - On affiche une modale demandant la saisie du mail et deux champs mot de passe
  */
-function confirmMail(email) {
+function confirmUtilisateur(email) {
     return __awaiter(this, void 0, void 0, function* () {
         // Afficher la modale
         // Execution de la fonction interne gestionFormulaire (valeur de l'email saisie)
@@ -534,19 +538,290 @@ function confirmMail(email) {
                 emailInput.addEventListener('input', validateForm);
                 password1Input.addEventListener('input', validateForm);
                 password2Input.addEventListener('input', validateForm);
+                // Gestion de la soumission de la modale de confirmation de compte
+                submitButton.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    if (!dataController.selectedUtilisateurUUID)
+                        return;
+                    if (yield confirmCreationCompte(dataController.selectedUtilisateurUUID, emailInput.value.trim(), password1Input.value.trim(), displayNameInput.value.trim())) {
+                        // On ferme la modal de confirmation
+                        const modalConfirm = document.getElementById('modal-confirmMail');
+                        if (modalConfirm) {
+                            modalConfirm.style.display = 'none';
+                        }
+                        dataController.reservationState = ReservationState.ReserveMailToConfirm;
+                        // On lance la modal de confirmation d'email
+                        yield confirmMail();
+                    }
+                    ;
+                }));
+            });
+        }
+        function confirmCreationCompte(id, email, password, displayName) {
+            return __awaiter(this, void 0, void 0, function* () {
+                const resultat = yield confirmUtilisateurApi(id, password, displayName);
+                if (resultat.statut === 'OK') {
+                    dataController.reservationState = ReservationState.ReserveToConfirm;
+                    dataController.selectedUtilisateurDisplayName = displayName;
+                    dataController.selectedUtilisateurMail = email;
+                    return true;
+                }
+                else {
+                    return false;
+                }
+                alert("Soumission de confirmationUtilisateur = " + id + " password = " + password + " displayName = " + displayName + " Resultat = " + JSON.stringify(resultat));
+            });
+        }
+    });
+}
+;
+/**
+ * Quand on reçoit "Compte Provisoire" => on exécute loginWithEmail
+ * - On affiche la modale de connexion
+ */
+function loginWithEmail() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Afficher la modale
+        // Execution de la fonction interne gestionFormulaire (valeur de l'email saisie)
+        //  Reprise de la valeur de l'email du formulaire précédent
+        //  Verification des champs email/password, si OK activation du bouton
+        //  Bouton submit qui enclenche la le login
+        console.log('===> loginEmail action');
+        const modalConfirm = document.getElementById('modal-loginEmail');
+        const closeModalBtn = document.getElementById("close-loginEmail");
+        const confirmModalBtn = document.getElementById("loginEmail-submit");
+        const emailError = document.getElementById('email-error');
+        if (modalConfirm && closeModalBtn && confirmModalBtn) {
+            modalConfirm.style.display = 'flex';
+            const closeModal = () => {
+                modalConfirm.style.display = 'none';
+            };
+            closeModalBtn.addEventListener('click', closeModal);
+            modalConfirm.addEventListener('click', (event) => {
+                if (event.target === modalConfirm)
+                    closeModal();
+            });
+            // Appel de la fonction de login -> on est sur d'avoir ces données car la vérification
+            // des valeurs du formulaire conditionne le submit qui exécute cette fonction
+            yield gestionFormulaireModal();
+        }
+        else {
+            console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal modal-loginEmail sont introuvables.');
+        }
+        /**
+         * Met en place toute la gestion de la modal login
+         * @param emailInitial sert a initialiser l'input du mail
+         *
+         */
+        function gestionFormulaireModal() {
+            return __awaiter(this, void 0, void 0, function* () {
+                // Sélection des éléments de la modal avec un typage strict
+                const titleConnexion = document.querySelector('.title__loginEmail');
+                const emailInput = document.getElementById('loginEmail-email');
+                const passwordInput = document.getElementById('loginEmail-password');
+                const submitButton = document.getElementById('loginEmail-submit');
+                /**
+                 * Vérifie si tous les champs sont remplis.
+                 * @returns boolean - True si tous les champs sont remplis, sinon False.
+                 */
+                function areAllFieldsFilled() {
+                    return (emailInput.value.trim() !== "" &&
+                        passwordInput.value.trim() !== "");
+                }
+                /**
+                 * Valide l'ensemble du formulaire et active/désactive le bouton de soumission.
+                 */
+                function validateForm() {
+                    const emailValid = validateEmail(emailInput.value);
+                    const fieldsFilled = areAllFieldsFilled();
+                    // Activation/désactivation du bouton de soumission
+                    if (!(emailValid && fieldsFilled)) {
+                        submitButton.classList.add("inactif");
+                        submitButton.disabled = true;
+                    }
+                    else {
+                        submitButton.classList.remove("inactif");
+                        submitButton.disabled = false;
+                    }
+                }
+                // Personnalise l'invitation
+                if (titleConnexion) {
+                    titleConnexion.textContent = `Bienvenue, ${dataController.selectedUtilisateurDisplayName}`;
+                }
+                // Ajout de la valeur d'email saisi dans le formulaire de réservation
+                emailInput.value = dataController.selectedUtilisateurMail || ''; // Définir une valeur par défaut
+                // Le bouton de validation est inactif au chargement
+                submitButton.classList.add("inactif");
+                // Gestion du message d'erreur pour l'email lors du blur (perte de focus)
+                emailInput.addEventListener('blur', () => {
+                    if (!validateEmail(emailInput.value)) {
+                        emailError.textContent = "Email invalide (exemple: utilisateur@domaine.com)";
+                        emailError.style.color = "red";
+                    }
+                    else {
+                        emailError.textContent = "";
+                    }
+                });
+                // Ajout d'écouteurs d'événements pour la validation en temps réeldisplayNameInput.addEventListener('input', validateForm);
+                emailInput.addEventListener('input', validateForm);
+                passwordInput.addEventListener('input', validateForm);
                 // Gestion de la soumission de la modale
                 submitButton.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
                     evt.preventDefault();
                     evt.stopPropagation();
                     if (!dataController.selectedUtilisateurUUID)
                         return;
-                    confirmCreationCompte(dataController.selectedUtilisateurUUID, password1Input.value.trim(), displayNameInput.value.trim());
+                    //     confirmCreationCompte(dataController.selectedUtilisateurUUID, emailInput.value.trim(), password1Input.value.trim(), displayNameInput.value.trim());
                 }));
             });
         }
-        function confirmCreationCompte(id, password, displayName) {
+    });
+}
+/**
+ * On vient de confirmer un compte, il faut confirmerl'email de ce compte
+ * Un email est envoyé par le backend avec un code
+ * Ce code doit etre saisit dans la modal de confirlmation de mail
+ */
+function confirmMail() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Afficher la modale de confirmation d'email
+        //  Bouton submit qui enclenche la confirmation de la création du compte confirmValidationMail
+        //    Appel de l'API Rest
+        //    Si Ok lancement de la fonction de login
+        const email = 'ttt';
+        console.log('===> confirmMail action, email =', email);
+        const modalConfirm = document.getElementById('modal-confirmMail');
+        const closeModalBtn = document.getElementById("close-confirmMail");
+        const confirmModalBtn = document.getElementById("confirmMail-submit");
+        if (modalConfirm && closeModalBtn && confirmModalBtn) {
+            modalConfirm.style.display = 'flex';
+            const closeModal = () => {
+                modalConfirm.style.display = 'none';
+            };
+            closeModalBtn.addEventListener('click', closeModal);
+            modalConfirm.addEventListener('click', (event) => {
+                if (event.target === modalConfirm)
+                    closeModal();
+            });
+            // Appel de la fonction de gestion du formulaire et récupération des données -> on est sur d'avoir ces données car la vérification
+            // des valeurs du formulaire conditionne le submit qui exécute cette fonction
+            yield gestionFormulaireModal(email);
+        }
+        else {
+            console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal modal-confirmMail sont introuvables.');
+        }
+        /**
+         * Met en place toute la gestion de la modal
+         *
+         * @param emailInitial sert a in itialiser l'input du mail
+         *
+         */
+        function gestionFormulaireModal(emailInitial) {
+            return __awaiter(this, void 0, void 0, function* () {
+                // Sélection des éléments de la modal avec un typage strict
+                const displayNameInput = document.getElementById('confirmMail-displayName');
+                const emailInput = document.getElementById('confirmMail-email');
+                const password1Input = document.getElementById('confirmMail-password1');
+                const password2Input = document.getElementById('confirmMail-password2');
+                const submitButton = document.getElementById('confirmMail-submit');
+                const emailError = document.getElementById('email-error');
+                const passwordError = document.getElementById('password-error');
+                /**
+                 * Vérifie si les mots de passe sont identiques.
+                 * @returns boolean - True si les mots de passe correspondent, sinon False.
+                 */
+                function passwordsMatch() {
+                    return password1Input.value === password2Input.value && password1Input.value.length > 0;
+                }
+                /**
+                 * Vérifie si tous les champs sont remplis.
+                 * @returns boolean - True si tous les champs sont remplis, sinon False.
+                 */
+                function areAllFieldsFilled() {
+                    return (displayNameInput.value.trim() !== "" &&
+                        emailInput.value.trim() !== "" &&
+                        password1Input.value.trim() !== "" &&
+                        password2Input.value.trim() !== "");
+                }
+                /**
+                 * Valide l'ensemble du formulaire et active/désactive le bouton de soumission.
+                 */
+                function validateForm() {
+                    const emailValid = validateEmail(emailInput.value);
+                    const passwordsAreValid = passwordsMatch();
+                    const fieldsFilled = areAllFieldsFilled();
+                    // Activation/désactivation du bouton de soumission
+                    if (!(emailValid && passwordsAreValid && fieldsFilled)) {
+                        submitButton.classList.add("inactif");
+                        submitButton.disabled = true;
+                    }
+                    else {
+                        submitButton.classList.remove("inactif");
+                        submitButton.disabled = false;
+                    }
+                }
+                // Ajout de la valeur d'email saisi dans le formulaire de réservation
+                emailInput.value = emailInitial; // Définir une valeur par défaut
+                // Le bouton de validation est inactif au chargement
+                submitButton.classList.add("inactif");
+                // Gestion du message d'erreur pour l'email lors du blur (perte de focus)
+                emailInput.addEventListener('blur', () => {
+                    if (!validateEmail(emailInput.value)) {
+                        emailError.textContent = "Email invalide (exemple: utilisateur@domaine.com)";
+                        emailError.style.color = "red";
+                    }
+                    else {
+                        emailError.textContent = "";
+                    }
+                });
+                // Gestion du message d'erreur pour les mots de passe lors du blur
+                password2Input.addEventListener('blur', () => {
+                    if (!passwordsMatch()) {
+                        passwordError.textContent = "Les mots de passe ne correspondent pas.";
+                        passwordError.style.color = "red";
+                    }
+                    else {
+                        passwordError.textContent = "";
+                    }
+                });
+                // Ajout d'écouteurs d'événements pour la validation en temps réel
+                displayNameInput.addEventListener('input', validateForm);
+                emailInput.addEventListener('input', validateForm);
+                password1Input.addEventListener('input', validateForm);
+                password2Input.addEventListener('input', validateForm);
+                // Gestion de la soumission de la modale de confirmation de compte
+                submitButton.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    if (!dataController.selectedUtilisateurUUID)
+                        return;
+                    if (yield confirmCreationCompte(dataController.selectedUtilisateurUUID, emailInput.value.trim(), password1Input.value.trim(), displayNameInput.value.trim())) {
+                        // On ferme la modal de confirmation
+                        const modalConfirm = document.getElementById('modal-confirmMail');
+                        if (modalConfirm) {
+                            modalConfirm.style.display = 'none';
+                        }
+                        dataController.reservationState = ReservationState.ReserveMailToConfirm;
+                        // On lance la modal de confirmation d'email
+                        //await confirmEmail();
+                    }
+                    ;
+                }));
+            });
+        }
+        function confirmCreationCompte(id, email, password, displayName) {
             return __awaiter(this, void 0, void 0, function* () {
                 const resultat = yield confirmUtilisateurApi(id, password, displayName);
+                if (resultat.statut === 'OK') {
+                    dataController.reservationState = ReservationState.ReserveToConfirm;
+                    dataController.selectedUtilisateurDisplayName = displayName;
+                    dataController.selectedUtilisateurMail = email;
+                    return true;
+                }
+                else {
+                    return false;
+                }
                 alert("Soumission de confirmationUtilisateur = " + id + " password = " + password + " displayName = " + displayName + " Resultat = " + JSON.stringify(resultat));
             });
         }

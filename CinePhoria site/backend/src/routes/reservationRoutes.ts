@@ -2,13 +2,14 @@ import { Router } from 'express';
 import { SeanceController } from '../controllers/seanceController';
 import { authenticateJWT } from '../middlewares/authMiddleware';
 import { isAuthenticated } from '../middlewares/sessionMidleWare';
-import logger from '../config/configLog'
+import logger from '../config/configLog';
 
 import { ReservationController } from '../controllers/reservationController';
 
 const router = Router();
 
 // POST /api/reservation
+logger.info('Declaration route /api/reservation/');
 router.post('/', ReservationController.createReservation);
 
 // (Futur) GET /api/reservation/:id
