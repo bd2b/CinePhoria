@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { dataController, seanceCardView, basculerPanelChoix } from './ViewReservation.js';
 import { ReservationState } from './DataController.js';
-import { reservationApi } from './NetworkController.js';
+import { reservationApi, confirmUtilisateurApi } from './NetworkController.js';
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
  * @returns
@@ -538,83 +538,18 @@ function confirmMail(email) {
                 submitButton.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
                     evt.preventDefault();
                     evt.stopPropagation();
-                    confirmCreationCompte(displayNameInput.value.trim(), emailInput.value.trim(), password1Input.value.trim());
+                    if (!dataController.selectedUtilisateurUUID)
+                        return;
+                    confirmCreationCompte(dataController.selectedUtilisateurUUID, password1Input.value.trim(), displayNameInput.value.trim());
                 }));
             });
         }
-        function confirmCreationCompte(displayName, email, password) {
+        function confirmCreationCompte(id, password, displayName) {
             return __awaiter(this, void 0, void 0, function* () {
-                console.log("Recupération de la modal");
-                alert("Soumission de displayName = " + displayName + " email = " + email + " password = " + password);
-                // // e) Appel à l’API /api/reservation
-                // try {
-                //   const seanceId = dataController.seanceSelected().seanceId;
-                //   // Construction du body
-                //   const body = {
-                //     email,
-                //     seanceId,
-                //     tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
-                //     pmrSeats
-                //   };
-                //   const response = await fetch('http://localhost:3500/api/reservation', {
-                //     method: 'POST',
-                //     headers: { 'Content-Type': 'application/json' },
-                //     body: JSON.stringify(body)
-                //   });
-                //   if (!response.ok) {
-                //     const errData = await response.json();
-                //     alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
-                //     return;
-                //   }
-                //   // Réponse OK -> { statut, utilisateurId, reservationId }
-                //   const { statut, utilisateurId, reservationId } = await response.json();
-                //   // f) Contrôles de cohérence
-                //   //   - Vérifier seanceId identique
-                //   //   - Vérifier si utilisateurId est un UUID
-                //   //   - Gérer statut
-                //   let messageError = "";
-                //   if (!isUUID(reservationId)) {
-                //     messageError += `ReservationID invalide.`;
-                //   }
-                //   if (!isUUID(utilisateurId)) {
-                //     messageError += `UtilisateurId invalide.`;
-                //   }
-                //   if (statut == 'NA') {
-                //     messageError = `Une erreur s'est produite côté serveur (NA).`;
-                //   }
-                //   if (utilisateurId.startsWith('Erreur')) {
-                //     messageError += " Erreur utilisateur : " + utilisateurId;
-                //   }
-                //   if (reservationId.startsWith('Erreur')) {
-                //     messageError += " Erreur reservation : " + reservationId;
-                //   }
-                //   if (messageError !== "") {
-                //     alert(`Une erreur s'est produite : ${messageError}`);
-                //     return;
-                //   }
-                //   dataController.selectedUtilisateurUUID = utilisateurId;
-                //   dataController.selectedReservationUUID = reservationId;
-                //   switch (statut) {
-                //     case 'Compte Provisoire':
-                //       // L'email est inconnu -> compte créé en provisoire
-                //       console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
-                //       confirmMail(dataController, email);
-                //       break;
-                //     case 'Compte Confirme':
-                //       // L'email correspond à un compte valide
-                //       console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
-                //       //  loginWithEmail(dataController, email);
-                //       break;
-                //     default:
-                //       // Cas imprévu
-                //       alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
-                //       break;
-                //   }
-                // } catch (error: any) {
-                //   console.error('Erreur lors de la création de la réservation', error);
-                //   alert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
-                // }
+                const resultat = yield confirmUtilisateurApi(id, password, displayName);
+                alert("Soumission de confirmationUtilisateur = " + id + " password = " + password + " displayName = " + displayName + " Resultat = " + JSON.stringify(resultat));
             });
         }
     });
 }
+;

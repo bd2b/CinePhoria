@@ -62,6 +62,9 @@ export function confirmUtilisateurApi(id, password, displayName) {
             const errData = yield response.json();
             throw new Error(errData.message || 'Erreur inconnue');
         }
-        return "couco";
+        // Examen de la reponse
+        const responseJSON = yield response.json();
+        console.log("Message retour", responseJSON);
+        return responseJSON;
     });
 }

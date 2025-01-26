@@ -2,7 +2,7 @@ import { dataController, seanceCardView, basculerPanelChoix } from './ViewReserv
 import { ReservationState } from './DataController.js';
 import { isUUID } from './Helpers.js';
 import { TarifForSeats } from './shared-models/Reservation';
-import { reservationApi } from './NetworkController.js';
+import { reservationApi, confirmUtilisateurApi } from './NetworkController.js';
 
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
@@ -48,7 +48,7 @@ function setReservation() {
     // Gere les boutons + et - du champ PMR
     const containerPMR = document.querySelector('.commande__pmr')
     const contentPMR = updateInputPMR();
-    
+
     if (!containerPMR) throw new Error("updateInputPMT");
     containerPMR.innerHTML = '';
     containerPMR.appendChild(contentPMR);
@@ -383,18 +383,18 @@ function updateInputPMR(): HTMLDivElement {
     const pmrContent = document.createElement('div');
     pmrContent.classList.add('pmr__content');
 
-//     pmrContent.innerHTML = `
-//     <p class="content__libelle-p">Personne à mobilité réduite :</p>
-//     <div class="content__num-pmr">
-//         <button class="num__add-button num__add-pmr">+</button>
-//         <span class="num__num-span num__numpmr-span" id="num__pmr">0</span>
-//         <button class="num__remove-button num__remove-pmr">-</button>
-//     </div>
-//   `;
+    //     pmrContent.innerHTML = `
+    //     <p class="content__libelle-p">Personne à mobilité réduite :</p>
+    //     <div class="content__num-pmr">
+    //         <button class="num__add-button num__add-pmr">+</button>
+    //         <span class="num__num-span num__numpmr-span" id="num__pmr">0</span>
+    //         <button class="num__remove-button num__remove-pmr">-</button>
+    //     </div>
+    //   `;
     const contentLibelle = document.createElement('p');
     contentLibelle.classList.add('content__libelle-p');
     contentLibelle.textContent = 'Personne à mobilité réduite :';
-    
+
 
     const contentNumPMR = document.createElement('div');
     contentNumPMR.classList.add('content__num-pmr');
@@ -411,7 +411,7 @@ function updateInputPMR(): HTMLDivElement {
     const btnRemovePMR = document.createElement('button');
     btnRemovePMR.classList.add('num__remove-button', 'num__remove-pmr');
     btnRemovePMR.textContent = '-';
-    
+
     if (!btnAddPMR || !btnRemovePMR || !spanPMR) throw new Error('Erreur updateInputPMR');;
     btnAddPMR.removeEventListener('click', (event: MouseEvent) => { });
     btnRemovePMR.removeEventListener('click', (event: MouseEvent) => { });
@@ -597,91 +597,15 @@ async function confirmMail(email: string) {
         submitButton.addEventListener('click', async (evt: MouseEvent) => {
             evt.preventDefault();
             evt.stopPropagation();
-            confirmCreationCompte(displayNameInput.value.trim(), emailInput.value.trim(), password1Input.value.trim());
+            if (!dataController.selectedUtilisateurUUID) return;
+            confirmCreationCompte(dataController.selectedUtilisateurUUID, password1Input.value.trim(), displayNameInput.value.trim());
         });
     }
-    async function confirmCreationCompte(displayName: string, email: string, password: string) {
-        console.log("Recupération de la modal");
-        alert("Soumission de displayName = " + displayName + " email = " + email + " password = " + password);
+    async function confirmCreationCompte(id: string, password: string, displayName: string) {
 
+        const resultat = await confirmUtilisateurApi(id, password, displayName);
 
+        alert("Soumission de confirmationUtilisateur = " + id + " password = " + password + " displayName = " + displayName + " Resultat = " + JSON.stringify(resultat));
 
-        // // e) Appel à l’API /api/reservation
-        // try {
-        //   const seanceId = dataController.seanceSelected().seanceId;
-        //   // Construction du body
-        //   const body = {
-        //     email,
-        //     seanceId,
-        //     tarifSeats: tarifSeatsMap, // { tarifId: numberOfSeats, ... }
-        //     pmrSeats
-        //   };
-
-        //   const response = await fetch('http://localhost:3500/api/reservation', {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' },
-        //     body: JSON.stringify(body)
-        //   });
-
-        //   if (!response.ok) {
-        //     const errData = await response.json();
-        //     alert(`Une erreur s'est produite : ${errData.message || 'inconnue'}`);
-        //     return;
-        //   }
-
-        //   // Réponse OK -> { statut, utilisateurId, reservationId }
-        //   const { statut, utilisateurId, reservationId } = await response.json();
-
-        //   // f) Contrôles de cohérence
-        //   //   - Vérifier seanceId identique
-        //   //   - Vérifier si utilisateurId est un UUID
-        //   //   - Gérer statut
-        //   let messageError = "";
-        //   if (!isUUID(reservationId)) {
-        //     messageError += `ReservationID invalide.`;
-        //   }
-        //   if (!isUUID(utilisateurId)) {
-        //     messageError += `UtilisateurId invalide.`;
-        //   }
-        //   if (statut == 'NA') {
-        //     messageError = `Une erreur s'est produite côté serveur (NA).`;
-        //   }
-        //   if (utilisateurId.startsWith('Erreur')) {
-        //     messageError += " Erreur utilisateur : " + utilisateurId;
-        //   }
-        //   if (reservationId.startsWith('Erreur')) {
-        //     messageError += " Erreur reservation : " + reservationId;
-        //   }
-        //   if (messageError !== "") {
-        //     alert(`Une erreur s'est produite : ${messageError}`);
-        //     return;
-        //   }
-
-        //   dataController.selectedUtilisateurUUID = utilisateurId;
-        //   dataController.selectedReservationUUID = reservationId;
-
-        //   switch (statut) {
-        //     case 'Compte Provisoire':
-        //       // L'email est inconnu -> compte créé en provisoire
-        //       console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
-        //       confirmMail(dataController, email);
-        //       break;
-
-        //     case 'Compte Confirme':
-        //       // L'email correspond à un compte valide
-        //       console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
-        //       //  loginWithEmail(dataController, email);
-        //       break;
-
-        //     default:
-        //       // Cas imprévu
-        //       alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
-        //       break;
-        //   }
-
-        // } catch (error: any) {
-        //   console.error('Erreur lors de la création de la réservation', error);
-        //   alert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
-        // }
     }
-}
+};
