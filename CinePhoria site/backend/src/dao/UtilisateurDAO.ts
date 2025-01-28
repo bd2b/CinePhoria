@@ -9,6 +9,16 @@ async function hashPassword(password: string): Promise<string> {
   const saltRounds = 10; // Plus le nombre est élevé, plus c'est sécurisé mais plus lent
   return await bcrypt.hash(password, saltRounds);
 }
+
+/**
+ * Vérification d'un mot de passe
+ * @param password en clair
+ * @param hashedPassword password hasché
+ * @returns boolean
+ */
+async function isPasswordEqual (password: string, hashedPassword: string): Promise<boolean> {
+    return await bcrypt.compare(password, hashedPassword);
+}
 export class UtilisateurDAO {
 
   static async createUtilisateur(
@@ -27,7 +37,7 @@ export class UtilisateurDAO {
         [email, passwordHashed, displayName]
       );
       logger.info("Execution de la procedure CreateUtilisateur ")
-      logger.info("Paramètres :", { email,  displayName } , "et mot de passe hashé");
+      logger.info("Paramètres :", { email, displayName }, "et mot de passe hashé");
 
       // Forcer TypeScript à comprendre la structure des résultats
       const callResults = results as any[][];  // Correction du typage
@@ -52,8 +62,6 @@ export class UtilisateurDAO {
     }
   };
 
-
-
   static async confirmUtilisateur(
     utilisateurId: string,
     password: string,
@@ -69,7 +77,7 @@ export class UtilisateurDAO {
         [utilisateurId, passwordHashed, displayName]
       );
       logger.info("Execution de la procedure ConfirmUtilisateur ")
-      logger.info("Parametre =", {utilisateurId, displayName} , "et mot de passe hashé");
+      logger.info("Parametre =", { utilisateurId, displayName }, "et mot de passe hashé");
       // Forcer TypeScript à comprendre la structure des résultats
       const callResults = results as any[][];  // Correction du typage
       const selectResult = callResults[0][1] as Array<{ result: string }>;
@@ -106,7 +114,7 @@ export class UtilisateurDAO {
         [email, codeConfirm]
       );
       logger.info("Execution de la procedure ConfirmCompte ")
-      logger.info("Parametre =", {email, codeConfirm});
+      logger.info("Parametre =", { email, codeConfirm });
       // Forcer TypeScript à comprendre la structure des résultats
       const callResults = results as any[][];  // Correction du typage
       const selectResult = callResults[0][1] as Array<{ result: string }>;
@@ -150,5 +158,31 @@ export class UtilisateurDAO {
     const data = (rows as any[])[0];
     return data ? data as UtilisateurCompte : null;
   }
+
+  static async login(
+    compte: string,
+    password: string
+  ): Promise<string> {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+      // Récupération du mot de passe chiffré
+      const rows  = await connection.query(`SELECT password FROM Compte WHERE Compte.email = ${compte}`) as any[];
+      const passwordHash = rows[0] as string;
+      
+      if (await isPasswordEqual(password, passwordHash)) {
+        return "OK";
+      } else { 
+        return "KO"
+      }
+      
+    } catch (error) {
+      logger.error('Erreur dans login', error);
+      throw new Error('Erreur lors de l’exécution de la procédure stockée.');
+    } finally {
+      await connection.end();
+    }
+  }
+
+
 };
 
