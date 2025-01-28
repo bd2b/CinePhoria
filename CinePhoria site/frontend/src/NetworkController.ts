@@ -51,7 +51,7 @@ export async function reservationApi (
 
 export async function confirmUtilisateurApi ( id: string, password: string, displayName: string): Promise<{ statut: string } > {
     const body = { id, password, displayName };
-    const response = await fetch('http://localhost:3500/api/utilisateur/confirm', {
+    const response = await fetch('http://localhost:3500/api/utilisateur/confirmUtilisateur', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -66,4 +66,40 @@ export async function confirmUtilisateurApi ( id: string, password: string, disp
     console.log("Message retour",responseJSON);
     return responseJSON;
 
+}
+
+export async function confirmCompteApi(email: string, codeConfirm: string) {
+    const body = { email , codeConfirm };
+    const response = await fetch('http://localhost:3500/api/utilisateur/confirmCompte', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || 'Erreur inconnue');
+    }
+
+    // Examen de la reponse
+    const responseJSON = await response.json();
+    console.log("Message retour",responseJSON);
+    return responseJSON;
+}
+
+export async function loginApi(compte: string, password: string) {
+    const body = { compte , password };
+    const response = await fetch('http://localhost:3500/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || 'Erreur inconnue');
+    }
+
+    // Examen de la reponse
+    const responseJSON = await response.json();
+    console.log("Message retour",responseJSON);
+    return responseJSON;
 }

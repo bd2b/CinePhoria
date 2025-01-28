@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { dataController, seanceCardView, basculerPanelChoix } from './ViewReservation.js';
 import { ReservationState } from './DataController.js';
-import { reservationApi, confirmUtilisateurApi } from './NetworkController.js';
+import { reservationApi, confirmUtilisateurApi, confirmCompteApi, loginApi } from './NetworkController.js';
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
  * @returns
@@ -135,12 +135,13 @@ function setReservation() {
             const { statut, utilisateurId, reservationId } = yield reservationApi(email, seanceId, tarifSeatsMap, pmrSeats);
             dataController.selectedUtilisateurUUID = utilisateurId;
             dataController.selectedReservationUUID = reservationId;
+            dataController.selectedUtilisateurMail = email;
             switch (statut) {
                 case 'Compte Provisoire':
-                    // L'email est inconnu -> compte créé en provisoire : il faudra confirmer le compte et se logguer
+                    // L'email est inconnu -> compte créé en provisoire : il faudra confirmer l'utilisateur puis le mail et se logguer
                     console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
                     dataController.reservationState = ReservationState.ReserveCompteToConfirm;
-                    confirmUtilisateur(email);
+                    confirmUtilisateur();
                     break;
                 case 'Compte Confirme':
                     // L'email correspond à un compte valide : il faudra se logguer
@@ -426,10 +427,10 @@ function validateEmail(email) {
 }
 ;
 /**
- * Quand on reçoit "Compte Provisoire" => on exécute confirmMail
+ * Quand on reçoit "Compte Provisoire" => on exécute confirmUtilisateur
  * - On affiche une modale demandant la saisie du mail et deux champs mot de passe
  */
-function confirmUtilisateur(email) {
+function confirmUtilisateur() {
     return __awaiter(this, void 0, void 0, function* () {
         // Afficher la modale
         // Execution de la fonction interne gestionFormulaire (valeur de l'email saisie)
@@ -438,10 +439,11 @@ function confirmUtilisateur(email) {
         //  Bouton submit qui enclenche la confirmation de la création du compte confirmCreationCompte
         //    Appel de l'API Rest
         //    Si Ok lancement de la fonction de login
-        console.log('===> confirmMail action, email =', email);
-        const modalConfirm = document.getElementById('modal-confirmMail');
-        const closeModalBtn = document.getElementById("close-confirmMail");
-        const confirmModalBtn = document.getElementById("confirmMail-submit");
+        const email = dataController.selectedUtilisateurMail || '';
+        console.log('===> confirmUtilisateur action, email =', email);
+        const modalConfirm = document.getElementById('modal-confirmUtilisateur');
+        const closeModalBtn = document.getElementById("close-confirmUtilisateur");
+        const confirmModalBtn = document.getElementById("confirmUtilisateur-submit");
         if (modalConfirm && closeModalBtn && confirmModalBtn) {
             modalConfirm.style.display = 'flex';
             const closeModal = () => {
@@ -454,10 +456,10 @@ function confirmUtilisateur(email) {
             });
             // Appel de la fonction de gestion du formulaire et récupération des données -> on est sur d'avoir ces données car la vérification
             // des valeurs du formulaire conditionne le submit qui exécute cette fonction
-            yield gestionFormulaireModal(email);
+            yield gestionFormulaireModal();
         }
         else {
-            console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal modal-confirmMail sont introuvables.');
+            console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal modal-confirmUtilisateur sont introuvables.');
         }
         /**
          * Met en place toute la gestion de la modal
@@ -465,14 +467,15 @@ function confirmUtilisateur(email) {
          * @param emailInitial sert a in itialiser l'input du mail
          *
          */
-        function gestionFormulaireModal(emailInitial) {
+        function gestionFormulaireModal() {
             return __awaiter(this, void 0, void 0, function* () {
+                const email = dataController.selectedUtilisateurMail || '';
                 // Sélection des éléments de la modal avec un typage strict
-                const displayNameInput = document.getElementById('confirmMail-displayName');
-                const emailInput = document.getElementById('confirmMail-email');
-                const password1Input = document.getElementById('confirmMail-password1');
-                const password2Input = document.getElementById('confirmMail-password2');
-                const submitButton = document.getElementById('confirmMail-submit');
+                const displayNameInput = document.getElementById('confirmUtilisateur-displayName');
+                const emailInput = document.getElementById('confirmUtilisateur-email');
+                const password1Input = document.getElementById('confirmUtilisateur-password1');
+                const password2Input = document.getElementById('confirmUtilisateur-password2');
+                const submitButton = document.getElementById('confirmUtilisateur-submit');
                 const emailError = document.getElementById('email-error');
                 const passwordError = document.getElementById('password-error');
                 /**
@@ -510,7 +513,8 @@ function confirmUtilisateur(email) {
                     }
                 }
                 // Ajout de la valeur d'email saisi dans le formulaire de réservation
-                emailInput.value = emailInitial; // Définir une valeur par défaut
+                // Cette valeur n'est pas modifiable car la reservation a été faite avec elle
+                emailInput.value = email;
                 // Le bouton de validation est inactif au chargement
                 submitButton.classList.add("inactif");
                 // Gestion du message d'erreur pour l'email lors du blur (perte de focus)
@@ -535,7 +539,6 @@ function confirmUtilisateur(email) {
                 });
                 // Ajout d'écouteurs d'événements pour la validation en temps réel
                 displayNameInput.addEventListener('input', validateForm);
-                emailInput.addEventListener('input', validateForm);
                 password1Input.addEventListener('input', validateForm);
                 password2Input.addEventListener('input', validateForm);
                 // Gestion de la soumission de la modale de confirmation de compte
@@ -544,9 +547,10 @@ function confirmUtilisateur(email) {
                     evt.stopPropagation();
                     if (!dataController.selectedUtilisateurUUID)
                         return;
+                    // On soumet la confirmation du compte
                     if (yield confirmCreationCompte(dataController.selectedUtilisateurUUID, emailInput.value.trim(), password1Input.value.trim(), displayNameInput.value.trim())) {
                         // On ferme la modal de confirmation
-                        const modalConfirm = document.getElementById('modal-confirmMail');
+                        const modalConfirm = document.getElementById('modal-confirmUtilisateur');
                         if (modalConfirm) {
                             modalConfirm.style.display = 'none';
                         }
@@ -562,7 +566,7 @@ function confirmUtilisateur(email) {
             return __awaiter(this, void 0, void 0, function* () {
                 const resultat = yield confirmUtilisateurApi(id, password, displayName);
                 if (resultat.statut === 'OK') {
-                    dataController.reservationState = ReservationState.ReserveToConfirm;
+                    dataController.reservationState = ReservationState.ReserveMailToConfirm;
                     dataController.selectedUtilisateurDisplayName = displayName;
                     dataController.selectedUtilisateurMail = email;
                     return true;
@@ -571,6 +575,145 @@ function confirmUtilisateur(email) {
                     return false;
                 }
                 alert("Soumission de confirmationUtilisateur = " + id + " password = " + password + " displayName = " + displayName + " Resultat = " + JSON.stringify(resultat));
+            });
+        }
+    });
+}
+;
+/**
+ * On vient de confirmer un compte, il faut confirmerl'email de ce compte
+ * Un email est envoyé par le backend avec un code
+ * Ce code doit etre saisi dans la modal de confirmation de mail
+ */
+function confirmMail() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Afficher la modale de confirmation d'email
+        //  Bouton submit qui enclenche la confirmation de la création du compte confirmValidationMail
+        //    Appel de l'API Rest
+        //    Si Ok lancement de la fonction de login
+        const email = dataController.selectedUtilisateurMail || '';
+        console.log('===> confirmMail action, email =', email);
+        const modalConfirm = document.getElementById('modal-confirmMail');
+        const closeModalBtn = document.getElementById("close-confirmMail");
+        const confirmModalBtn = document.getElementById("confirmMail-submit");
+        if (modalConfirm && closeModalBtn && confirmModalBtn) {
+            modalConfirm.style.display = 'flex';
+            const closeModal = () => {
+                modalConfirm.style.display = 'none';
+            };
+            closeModalBtn.addEventListener('click', closeModal);
+            modalConfirm.addEventListener('click', (event) => {
+                if (event.target === modalConfirm)
+                    closeModal();
+            });
+            // Appel de la fonction de gestion du formulaire et récupération des données -> on est sur d'avoir ces données car la vérification
+            // des valeurs du formulaire conditionne le submit qui exécute cette fonction
+            yield gestionFormulaireModal();
+        }
+        else {
+            console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal modal-confirmMail sont introuvables.');
+        }
+        /**
+         * Met en place toute la gestion de la modal
+         *
+         * @param emailInitial sert a in itialiser l'input du mail
+         *
+         */
+        function gestionFormulaireModal() {
+            return __awaiter(this, void 0, void 0, function* () {
+                // Sélection des éléments de la modal avec un typage strict
+                const codeInput = document.getElementById('confirmMail-code');
+                const submitButton = document.getElementById('confirmMail-submit');
+                const codeError = document.getElementById('code-error');
+                const inviteP = document.getElementById('confirmMail-title');
+                if (inviteP) {
+                    inviteP.textContent = `
+Nous avons envoyé à l'adresse (${dataController.selectedUtilisateurMail || ''}) 
+un code à renseigner ci-dessous.
+`;
+                    /**
+                     * Vérifie si tous les champs sont remplis.
+                     * @returns boolean - True si tous les champs sont remplis, sinon False.
+                     */
+                    function areAllFieldsFilled() {
+                        return (codeInput.value.trim() !== "");
+                    }
+                    /**
+                     * Valide l'ensemble du formulaire et active/désactive le bouton de soumission.
+                     */
+                    function validateForm() {
+                        const fieldsFilled = areAllFieldsFilled();
+                        // Activation/désactivation du bouton de soumission
+                        if (!(fieldsFilled)) {
+                            submitButton.classList.add("inactif");
+                            submitButton.disabled = true;
+                        }
+                        else {
+                            submitButton.classList.remove("inactif");
+                            submitButton.disabled = false;
+                        }
+                    }
+                    // Le bouton de validation est inactif au chargement
+                    submitButton.classList.add("inactif");
+                    // Gestion du message d'erreur pour l'email lors du blur (perte de focus)
+                    codeInput.addEventListener('blur', () => {
+                        if (!validateCode(codeInput.value)) {
+                            codeError.textContent = "Le code se compose de 6 chiffres (exemple : 123456)";
+                            codeError.style.color = "red";
+                        }
+                        else {
+                            codeError.textContent = "";
+                        }
+                    });
+                    // Vérification du code de confirmation
+                    function validateCode(code) {
+                        // Expression régulière pour vérifier si le code est composé exactement de 6 chiffres
+                        const regex = /^[0-9]{6}$/;
+                        return regex.test(code);
+                    }
+                    // Ajout d'écouteurs d'événements pour la validation en temps réel
+                    codeInput.addEventListener('input', validateForm);
+                    // Gestion de la soumission de la modale de confirmation de compte
+                    submitButton.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        if (!dataController.selectedUtilisateurUUID)
+                            return;
+                        try {
+                            if (yield confirmCreationCompte(dataController.selectedUtilisateurMail || '', codeInput.value.trim())) {
+                                // On ferme la modal de confirmation
+                                const modalConfirm = document.getElementById('modal-confirmMail');
+                                if (modalConfirm) {
+                                    modalConfirm.style.display = 'none';
+                                }
+                                dataController.reservationState = ReservationState.ReserveMailToConfirm;
+                                // On lance la modal de connexion
+                                yield loginWithEmail();
+                            }
+                            ;
+                        }
+                        catch (error) {
+                            console.log("Erreur = ", error);
+                            const messageT = error;
+                            if (messageT) {
+                                //    const [partie1, partie2, messageText] = messageT.split(':');
+                                codeError.textContent = messageT;
+                            }
+                        }
+                    }));
+                }
+                function confirmCreationCompte(email, codeConfirm) {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        const resultat = yield confirmCompteApi(email, codeConfirm);
+                        if (resultat.statut === 'OK') {
+                            dataController.reservationState = ReservationState.ReserveToConfirm;
+                            return true;
+                        }
+                        else {
+                            throw new Error(resultat.statut);
+                        }
+                    });
+                }
             });
         }
     });
@@ -617,7 +760,6 @@ function loginWithEmail() {
         function gestionFormulaireModal() {
             return __awaiter(this, void 0, void 0, function* () {
                 // Sélection des éléments de la modal avec un typage strict
-                const titleConnexion = document.querySelector('.title__loginEmail');
                 const emailInput = document.getElementById('loginEmail-email');
                 const passwordInput = document.getElementById('loginEmail-password');
                 const submitButton = document.getElementById('loginEmail-submit');
@@ -645,10 +787,6 @@ function loginWithEmail() {
                         submitButton.disabled = false;
                     }
                 }
-                // Personnalise l'invitation
-                if (titleConnexion) {
-                    titleConnexion.textContent = `Bienvenue, ${dataController.selectedUtilisateurDisplayName}`;
-                }
                 // Ajout de la valeur d'email saisi dans le formulaire de réservation
                 emailInput.value = dataController.selectedUtilisateurMail || ''; // Définir une valeur par défaut
                 // Le bouton de validation est inactif au chargement
@@ -672,159 +810,20 @@ function loginWithEmail() {
                     evt.stopPropagation();
                     if (!dataController.selectedUtilisateurUUID)
                         return;
-                    //     confirmCreationCompte(dataController.selectedUtilisateurUUID, emailInput.value.trim(), password1Input.value.trim(), displayNameInput.value.trim());
+                    try {
+                        yield login(emailInput.value.trim(), passwordInput.value.trim());
+                    }
+                    catch (error) {
+                        console.log(error);
+                    }
                 }));
+                function login(compte, password) {
+                    return __awaiter(this, void 0, void 0, function* () {
+                        const resultat = yield loginApi(compte, password);
+                        return true;
+                    });
+                }
             });
         }
     });
 }
-/**
- * On vient de confirmer un compte, il faut confirmerl'email de ce compte
- * Un email est envoyé par le backend avec un code
- * Ce code doit etre saisit dans la modal de confirlmation de mail
- */
-function confirmMail() {
-    return __awaiter(this, void 0, void 0, function* () {
-        // Afficher la modale de confirmation d'email
-        //  Bouton submit qui enclenche la confirmation de la création du compte confirmValidationMail
-        //    Appel de l'API Rest
-        //    Si Ok lancement de la fonction de login
-        const email = 'ttt';
-        console.log('===> confirmMail action, email =', email);
-        const modalConfirm = document.getElementById('modal-confirmMail');
-        const closeModalBtn = document.getElementById("close-confirmMail");
-        const confirmModalBtn = document.getElementById("confirmMail-submit");
-        if (modalConfirm && closeModalBtn && confirmModalBtn) {
-            modalConfirm.style.display = 'flex';
-            const closeModal = () => {
-                modalConfirm.style.display = 'none';
-            };
-            closeModalBtn.addEventListener('click', closeModal);
-            modalConfirm.addEventListener('click', (event) => {
-                if (event.target === modalConfirm)
-                    closeModal();
-            });
-            // Appel de la fonction de gestion du formulaire et récupération des données -> on est sur d'avoir ces données car la vérification
-            // des valeurs du formulaire conditionne le submit qui exécute cette fonction
-            yield gestionFormulaireModal(email);
-        }
-        else {
-            console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal modal-confirmMail sont introuvables.');
-        }
-        /**
-         * Met en place toute la gestion de la modal
-         *
-         * @param emailInitial sert a in itialiser l'input du mail
-         *
-         */
-        function gestionFormulaireModal(emailInitial) {
-            return __awaiter(this, void 0, void 0, function* () {
-                // Sélection des éléments de la modal avec un typage strict
-                const displayNameInput = document.getElementById('confirmMail-displayName');
-                const emailInput = document.getElementById('confirmMail-email');
-                const password1Input = document.getElementById('confirmMail-password1');
-                const password2Input = document.getElementById('confirmMail-password2');
-                const submitButton = document.getElementById('confirmMail-submit');
-                const emailError = document.getElementById('email-error');
-                const passwordError = document.getElementById('password-error');
-                /**
-                 * Vérifie si les mots de passe sont identiques.
-                 * @returns boolean - True si les mots de passe correspondent, sinon False.
-                 */
-                function passwordsMatch() {
-                    return password1Input.value === password2Input.value && password1Input.value.length > 0;
-                }
-                /**
-                 * Vérifie si tous les champs sont remplis.
-                 * @returns boolean - True si tous les champs sont remplis, sinon False.
-                 */
-                function areAllFieldsFilled() {
-                    return (displayNameInput.value.trim() !== "" &&
-                        emailInput.value.trim() !== "" &&
-                        password1Input.value.trim() !== "" &&
-                        password2Input.value.trim() !== "");
-                }
-                /**
-                 * Valide l'ensemble du formulaire et active/désactive le bouton de soumission.
-                 */
-                function validateForm() {
-                    const emailValid = validateEmail(emailInput.value);
-                    const passwordsAreValid = passwordsMatch();
-                    const fieldsFilled = areAllFieldsFilled();
-                    // Activation/désactivation du bouton de soumission
-                    if (!(emailValid && passwordsAreValid && fieldsFilled)) {
-                        submitButton.classList.add("inactif");
-                        submitButton.disabled = true;
-                    }
-                    else {
-                        submitButton.classList.remove("inactif");
-                        submitButton.disabled = false;
-                    }
-                }
-                // Ajout de la valeur d'email saisi dans le formulaire de réservation
-                emailInput.value = emailInitial; // Définir une valeur par défaut
-                // Le bouton de validation est inactif au chargement
-                submitButton.classList.add("inactif");
-                // Gestion du message d'erreur pour l'email lors du blur (perte de focus)
-                emailInput.addEventListener('blur', () => {
-                    if (!validateEmail(emailInput.value)) {
-                        emailError.textContent = "Email invalide (exemple: utilisateur@domaine.com)";
-                        emailError.style.color = "red";
-                    }
-                    else {
-                        emailError.textContent = "";
-                    }
-                });
-                // Gestion du message d'erreur pour les mots de passe lors du blur
-                password2Input.addEventListener('blur', () => {
-                    if (!passwordsMatch()) {
-                        passwordError.textContent = "Les mots de passe ne correspondent pas.";
-                        passwordError.style.color = "red";
-                    }
-                    else {
-                        passwordError.textContent = "";
-                    }
-                });
-                // Ajout d'écouteurs d'événements pour la validation en temps réel
-                displayNameInput.addEventListener('input', validateForm);
-                emailInput.addEventListener('input', validateForm);
-                password1Input.addEventListener('input', validateForm);
-                password2Input.addEventListener('input', validateForm);
-                // Gestion de la soumission de la modale de confirmation de compte
-                submitButton.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
-                    evt.preventDefault();
-                    evt.stopPropagation();
-                    if (!dataController.selectedUtilisateurUUID)
-                        return;
-                    if (yield confirmCreationCompte(dataController.selectedUtilisateurUUID, emailInput.value.trim(), password1Input.value.trim(), displayNameInput.value.trim())) {
-                        // On ferme la modal de confirmation
-                        const modalConfirm = document.getElementById('modal-confirmMail');
-                        if (modalConfirm) {
-                            modalConfirm.style.display = 'none';
-                        }
-                        dataController.reservationState = ReservationState.ReserveMailToConfirm;
-                        // On lance la modal de confirmation d'email
-                        //await confirmEmail();
-                    }
-                    ;
-                }));
-            });
-        }
-        function confirmCreationCompte(id, email, password, displayName) {
-            return __awaiter(this, void 0, void 0, function* () {
-                const resultat = yield confirmUtilisateurApi(id, password, displayName);
-                if (resultat.statut === 'OK') {
-                    dataController.reservationState = ReservationState.ReserveToConfirm;
-                    dataController.selectedUtilisateurDisplayName = displayName;
-                    dataController.selectedUtilisateurMail = email;
-                    return true;
-                }
-                else {
-                    return false;
-                }
-                alert("Soumission de confirmationUtilisateur = " + id + " password = " + password + " displayName = " + displayName + " Resultat = " + JSON.stringify(resultat));
-            });
-        }
-    });
-}
-;

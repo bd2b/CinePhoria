@@ -392,15 +392,16 @@
             </iframe>
         </div>
     </div>
-    <!-- Modale confirmMail -->
-    <div id="modal-confirmMail" class="modal">
+    
+    <!-- Modale confirmUtilisateur -->
+    <div id="modal-confirmUtilisateur" class="modal">
         <div class="modal__content-wrapper">
             <div class="modal__title">
                 <div class="title-h2">
                     <h2>Création du compte</h2>
                 </div>
                 <!-- Bouton (X) ou autre mécanisme pour fermer la modale si besoin -->
-                <span class="close-modal" id="close-confirmMail">×</span>
+                <span class="close-modal" id="close-confirmUtilisateur">×</span>
             </div>
             <div class="modal__content">
                 <div class="title-p">
@@ -411,29 +412,59 @@
                 </div>
                 <!-- Saisie de l'email -->
                 <div class="form__group">
-                    <label for="confirmMail-email">Email :</label>
-                    <input type="email" id="confirmMail-email" class="input__mail" required>
+                    <label for="confirmUtilisateur-email">Email :</label>
+                    <input type="email" id="confirmUtilisateur-email" class="input__mail" disabled>
                     <span id="email-error" class="error-message"></span>
                 </div>
 
                 <!-- Saisie du displayName -->
                 <div class="form__group">
-                    <label for="confirmMail-displayName">Nom ou pseudo :</label>
-                    <input type="text" id="confirmMail-displayName" class="input__text" required />
+                    <label for="confirmUtilisateur-displayName">Nom ou pseudo :</label>
+                    <input type="text" id="confirmUtilisateur-displayName" class="input__text" required />
                 </div>
 
 
                 <!-- Mot de passe 1 -->
                 <div class="form__group">
-                    <label for="confirmMail-password1">Mot de passe :</label>
-                    <input type="password" id="confirmMail-password1" required />
+                    <label for="confirmUtilisateur-password1">Mot de passe :</label>
+                    <input type="password" id="confirmUtilisateur-password1" required />
                 </div>
 
                 <!-- Mot de passe 2 -->
                 <div class="form__group">
-                    <label for="confirmMail-password2">Confirmer le mot de passe :</label>
-                    <input type="password" id="confirmMail-password2" required />
+                    <label for="confirmUtilisateur-password2">Confirmer le mot de passe :</label>
+                    <input type="password" id="confirmUtilisateur-password2" required />
                     <span id="password-error" class="error-message"></span>
+                </div>
+
+                <!-- Bouton de validation -->
+                <button id="confirmUtilisateur-submit" class="button button-primary" disabled>
+                    Valider
+                </button>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Modale confirmMail -->
+    <div id="modal-confirmMail" class="modal">
+        <div class="modal__content-wrapper">
+            <div class="modal__title">
+                <div class="title-h2">
+                    <h2>Verification adresse email</h2>
+                </div>
+                <!-- Bouton (X) ou autre mécanisme pour fermer la modale si besoin -->
+                <span class="close-modal" id="close-confirmMail">×</span>
+            </div>
+            <div class="modal__content">
+                <div class="confirmMail-title title-p" id="confirmMail-title">
+                    <p>Vous avez du recevoir un email contenant un code de confirmation à six chiffres.</p>
+                </div>
+                <!-- Saisie du code de confirmation -->
+                <div class="form__group">
+                    <label for="confirmMail-code">Code de confirmation :</label>
+                    <input type="text" id="confirmMail-code" class="input__code">
+                    <span id="code-error" class="error-message"></span>
                 </div>
 
                 <!-- Bouton de validation -->
