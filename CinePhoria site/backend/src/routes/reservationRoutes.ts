@@ -12,6 +12,9 @@ const router = Router();
 logger.info('Declaration route /api/reservation/');
 router.post('/', ReservationController.createReservation);
 
+// Confirmer une reservation
+router.post('/confirm', ReservationController.confirmReservation);
+
 // (Futur) GET /api/reservation/:id
 router.get('/:id', ReservationController.getReservation);
 

@@ -46,7 +46,7 @@ export const jwtTK = process.env.JWT_SECRET || 'secretjws';
 const masquedjwtTK = "*".repeat(jwtTK.length); // Remplace la valeur par des étoiles
 logger.info('Configuration secret JWS :'+ masquedjwtTK);
 
-
+export const nombreTentativeLoginKO = parseInt(process.env.MAX_TENTATIVE_LOGIN_KO_BEFORE_BLOCKED || '3',10);
 
 // Autres configs (port, secrets JWT, etc.)
 // export const SERVER_PORT = process.env.SERVER_PORT || 3000;

@@ -666,7 +666,7 @@ VALUES
 		 -- (c) Récupérer la valeur pour le film
          -- Calculer un v_film_idx dépendant de (v_week_index, v_cinema_counter, v_salle_counter)
 		  SET v_film_idx = ((v_week_index + v_cinema_counter + v_salle_counter - 1) MOD 15) + 1;
-          call logTrace(CONCAT("Valeur de l'index",v_film_idx));
+          
           SET v_film_varName = CONCAT('UUIDFilm', v_film_idx);
          
           SELECT varValue INTO v_film_realId

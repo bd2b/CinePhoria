@@ -32,4 +32,43 @@ export class ReservationDAO {
       await connection.end();
     }
   }
+
+  static async confirmReserve ( reservationId : string , utilisateurId: string, seanceId: string) : Promise<string> {
+    const connection = await mysql.createConnection(dbConfig);
+
+    // Étape 1 : Récupérer les informations de la reservation dans la base
+    const [rows] = await connection.execute(
+      `SELECT utilisateurId, seanceId, stateReservation
+       FROM Reservation 
+       WHERE id = ?`,
+      [reservationId]
+    );
+
+    const reservationData = (rows as any[])[0];
+
+    if (!reservationData) {
+      logger.info(`Reservation inexistante pour ${reservationId}`);
+      return 'Reservation inexistante';
+    }
+
+    const { v_utilisateurId, v_seanceId, v_stateReservation } = reservationData;
+    if ((v_utilisateurId !== utilisateurId) || (v_seanceId !== seanceId) ||(v_stateReservation !== 'future') ) {
+      logger.info(`Reservation incoherente pour les données communiquées u = ${v_utilisateurId} s = ${v_seanceId} , st =  ${v_stateReservation}`);
+      return 'Reservation incoherente pour les données communiquées';
+    }
+    // On peut confirmer la reservation
+    const [results] = await connection.query(
+      `CALL ConfirmReserve(?, @result);
+       SELECT @result AS result;`,
+      [reservationId]
+    );
+
+    const resultConfirm = (results as any[])[0];
+    if (!resultConfirm) {
+      logger.info(`Erreur dans l'execution de la confirmation`);
+      return 'Reservation inexistante';
+    }
+    const { statut } = resultConfirm;
+    return statut;
+}
 }

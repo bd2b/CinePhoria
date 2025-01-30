@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import mysql from 'mysql2/promise';
-import { dbConfig } from '../config/config';
+import { dbConfig , nombreTentativeLoginKO } from '../config/config';
 import logger from '../config/configLog';
 import { UtilisateurCompte } from '../shared-models/Utilisateur';
 
@@ -68,6 +68,7 @@ export class UtilisateurDAO {
     displayName: string
   ): Promise<string> {
     const passwordHashed = await hashPassword(password);
+    logger.info("Je hash : " + password + " = " + passwordHashed);
     const connection = await mysql.createConnection(dbConfig);
     try {
       // Exécution de la procédure stockée avec @result
@@ -77,7 +78,7 @@ export class UtilisateurDAO {
         [utilisateurId, passwordHashed, displayName]
       );
       logger.info("Execution de la procedure ConfirmUtilisateur ")
-      logger.info("Parametre =", { utilisateurId, displayName }, "et mot de passe hashé");
+      logger.info("Parametre = " + utilisateurId + " , " + passwordHashed + " , "  + displayName);
       // Forcer TypeScript à comprendre la structure des résultats
       const callResults = results as any[][];  // Correction du typage
       const selectResult = callResults[0][1] as Array<{ result: string }>;
@@ -164,17 +165,79 @@ export class UtilisateurDAO {
     password: string
   ): Promise<string> {
     const connection = await mysql.createConnection(dbConfig);
+
     try {
-      // Récupération du mot de passe chiffré
-      const rows  = await connection.query(`SELECT password FROM Compte WHERE Compte.email = ${compte}`) as any[];
-      const passwordHash = rows[0] as string;
-      
-      if (await isPasswordEqual(password, passwordHash)) {
-        return "OK";
-      } else { 
-        return "KO"
+      // Étape 1 : Récupérer les informations du compte
+      const [rows] = await connection.execute(
+        `SELECT passwordText, isValidated, numTentativeConnexionKO 
+         FROM Compte 
+         WHERE email = ?`,
+        [compte]
+      );
+
+      const compteData = (rows as any[])[0]; // Premier résultat
+
+      if (!compteData) {
+        logger.info(`Compte inexistant pour ${compte}`);
+        await connection.execute(
+          `CALL applyLogin(?, 0, ?, ?, ?)`,
+          [compte, 'Erreur : login - compte inexistant', nombreTentativeLoginKO, 0]
+        );
+        return 'KO : Compte inexistant';
       }
+
+      const { passwordText, isValidated, numTentativeConnexionKO } = compteData;
+
+      // Étape 2 : Vérifier les états du compte
+      if (isValidated === -1) {
+        logger.info(`Compte bloqué pour ${compte}`);
+        await connection.execute(
+          `CALL applyLogin(?, 0, ?, ?, ?)`,
+          [compte, 'Erreur : login - compte bloqué', nombreTentativeLoginKO, numTentativeConnexionKO]
+        );
+        return 'KO : Compte bloqué';
+      }
+
+      if (isValidated === 0) {
+        logger.info(`Compte non validé pour ${compte}`);
+        await connection.execute(
+          `CALL applyLogin(?, 0, ?, ?, ?)`,
+          [compte, 'Erreur : login - compte non validé', nombreTentativeLoginKO, numTentativeConnexionKO]
+        );
+        return 'KO : Compte non validé';
+      }
+
+      // Étape 3 : Comparer le mot de passe
+      logger.info("Je compare : " + password + ' , ' + passwordText);
+      // const p1 = 'toto';
+      // const p1Hash = await hashPassword(p1);
+      // if (p1Hash) {
+      // const isPcorrect = await bcrypt.compare(p1, p1Hash);
+      // if (isPcorrect) logger.info("Correspond");
+      // }
       
+
+      const isPasswordCorrect = await bcrypt.compare(password, passwordText);
+      if (!isPasswordCorrect) {
+        logger.info(`Mot de passe incorrect pour ${compte}`);
+
+        // Appeler la procédure stockée pour gérer les tentatives ou bloquer le compte
+        await connection.execute(
+          `CALL applyLogin(?, 0, ?, ?, ?)`,
+          [compte, 'Erreur : login - mot de passe incorrect', nombreTentativeLoginKO, numTentativeConnexionKO]
+        );
+
+        return 'KO : Mot de passe incorrect';
+      }
+
+      // Étape 4 : Login réussi
+      await connection.execute(
+        `CALL applyLogin(?, 1, NULL, ?, 0)`,
+        [compte, nombreTentativeLoginKO]
+      );
+      logger.info(`Connexion réussie pour ${compte}`);
+
+      return 'OK';
     } catch (error) {
       logger.error('Erreur dans login', error);
       throw new Error('Erreur lors de l’exécution de la procédure stockée.');
@@ -182,7 +245,5 @@ export class UtilisateurDAO {
       await connection.end();
     }
   }
-
-
 };
 

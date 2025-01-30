@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { dataController, seanceCardView, basculerPanelChoix } from './ViewReservation.js';
 import { ReservationState } from './DataController.js';
-import { reservationApi, confirmUtilisateurApi, confirmCompteApi, loginApi } from './NetworkController.js';
+import { reservationApi, confirmUtilisateurApi, confirmCompteApi, loginApi, confirmReserveApi } from './NetworkController.js';
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
  * @returns
@@ -141,13 +141,13 @@ function setReservation() {
                     // L'email est inconnu -> compte créé en provisoire : il faudra confirmer l'utilisateur puis le mail et se logguer
                     console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
                     dataController.reservationState = ReservationState.ReserveCompteToConfirm;
-                    confirmUtilisateur();
+                    yield confirmUtilisateur();
                     break;
                 case 'Compte Confirme':
                     // L'email correspond à un compte valide : il faudra se logguer
                     console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
                     dataController.reservationState = ReservationState.ReserveToConfirm;
-                    loginWithEmail();
+                    yield loginWithEmail();
                     break;
                 default:
                     // Cas imprévu
@@ -696,7 +696,6 @@ un code à renseigner ci-dessous.
                             console.log("Erreur = ", error);
                             const messageT = error;
                             if (messageT) {
-                                //    const [partie1, partie2, messageText] = messageT.split(':');
                                 codeError.textContent = messageT;
                             }
                         }
@@ -735,6 +734,7 @@ function loginWithEmail() {
         const closeModalBtn = document.getElementById("close-loginEmail");
         const confirmModalBtn = document.getElementById("loginEmail-submit");
         const emailError = document.getElementById('email-error');
+        const loginError = document.getElementById('login-error');
         if (modalConfirm && closeModalBtn && confirmModalBtn) {
             modalConfirm.style.display = 'flex';
             const closeModal = () => {
@@ -785,12 +785,15 @@ function loginWithEmail() {
                     else {
                         submitButton.classList.remove("inactif");
                         submitButton.disabled = false;
+                        loginError.hidden = true;
                     }
                 }
                 // Ajout de la valeur d'email saisi dans le formulaire de réservation
                 emailInput.value = dataController.selectedUtilisateurMail || ''; // Définir une valeur par défaut
                 // Le bouton de validation est inactif au chargement
                 submitButton.classList.add("inactif");
+                // Pas de message d'erreur de login
+                emailError.textContent = "";
                 // Gestion du message d'erreur pour l'email lors du blur (perte de focus)
                 emailInput.addEventListener('blur', () => {
                     if (!validateEmail(emailInput.value)) {
@@ -805,25 +808,46 @@ function loginWithEmail() {
                 emailInput.addEventListener('input', validateForm);
                 passwordInput.addEventListener('input', validateForm);
                 // Gestion de la soumission de la modale
+                submitButton.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
                 submitButton.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
                     evt.preventDefault();
                     evt.stopPropagation();
                     if (!dataController.selectedUtilisateurUUID)
                         return;
                     try {
-                        yield login(emailInput.value.trim(), passwordInput.value.trim());
+                        yield loginApi(emailInput.value.trim(), passwordInput.value.trim());
+                        console.log("Connexion réussie");
+                        if (modalConfirm)
+                            modalConfirm.style.display = 'none';
+                        confirmReserve();
                     }
                     catch (error) {
                         console.log(error);
+                        loginError.hidden = false;
+                        loginError.textContent = error;
+                        loginError.style.color = "red";
                     }
                 }));
-                function login(compte, password) {
-                    return __awaiter(this, void 0, void 0, function* () {
-                        const resultat = yield loginApi(compte, password);
-                        return true;
-                    });
-                }
             });
+        }
+    });
+}
+/**
+ * Confirmation de la reservation
+ */
+function confirmReserve() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const reservationId = dataController.selectedReservationUUID;
+        const utilisateurId = dataController.selectedUtilisateurUUID;
+        const seanceId = dataController.selectedSeanceUUID;
+        if (reservationId && utilisateurId && seanceId) {
+            try {
+                yield confirmReserveApi(reservationId, utilisateurId, seanceId);
+                alert("votre reservation est confirmée");
+            }
+            catch (error) {
+                alert("Erreur dans la confirmation de la réservation = " + error);
+            }
         }
     });
 }
