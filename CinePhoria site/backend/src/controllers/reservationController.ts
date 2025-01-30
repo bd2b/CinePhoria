@@ -43,4 +43,35 @@ export class ReservationController {
   static async getSeatsForTarif(req: Request, res: Response): Promise<void> {
     res.status(501).json({ message: 'Non implémenté.' });
   }
+
+
+  static async confirmReservation (req: Request, res: Response): Promise<void> {
+    try {
+      const { reservationId , utilisateurId, seanceId } = req.body;
+
+      // Validation des données d'entrée
+      if (!reservationId ) {
+        res.status(400).json({ message: 'Données manquantes ou invalides.' });
+        return;
+      }
+
+      // Appel au DAO pour exécuter la procédure stockée
+      const result = await ReservationDAO.confirmReserve(
+        reservationId , utilisateurId, seanceId
+      );
+
+      // Gestion du résultat
+      if (result.startsWith('Erreur')) {
+        res.status(400).json({ message: result });
+      } else {
+        const [statut] = result;
+        res.status(201).json({ statut });
+        logger.info("Resultat =", [statut]);
+      }
+    } catch (error) {
+      console.error('Erreur dans confirmReservation:', error);
+      res.status(500).json({ message: 'Erreur interne du serveur.' });
+    }
+  }
+  
 }

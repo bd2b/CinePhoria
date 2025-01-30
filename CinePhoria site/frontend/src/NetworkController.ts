@@ -101,5 +101,32 @@ export async function loginApi(compte: string, password: string) {
     // Examen de la reponse
     const responseJSON = await response.json();
     console.log("Message retour",responseJSON);
+    localStorage.setItem('jwtToken', responseJSON.token); // Stocker le token
+    
+}
+
+export async function confirmReserveApi(reservationId: string , utilisateurId: string, seanceId: string) {
+    const body = { reservationId , utilisateurId, seanceId };
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+        alert('Vous devez être connecté');
+        return;
+    }
+    const response = await fetch('http://localhost:3500/api/reservation/confirm', {
+        method: 'POST',
+        headers: {  
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+         },
+        body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || 'Erreur inconnue');
+    }
+
+    // Examen de la reponse
+    const responseJSON = await response.json();
+    console.log("Message retour",responseJSON);
     return responseJSON;
 }

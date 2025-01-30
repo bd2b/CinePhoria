@@ -600,12 +600,12 @@ CREATE PROCEDURE ConfirmUtilisateur(
      DECLARE v_timeStampCreate timestamp;
      
      -- Gestion des erreurs
-    DECLARE EXIT HANDLER FOR SQLEXCEPTION
-    BEGIN
+     DECLARE EXIT HANDLER FOR SQLEXCEPTION
+     BEGIN
         -- En cas d'erreur SQL, effectuer un rollback
         ROLLBACK;
         SET p_Result =  "Erreur : erreur interne procedure";
-	END;
+	 END;
     
     START transaction;
     
@@ -636,6 +636,9 @@ CREATE PROCEDURE ConfirmUtilisateur(
 			 displayName = p_displayName
      WHERE email = v_email;
      
+     UPDATE Compte
+     SET passwordText = p_password
+     WHERE email = v_email;
      
      Commit;
      SET p_Result = "OK";
@@ -710,6 +713,7 @@ CREATE PROCEDURE ConfirmCompte(
         
         IF v_nombreTentative = 9 THEN
 			SET p_Result = "Erreur : nombre maximal de tentative atteint";
+            ROLLBACK;
             LEAVE block_label;
         END IF;
         
@@ -723,7 +727,7 @@ CREATE PROCEDURE ConfirmCompte(
             UPDATE Compte
             SET oldpasswordsArray = CONCAT(v_codeConfirmMailStocke,",",v_nombreTentative)
             WHERE email = p_email;
-            
+            commit;
             LEAVE block_label;
         END IF;
      -- Le code est valide, on confirme le mail
@@ -739,119 +743,65 @@ CREATE PROCEDURE ConfirmCompte(
 END$$
 DELIMITER ;
 select 1;
-DROP PROCEDURE IF EXISTS Login;
+DROP PROCEDURE IF EXISTS ApplyLogin;
 DELIMITER $$
-CREATE PROCEDURE login(
+
+CREATE PROCEDURE applyLogin(
     IN p_email VARCHAR(100),
-    IN p_password VARCHAR(100), 
-    IN p_maxTentative INT,
-     OUT p_Result VARCHAR(255)
-     )
-     -- Le login consiste :
-     -- Selectionner le compte par l'email
-     -- Verifier l'existence du compte, sinon KO avec logTrace(CONCAT(p_email, ' Erreur : login - compte inexistant')); et sortir
-     -- Verifier que le compte est valide, sinon KO avec logTrace(CONCAT(p_email, ' Erreur : login - compte non valide')); et sortir
-     -- Verifier que le mot de passe est égal, sinon 
-     -- 		Verifier le nombre de tentative si le nombre est inferieur au p_maxTentative  KO avec logTrace(CONCAT(p_email, ' Erreur : login - mot de passe incorrect')); et sortir
-     -- 		Sinon on bloque le compte isValidated = -1, KO avec logTrace(CONCAT(p_email, ' Erreur : login - max tentative atteint, blocage')); et sortir
-     -- Mettre à jour dateDerniereConnexion de Compte
-     -- Creer un enregistrement dans la table Connexions
-     -- Revoyer OK
-     
-     
-     BEGIN
-     
-     
-     DECLARE v_passwordStocke VARCHAR(100);
-     DECLARE v_dateDerniereConnexion DATETIME;
-     DECLARE v_nombreTentative INT;
-     DECLARE v_isValidated INT;
-     
-     DECLARE v_messageErreur VARCHAR(255);
-     
-     -- Gestion des erreurs
+    IN p_statutLogin INT, -- 0 pour échec, 1 pour succès
+    IN p_message VARCHAR(255),
+    IN p_maxTentative INT, -- Nombre maximum de tentatives
+    IN p_numTentativeConnexionKO INT -- Nombre actuel de tentatives échouées
+)
+BEGIN
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
-        -- En cas d'erreur SQL, effectuer un rollback
+        -- Gestion des erreurs SQL : rollback et log
         ROLLBACK;
-        SET v_messageErreur =  "Erreur : login - erreur interne procedure";
-        call logTrace(v_messageErreur);
-	END;
-    
-     -- Valeur par defaut
-    SET p_Result = "KO";
-    
-    START transaction;
-    
-     -- Début d'un bloc labellisé
-    block_label: BEGIN
-    
-   
-    
-     -- Recherche du code stocke
-       
-            SELECT passwordText, isValidated , dateDerniereConnexion, numTentativeConnexionKO
-            FROM Compte
-            WHERE Compte.email  = p_email
-			INTO v_passwordStocke, v_isValidated , v_dateDerniereConnexion ,  v_nombreTentative
-        ;
-        
-        IF v_passwordStocke is null THEN
-			call logTrace(CONCAT(p_email, ' Erreur : login - compte inexistant'));
-            commit;
-			LEAVE block_label;
+        CALL logTrace(CONCAT('Erreur interne : ', p_message));
+    END;
+
+    START TRANSACTION;
+
+    -- Si le login a échoué
+    IF p_statutLogin = 0 THEN
+        -- Incrémenter le nombre de tentatives
+        SET p_numTentativeConnexionKO = p_numTentativeConnexionKO + 1;
+
+        -- Vérifier si le nombre maximum de tentatives est dépassé
+        IF p_numTentativeConnexionKO >= p_maxTentative THEN
+            -- Bloquer le compte
+            UPDATE Compte
+            SET isValidated = -1,
+                numTentativeConnexionKO = p_numTentativeConnexionKO
+            WHERE email = p_email;
+
+            CALL logTrace(CONCAT(p_email, ' Erreur : compte bloqué après trop de tentatives.'));
+        ELSE
+            -- Mettre à jour le nombre de tentatives
+            UPDATE Compte
+            SET numTentativeConnexionKO = p_numTentativeConnexionKO
+            WHERE email = p_email;
+
+            CALL logTrace(p_message);
         END IF;
-        
-        IF v_isValidated =  -1 THEN
-            call logTrace(CONCAT(p_email, ' Erreur : login - compte bloque'));
-            commit;
-			LEAVE block_label;
-        END IF;
-        
-         IF v_isValidated =  0 THEN
-            call logTrace(CONCAT(p_email, ' Erreur : login - non valide'));
-            commit;
-			LEAVE block_label;
-        END IF;
-        
-         IF v_passwordStocke <>  p_password THEN
-			-- On verifie le nombre de tentative
-            IF v_nombreTentative + 1 < p_maxTentative THEN
-				-- On trace la tentative
-                UPDATE Compte
-					SET numTentativeConnexionKO = v_nombreTentative + 1
-					WHERE compte.email = p_email;
-                call logTrace(CONCAT(p_email, ' Erreur : login - mot de passe incorrecte'));
-                commit;
-                LEAVE block_label;
-			ELSE
-				-- on bloque le compte
-                UPDATE Compte
-					SET isValidated =  -1,
-							numTentativeConnexionKO = v_nombreTentative + 1
-					WHERE compte.email = p_email;
-                call logTrace(CONCAT(p_email, ' Erreur : login - max tentative atteint, blocage'));
-                commit;
-                LEAVE block_label;
-            END IF;
-        END IF;
-        -- Le compte est valide et le mot de passe correspond
-        
-        -- Mettre à jour dateDerniereConnexion de Compte et numTentative
-        UPDATE Compte 
-			SET dateDerniereConnexion = now(),
-					numTentativeConnexionKO = 0
-			WHERE compte.email = p_email;
-		
-		-- Creer un enregistrement dans la table Connexions
+
+    -- Si le login est réussi
+    ELSEIF p_statutLogin = 1 THEN
+        -- Réinitialiser les tentatives et mettre à jour la date de connexion
+        UPDATE Compte
+        SET numTentativeConnexionKO = 0,
+            dateDerniereConnexion = NOW()
+        WHERE email = p_email;
+
+        -- Enregistrer une trace dans les connexions
         INSERT INTO Connexions (dateConnexion, email)
-		VALUES (now(), p_email);
-        
-		Commit;
-		SET p_Result = "OK";
-      -- fin d'un bloc labellisé
-    END block_label ;
+        VALUES (NOW(), p_email);
+    END IF;
+
+    COMMIT;
 END$$
+
 DELIMITER ;
 select 1;
 DROP PROCEDURE IF EXISTS PurgeOldUsers;

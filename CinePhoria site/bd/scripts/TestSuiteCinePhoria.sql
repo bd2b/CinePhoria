@@ -1,3 +1,11 @@
+-- TODO
+-- Faire un test de login avec administrateur , password
+-- 1) test bon pwd -> result OK, dateDerniereConnexion mise à jour, entrée dans Connexions
+-- 2) test pwd erreur -> KO , dans trace message 
+-- 3) test de blocage
+-- 
+
+
 -- Test CheckAvailabilityAndReserve
 
 DROP PROCEDURE IF EXISTS Test_CheckAvailabilityAndReserve;
