@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { isUUID } from './Helpers.js';
+import { isUUID, validateEmail } from './Helpers.js';
 export function reservationApi(email, seanceId, tarifSeats, // { tarifId: numberOfSeats, ... }
 pmrSeats) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -128,5 +128,11 @@ export function confirmReserveApi(reservationId, utilisateurId, seanceId) {
         const responseJSON = yield response.json();
         console.log("Message retour", responseJSON);
         return responseJSON;
+    });
+}
+export function profilApi(identUtilisateur) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (validateEmail(identUtilisateur)) {
+        }
     });
 }

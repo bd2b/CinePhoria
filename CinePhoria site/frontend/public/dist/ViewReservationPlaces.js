@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { dataController, seanceCardView, basculerPanelChoix } from './ViewReservation.js';
 import { ReservationState } from './DataController.js';
+import { validateEmail } from './Helpers.js';
 import { reservationApi, confirmUtilisateurApi, confirmCompteApi, loginApi, confirmReserveApi } from './NetworkController.js';
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
@@ -422,16 +423,6 @@ function updateInputPMR() {
     pmrContent.appendChild(contentNumPMR);
     console.log(JSON.stringify(pmrContent));
     return pmrContent;
-}
-;
-/**
-     * Vérifie la validité d'un email.
-     * @param email - L'email à valider.
-     * @returns boolean - True si l'email est valide, sinon False.
-     */
-function validateEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
 }
 ;
 /**

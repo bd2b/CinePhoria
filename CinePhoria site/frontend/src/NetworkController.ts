@@ -1,5 +1,5 @@
 import { TarifForSeats } from './shared-models/Reservation';
-import { isUUID } from './Helpers.js';
+import { isUUID, validateEmail } from './Helpers.js';
 
 export async function reservationApi (
     email: string,
@@ -129,4 +129,10 @@ export async function confirmReserveApi(reservationId: string , utilisateurId: s
     const responseJSON = await response.json();
     console.log("Message retour",responseJSON);
     return responseJSON;
+}
+
+export async function profilApi (identUtilisateur: string) {
+    if validateEmail(identUtilisateur) {
+        
+    }
 }

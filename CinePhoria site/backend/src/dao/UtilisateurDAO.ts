@@ -2,7 +2,7 @@ import * as bcrypt from 'bcrypt';
 import mysql from 'mysql2/promise';
 import { dbConfig , nombreTentativeLoginKO } from '../config/config';
 import logger from '../config/configLog';
-import { UtilisateurCompte } from '../shared-models/Utilisateur';
+import { UtilisateurCompte , ComptePersonne} from '../shared-models/Utilisateur';
 
 
 async function hashPassword(password: string): Promise<string> {
@@ -19,6 +19,24 @@ async function hashPassword(password: string): Promise<string> {
 async function isPasswordEqual (password: string, hashedPassword: string): Promise<boolean> {
     return await bcrypt.compare(password, hashedPassword);
 }
+
+/**
+ * Fonction de vérification d'UUID
+ */
+export function isUUID(str: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(str.trim());
+}
+
+/**
+   * Vérifie la validité d'un email.
+   * @param email - L'email à valider.
+   * @returns boolean - True si l'email est valide, sinon False.
+   */
+export function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
 export class UtilisateurDAO {
 
   static async createUtilisateur(
@@ -148,6 +166,34 @@ export class UtilisateurDAO {
 
     const data = (rows as any[])[0];
     return data ? data as UtilisateurCompte : null;
+  }
+
+  /**
+   * Recherche de la valeur de viewComptePersonne correspondant à ident
+   * @param ident peut etre utilisateur.id, compte.email, employe.matricule
+   * @returns 
+   */
+  static async findByIdent(ident: string): Promise<ComptePersonne | null> {
+    const connection = await mysql.createConnection(dbConfig);
+    logger.info('Connexion réussie à la base de données');
+    let requete = ""
+    if (validateEmail(ident)) {
+      requete = 'select * from viewComptePersonne where email = ? ;';
+      logger.info ("Recherche par email = " + ident );
+    
+    } else if (isUUID(ident)) {
+      requete = 'select * from viewComptePersonne where utilisateurid = ? ;';
+      logger.info ("Recherche par id = " + ident );
+    
+    } else {
+      requete = 'select * from viewComptePersonne where matricule = ? ;';
+      logger.info ("Recherche par matricule = " + ident );
+    }
+    const [rows] = await connection.execute(requete, [ident]);
+    await connection.end();
+
+    const data = (rows as any[])[0];
+    return data ? data as ComptePersonne : null;
   }
 
   static async findByMail(email: string): Promise<UtilisateurCompte | null> {
