@@ -16,6 +16,7 @@ router.post('/confirmCompte', UtilisateurController.confirmCompte);
 // (Futur) GET /api/reservation/:id
 router.get('/:id', UtilisateurController.getUtilisateurById);
 
+
 // (Futur) GET /api/reservation/:email
 router.get('/mail/:email', UtilisateurController.getUtilisateurByMail);
 

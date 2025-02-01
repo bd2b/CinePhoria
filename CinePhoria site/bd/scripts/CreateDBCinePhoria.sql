@@ -243,6 +243,31 @@ INNER JOIN Salle ON Seance.Salleid = Salle.id
 INNER JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
 
 WHERE Film.dateSortieCinePhoria = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE()) - 2 + 7) % 7 DAY);
+CREATE VIEW `ViewUtilisateurReservation` AS
+SELECT 
+    utilisateurid AS utilisateurId,
+    reservation.id AS reservationId,
+    reservation.statereservation AS statereservation,
+    reservation.timestampcreate AS timestampcreate,
+    utilisateur.displayname AS displayname,
+    seance.dateJour AS dateJour,
+    film.titleFilm AS titleFilm,
+    cinema.nameCinema AS nameCinema,
+    reservation.note AS note,
+    reservation.evaluation as evaluation,
+    SUM(seatsForTarif.numberSeats) AS totalSeats,
+    SUM(tarifQualite.price * seatsForTarif.numberSeats) AS totalPrice,
+    reservation.numberPmr as numberPMR
+FROM Utilisateur
+JOIN Reservation ON Reservation.utilisateurId = Utilisateur.id
+JOIN SeatsForTarif ON SeatsForTarif.ReservationId = Reservation.id 
+JOIN TarifQualite ON SeatsForTarif.tarifQualiteId = TarifQualite.id
+JOIN Seance ON Reservation.Seanceid = Seance.id
+JOIN Film ON Seance.Filmid = Film.id
+JOIN Salle ON Salle.id = Seance.Salleid
+JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
+-- WHERE Utilisateur.email = "claire@mail.fr"
+GROUP BY Reservation.id, seance.dateJour, film.titleFilm, cinema.nameCinema, reservation.note, reservation.evaluation;
 ALTER TABLE Seance ADD CONSTRAINT FKSeance628062 FOREIGN KEY (Salleid) REFERENCES Salle (id);
 ALTER TABLE SeatsForTarif ADD CONSTRAINT comprend FOREIGN KEY (ReservationId) REFERENCES Reservation (id);
 ALTER TABLE Incident ADD CONSTRAINT concerne FOREIGN KEY (Salleid) REFERENCES Salle (id);

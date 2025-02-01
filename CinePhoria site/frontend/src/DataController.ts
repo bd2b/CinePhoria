@@ -26,12 +26,12 @@ export enum ReservationState {
     PendingChoiceSeance = "PendingChoiceSeance",    // Choix de seance en cours , le panel choix est affiché
     PendingChoiceSeats = "PendingChoiceSeats",      // Choix de tarifs en cours, le panel reserve est affiché
     ReserveCompteToConfirm = "ReserveCompteToConfirm",    // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués) 
-                                                    // avec un compte provisoire qu'il faut confirmer
+    // avec un compte provisoire qu'il faut confirmer
     ReserveMailToConfirm = "ReserveMailToConfirm",  // Le compte a été confirmé, il faut maintenant confirmer le mail en saisissant le code reçu dans la modal
     ReserveToConfirm = "ReserveToConfirm",          // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués) 
-                                                    // avec un email qui est celui d'un compte existant                                     
+    // avec un email qui est celui d'un compte existant                                     
     ReserveConfirmed = "ReserveConfirmed"           // La reservation est confirmé après login sur un compte existant, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
-    }
+}
 
 export class DataController {
 
@@ -47,6 +47,7 @@ export class DataController {
     private _selectedUtilisateurMail?: string | undefined // Mail de l'utilisateur
     private _selectedUtilisateurDisplayName?: string | undefined // displayName de l'utilisateur
     private _selectedReservationUUID?: string | undefined // UUID de la reservation
+    private _selectedReservationStatut?: string | undefined // Statut de la reservation _selectedReservationUUID , si définie elle est confirme
 
 
 
@@ -62,6 +63,7 @@ export class DataController {
 
     // Setter pour selectedSeanceUUID
     public set reservationState(value: ReservationState) {
+        console.log("Mise a jour statut reservation = " + value)
         this._reservationState = value;
     }
 
@@ -93,21 +95,42 @@ export class DataController {
     }
 
     // Setter pour nameCinema
-    public set nameCinema(value: string) {
-        const cinemaActuel = this._nameCinema;
-        if (value.trim() === '') {
-            throw new Error('Le nom du cinéma ne peut pas être vide.');
-        }
-        let isNewCinema: boolean = (value !== this._nameCinema);
-        this._nameCinema = value;
+    // public set nameCinema(value: string) {
+    //     const cinemaActuel = this._nameCinema;
+    //     if (value.trim() === '') {
+    //         throw new Error('Le nom du cinéma ne peut pas être vide.');
+    //     }
+    //     let isNewCinema: boolean = (value !== this._nameCinema);
+    //     this._nameCinema = value;
 
-        if (isNewCinema) {
-            // Changement de cinema il faut recharger le cache a la prochaine initialisation, on fait expirer le cookie dateAccess
-            console.log(`Seter nameCinema 1 - Changement de cinema : ${cinemaActuel} remplace par ${this._nameCinema}`)
-            setCookie(DataController.nomCookieDateAccess, " ", -1);
-            console.log(`Seter nameCinema 2 - Expiration du cookie de date de mise à jour`)
+    //     if (isNewCinema) {
+    //         // Changement de cinema il faut recharger le cache a la prochaine initialisation, on fait expirer le cookie dateAccess
+    //         console.log(`Seter nameCinema 1 - Changement de cinema : ${cinemaActuel} remplace par ${this._nameCinema}`)
+    //         setCookie(DataController.nomCookieDateAccess, " ", -1);
+    //         console.log(`Seter nameCinema 2 - Expiration du cookie de date de mise à jour`)
+    //     }
+    // }
+
+    public set nameCinema(value: string) {
+        if (value.trim() === '') {
+          throw new Error('Le nom du cinéma ne peut pas être vide.');
         }
-    }
+        const isNewCinema = (value !== this._nameCinema);
+        this._nameCinema = value;
+      
+        if (isNewCinema) {
+          // 1) Expiration du cookie dateAccess (pour forcer le rechargement)
+          setCookie(DataController.nomCookieDateAccess, ' ', -1);
+          // 2) Vider ou invalider le localStorage
+          localStorage.removeItem(DataController.nomStorage); 
+          // 3) Vider les tableaux internes
+          this._seances = [];
+          this._films = [];
+          this._tarifQualite = [];
+          // 4) Re-lancement de la logique de chargement
+          this.init();
+        }
+      }
 
     // Getter pour selectedFilmUID
     public get selectedFilmUUID(): string | undefined {
@@ -120,8 +143,6 @@ export class DataController {
             throw new Error("L'id du film n'est pas conforme.");
         }
         this._selectedFilmUUID = value;
-        // Appeler ici les fonctions de mise à jour
-        updateContentPage(this);
     }
 
     // Getter pour selectedFilm
@@ -194,27 +215,44 @@ export class DataController {
         this._selectedReservationUUID = value;
     }
 
-    constructor(nameCinema: string) {
-        this._nameCinema = nameCinema;
-        // Charger les données depuis localStorage si elles existent
-        const saved = localStorage.getItem(DataController.nomStorage);
-        // Si les données stockées sont plus vieilles de DataController.validiteCache heures, on force le rechargement
-        const dateAccessString = getCookie(DataController.nomCookieDateAccess);
-        let mustReload = true;
-        if (dateAccessString) {
-            if (!isDifferenceGreaterThanHours(new Date(), new Date(dateAccessString), DataController.validiteCache)) {
-                mustReload = false;
-            }
-        }
-        if (saved && !mustReload) {
-            this.charger()
-            this.extractFilmsFromSeances();
-            console.log(`Utilisation du stockage local : ${this._seances.length} séances, ${this._films.length} films`);
-            console.log(`Utilisation du stockage local : ${this._tarifQualite.length} tarifs`);
-
-        }
+    // Getter pour _selectedReservationStatut
+    public get selectedReservationStatut(): string | undefined {
+        return this._selectedReservationStatut || undefined;
     }
 
+    // Setter pour selectedReservationStatut
+    public set selectedReservationStatut(value: string | undefined) {
+        this._selectedReservationStatut = value;
+    }
+
+
+    // constructor(nameCinema: string) {
+    //     this._nameCinema = nameCinema;
+    //     // Charger les données depuis localStorage si elles existent
+    //     const saved = localStorage.getItem(DataController.nomStorage);
+    //     // Si les données stockées sont plus vieilles de DataController.validiteCache heures, on force le rechargement
+    //     const dateAccessString = getCookie(DataController.nomCookieDateAccess);
+    //     let mustReload = true;
+    //     if (dateAccessString) {
+    //         if (!isDifferenceGreaterThanHours(new Date(), new Date(dateAccessString), DataController.validiteCache)) {
+    //             mustReload = false;
+    //         }
+    //     }
+    //     if (saved && !mustReload) {
+    //         this.charger()
+    //         this.extractFilmsFromSeances();
+    //         console.log(`Utilisation du stockage local : ${this._seances.length} séances, ${this._films.length} films`);
+    //         console.log(`Utilisation du stockage local : ${this._tarifQualite.length} tarifs`);
+
+    //     }
+    // }
+    constructor(nameCinema: string) {
+        this._nameCinema = nameCinema;
+        console.log("New avec " + nameCinema);
+        // Le constructeur ne fait pas d’appel asynchrone
+        // On doit appeler manuellement dataController.init() après l’avoir construit
+      }
+    
     // Méthode asynchrone pour initialiser les données depuis l'API
     public async chargerDepuisAPI(): Promise<void> {
         try {
@@ -248,7 +286,7 @@ export class DataController {
                 setCookie(DataController.nomCookieDateAccess, (new Date()).toISOString(), 1);
 
                 // Sauvegarder dans localStorage
-                this.sauver();
+                // this.sauver();
             }
         } catch (error) {
             console.error('Erreur lors du chargement des données de séances : ', error);
@@ -399,4 +437,100 @@ export class DataController {
             console.warn("Aucune donnée trouvée dans le localStorage.");
         }
     }
+
+    public sauverComplet(): void {
+        // Construire un objet « snapshot » de tout ce qu’on veut persister
+        const snapshot = {
+            reservationState: this._reservationState,
+            seances: this._seances,
+            films: this._films,
+            tarifQualite: this._tarifQualite,
+            nameCinema: this._nameCinema,
+            selectedFilmUUID: this._selectedFilmUUID,
+            selectedSeanceDate: this._selectedSeanceDate?.toISOString() || null,
+            selectedSeanceUUID: this._selectedSeanceUUID,
+            selectedUtilisateurUUID: this._selectedUtilisateurUUID,
+            selectedUtilisateurMail: this._selectedUtilisateurMail,
+            selectedUtilisateurDisplayName: this._selectedUtilisateurDisplayName,
+            selectedReservationUUID: this._selectedReservationUUID,
+            selectedReservationStatut: this._selectedReservationStatut
+            
+        };
+
+        localStorage.setItem(DataController.nomStorage, JSON.stringify(snapshot));
+    }
+
+    public async chargerComplet(): Promise<void> {
+        const saved = localStorage.getItem(DataController.nomStorage);
+
+        if (!saved) {
+            console.warn("Aucune donnée trouvée dans le localStorage.");
+            return;
+        }
+        try {
+            const parsed = JSON.parse(saved);
+
+            // Restauration du state
+            this._reservationState = parsed.reservationState || ReservationState.PendingChoiceSeance;
+
+            // Restauration des séances
+            if (Array.isArray(parsed.seances)) {
+                // Convertir en instances de Seance si besoin
+                this._seances = parsed.seances.map((s: any) => new Seance(s));
+            }
+
+            // Restauration des films (si vous les enregistrez, attention à leur typage)
+            if (Array.isArray(parsed.films)) {
+                this._films = parsed.films.map((f: any) => new Film(f));
+            }
+
+            // Restauration des tarifs
+            if (Array.isArray(parsed.tarifQualite)) {
+                this._tarifQualite = parsed.tarifQualite.map((t: any) => new TarifQualite(t));
+            }
+
+            // Autres champs
+            this._nameCinema = parsed.nameCinema ?? 'Selectionnez un cinema';
+            this._selectedFilmUUID = parsed.selectedFilmUUID || undefined;
+            this._selectedSeanceUUID = parsed.selectedSeanceUUID || undefined;
+            this._selectedUtilisateurUUID = parsed.selectedUtilisateurUUID || undefined;
+            this._selectedUtilisateurMail = parsed.selectedUtilisateurMail || undefined;
+            this._selectedUtilisateurDisplayName = parsed.selectedUtilisateurDisplayName || undefined;
+            this._selectedReservationUUID = parsed.selectedReservationUUID || undefined;
+            this._selectedReservationStatut = parsed.selectedReservationStatut || undefined;
+
+            // Reconstruire la date
+            if (parsed.selectedSeanceDate) {
+                this._selectedSeanceDate = new Date(parsed.selectedSeanceDate);
+            }
+
+        } catch (e) {
+            console.error('Erreur de parsing du localStorage : ', e);
+        }
+    }
+
+    public async init(): Promise<void> {
+        // // 1) Charger depuis le localStorage
+        // console.log("init 1");
+        // await this.chargerComplet(); // ou this.charger()
+    
+        // 2) Vérifier la validité du cache
+        let mustReload = true;
+        const dateAccessString = getCookie(DataController.nomCookieDateAccess);
+        
+        if (dateAccessString) {
+          if (!isDifferenceGreaterThanHours(new Date(), new Date(dateAccessString), DataController.validiteCache)) {
+            mustReload = false;
+          }
+        }
+    
+        // 3) Si invalidité du cache, on va recharger
+        if (!this._seances.length || mustReload) {
+          console.log('[init] Cache inexistant ou expiré -> rechargement depuis l’API');
+          await this.chargerDepuisAPI();
+        
+        } else {
+          console.log('[init] Données restaurées depuis localStorage');
+        }
+      }
 }

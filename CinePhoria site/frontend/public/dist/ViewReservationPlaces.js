@@ -30,6 +30,7 @@ export function updateContentPlace() {
             btnChanger.addEventListener('click', (evt) => {
                 evt.preventDefault();
                 evt.stopPropagation();
+                dataController.reservationState = ReservationState.PendingChoiceSeance;
                 basculerPanelChoix();
             });
         }
@@ -45,6 +46,8 @@ export function updateContentPlace() {
  * @returns
  */
 function setReservation() {
+    console.log("Affichage de la reservation de place");
+    dataController.reservationState = ReservationState.PendingChoiceSeats;
     const qualiteFilm = dataController.seanceSelected().qualite;
     // Afficher le tableau de tarifs selon la qualite
     const containerTable = document.querySelector('.commande__tabtarif');
@@ -65,6 +68,7 @@ function setReservation() {
     const emailError = document.getElementById('commande__mail-error');
     if (!emailInput || !emailError)
         return;
+    emailInput.value = "";
     emailInput.addEventListener('blur', () => {
         if (!validateEmail(emailInput.value)) {
             emailError.textContent = "Email invalide (exemple: utilisateur@domaine.com)";
@@ -95,7 +99,7 @@ function setReservation() {
         // Verification que l'on commande au moins une pkace
         const commandeMinValid = parseInt((totalPlaces === null || totalPlaces === void 0 ? void 0 : totalPlaces.textContent) || '0', 10) > 0;
         // Activation/désactivation du bouton de soumission
-        if (!(emailValid && commandeMinValid)) {
+        if (!(emailValid && commandeMinValid && dataController.selectedReservationStatut === undefined)) {
             btnReserve.classList.add("inactif");
             btnReserve.disabled = true;
         }
@@ -117,9 +121,11 @@ function setReservation() {
     });
     // Gestion de la reservation
     // La validation des saisies est faites par la fonction de validation validateForm
+    btnReserve.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
     btnReserve.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
         evt.preventDefault();
         evt.stopPropagation();
+        console.log("Statut Reservation " + dataController.reservationState);
         // a) Récupérer le nombre total de places et la répartition par tarif
         const { totalPlaces, tarifSeatsMap } = collectTarifSeatsAndTotal('.tabtarif__commande-table');
         console.log(`Nombre de places total = ${totalPlaces}, Répartition = ${tarifSeatsMap}`);
@@ -140,14 +146,16 @@ function setReservation() {
                 case 'Compte Provisoire':
                     // L'email est inconnu -> compte créé en provisoire : il faudra confirmer l'utilisateur puis le mail et se logguer
                     console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
-                    dataController.reservationState = ReservationState.ReserveCompteToConfirm;
                     yield confirmUtilisateur();
+                    dataController.reservationState = ReservationState.ReserveCompteToConfirm;
+                    dataController.selectedReservationStatut = "Reserve";
                     break;
                 case 'Compte Confirme':
                     // L'email correspond à un compte valide : il faudra se logguer
                     console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
-                    dataController.reservationState = ReservationState.ReserveToConfirm;
                     yield loginWithEmail();
+                    dataController.reservationState = ReservationState.ReserveToConfirm;
+                    dataController.selectedReservationStatut = "Reserve";
                     break;
                 default:
                     // Cas imprévu
@@ -478,6 +486,7 @@ function confirmUtilisateur() {
                 const submitButton = document.getElementById('confirmUtilisateur-submit');
                 const emailError = document.getElementById('email-error');
                 const passwordError = document.getElementById('password-error');
+                displayNameInput.value = "";
                 /**
                  * Vérifie si les mots de passe sont identiques.
                  * @returns boolean - True si les mots de passe correspondent, sinon False.
@@ -542,6 +551,7 @@ function confirmUtilisateur() {
                 password1Input.addEventListener('input', validateForm);
                 password2Input.addEventListener('input', validateForm);
                 // Gestion de la soumission de la modale de confirmation de compte
+                submitButton.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
                 submitButton.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
                     evt.preventDefault();
                     evt.stopPropagation();
@@ -627,6 +637,7 @@ function confirmMail() {
                 const codeError = document.getElementById('code-error');
                 const inviteP = document.getElementById('confirmMail-title');
                 if (inviteP) {
+                    codeInput.value = "";
                     inviteP.textContent = `
 Nous avons envoyé à l'adresse (${dataController.selectedUtilisateurMail || ''}) 
 un code à renseigner ci-dessous.
@@ -674,6 +685,7 @@ un code à renseigner ci-dessous.
                     // Ajout d'écouteurs d'événements pour la validation en temps réel
                     codeInput.addEventListener('input', validateForm);
                     // Gestion de la soumission de la modale de confirmation de compte
+                    submitButton.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
                     submitButton.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
                         evt.preventDefault();
                         evt.stopPropagation();
@@ -842,6 +854,7 @@ function confirmReserve() {
         const seanceId = dataController.selectedSeanceUUID;
         if (reservationId && utilisateurId && seanceId) {
             try {
+                console.log("Appel sur R U S", reservationId, " ", utilisateurId, " ", seanceId);
                 yield confirmReserveApi(reservationId, utilisateurId, seanceId);
                 alert("votre reservation est confirmée");
             }

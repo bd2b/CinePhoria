@@ -1,6 +1,7 @@
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../config/config';
 import logger from '../config/configLog';
+import { ReservationForUtilisateur } from "../shared-models/Reservation";
 
 export class ReservationDAO {
   static async checkAvailabilityAndReserve(
@@ -33,42 +34,73 @@ export class ReservationDAO {
     }
   }
 
-  static async confirmReserve ( reservationId : string , utilisateurId: string, seanceId: string) : Promise<string> {
+  static async confirmReserve ( p_reservationId : string , p_utilisateurId: string, p_seanceId: string) : Promise<string> {
     const connection = await mysql.createConnection(dbConfig);
+
+    logger.info("Confirm R U S "+ p_reservationId + " " + p_utilisateurId + " " + p_seanceId);
 
     // Étape 1 : Récupérer les informations de la reservation dans la base
     const [rows] = await connection.execute(
       `SELECT utilisateurId, seanceId, stateReservation
        FROM Reservation 
        WHERE id = ?`,
-      [reservationId]
+      [p_reservationId]
     );
 
     const reservationData = (rows as any[])[0];
 
     if (!reservationData) {
-      logger.info(`Reservation inexistante pour ${reservationId}`);
+      logger.info(`Reservation inexistante pour ${p_reservationId}`);
       return 'Reservation inexistante';
     }
-
-    const { v_utilisateurId, v_seanceId, v_stateReservation } = reservationData;
-    if ((v_utilisateurId !== utilisateurId) || (v_seanceId !== seanceId) ||(v_stateReservation !== 'future') ) {
-      logger.info(`Reservation incoherente pour les données communiquées u = ${v_utilisateurId} s = ${v_seanceId} , st =  ${v_stateReservation}`);
+    logger.info("Resultat select = " + JSON.stringify(reservationData));
+    const { utilisateurId, seanceId, stateReservation } = reservationData;
+    
+    if ((p_utilisateurId !== utilisateurId) || (p_seanceId !== seanceId) || (stateReservation !== 'future') ) {
+      logger.info(`Reservation incoherente pour les données communiquées u = ${p_utilisateurId} s = ${p_seanceId} , st =  ${stateReservation}`);
       return 'Reservation incoherente pour les données communiquées';
     }
     // On peut confirmer la reservation
     const [results] = await connection.query(
       `CALL ConfirmReserve(?, @result);
        SELECT @result AS result;`,
-      [reservationId]
-    );
+      [p_reservationId]
+    ) as [any[], any]; ;
+// Exemple de retour 
+// {
+//   "0": { "affectedRows": 0, "changedRows": 0, "fieldCount": 0, "info": "", "insertId": 0, "serverStatus": 16394, "warningStatus": 0 },
+//   "1": [{ "result": "OK" }],
+//   "service": "backend-CinePhoria"
+// }
+// console.log("Type de results:", typeof results);
+// console.log("Contenu de results:", JSON.stringify(results, null, 2));
 
-    const resultConfirm = (results as any[])[0];
-    if (!resultConfirm) {
-      logger.info(`Erreur dans l'execution de la confirmation`);
-      return 'Reservation inexistante';
-    }
-    const { statut } = resultConfirm;
-    return statut;
+// Vérification et extraction correcte du résultat
+const resultRows = results["1"]; // Accès à la clé "1"
+const resultValue = Array.isArray(resultRows) && resultRows.length > 0
+    ? resultRows[0].result
+    : "Erreur : Résultat non trouvé";
+
+    logger.info("resultValue =", resultValue);
+return resultValue;
+
+}
+
+
+static async reserveForUtilisateur ( p_utilisateurId: string) : Promise<ReservationForUtilisateur[]> {
+  const connection = await mysql.createConnection(dbConfig);
+
+  // Étape 1 : Récupérer les informations des reservation dans la base pour l'utilisateur donné
+  const [rows] = await connection.execute(
+    `SELECT *
+     FROM viewutilisateurreservation 
+     WHERE utilisateurId = ?`,
+    [p_utilisateurId]
+  );
+  logger.info(`SELECT * FROM viewutilisateurreservation WHERE utilisateurId = ${p_utilisateurId}`);
+  await connection.end();
+
+    // Map des lignes pour les convertir en instances de Seance
+    return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
 }
 }
