@@ -13,12 +13,15 @@ logger.info('Declaration route /api/reservation/');
 router.post('/', ReservationController.createReservation);
 
 // Confirmer une reservation
-router.post('/confirm', ReservationController.confirmReservation);
+router.post('/confirm', authenticateJWT ,ReservationController.confirmReservation);
 
-// (Futur) GET /api/reservation/:id
-router.get('/:id', ReservationController.getReservation);
+// Recupérer les reservations d'un utilisateur
+router.get('/:utilisateurId', authenticateJWT ,ReservationController.getReservationForUtilisateur);
+
+// // (Futur) GET /api/reservation/:id
+// router.get('/:id', ReservationController.getReservation);
 
 // (Futur) GET /api/reservation/:id/seats
-router.get('/:id/seats', ReservationController.getSeatsForTarif);
+// router.get('/:id/seats', ReservationController.getSeatsForTarif);
 
 export default router;

@@ -10,3 +10,9 @@ export class SeatsForTarif {
     }
 }
 ;
+export class ReservationForUtilisateur {
+    constructor(data) {
+        Object.assign(this, data);
+    }
+}
+;

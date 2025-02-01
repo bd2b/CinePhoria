@@ -43,15 +43,13 @@ document.addEventListener('DOMContentLoaded', async () => {
       modal.classList.add('show'); // Afficher la modale
       // On se positionne sur Paris pour avoir un affichage valide
       dataController = new DataController("Paris");
-      await dataController.chargerDepuisAPI();
+      await dataController.init();
     }
   } else {
     // Le cookie existe on initialise le dataController
     dataController = new DataController(selectedCinema);
-    // Chargement des données via API si la restore du cache ne s'est pas faite dans l'initialisation
-    if (dataController.allSeances.length === 0) {
-      await dataController.chargerDepuisAPI();
-    }
+    await dataController.init();
+
     // Mettre à jour l'affichage initial du dropdown sur le composant titre
     updateDropdownDisplay("Changer de cinema");
 
@@ -61,12 +59,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // Identifier le film par defaut dans le cas où on n'affiche pour la première fois le contenu de la page
-  const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
-  if (!filmSeancesCandidat[0].filmId) return;
+  // Identifier le film par defaut si on n'a pas de film selectionné dans le dataController
+  if (dataController.selectedFilmUUID === undefined) {
+    const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
+    if (!filmSeancesCandidat[0].filmId) return;
 
-  // Mettre a jour le film selection dans le dataController
-  dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
+    // Mettre a jour le film selection dans le dataController
+    dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
+  }
 
   // Mise a jour de la page
   await updateContentPage(dataController);
@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   dropdownContents.forEach((content) => {
     const links = content.querySelectorAll<HTMLAnchorElement>('a');
     links.forEach((link) => {
+      link.removeEventListener('click', async (event: Event) => {});
       link.addEventListener('click', async (event: Event) => {
         event.preventDefault();
         const cinema = link.textContent?.trim();
@@ -95,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           dataController.nameCinema = cinema;
 
           // Chargement des données
-          await dataController.chargerDepuisAPI();
+          await dataController.init()
 
           // Identifier le film par defaut
           const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
@@ -106,6 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
           // Bascule vers le panel choix
           basculerPanelChoix();
+          updateContentPage(dataController);
 
           // Mise à jour de l'état
           dataController.reservationState = ReservationState.PendingChoiceSeance;
@@ -125,6 +127,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
+window.addEventListener('beforeunload', (event) => {
+  // Fonction de sauvegarde de dataController, 
+  // Cette fonction ne fait que enregistrer dans le storage, elle sera terminée avant le DOMContentLoaded
+  // dans le cadre d'un regchargement
+  if (dataController) {
+    dataController.sauverComplet(); // Sauvegarde des données dans le stockage local
+  }
+});
 
 /**
  * Fonction de mise à jour de la page
@@ -170,9 +180,11 @@ export async function updateContentPage(dataController: DataController) {
     // Afficher les séances du jour pour le film sélectionné
     afficherSeancesDuJour(dataController, new Date(seancesFilm[0].dateJour || ''));
     console.log(`UCP 8 - Séances affichées pour ${activeSelectedFilm.titleFilm} le ${new Date(seancesFilm[0].dateJour || '')}`);
-  } else if (dataController.reservationState = ReservationState.PendingChoiceSeats) {
 
+  } else if (dataController.reservationState = ReservationState.PendingChoiceSeats) {
     console.log("ETAT : choix des places");
+    basculerPanelReserve()
+    dataController.reservationState = ReservationState.PendingChoiceSeats
     updateContentPlace();
 
   }
@@ -249,6 +261,7 @@ function afficherListeFilms(dataController: DataController): void {
     divCard.appendChild(pTitre);
 
     // Gérer la sélection
+    divCard.removeEventListener('click', () => {});
     divCard.addEventListener('click', () => {
       // Désélectionner la carte précédemment sélectionnée
       const previouslySelected = container.querySelector('.listFilms__simpleCard.selected');
@@ -262,11 +275,18 @@ function afficherListeFilms(dataController: DataController): void {
       // Mettre à jour le film sélectionné dans le dataController
       dataController.selectedFilmUUID = film.id;
 
+      dataController.reservationState = ReservationState.PendingChoiceSeance;
+
+      
+
       // Rafraîchir la page ou effectuer des actions supplémentaires
-      // updateContentPage(dataController);
+      updateContentPage(dataController);
 
       // Basculer vers le panel choix
       basculerPanelChoix();
+      
+
+      
 
     });
 
@@ -539,7 +559,8 @@ function afficherSeancesDuJour(dataController: DataController, dateSelectionnee:
 
       // Memorisation de la seance
       dataController.selectedSeanceUUID = seance.seanceId;
-      console.log("SeanceId selectionnee = " + dataController.selectedSeanceUUID + ", seance = " + JSON.stringify(dataController.seanceSelected()));
+      console.log("SeanceId selectionnee = " + dataController.selectedSeanceUUID + ", seance = " + dataController.seanceSelected().dateJour + ","
+    + dataController.seanceSelected().hourBeginHHSMM);
 
 
       // Changement du libelle du bouton 
@@ -555,6 +576,9 @@ function afficherSeancesDuJour(dataController: DataController, dateSelectionnee:
         newButtonPanel.addEventListener('click', () => {
           if (buttonPanel) {
             basculerPanelReserve();
+            dataController.reservationState = ReservationState.PendingChoiceSeats
+            updateContentPlace();
+            dataController.sauverComplet();
           }
         })
       }
@@ -645,8 +669,6 @@ function basculerPanelReserve() {
   if ((panelChoix) && (panelReservation)) {
     panelChoix.style.display = 'none';
     panelReservation.style.display = 'flex';
-    dataController.reservationState = ReservationState.PendingChoiceSeats
-    updateContentPage(dataController);
   }
 }
 
@@ -659,8 +681,6 @@ export function basculerPanelChoix() {
   if ((panelChoix) && (panelReservation)) {
     panelChoix.style.display = 'block';
     panelReservation.style.display = 'none';
-    dataController.reservationState = ReservationState.PendingChoiceSeance;
-    updateContentPage(dataController);
   }
 
 }

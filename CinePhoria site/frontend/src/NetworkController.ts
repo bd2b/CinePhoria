@@ -112,7 +112,7 @@ export async function confirmReserveApi(reservationId: string , utilisateurId: s
         alert('Vous devez être connecté');
         return;
     }
-    const response = await fetch('http://localhost:3500/api/reservation/confirm', {
+    const response = await fetch(`http://localhost:3500/api/reservation/confirm`, {
         method: 'POST',
         headers: {  
             'Content-Type': 'application/json',

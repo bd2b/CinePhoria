@@ -28,3 +28,23 @@ export class SeatsForTarif {
 };
 
 export type TarifForSeats = Record<string, number>;
+
+
+export class ReservationForUtilisateur {
+  utilisateurId!:string;
+  reservationId!:string;
+  statereservation?:string;
+  timestampcreate?:Date;
+  displayname?:string;
+  dateJour?:Date;
+  titleFilm?:string;
+  nameCinema?:string;
+  note?:number;
+  evaluation?:string;
+  totalSeats?:number;
+  totalPrice?:number;
+  numberPMR?:number;
+  constructor(data: Partial<Reservation>) {
+    Object.assign(this, data);
+  }
+};

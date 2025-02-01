@@ -21,6 +21,7 @@ ALTER TABLE Salle DROP FOREIGN KEY possede;
 ALTER TABLE Reservation DROP FOREIGN KEY prend;
 ALTER TABLE Connexions DROP FOREIGN KEY `se connecte`;
 ALTER TABLE Employe_Cinema DROP FOREIGN KEY `travail au`;
+DROP VIEW IF EXISTS ViewUtilisateurReservation;
 DROP VIEW IF EXISTS ViewFilmsSortiesRecentes;
 DROP VIEW IF EXISTS ViewFilmsSortiesDeLaSemaine;
 DROP VIEW IF EXISTS ViewFilmsSeancesSalle;

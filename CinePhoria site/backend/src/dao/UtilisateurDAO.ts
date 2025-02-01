@@ -206,17 +206,7 @@ export class UtilisateurDAO {
         );
         return 'KO : Compte non validé';
       }
-
-      // Étape 3 : Comparer le mot de passe
-      logger.info("Je compare : " + password + ' , ' + passwordText);
-      // const p1 = 'toto';
-      // const p1Hash = await hashPassword(p1);
-      // if (p1Hash) {
-      // const isPcorrect = await bcrypt.compare(p1, p1Hash);
-      // if (isPcorrect) logger.info("Correspond");
-      // }
       
-
       const isPasswordCorrect = await bcrypt.compare(password, passwordText);
       if (!isPasswordCorrect) {
         logger.info(`Mot de passe incorrect pour ${compte}`);

@@ -112,7 +112,7 @@ export function confirmReserveApi(reservationId, utilisateurId, seanceId) {
             alert('Vous devez être connecté');
             return;
         }
-        const response = yield fetch('http://localhost:3500/api/reservation/confirm', {
+        const response = yield fetch(`http://localhost:3500/api/reservation/confirm`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
