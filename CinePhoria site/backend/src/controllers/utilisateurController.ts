@@ -24,7 +24,8 @@ export class UtilisateurController {
       if (result.startsWith('Erreur')) {
         res.status(400).json({ message: result });
       } else {
-        res.status(200).json({ id: result })};
+        res.status(200).json({ id: result })
+      };
     } catch (error) {
       console.error('Erreur dans createUtilisateur:', error);
       res.status(500).json({ message: 'Erreur interne du serveur.' });
@@ -53,7 +54,8 @@ export class UtilisateurController {
       if (result.startsWith('Erreur')) {
         res.status(400).json({ message: result });
       } else {
-        res.status(200).json({ statut: result })};
+        res.status(200).json({ statut: result })
+      };
     } catch (error) {
       console.error('Erreur dans confirmUtilisateur:', error);
       res.status(500).json({ message: 'Erreur interne du serveur.' });
@@ -66,7 +68,7 @@ export class UtilisateurController {
       console.log(email, codeConfirm);
 
       // Validation des données d'entrée
-      if (!email || !codeConfirm ) {
+      if (!email || !codeConfirm) {
         res.status(400).json({ message: 'Données manquantes ou invalides.' });
         return;
       }
@@ -81,7 +83,8 @@ export class UtilisateurController {
       if (result.startsWith('Erreur')) {
         res.status(400).json({ message: result });
       } else {
-        res.status(200).json({ statut: result })};
+        res.status(200).json({ statut: result })
+      };
     } catch (error) {
       console.error('Erreur dans confirmCompte:', error);
       res.status(500).json({ message: 'Erreur interne du serveur.' });
@@ -89,21 +92,31 @@ export class UtilisateurController {
   };
 
   static async getUtilisateurById(req: Request, res: Response) {
-      try {
-        const utilisateur = await UtilisateurDAO.findById(req.params.id);
-        res.json(utilisateur);
-      } catch (error: any) {
-        res.status(500).json({ error: error.message });
-      }
-    };
+    try {
+      const utilisateur = await UtilisateurDAO.findById(req.params.id);
+      res.json(utilisateur);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  };
 
-    static async getUtilisateurByMail(req: Request, res: Response) {
-        try {
-          const utilisateur = await UtilisateurDAO.findByMail(req.params.email);
-          res.json(utilisateur);
-        } catch (error: any) {
-          res.status(500).json({ error: error.message });
-        }
-      };
+  static async getUtilisateur(req: Request, res: Response) {
+    try {
+      const utilisateur = await UtilisateurDAO.findByIdent(req.params.ident);
+      res.json(utilisateur);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+
+
+  static async getUtilisateurByMail(req: Request, res: Response) {
+    try {
+      const utilisateur = await UtilisateurDAO.findByMail(req.params.email);
+      res.json(utilisateur);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  };
 
 }

@@ -26,6 +26,7 @@ DROP VIEW IF EXISTS ViewFilmsSortiesRecentes;
 DROP VIEW IF EXISTS ViewFilmsSortiesDeLaSemaine;
 DROP VIEW IF EXISTS ViewFilmsSeancesSalle;
 DROP VIEW IF EXISTS ViewFilmReservationDate;
+DROP VIEW IF EXISTS ViewComptePersonne;
 DROP TABLE IF EXISTS Cinema;
 DROP TABLE IF EXISTS Compte;
 DROP TABLE IF EXISTS Connexions;

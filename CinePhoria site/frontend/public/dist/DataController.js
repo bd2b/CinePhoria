@@ -69,21 +69,6 @@ export class DataController {
     get nameCinema() {
         return this._nameCinema;
     }
-    // Setter pour nameCinema
-    // public set nameCinema(value: string) {
-    //     const cinemaActuel = this._nameCinema;
-    //     if (value.trim() === '') {
-    //         throw new Error('Le nom du cinéma ne peut pas être vide.');
-    //     }
-    //     let isNewCinema: boolean = (value !== this._nameCinema);
-    //     this._nameCinema = value;
-    //     if (isNewCinema) {
-    //         // Changement de cinema il faut recharger le cache a la prochaine initialisation, on fait expirer le cookie dateAccess
-    //         console.log(`Seter nameCinema 1 - Changement de cinema : ${cinemaActuel} remplace par ${this._nameCinema}`)
-    //         setCookie(DataController.nomCookieDateAccess, " ", -1);
-    //         console.log(`Seter nameCinema 2 - Expiration du cookie de date de mise à jour`)
-    //     }
-    // }
     set nameCinema(value) {
         if (value.trim() === '') {
             throw new Error('Le nom du cinéma ne peut pas être vide.');
@@ -180,25 +165,6 @@ export class DataController {
     set selectedReservationStatut(value) {
         this._selectedReservationStatut = value;
     }
-    // constructor(nameCinema: string) {
-    //     this._nameCinema = nameCinema;
-    //     // Charger les données depuis localStorage si elles existent
-    //     const saved = localStorage.getItem(DataController.nomStorage);
-    //     // Si les données stockées sont plus vieilles de DataController.validiteCache heures, on force le rechargement
-    //     const dateAccessString = getCookie(DataController.nomCookieDateAccess);
-    //     let mustReload = true;
-    //     if (dateAccessString) {
-    //         if (!isDifferenceGreaterThanHours(new Date(), new Date(dateAccessString), DataController.validiteCache)) {
-    //             mustReload = false;
-    //         }
-    //     }
-    //     if (saved && !mustReload) {
-    //         this.charger()
-    //         this.extractFilmsFromSeances();
-    //         console.log(`Utilisation du stockage local : ${this._seances.length} séances, ${this._films.length} films`);
-    //         console.log(`Utilisation du stockage local : ${this._tarifQualite.length} tarifs`);
-    //     }
-    // }
     constructor(nameCinema) {
         this._reservationState = ReservationState.PendingChoiceSeance;
         this._seances = [];

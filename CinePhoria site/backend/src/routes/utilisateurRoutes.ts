@@ -14,7 +14,12 @@ router.post('/confirmUtilisateur', UtilisateurController.confirmUtilisateur);
 router.post('/confirmCompte', UtilisateurController.confirmCompte);
 
 // (Futur) GET /api/reservation/:id
-router.get('/:id', UtilisateurController.getUtilisateurById);
+// router.get('/:id', authenticateJWT, UtilisateurController.getUtilisateurById);
+
+// GET /api/utilisateur
+router.get('/:ident', authenticateJWT, UtilisateurController.getUtilisateur);
+
+
 
 
 // (Futur) GET /api/reservation/:email

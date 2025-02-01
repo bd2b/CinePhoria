@@ -1,6 +1,6 @@
 import { dataController, seanceCardView, basculerPanelChoix } from './ViewReservation.js';
 import { ReservationState } from './DataController.js';
-import { isUUID } from './Helpers.js';
+import { isUUID, validateEmail } from './Helpers.js';
 import { TarifForSeats } from './shared-models/Reservation';
 import { reservationApi, confirmUtilisateurApi, confirmCompteApi, loginApi , confirmReserveApi } from './NetworkController.js';
 
@@ -473,15 +473,6 @@ function updateInputPMR(): HTMLDivElement {
 };
 
 
-/**
-     * Vérifie la validité d'un email.
-     * @param email - L'email à valider.
-     * @returns boolean - True si l'email est valide, sinon False.
-     */
-function validateEmail(email: string): boolean {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
-    return emailRegex.test(email);
-};
 
 
 /**

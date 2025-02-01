@@ -121,6 +121,38 @@ CREATE TABLE Utilisateur (
   displayName     varchar(100) NOT NULL, 
   timeStampCreate timestamp NULL, 
   PRIMARY KEY (id));
+CREATE VIEW `ViewComptePersonne` AS
+
+SELECT 
+	compte.email, 
+	compte.dateDerniereConnexion,
+    compte.isValidated,
+    utilisateur.id as utilisateurid,
+    utilisateur.displayName as utilisateurDisplayName,
+    null as matricule,
+    null as isAdministrateur,
+    null as lastnameEmploye,
+    null as firstnameEmploye,
+    null as nameCinema
+FROM Compte
+JOIN Utilisateur ON compte.email = utilisateur.email
+
+UNION
+
+SELECT 
+compte.email, 
+	compte.dateDerniereConnexion,
+    compte.isValidated,
+    Null as utilisateurid,
+    Null as utilisateurdisplayName,
+    employe.matricule as matricule,
+    employe.isAdministrateur as isAdministrateur,
+    employe.lastnameEmploye as lastnameEmploye,
+    employe.firstnameEmploye as firstnameEmploye,
+    employe_cinema.nameCinema as nameCinema
+FROM Compte
+JOIN Employe ON compte.email = employe.email
+JOIN Employe_Cinema ON employe.matricule = employe_cinema.matricule;
 CREATE VIEW `ViewFilmReservationDate` AS
     SELECT filmTitre, jour, SUM(Places) AS totalPlaces
 FROM (

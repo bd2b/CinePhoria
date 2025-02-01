@@ -13,3 +13,16 @@ export interface UserPayload {
   // id: string;
   // Ajoutez d'autres champs selon vos besoins
 }
+
+export class ComptePersonne {
+  email!: string;
+  dateDerniereConnexion?: Date;
+  isValidated?: number;
+  utilisateurid?: string;
+  utilisateurDisplayName?: string;
+  matriculeutilisateurid?: string;
+  isAdministrateur?: string;
+  lastnameEmploye?: string;
+  firstnameEmploye?: string;
+  nameCinema?: string;
+}

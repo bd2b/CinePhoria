@@ -106,3 +106,13 @@ export function isUUID(str: string): boolean {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     return uuidRegex.test(str.trim());
 }
+
+/**
+     * Vérifie la validité d'un email.
+     * @param email - L'email à valider.
+     * @returns boolean - True si l'email est valide, sinon False.
+     */
+export function validateEmail(email: string): boolean {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+};
