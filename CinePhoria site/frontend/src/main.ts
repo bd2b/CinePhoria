@@ -49,5 +49,5 @@ const animateMainContent = () => {
     });
 };
 
-handleMobileMenu();
-animateMainContent();
+ handleMobileMenu();
+ animateMainContent();

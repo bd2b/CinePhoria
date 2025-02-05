@@ -1,5 +1,22 @@
 // shared-models/User.ts
 // shared-models/User.ts
+
+export class ComptePersonne {
+  email!: string;
+  dateDerniereConnexion?: Date;
+  isValidated?: number;
+  utilisateurid?: string;
+  utilisateurDisplayName?: string;
+  matricule?: number;
+  isAdministrateur?: number;
+  lastnameEmploye?: string;
+  firstnameEmploye?: string;
+  nameCinema?: string;
+  constructor(data: Partial<ComptePersonne>) {
+    Object.assign(this, data);
+  }
+}
+
 export interface UtilisateurCompte {
   id: string;
   email?: string;
@@ -14,15 +31,3 @@ export interface UserPayload {
   // Ajoutez d'autres champs selon vos besoins
 }
 
-export class ComptePersonne {
-  email!: string;
-  dateDerniereConnexion?: Date;
-  isValidated?: number;
-  utilisateurid?: string;
-  utilisateurDisplayName?: string;
-  matriculeutilisateurid?: string;
-  isAdministrateur?: string;
-  lastnameEmploye?: string;
-  firstnameEmploye?: string;
-  nameCinema?: string;
-}

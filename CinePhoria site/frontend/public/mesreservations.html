@@ -5,14 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/sections/main-visiteur.css">
-    <link rel="stylesheet" href="css/sections/main-reservation.css">
     
 
+    <!-- <script type="module" src="dist/ViewMenu.js" defer></script>
+    <script type="module" src="dist/ViewFooter.js" defer></script> -->
     <script type="module" src="dist/global.js" defer></script>
     <script type="module" src="dist/main.js" defer></script>
-    <script type="module" src="dist/ViewFilmsSortiesSemaine.js" defer></script>
-
+    <script type="module" src="dist/ViewMesReservations.js" defer></script>
 
     <title>CinePhoria</title>
 </head>
@@ -24,12 +23,12 @@
                 <a href="./visiteur.html">
                 <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
             </div>
-            <div class="nav__actions">
+            <nav class="nav__actions">
                 <button class="nav__actions-button nav__actions-button--link">Réservation</button>
                 <button class="nav__actions-button nav__actions-button--link">Films</button>
                 <button class="nav__actions-button nav__actions-button--link">Contact</button>
                 <button class="nav__actions-button nav__actions-button--signin">Connexion</button>
-            </div>
+            </nav>
             <div class="nav__mobile-menu" id="navMobileMenu">
                 <img src="assets/menu.svg" alt="Menu">
             </div>
@@ -49,7 +48,7 @@
         <div class="main__container">
             <div class="container__title"> <!--- Titre -->
                 <div class="title__left">
-                    <h1 class="title__left-h1">Nouveautés de la semaine</h1>
+                    <h1 class="title__left-h1" id="titleLeft">Mes réservations</h1>
                 </div>
                 <div class="title__filters title__filters-visiteur">
                     <div class="title__filter-dropdown titre__filter-dropdown-genre">
@@ -60,36 +59,29 @@
                             <a href="#">Thriller</a>
                         </div>
                     </div>
-                    
+                    <div class="title__filter-dropdown">
+                        <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">Choisissez votre
+                            complexe <span class="chevron">▼</span></button><!-- Boutons de sélection-->
+                        <div
+                            class="title__filter-button-drowdown-content title__filter-button-drowdown-content-complexe">
+                            <a href="#" data-cinema="Paris">Paris</a>
+                            <a href="#" data-cinema="Bordeaux">Bordeaux</a>
+                            <a href="#" data-cinema="Nantes">Nantes</a>
+                            <a href="#" data-cinema="Lille">Lille</a>
+                            <a href="#" data-cinema="Toulouse">Toulouse</a>
+                            <a href="#" data-cinema="Charleroi">Charleroi</a>
+                            <a href="#" data-cinema="Liège">Liège</a>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="container__filmsreservation" id="films-container">
-                <!-- Cartes générées par films.js -->
-              </div>
+            <div class="container__mesreservations"> <!--- Mes Reservations -->
+               <h1>Mes reservations</h1>
+            </div>
+        </div>
         </div>
     </main>
     <footer class="footer" id="footer">
     </footer>
-    <!-- Modale Selection Cinema-->
-    <div id="modal" class="modalcinema">
-        <div class="modalcinema-content">
-            <h2>Veuillez choisir votre complexe</h2>
-            <div class="title__filter-dropdown">
-                <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">Choisissez votre
-                    complexe <span class="chevron">▼</span></button>
-                <div class="title__filter-button-drowdown-content title__filter-button-drowdown-content-complexe">
-                    <a href="#" data-cinema="Paris">Paris</a>
-                    <a href="#" data-cinema="Bordeaux">Bordeaux</a>
-                    <a href="#" data-cinema="Nantes">Nantes</a>
-                    <a href="#" data-cinema="Lille">Lille</a>
-                    <a href="#" data-cinema="Toulouse">Toulouse</a>
-                    <a href="#" data-cinema="Charleroi">Charleroi</a>
-                    <a href="#" data-cinema="Liège">Liège</a>
-                </div>
-            </div>
-        </div>
-    </div>
 
 </body>
-
-</html>

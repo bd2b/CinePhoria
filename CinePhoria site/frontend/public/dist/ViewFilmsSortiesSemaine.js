@@ -1,4 +1,3 @@
-"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,15 +7,31 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-function chargerFilmsSortiesSemaine() {
+export function onLoadVisiteur() {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(" ===>  onLoadVisiteur");
+        const container = document.getElementById('films-container');
+        if (!container)
+            return;
+        container.innerHTML = '';
         try {
-            const response = yield fetch('http://localhost:3000/api/films/sorties');
-            const films = yield response.json();
-            const container = document.getElementById('films-container');
-            if (!container)
-                return;
-            container.innerHTML = '';
+            const response = yield fetch('http://localhost:3500/api/films/sorties');
+            let films = yield response.json();
+            if (films.length === 0) {
+                const card = document.createElement('div');
+                card.classList.add('filmsreservation__film');
+                card.innerHTML = `
+          <div class="film__cardreservation"> <!-- Card pour chaque film-->
+            <div class="cardreservation__description">
+                <h2 class="cardreservation__description-title">Pas de film sortie la semaine précédente : affichage de tous les films présent au catalogue</h2>
+            </div>
+          </div>
+        `;
+                container.appendChild(card);
+                // Chargement de tous les films
+                const response = yield fetch('http://localhost:3500/api/films');
+                films = yield response.json();
+            }
             films.forEach((film) => {
                 const card = document.createElement('div');
                 card.classList.add('filmsreservation__film');
@@ -50,4 +65,3 @@ function chargerFilmsSortiesSemaine() {
         }
     });
 }
-document.addEventListener('DOMContentLoaded', chargerFilmsSortiesSemaine);

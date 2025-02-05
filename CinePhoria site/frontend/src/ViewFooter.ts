@@ -9,7 +9,7 @@ interface Cinema {
     ligne2     : string;
 }
 
-async function chargerCinemaSites() {
+export async function chargerCinemaSites() {
   
   const footerElement = document.getElementById('footer');
   if (!footerElement) return;

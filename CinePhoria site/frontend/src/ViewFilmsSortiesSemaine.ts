@@ -1,3 +1,6 @@
+import { getCookie , setCookie } from "./Helpers.js";
+import { dataController } from "./DataController.js";
+
 interface Film {
   id: string;
   titleFilm: string;
@@ -19,16 +22,34 @@ interface Film {
 
 }
 
+export async function onLoadVisiteur() {
+  console.log(" ===>  onLoadVisiteur");
 
-async function chargerFilmsSortiesSemaine() {
-  try {
-    const response = await fetch('http://localhost:3000/api/films/sorties');
-    const films: Film[] = await response.json();
 
-    const container = document.getElementById('films-container');
+
+  const container = document.getElementById('films-container');
     if (!container) return;
-
     container.innerHTML = '';
+  try {
+    const response = await fetch('http://localhost:3500/api/films/sorties');
+    let films: Film[] = await response.json();
+    if (films.length === 0) {
+      const card = document.createElement('div');
+      card.classList.add('filmsreservation__film');
+
+      card.innerHTML = `
+          <div class="film__cardreservation"> <!-- Card pour chaque film-->
+            <div class="cardreservation__description">
+                <h2 class="cardreservation__description-title">Pas de film sortie la semaine précédente : affichage de tous les films présent au catalogue</h2>
+            </div>
+          </div>
+        `;
+      container.appendChild(card);
+
+      // Chargement de tous les films
+      const response = await fetch('http://localhost:3500/api/films');
+      films = await response.json();
+    }
 
     films.forEach((film) => {
       const card = document.createElement('div');
@@ -62,5 +83,3 @@ async function chargerFilmsSortiesSemaine() {
     console.error('Erreur lors du chargement des films', error);
   }
 }
-
-document.addEventListener('DOMContentLoaded', chargerFilmsSortiesSemaine);

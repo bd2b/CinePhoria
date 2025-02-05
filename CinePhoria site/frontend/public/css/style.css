@@ -1,5 +1,6 @@
 
 @import url("global.css");
+@import url("sections/modal.css");
 @import url("sections/header.css");
 @import url("sections/main.css");
 @import url("sections/footer.css");

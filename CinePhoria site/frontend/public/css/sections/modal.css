@@ -1,0 +1,178 @@
+/* -------------------- Modal de selection du cinema */
+.modalcinema {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+}
+.modalcinema-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+}
+.modalcinema.show {
+    display: flex;
+}
+
+/* -------------------- Modal bande annonce */
+/* Styles généraux pour la modal */
+.modalyoutube {
+    display: none; /* Masqué par défaut */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Fond semi-transparent */
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .modalyoutube-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+    position: relative;
+  }
+  
+  .modalyoutube-content iframe {
+    width: 100%;
+    height: 315px;
+    border: none;
+  }
+  
+  /* Bouton de fermeture */
+  .closeyoutube {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #333;
+  }
+
+/* ----------------------- Modal confirm et mot de passe */
+.modal {
+    display: none; 
+    flex-direction: column;
+    justify-content: center; /* Centrage vertical */
+    align-items: center; /* Centrage horizontal */
+    position: fixed;
+    z-index: 999; /* Au-dessus du reste */
+    left: 0; 
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Conteneur interne centré */
+  .modal__content-wrapper {
+    background-color: #fff;
+    width: 100%;
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* padding: 20px; */
+    position: relative;
+  }
+  
+  /* Style du titre */
+  .modal__title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px 10px;
+    border-bottom: 1px solid #ddd;
+    font-size: 1.2rem;
+    font-weight: bold;
+    background-color: #0c0606;
+    color: #eff1f4; /* Bleu nuit */
+  }
+  
+  /* Bouton de fermeture */
+  .close-modal {
+    font-size: 28px;
+    font-weight: bold;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.3s;
+  }
+  
+  .close-modal:hover {
+    color: #e74c3c; /* Rouge */
+  }
+  
+  /* Contenu de la modale */
+  .modal__content {
+    padding: 20px;
+    text-align: center;
+  }
+  
+  /* Style du texte d'introduction */
+  .modal__content p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  
+  /* Groupes de formulaires */
+  .form__group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  
+  /* Style des labels */
+  .form__group label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #34495e; /* Gris foncé */
+  }
+  
+  /* Style des champs de saisie */
+  .form__group input {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  
+  .form__group input:focus {
+    border-color: #3498db; /* Bleu */
+  }
+  
+  /* Bouton de validation */
+  .button-primary {
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    width: 100%;
+  }
+  
+  
+  /* Affichage de la modale */
+  .modal.show { 
+      display: flex; 
+  }
+
+/* -------------------------- Fin Modale */

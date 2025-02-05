@@ -16,9 +16,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-
-    
-
 }
 
 .nav__logo {
@@ -51,6 +48,9 @@
 
 .nav__actions-button--link {
     background-color: transparent;
+    color: rgb(var(--primary-color));
+    text-decoration: none;
+    text-align: center;
 
 }
 
@@ -108,3 +108,61 @@ cursor: pointer;
 .mobile-menu--open {
     right: 0;
 }
+
+/* ============================= */
+/* STYLES GÉNÉRIQUES SOUS-MENU   */
+/* ============================= */
+
+.submenu-level2-item {
+    /* Type=Level 2, State=Default */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+  
+    width: 115px;
+    height: 46px;
+    background: #F8F8FF; /* Blanc cassé */
+  
+    /* Pour aligner le lien <a> */
+    gap: 0px;
+    border-bottom: 1px solid #eee; /* Ligne séparatrice ou non, à votre convenance */
+  }
+  
+  .submenu-level2-item a {
+    /* Frame 1 / l’intérieur, ex: 16px de padding si besoin */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    width: 114px;
+    height: 46px;
+  
+    font-family: 'Actor', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: #000000;
+  
+    text-decoration: none; /* Pas de soulignement */
+  }
+  
+  /* Survol (Hover) */
+  .submenu-level2-item:hover {
+    /* Type=Level 2, State=Hover */
+    background: #F8F8FF; /* inchangé */
+    cursor: pointer;
+  }
+  
+  .submenu-level2-item:hover::before {
+    /* "Rectangle 1" -> barre de 4px #2C3E50 au survol */
+    content: '';
+    display: block;
+    width: 4px;
+    height: 46px;
+    background: #2C3E50;
+    margin-right: -4px; 
+  }

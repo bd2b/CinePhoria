@@ -1,26 +1,93 @@
+import { ComptePersonne } from './shared-models/Utilisateur.js';
+import { profilApi } from './NetworkController.js';
+import { deleteCookie, getCookie, setCookie } from './Helpers.js';
+
 export enum ProfilUtilisateur {
-Utilisateur = "Utilisateur",
-Administrateur = "Administrateur",
-Employee = "Employe" 
+    Utilisateur = "mesreservations.html",
+    Administrateur = "manageEmploye.html",
+    Employee = "moderer.html",
+    Visiteur = "visiteur.html"
 }
 
 export class DataControllerUser {
-    private _email: string;
-
+    private _comptes?: ComptePersonne[];
+    private _ident?: string;
     
-    constructor(email: string) {
-        this._email = email;
-        console.log("New avec " + email);
-        // Le constructeur ne fait pas d’appel asynchrone
-        // On doit appeler manuellement dataController.init() après l’avoir construit
+
+    // Getter pour ident
+    public get ident(): string | undefined {
+        const ident = getCookie('ident');
+        this._ident = ident;
+        return getCookie('ident')
+        
     }
 
-    public profilUtilisateurByEmail () : string {
-        return "";
+    // Setter pour ident
+    public set ident(value: string) {
+        if (value !== '') {
+        console.log("Mise a jour ident = " + value)
+        setCookie("ident", value, 1);
+        this._ident = value;
+        } else {
+            console.log("logout de ",this._ident,)
+            this._ident = undefined;
+            
+        }
     }
 
-    public profilUtilisateurById () : string {
-        return "";
+    // Getter pour comptes
+    public get comptes(): ComptePersonne[] {
+        
+        return this._comptes || [];
+    }
+
+    // Acces au premier compte
+    // Pour éviter d'alourdir tous les cas ou on n'a pas besoin de gérer le multi-site d'un employé
+    public compte(): ComptePersonne | undefined {
+        if (this._comptes) {
+            return this._comptes[0];
+        } else 
+        return undefined;
+    }
+
+    // Calcul au profil
+    public profil() : ProfilUtilisateur {
+        if (this.compte() === undefined) {
+            return ProfilUtilisateur.Visiteur
+        } else if (this.compte()?.matricule) {
+            if (this.compte()?.isAdministrateur &&  this.compte()?.isAdministrateur === 1) {
+                return ProfilUtilisateur.Administrateur;
+            } else {
+                return ProfilUtilisateur.Employee;
+            }
+        } else {
+            return ProfilUtilisateur.Utilisateur;
+        }
+    }
+
+    // Invalider le compte
+    public invalidate() {
+        deleteCookie('ident');
+        this._ident = undefined;
+        this._comptes = undefined;
+    }
+    
+    /**
+     * Charge les comptes utilisateur si l'ident est defini et si le compte n'a pas été déja chargé
+     */
+    public async comptesUtilisateur() {
+        console.log("000");
+            if (this._ident !== undefined) {
+                console.log("111");
+                const comptesCharge = await profilApi(this._ident);
+                if (comptesCharge) {
+                    this._comptes = comptesCharge
+                }
+            }
+        
     }
 
 }
+
+export let userDataController = new DataControllerUser();
+
