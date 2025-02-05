@@ -8,8 +8,7 @@
     <link rel="stylesheet" href="css/sections/main-reservation.css">
     <link rel="stylesheet" href="css/sections/reservation-panel.css">
 
-
-    <script type="module" src="dist/ViewFooter.js" defer></script>
+    <script type="module" src="dist/global.js" defer></script>
     <script type="module" src="dist/main.js" defer></script>
     <script type="module" src="dist/ViewReservation.js" defer></script>
 
@@ -20,14 +19,15 @@
     <header class="header">
         <nav class="header__nav">
             <div class="nav__logo ">
-                <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img">
+                <a href="./visiteur.html">
+                <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
             </div>
-            <div class="nav__actions">
+            <nav class="nav__actions">
                 <button class="nav__actions-button nav__actions-button--link">Réservation</button>
                 <button class="nav__actions-button nav__actions-button--link">Films</button>
                 <button class="nav__actions-button nav__actions-button--link">Contact</button>
                 <button class="nav__actions-button nav__actions-button--signin">Connexion</button>
-            </div>
+            </nav>
             <div class="nav__mobile-menu" id="navMobileMenu">
                 <img src="assets/menu.svg" alt="Menu">
             </div>

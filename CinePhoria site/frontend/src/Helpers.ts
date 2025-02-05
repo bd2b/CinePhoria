@@ -12,6 +12,11 @@ export function setCookie(name: string, value: string, days: number): void {
     document.cookie = `${name}=${value}; path=/; expires=${date.toUTCString()}`;
 }
 
+// Suppression d'un cookie
+export function deleteCookie(name: string) {
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+}
+
 /** 
  * Petite fonction pour un mois en texte 
  */

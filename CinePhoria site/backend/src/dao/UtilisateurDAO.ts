@@ -173,7 +173,7 @@ export class UtilisateurDAO {
    * @param ident peut etre utilisateur.id, compte.email, employe.matricule
    * @returns 
    */
-  static async findByIdent(ident: string): Promise<ComptePersonne | null> {
+  static async findByIdent(ident: string): Promise<ComptePersonne[] | []> {
     const connection = await mysql.createConnection(dbConfig);
     logger.info('Connexion réussie à la base de données');
     let requete = ""
@@ -192,8 +192,8 @@ export class UtilisateurDAO {
     const [rows] = await connection.execute(requete, [ident]);
     await connection.end();
 
-    const data = (rows as any[])[0];
-    return data ? data as ComptePersonne : null;
+    const data = (rows as any[]);
+    return data ? data as ComptePersonne[] : [];
   }
 
   static async findByMail(email: string): Promise<UtilisateurCompte | null> {

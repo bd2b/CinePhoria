@@ -7,7 +7,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { isUUID, validateEmail } from './Helpers.js';
+import { isUUID } from './Helpers.js';
+import { ComptePersonne } from './shared-models/Utilisateur.js';
 export function reservationApi(email, seanceId, tarifSeats, // { tarifId: numberOfSeats, ... }
 pmrSeats) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -132,7 +133,21 @@ export function confirmReserveApi(reservationId, utilisateurId, seanceId) {
 }
 export function profilApi(identUtilisateur) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (validateEmail(identUtilisateur)) {
+        const token = localStorage.getItem('jwtToken');
+        const response = yield fetch(`http://localhost:3500/api/utilisateur/${identUtilisateur}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const rawData = yield response.json();
+        if (!Array.isArray(rawData)) {
+            throw new Error('La réponse de l’API n’est pas un tableau.');
         }
+        // Convertir les données brutes en instances de Seance
+        const comptesUtilisateur = rawData.map((d) => new ComptePersonne(d));
+        console.log("compte = ", comptesUtilisateur);
+        return comptesUtilisateur;
     });
 }

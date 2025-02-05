@@ -99,7 +99,7 @@ export class UtilisateurController {
       res.status(500).json({ error: error.message });
     }
   };
-
+  // Récupérer par ident 
   static async getUtilisateur(req: Request, res: Response) {
     try {
       const utilisateur = await UtilisateurDAO.findByIdent(req.params.ident);

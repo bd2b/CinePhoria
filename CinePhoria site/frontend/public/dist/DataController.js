@@ -28,6 +28,11 @@ import { Seance, TarifQualite } from './shared-models/Seance.js'; // extension e
 import { Film } from './shared-models/Film.js';
 import { getCookie, setCookie } from './Helpers.js';
 import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
+// import { onLoadReservation } from "./ViewReservation.js";
+// import { onLoadMesReservations } from "./ViewMesReservations.js";
+// import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
+// import { chargerMenu } from './ViewMenu.js';
+// import { chargerCinemaSites } from './ViewFooter.js';
 export var ReservationState;
 (function (ReservationState) {
     ReservationState["PendingChoiceSeance"] = "PendingChoiceSeance";
@@ -44,7 +49,7 @@ export class DataController {
     get reservationState() {
         return this._reservationState;
     }
-    // Setter pour selectedSeanceUUID
+    // Setter pour reservationState
     set reservationState(value) {
         console.log("Mise a jour statut reservation = " + value);
         this._reservationState = value;
@@ -416,3 +421,34 @@ export class DataController {
 DataController.validiteCache = 1; // Apres validiteCache heure on force le rechargement des données
 DataController.nomCookieDateAccess = 'dateAccess'; // Nom du cookie pour stocker la date de mise à jour
 DataController.nomStorage = 'storage'; // Nom du storage pour stocker toutes les SeancesFilmsSalle du cinema
+// export function changePage(newPage: string) {
+//     window.location.href = newPage;
+// }
+// export async function changePage(pageUrl: string) {
+//     try {
+//         const response = await fetch(`http://localhost:3000/${pageUrl}`);
+//         if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
+//         const htmlContent = await response.text();
+//         document.body.innerHTML = htmlContent;
+//         console.log(`Page ${pageUrl} chargée avec succès.`);
+//     } catch (error) {
+//         console.error("Erreur lors du chargement de la page :", error);
+//     }
+// }
+// const pageHandlers: Record<string, () => void> = {
+//     "visiteur.html" : onLoadVisiteur,
+//     "reservation.html": onLoadReservation,
+//     "mesreservations.html": onLoadMesReservations
+// };
+// document.addEventListener("DOMContentLoaded", async () => {
+//     const page = window.location.pathname.split("/").pop(); // Récupère le nom de la page actuelle
+//     console.log("Chargement dynamique de ", page , " ", )
+//     if (page && pageHandlers[page]) {
+//         chargerMenu(); // Header
+//         chargerCinemaSites() // Footer
+//         await pageHandlers[page](); // Exécute la fonction associée à la page
+//     } else {
+//         console.warn("⚠️ Aucune fonction associée pour cette page.");
+//     }
+// });
+export let dataController = new DataController("Paris");

@@ -9,114 +9,112 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { getCookie, setCookie } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD } from './Helpers.js';
-import { DataController, ReservationState } from './DataController.js';
+import { ReservationState, dataController } from './DataController.js';
 import { updateContentPlace } from './ViewReservationPlaces.js';
-// Persistence des données 
-export let dataController;
 /** Chargement ou raffraichissement de la page
  * Au premier chargement une fenetre modale permet de choisir un site, dans ce cas le cookie selectedCinema est positionné avec la valeur choisie
  * Aux chargements on recupère la valeur du cookie
  * On peut changer cette valeur via le dropdown button droit sur le titre
  */
-document.addEventListener('DOMContentLoaded', () => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("Traitement de DOMContentLoaded");
-    /**
-     * Initialisation
-     */
-    const modal = document.getElementById('modal');
-    const dropdownButtons = document.querySelectorAll('.titre__filter-dropdown-complexe');
-    const dropdownContents = document.querySelectorAll('.title__filter-button-drowdown-content-complexe');
-    const titleLeft = document.getElementById('titleLeft');
-    // Fonction de mise à jour l'affichage du bouton du dropdown
-    function updateDropdownDisplay(textButton) {
-        dropdownButtons.forEach((button) => {
-            button.innerHTML = `${textButton} <span class="chevron">▼</span>`;
-        });
-    }
-    // Vérifier si le cookie 'selectedCinema' existe
-    let selectedCinema = getCookie('selectedCinema');
-    if (!selectedCinema) {
-        // Le cookie n'existe pas : on affiche la modale avec l'invite à sélectionner un cinema
-        // On construit la page sur le cinema de Paris pour avoir un contenu grisé attrayant
-        if (modal) {
-            // Mise à jour du titre pour selectionnez un cinema
-            updateDropdownDisplay('Selectionnez un cinema');
-            modal.classList.add('show'); // Afficher la modale
-            // On se positionne sur Paris pour avoir un affichage valide
-            dataController = new DataController("Paris");
+export function onLoadReservation() {
+    return __awaiter(this, void 0, void 0, function* () {
+        /**
+         * Initialisation
+         */
+        const modal = document.getElementById('modal');
+        const dropdownButtons = document.querySelectorAll('.titre__filter-dropdown-complexe');
+        const dropdownContents = document.querySelectorAll('.title__filter-button-drowdown-content-complexe');
+        const titleLeft = document.getElementById('titleLeft');
+        // Fonction de mise à jour l'affichage du bouton du dropdown
+        function updateDropdownDisplay(textButton) {
+            dropdownButtons.forEach((button) => {
+                button.innerHTML = `${textButton} <span class="chevron">▼</span>`;
+            });
+        }
+        // Vérifier si le cookie 'selectedCinema' existe
+        let selectedCinema = getCookie('selectedCinema');
+        if (!selectedCinema) {
+            // Le cookie n'existe pas : on affiche la modale avec l'invite à sélectionner un cinema
+            // On construit la page sur le cinema de Paris pour avoir un contenu grisé attrayant
+            if (modal) {
+                // Mise à jour du titre pour selectionnez un cinema
+                updateDropdownDisplay('Selectionnez un cinema');
+                modal.classList.add('show'); // Afficher la modale
+                // On charge le dataController qui est positionné sur Paris pour avoir un affichage valide
+                yield dataController.init();
+            }
+        }
+        else {
+            // Le cookie existe on initialise le dataController
             yield dataController.init();
+            // Mettre à jour l'affichage initial du dropdown sur le composant titre
+            updateDropdownDisplay("Changer de cinema");
+            // Mise à jour du titre
+            if (titleLeft) {
+                titleLeft.innerText = `Réservez au CinePhoria de ${selectedCinema}`;
+            }
         }
-    }
-    else {
-        // Le cookie existe on initialise le dataController
-        dataController = new DataController(selectedCinema);
-        yield dataController.init();
-        // Mettre à jour l'affichage initial du dropdown sur le composant titre
-        updateDropdownDisplay("Changer de cinema");
-        // Mise à jour du titre
-        if (titleLeft) {
-            titleLeft.innerText = `Réservez au CinePhoria de ${selectedCinema}`;
+        // Identifier le film par defaut si on n'a pas de film selectionné dans le dataController
+        if (dataController.selectedFilmUUID === undefined) {
+            const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
+            if (!filmSeancesCandidat[0].filmId)
+                return;
+            // Mettre a jour le film selection dans le dataController
+            dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
         }
-    }
-    // Identifier le film par defaut si on n'a pas de film selectionné dans le dataController
-    if (dataController.selectedFilmUUID === undefined) {
-        const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
-        if (!filmSeancesCandidat[0].filmId)
-            return;
-        // Mettre a jour le film selection dans le dataController
-        dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
-    }
-    // Mise a jour de la page
-    yield updateContentPage(dataController);
-    // Verification dataController
-    console.log(`dataController.nameCinema = ${dataController.nameCinema} nombre de séances = ${dataController.allSeances.length}`);
-    // Définitiion des interactions dans les dropdowns de selection de cinema (celui de la modale ou celui du titre droit)
-    dropdownContents.forEach((content) => {
-        const links = content.querySelectorAll('a');
-        links.forEach((link) => {
-            link.removeEventListener('click', (event) => __awaiter(void 0, void 0, void 0, function* () { }));
-            link.addEventListener('click', (event) => __awaiter(void 0, void 0, void 0, function* () {
-                var _a;
-                event.preventDefault();
-                const cinema = (_a = link.textContent) === null || _a === void 0 ? void 0 : _a.trim();
-                if (cinema) {
-                    console.log("1 - Nouvelle valeur de cinema = ", cinema);
-                    // Stocker dans le cookie pour 30 jours
-                    setCookie('selectedCinema', cinema, 30);
-                    // Mettre à jour l'affichage du bouton
-                    updateDropdownDisplay("Changez de cinema");
-                    // Mettre à jour le titre droit
-                    if (titleLeft) {
-                        titleLeft.innerText = `Réservez au CinePhoria de ${cinema}`;
+        // Mise a jour de la page
+        yield updateContentPage(dataController);
+        // Verification dataController
+        console.log(`dataController.nameCinema = ${dataController.nameCinema} nombre de séances = ${dataController.allSeances.length}`);
+        // Définitiion des interactions dans les dropdowns de selection de cinema (celui de la modale ou celui du titre droit)
+        dropdownContents.forEach((content) => {
+            const links = content.querySelectorAll('a');
+            links.forEach((link) => {
+                link.removeEventListener('click', (event) => __awaiter(this, void 0, void 0, function* () { }));
+                link.addEventListener('click', (event) => __awaiter(this, void 0, void 0, function* () {
+                    var _a;
+                    event.preventDefault();
+                    const cinema = (_a = link.textContent) === null || _a === void 0 ? void 0 : _a.trim();
+                    if (cinema) {
+                        console.log("1 - Nouvelle valeur de cinema = ", cinema);
+                        // Stocker dans le cookie pour 30 jours
+                        setCookie('selectedCinema', cinema, 30);
+                        // Mettre à jour l'affichage du bouton
+                        updateDropdownDisplay("Changez de cinema");
+                        // Mettre à jour le titre droit
+                        if (titleLeft) {
+                            titleLeft.innerText = `Réservez au CinePhoria de ${cinema}`;
+                        }
+                        // Mettre à jour le dataController
+                        dataController.nameCinema = cinema;
+                        // Chargement des données
+                        yield dataController.init();
+                        // Identifier le film par defaut
+                        const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
+                        if (!filmSeancesCandidat[0].filmId)
+                            return;
+                        // Mettre a jour le film selection dans le dataController
+                        dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
+                        // Bascule vers le panel choix
+                        basculerPanelChoix();
+                        updateContentPage(dataController);
+                        // Mise à jour de l'état
+                        dataController.reservationState = ReservationState.PendingChoiceSeance;
+                        // Mise à jour de la page
+                        updateContentPage(dataController);
+                        // Fermeture de la modale
+                        if (modal) {
+                            console.log("2 - Fermeture de la modale ");
+                            modal.classList.remove('show'); // Fermer la modale si elle est ouverte
+                        }
+                        console.log(`3 - Fin du changement de cinéma : ${cinema}`);
                     }
-                    // Mettre à jour le dataController
-                    dataController.nameCinema = cinema;
-                    // Chargement des données
-                    yield dataController.init();
-                    // Identifier le film par defaut
-                    const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
-                    if (!filmSeancesCandidat[0].filmId)
-                        return;
-                    // Mettre a jour le film selection dans le dataController
-                    dataController.selectedFilmUUID = filmSeancesCandidat[0].filmId;
-                    // Bascule vers le panel choix
-                    basculerPanelChoix();
-                    updateContentPage(dataController);
-                    // Mise à jour de l'état
-                    dataController.reservationState = ReservationState.PendingChoiceSeance;
-                    // Mise à jour de la page
-                    updateContentPage(dataController);
-                    // Fermeture de la modale
-                    if (modal) {
-                        console.log("2 - Fermeture de la modale ");
-                        modal.classList.remove('show'); // Fermer la modale si elle est ouverte
-                    }
-                    console.log(`3 - Fin du changement de cinéma : ${cinema}`);
-                }
-            }));
+                }));
+            });
         });
     });
-}));
+}
+;
 window.addEventListener('beforeunload', (event) => {
     // Fonction de sauvegarde de dataController, 
     // Cette fonction ne fait que enregistrer dans le storage, elle sera terminée avant le DOMContentLoaded

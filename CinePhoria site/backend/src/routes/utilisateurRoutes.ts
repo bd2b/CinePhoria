@@ -17,7 +17,7 @@ router.post('/confirmCompte', UtilisateurController.confirmCompte);
 // router.get('/:id', authenticateJWT, UtilisateurController.getUtilisateurById);
 
 // GET /api/utilisateur
-router.get('/:ident', authenticateJWT, UtilisateurController.getUtilisateur);
+router.get('/:ident', UtilisateurController.getUtilisateur);
 
 
 

@@ -1,21 +1,18 @@
 import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { getCookie, setCookie } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID } from './Helpers.js';
-import { DataController, ReservationState } from './DataController.js';
+import { DataController, ReservationState , dataController } from './DataController.js';
 import { Film } from './shared-models/Film.js';
 
 import { updateContentPlace } from './ViewReservationPlaces.js';
-
-// Persistence des données 
-export let dataController: DataController
 
 /** Chargement ou raffraichissement de la page
  * Au premier chargement une fenetre modale permet de choisir un site, dans ce cas le cookie selectedCinema est positionné avec la valeur choisie
  * Aux chargements on recupère la valeur du cookie
  * On peut changer cette valeur via le dropdown button droit sur le titre
  */
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log("Traitement de DOMContentLoaded");
+
+export async function onLoadReservation() {
 
   /**
    * Initialisation
@@ -41,13 +38,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Mise à jour du titre pour selectionnez un cinema
       updateDropdownDisplay('Selectionnez un cinema');
       modal.classList.add('show'); // Afficher la modale
-      // On se positionne sur Paris pour avoir un affichage valide
-      dataController = new DataController("Paris");
+      // On charge le dataController qui est positionné sur Paris pour avoir un affichage valide
       await dataController.init();
     }
   } else {
     // Le cookie existe on initialise le dataController
-    dataController = new DataController(selectedCinema);
     await dataController.init();
 
     // Mettre à jour l'affichage initial du dropdown sur le composant titre
@@ -125,7 +120,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
   });
-});
+};
 
 window.addEventListener('beforeunload', (event) => {
   // Fonction de sauvegarde de dataController, 
@@ -134,6 +129,8 @@ window.addEventListener('beforeunload', (event) => {
   if (dataController) {
     dataController.sauverComplet(); // Sauvegarde des données dans le stockage local
   }
+
+  
 });
 
 /**
