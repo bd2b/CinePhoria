@@ -25,6 +25,9 @@ import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, f
 // import { chargerMenu } from './ViewMenu.js';
 // import { chargerCinemaSites } from './ViewFooter.js';
 
+const tabReservationState = [ "PendingChoiceSeance", "PendingChoiceSeats", "ReserveCompteToConfirm", "ReserveMailToConfirm", 
+    "ReserveToConfirm", "ReserveConfirmed"];
+
 
 export enum ReservationState {
     PendingChoiceSeance = "PendingChoiceSeance",    // Choix de seance en cours , le panel choix est affiché
@@ -44,16 +47,17 @@ export class DataController {
     private _films: Film[] = [];
     private _tarifQualite: TarifQualite[] = [];
     private _nameCinema: string;
+
     private _selectedFilmUUID?: string; // UUID du film actuellement selectionne
     private _selectedSeanceDate?: Date; // date du jour actuellement selectionnee
     private _selectedSeanceUUID?: string | undefined // UUID de la séance selectionnée
+
     private _selectedUtilisateurUUID?: string | undefined // UUID de l'utilisateur
     private _selectedUtilisateurMail?: string | undefined // Mail de l'utilisateur
     private _selectedUtilisateurDisplayName?: string | undefined // displayName de l'utilisateur
+
     private _selectedReservationUUID?: string | undefined // UUID de la reservation
     private _selectedReservationStatut?: string | undefined // Statut de la reservation _selectedReservationUUID , si définie elle est confirme
-
-
 
     private static validiteCache: number = 1; // Apres validiteCache heure on force le rechargement des données
     private static nomCookieDateAccess: string = 'dateAccess'; // Nom du cookie pour stocker la date de mise à jour

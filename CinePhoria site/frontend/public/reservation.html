@@ -340,8 +340,8 @@
                                         </div>
                                     </div>
                                     <div class="commande__mail">
-                                        <p class="commande__mail">Pour accéder à vos billets, renseignez votre email</p>
-                                        <label for="email"><span style="color: red;">*</span></label>
+                                        <p class="commande__mail" id="commande__mail-p">Pour accéder à vos billets, renseignez votre email</p>
+                                        <label for="email"><span style="color: red;" id="commande__mail-span">*</span></label>
                                         <input type="email" id="commande__mail-input" name="commande__mail-input"
                                             required class="commande__mail-input">
                                         <span id="commande__mail-error" class="error-message"></span>
@@ -363,7 +363,7 @@
     <footer class="footer" id="footer">
     </footer>
     <!-- Modale Selection Cinema-->
-    <div id="modal" class="modalcinema">
+    <div id="modal-cinema" class="modalcinema">
         <div class="modalcinema-content">
             <h2>Veuillez choisir votre complexe</h2>
             <div class="title__filter-dropdown">
