@@ -33,6 +33,8 @@ import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, is
 // import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
 // import { chargerMenu } from './ViewMenu.js';
 // import { chargerCinemaSites } from './ViewFooter.js';
+const tabReservationState = ["PendingChoiceSeance", "PendingChoiceSeats", "ReserveCompteToConfirm", "ReserveMailToConfirm",
+    "ReserveToConfirm", "ReserveConfirmed"];
 export var ReservationState;
 (function (ReservationState) {
     ReservationState["PendingChoiceSeance"] = "PendingChoiceSeance";

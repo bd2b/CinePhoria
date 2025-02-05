@@ -11,6 +11,7 @@ import { seanceCardView, basculerPanelChoix } from './ViewReservation.js';
 import { ReservationState, dataController } from './DataController.js';
 import { validateEmail } from './Helpers.js';
 import { reservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi } from './NetworkController.js';
+import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { login } from './Login.js';
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
@@ -26,18 +27,36 @@ export function updateContentPlace() {
         }
         const selectedSeance = seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate, "seances__cardseance-selected");
         containerSelectedSeance.replaceWith(selectedSeance);
-        // 2) Gestion du bouton "Changer de séance" -> basculerPanelChoix()
-        const btnChanger = document.querySelector('.panel__changer-button');
-        if (btnChanger) {
-            btnChanger.addEventListener('click', (evt) => {
-                evt.preventDefault();
-                evt.stopPropagation();
-                dataController.reservationState = ReservationState.PendingChoiceSeance;
-                basculerPanelChoix();
-            });
+        if (dataController.reservationState === ReservationState.PendingChoiceSeance ||
+            dataController.reservationState === ReservationState.PendingChoiceSeats) {
+            // On n'a pas créé de reservation
+            // 2) Gestion du bouton "Changer de séance" -> basculerPanelChoix()
+            const btnChanger = document.querySelector('.panel__changer-button');
+            if (btnChanger) {
+                btnChanger.removeEventListener('click', () => { });
+                btnChanger.addEventListener('click', (evt) => {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    dataController.reservationState = ReservationState.PendingChoiceSeance;
+                    basculerPanelChoix();
+                });
+            }
+            // 3) Gestion de la table des tarifs, de la saisie du nombre PMR, de la saisie de l'email et du bouton "Je reserve pour cette seance"
+            setReservation();
         }
-        // 3) Gestion de la table des tarifs, de la saisie du nombre PMR, de la saisie de l'email et du bouton "Je reserve pour cette seance"
-        setReservation();
+        ;
+        if (dataController.reservationState === ReservationState.ReserveCompteToConfirm) {
+            console.log("Abandon à la confirmation de compte");
+        }
+        if (dataController.reservationState === ReservationState.ReserveMailToConfirm) {
+            // On a confirmé le compte mais abandonne la verification de mail
+            console.log("Abandon à la vérification de mail");
+        }
+        if (dataController.reservationState === ReservationState.ReserveToConfirm) {
+            // On a confirmé le compte, verifier le mail, mais pas confirmer la reservation en se loguant.
+            console.log("Abandon au login");
+        }
+        ;
     }
     catch (error) {
         console.error("Erreur lors de l'affichage du content de selection des places : ", error);
@@ -48,6 +67,7 @@ export function updateContentPlace() {
  * @returns
  */
 function setReservation() {
+    var _a;
     console.log("Affichage de la reservation de place");
     dataController.reservationState = ReservationState.PendingChoiceSeats;
     const qualiteFilm = dataController.seanceSelected().qualite;
@@ -65,21 +85,39 @@ function setReservation() {
         throw new Error("updateInputPMT");
     containerPMR.innerHTML = '';
     containerPMR.appendChild(contentPMR);
+    if (userDataController.profil() === ProfilUtilisateur.Utilisateur) {
+        // Il faut utiliser l'email de l'utilisateur et desactiver le changement.
+    }
     // Gere la complétude de l'email avec un message d'erreur associé
     const emailInput = document.getElementById('commande__mail-input');
     const emailError = document.getElementById('commande__mail-error');
     if (!emailInput || !emailError)
         return;
-    emailInput.value = "";
-    emailInput.addEventListener('blur', () => {
-        if (!validateEmail(emailInput.value)) {
-            emailError.textContent = "Email invalide (exemple: utilisateur@domaine.com)";
-            emailError.style.color = "red";
+    if (userDataController.profil() === ProfilUtilisateur.Utilisateur) {
+        // Il faut utiliser l'email de l'utilisateur et desactiver le changement.
+        const emailUtilisateur = (_a = userDataController.compte()) === null || _a === void 0 ? void 0 : _a.email;
+        if (emailUtilisateur) {
+            emailInput.value = emailUtilisateur;
+            emailInput.disabled = true;
         }
-        else {
-            emailError.textContent = "";
-        }
-    });
+        const emailInvite = document.getElementById("commande__mail-p");
+        emailInvite.innerHTML = "Votre email ";
+        const emailspan = document.getElementById("commande__mail-span");
+        emailspan.hidden = true;
+    }
+    else {
+        emailInput.value = "";
+        emailInput.removeEventListener('blur', () => { });
+        emailInput.addEventListener('blur', () => {
+            if (!validateEmail(emailInput.value)) {
+                emailError.textContent = "Email invalide (exemple: utilisateur@domaine.com)";
+                emailError.style.color = "red";
+            }
+            else {
+                emailError.textContent = "";
+            }
+        });
+    }
     // Gestion du bouton de reservation
     const btnReserve = document.querySelector('.panel__jereserve-button');
     // Le bouton estr initialement desactivé
@@ -144,32 +182,22 @@ function setReservation() {
             dataController.selectedUtilisateurUUID = utilisateurId;
             dataController.selectedReservationUUID = reservationId;
             dataController.selectedUtilisateurMail = email;
-            if (dataController.reservationState === ReservationState.ReserveCompteToConfirm) {
-                console.log("Abandon à la confirmation de compte");
-            }
-            if (dataController.reservationState === ReservationState.ReserveMailToConfirm) {
-                // On a confirmé le compte mais abandonne la verification de mail
-                console.log("Abandon à la vérification de mail");
-            }
-            if (dataController.reservationState === ReservationState.ReserveToConfirm) {
-                // On a confirmé le compte, verifier le mail, mais pas confirmer la reservation en se loguant.
-                console.log("Abandon au login");
-            }
-            ;
             switch (statut) {
                 case 'Compte Provisoire':
                     // L'email est inconnu -> compte créé en provisoire : il faudra confirmer l'utilisateur puis le mail et se logguer
                     console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
-                    yield confirmUtilisateur();
                     dataController.reservationState = ReservationState.ReserveCompteToConfirm;
                     dataController.selectedReservationStatut = "Reserve";
+                    dataController.sauverComplet();
+                    yield confirmUtilisateur();
                     break;
                 case 'Compte Confirme':
                     // L'email correspond à un compte valide : il faudra se logguer
                     console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
-                    yield login("Veuillez vous connecter pour valider la réservation");
                     dataController.reservationState = ReservationState.ReserveToConfirm;
                     dataController.selectedReservationStatut = "Reserve";
+                    dataController.sauverComplet();
+                    yield login("Veuillez vous connecter pour valider la réservation");
                     break;
                 default:
                     // Cas imprévu
@@ -434,7 +462,6 @@ function updateInputPMR() {
     contentNumPMR.appendChild(btnRemovePMR);
     pmrContent.appendChild(contentLibelle);
     pmrContent.appendChild(contentNumPMR);
-    console.log(JSON.stringify(pmrContent));
     return pmrContent;
 }
 ;
@@ -571,6 +598,7 @@ function confirmUtilisateur() {
                         dataController.reservationState = ReservationState.ReserveMailToConfirm;
                         // On lance la modal de confirmation d'email
                         yield confirmMail();
+                        dataController.sauverComplet();
                     }
                     ;
                 }));
