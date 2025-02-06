@@ -289,7 +289,10 @@ SELECT
     reservation.evaluation as evaluation,
     SUM(seatsForTarif.numberSeats) AS totalSeats,
     SUM(tarifQualite.price * seatsForTarif.numberSeats) AS totalPrice,
-    reservation.numberPmr as numberPMR
+    reservation.numberPmr as numberPMR,
+    film.id as filmId,
+    seance.id as seanceId,
+    utilisateur.email as email
 FROM Utilisateur
 JOIN Reservation ON Reservation.utilisateurId = Utilisateur.id
 JOIN SeatsForTarif ON SeatsForTarif.ReservationId = Reservation.id 

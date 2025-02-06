@@ -257,7 +257,7 @@ export class DataController {
                 setCookie(DataController.nomCookieDateAccess, (new Date()).toISOString(), 1);
 
                 // Sauvegarder dans localStorage
-                // this.sauver();
+                this.sauverComplet();
             }
         } catch (error) {
             console.error('Erreur lors du chargement des données de séances : ', error);

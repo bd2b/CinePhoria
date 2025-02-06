@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../config/config';
 import logger from '../config/configLog';
-import { ReservationForUtilisateur } from "../shared-models/Reservation";
+import { ReservationForUtilisateur , SeatsForReservation } from "../shared-models/Reservation";
 
 export class ReservationDAO {
   static async checkAvailabilityAndReserve(
@@ -90,7 +90,7 @@ return resultValue;
 static async reserveForUtilisateur ( p_utilisateurId: string) : Promise<ReservationForUtilisateur[]> {
   const connection = await mysql.createConnection(dbConfig);
 
-  // Étape 1 : Récupérer les informations des reservation dans la base pour l'utilisateur donné
+  // Étape 1 : Récupérer les informations des reservations dans la base pour l'utilisateur donné
   const [rows] = await connection.execute(
     `SELECT *
      FROM viewutilisateurreservation 
@@ -102,5 +102,48 @@ static async reserveForUtilisateur ( p_utilisateurId: string) : Promise<Reservat
 
     // Map des lignes pour les convertir en instances de Seance
     return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
+}
+
+static async getReservationById(p_reservationId: string) : Promise<ReservationForUtilisateur[]> {
+  const connection = await mysql.createConnection(dbConfig);
+  // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation
+  const [rows] = await connection.execute(
+    `SELECT *
+     FROM viewutilisateurreservation 
+     WHERE reservationId = ? LIMIT 1`,
+    [p_reservationId]
+  );
+  logger.info(`SELECT * FROM viewutilisateurreservation WHERE reservationId = ${p_reservationId}`);
+  await connection.end();
+
+    // Map des lignes pour les convertir en instances de Seance
+    return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
+
+}
+
+
+
+static async getSeatsForReservation(p_reservationId: string) : Promise<SeatsForReservation[]> {
+  const connection = await mysql.createConnection(dbConfig);
+  // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation
+  const [rows] = await connection.execute(
+    `SELECT 
+      SeatsForTarif.numberSeats as numberSeats,
+      TarifQualite.nameTarif as nameTarif,
+      TarifQUalite.price as price
+    
+    FROM Reservation
+    JOIN SeatsForTarif ON Reservation.id = SeatsForTarif.ReservationId
+    JOIN TarifQualite ON SeatsForTarif.TarifQualiteid = TarifQualite.id
+
+    WHERE Reservation.id = ?`,
+    [p_reservationId]
+  );
+  logger.info(`SELECT * FROM viewutilisateurreservation WHERE reservationId = ${p_reservationId}`);
+  await connection.end();
+
+    // Map des lignes pour les convertir en liste de places avec tarif
+    return (rows as any[]).map((row) => new SeatsForReservation(row));
+
 }
 }

@@ -35,9 +35,56 @@ export class ReservationController {
     }
   }
 
-  // Placeholder pour les méthodes futures
-  static async getReservation(req: Request, res: Response): Promise<void> {
-    res.status(501).json({ message: 'Non implémenté.' });
+  
+  static async getReservationById(req: Request, res: Response): Promise<void> {
+    try {
+      // Recuperation de l'ID de la reservation
+      const reservationId = req.params.reservationid?.trim();
+
+      if (!reservationId) {
+        res.status(400).json({ message: `L'ID de la réservation est requis.` });
+        return;
+
+      }
+      // Récupération des réservations
+      const reservations = await ReservationDAO.getReservationById(reservationId);
+      
+      if (!reservations || reservations.length === 0) {
+        res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}` });
+        return;
+      }
+
+      res.status(200).json(reservations);
+    } catch (error: any) {
+      logger.error(`Erreur lors de la récupération des réservations: ${error.message}`);
+      res.status(500).json({ error: "Erreur interne du serveur." });
+    }
+    
+  }
+
+  static async getSeatsForReservation(req: Request, res: Response): Promise<void> {
+    try {
+      // Recuperation de l'ID de la reservation
+      const reservationId = req.params.reservationid?.trim();
+
+      if (!reservationId) {
+        res.status(400).json({ message: `L'ID de la réservation est requis.` });
+        return;
+
+      }
+      // Récupération des places
+      const seats = await ReservationDAO.getSeatsForReservation(reservationId);
+      
+      if (!seats || seats.length === 0) {
+        res.status(404).json({ message: `Aucune place trouvée pour la reservation ${reservationId}` });
+        return;
+      }
+
+      res.status(200).json(seats);
+    } catch (error: any) {
+      logger.error(`Erreur lors de la récupération des places d'une réservation : ${error.message}`);
+      res.status(500).json({ error: "Erreur interne du serveur." });
+    }
   }
 
   static async getSeatsForTarif(req: Request, res: Response): Promise<void> {
