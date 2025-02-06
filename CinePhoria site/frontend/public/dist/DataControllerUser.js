@@ -77,7 +77,6 @@ export class DataControllerUser {
      */
     comptesUtilisateur() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("000");
             if (this._ident !== undefined) {
                 console.log("111");
                 const comptesCharge = yield profilApi(this._ident);

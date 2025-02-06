@@ -195,3 +195,15 @@ export async function getPlacesReservationApi(reservationId: string) : Promise <
     console.log("places = ",places)
     return places;
 }
+
+export async function isLogged () : Promise<void> {
+    const token = localStorage.getItem('jwtToken');
+    const response = await fetch(`http://localhost:3500/api/login/isLogged`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+}
+

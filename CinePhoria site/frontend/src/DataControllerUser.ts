@@ -76,7 +76,6 @@ export class DataControllerUser {
      * Charge les comptes utilisateur si l'ident est defini et si le compte n'a pas été déja chargé
      */
     public async comptesUtilisateur() {
-        console.log("000");
             if (this._ident !== undefined) {
                 console.log("111");
                 const comptesCharge = await profilApi(this._ident);

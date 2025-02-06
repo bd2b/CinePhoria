@@ -57,8 +57,8 @@ export class DataController {
     private _selectedUtilisateurDisplayName?: string | undefined // displayName de l'utilisateur
 
     private _selectedReservationUUID?: string | undefined // UUID de la reservation
-    private _selectedReservationStatut?: string | undefined // Statut de la reservation _selectedReservationUUID , si définie elle est confirme
-
+    private _selectedReservationCinema?: string | undefined // Cinema de localisation de la reservation
+    
     private static validiteCache: number = 1; // Apres validiteCache heure on force le rechargement des données
     private static nomCookieDateAccess: string = 'dateAccess'; // Nom du cookie pour stocker la date de mise à jour
     private static nomStorage: string = 'storage'; // Nom du storage pour stocker toutes les SeancesFilmsSalle du cinema
@@ -205,17 +205,16 @@ export class DataController {
     // Setter pour selectedReservationUUID
     public set selectedReservationUUID(value: string | undefined) {
         this._selectedReservationUUID = value;
+        if (value === undefined) {
+        this._selectedReservationCinema = undefined;
+        }
     }
 
-    // Getter pour _selectedReservationStatut
-    public get selectedReservationStatut(): string | undefined {
-        return this._selectedReservationStatut || undefined;
+    // Getter pour selectedReservationUUID
+    public get selectedReservationCinema(): string | undefined {
+        return this._selectedReservationCinema || undefined;
     }
-
-    // Setter pour selectedReservationStatut
-    public set selectedReservationStatut(value: string | undefined) {
-        this._selectedReservationStatut = value;
-    }
+    
 
     constructor(nameCinema: string) {
         this._nameCinema = nameCinema;
@@ -424,7 +423,7 @@ export class DataController {
             selectedUtilisateurMail: this._selectedUtilisateurMail,
             selectedUtilisateurDisplayName: this._selectedUtilisateurDisplayName,
             selectedReservationUUID: this._selectedReservationUUID,
-            selectedReservationStatut: this._selectedReservationStatut
+            selectedReservationCinema: this._selectedReservationCinema
             
         };
 
@@ -432,17 +431,18 @@ export class DataController {
     }
 
     public async chargerComplet(): Promise<void> {
-        const saved = localStorage.getItem(DataController.nomStorage);
+            const saved = localStorage.getItem(DataController.nomStorage);
 
-        if (!saved) {
-            console.warn("Aucune donnée trouvée dans le localStorage.");
-            return;
-        }
-        try {
-            const parsed = JSON.parse(saved);
+            if (!saved) {
+                console.warn("Aucune donnée trouvée dans le localStorage.");
+                return;
+            }
+            try {
+                const parsed = JSON.parse(saved);
 
-            // Restauration du state
-            this._reservationState = parsed.reservationState || ReservationState.PendingChoiceSeance;
+                // Restauration du state
+                debugger;
+                this._reservationState = parsed.reservationState || ReservationState.PendingChoiceSeance;
 
             // Restauration des séances
             if (Array.isArray(parsed.seances)) {
@@ -468,11 +468,13 @@ export class DataController {
             this._selectedUtilisateurMail = parsed.selectedUtilisateurMail || undefined;
             this._selectedUtilisateurDisplayName = parsed.selectedUtilisateurDisplayName || undefined;
             this._selectedReservationUUID = parsed.selectedReservationUUID || undefined;
-            this._selectedReservationStatut = parsed.selectedReservationStatut || undefined;
-
+            this._selectedReservationCinema = parsed.selectedReservationCinema || undefined;
+            
+            
             // Reconstruire la date
             if (parsed.selectedSeanceDate) {
                 this._selectedSeanceDate = new Date(parsed.selectedSeanceDate);
+                console.log ("Rechargement = ",this._selectedSeanceDate);
             }
 
         } catch (e) {
@@ -506,40 +508,10 @@ export class DataController {
       }
 }
 
-// export function changePage(newPage: string) {
-//     window.location.href = newPage;
-// }
 
-// export async function changePage(pageUrl: string) {
-//     try {
-//         const response = await fetch(`http://localhost:3000/${pageUrl}`);
-//         if (!response.ok) throw new Error(`Erreur HTTP ${response.status}`);
-        
-//         const htmlContent = await response.text();
-//         document.body.innerHTML = htmlContent;
-//         console.log(`Page ${pageUrl} chargée avec succès.`);
-//     } catch (error) {
-//         console.error("Erreur lors du chargement de la page :", error);
-//     }
-// }
-
-// const pageHandlers: Record<string, () => void> = {
-//     "visiteur.html" : onLoadVisiteur,
-//     "reservation.html": onLoadReservation,
-//     "mesreservations.html": onLoadMesReservations
-// };
-
-// document.addEventListener("DOMContentLoaded", async () => {
-    
-//     const page = window.location.pathname.split("/").pop(); // Récupère le nom de la page actuelle
-//     console.log("Chargement dynamique de ", page , " ", )
-//     if (page && pageHandlers[page]) {
-//         chargerMenu(); // Header
-//         chargerCinemaSites() // Footer
-//         await pageHandlers[page](); // Exécute la fonction associée à la page
-//     } else {
-//         console.warn("⚠️ Aucune fonction associée pour cette page.");
-//     }
-// });
-
-export let dataController: DataController = new DataController("Paris");
+let cinema = getCookie('selectedCinema');
+if (!cinema) { 
+    cinema = "Paris";
+    setCookie('selectedCinema', cinema, 1);
+}
+export let dataController: DataController = new DataController(cinema);

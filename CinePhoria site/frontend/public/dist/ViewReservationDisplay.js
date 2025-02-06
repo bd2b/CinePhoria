@@ -7,10 +7,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { basculerPanelReserve, afficherDetailsFilm } from './ViewReservation.js';
-import { dataController } from './DataController.js';
-import { updateTableContent } from "./ViewReservationPlaces.js";
+import { seanceCardView, basculerPanelReserve, afficherDetailsFilm } from './ViewReservation.js';
+import { ReservationState, dataController } from './DataController.js';
+import { updateTableContent, confirmUtilisateur, confirmMail } from "./ViewReservationPlaces.js";
 import { getReservationApi } from './NetworkController.js';
+import { login } from './Login.js';
 export function updateDisplayReservation() {
     return __awaiter(this, void 0, void 0, function* () {
         const reservationUUID = dataController.selectedReservationUUID;
@@ -19,15 +20,25 @@ export function updateDisplayReservation() {
                 const reservation = (yield getReservationApi(reservationUUID))[0];
                 dataController.selectedFilmUUID = reservation.filmId || '';
                 dataController.selectedSeanceUUID = reservation.seanceId;
-                dataController.selectedSeanceDate = reservation.dateJour || new Date();
-                // On masque la liste des films
+                console.log("Date reservation = ", reservation.dateJour);
+                const datePure = reservation.dateJour ? new Date(reservation.dateJour) : new Date();
+                dataController.selectedSeanceDate = datePure;
+                // 1) Mettre à jour le bloc .seances__cardseance seances__cardseance-selected pour afficher la séance choisie
+                const containerSelectedSeance = document.getElementById('seances__cardseance-selected');
+                if (!containerSelectedSeance) {
+                    console.log("Pas de carte selectionnée");
+                    return;
+                }
+                const selectedSeance = seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate, "seances__cardseance-selected");
+                containerSelectedSeance.replaceWith(selectedSeance);
+                // 2) On masque la liste des films
                 const listeFilms = document.querySelector(".reservation__listFilms");
                 if (listeFilms) {
                     listeFilms.style.display = 'none';
                 }
-                // On affiche le detail du film reservé
+                // 3) On affiche le detail du film reservé
                 afficherDetailsFilm();
-                // On affiche le détail de la reservation
+                // On affiche le détail de la reservation dans le panel reserve
                 basculerPanelReserve();
                 afficherDetailsReservation(reservation);
             }
@@ -41,11 +52,11 @@ export function updateDisplayReservation() {
 ;
 function afficherDetailsReservation(reservation) {
     return __awaiter(this, void 0, void 0, function* () {
-        // Afficher la reservation selon la qualite
         const containerTable = document.querySelector('.commande__tabtarif');
         if (!containerTable)
             return;
         containerTable.innerHTML = '';
+        // Affichage du tableau de la reservation
         const nodeTable = yield updateTableContent("", true);
         containerTable.appendChild(nodeTable);
         // Si pas de PMR on masque l'ensemble , sinon on affiche avec masquage des boutons
@@ -73,6 +84,79 @@ function afficherDetailsReservation(reservation) {
             const spanMail = document.getElementById('commande__mail-span');
             if (spanMail)
                 spanMail.style.display = 'none';
+        }
+        // Récupération du message de statut sur la reservation
+        const messageStatut = document.getElementById("statutMessage");
+        // Le bouton "Changer de séance" est pour annuler la reservation
+        const btnChanger = document.querySelector('.panel__changer-button');
+        if (btnChanger) {
+            btnChanger.textContent = "Annuler la reservation";
+            btnChanger.removeEventListener('click', () => { });
+            btnChanger.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                evt.stopPropagation();
+                // Code a venir
+            });
+        }
+        if (messageStatut) {
+            messageStatut.style.display = 'flex';
+            if (dataController.reservationState === ReservationState.ReserveCompteToConfirm) {
+                messageStatut.innerHTML = '<p>Vous devez finaliser la creation de votre compte</p>';
+                // Le bouton action est confirmer la creation du compte
+                // Gestion du bouton de reservation
+                const btnConfirm = document.querySelector('.panel__jereserve-button');
+                if (!btnConfirm)
+                    return;
+                // Le bouton est initialement actif
+                btnConfirm.classList.remove("inactif");
+                btnConfirm.disabled = false;
+                btnConfirm.textContent = "Finaliser le compte";
+                btnConfirm.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
+                btnConfirm.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    dataController.sauverComplet();
+                    yield confirmUtilisateur();
+                }));
+            }
+            else if (dataController.reservationState === ReservationState.ReserveMailToConfirm) {
+                messageStatut.innerHTML = '<p>Vous devez proceder à la vérification de votre email</p>';
+                // Le bouton action est confirmer la creation du compte
+                // Gestion du bouton de reservation
+                const btnConfirm = document.querySelector('.panel__jereserve-button');
+                if (!btnConfirm)
+                    return;
+                // Le bouton est initialement actif
+                btnConfirm.classList.remove("inactif");
+                btnConfirm.disabled = false;
+                btnConfirm.textContent = "Vérifier votre email";
+                btnConfirm.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
+                btnConfirm.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    dataController.sauverComplet();
+                    yield confirmMail();
+                }));
+            }
+            else if (dataController.reservationState === ReservationState.ReserveToConfirm) {
+                messageStatut.innerHTML = '<p>Vous devez vous connecter pour confirmer la reservation</p>';
+                // Le bouton action est confirmer la creation du compte
+                // Gestion du bouton de reservation
+                const btnConfirm = document.querySelector('.panel__jereserve-button');
+                if (!btnConfirm)
+                    return;
+                // Le bouton est initialement actif
+                btnConfirm.classList.remove("inactif");
+                btnConfirm.disabled = false;
+                btnConfirm.textContent = "Connexion";
+                btnConfirm.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
+                btnConfirm.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    dataController.sauverComplet();
+                    yield login("Veuillez vous connecter pour valider la réservation");
+                }));
+            }
         }
     });
 }

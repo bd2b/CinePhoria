@@ -72,6 +72,7 @@ export function login() {
             modalConfirm.style.display = 'flex';
             const closeModal = () => {
                 modalConfirm.style.display = 'none';
+                window.location.reload();
             };
             closeModalBtn.addEventListener('click', closeModal);
             modalConfirm.addEventListener('click', (event) => {
@@ -166,7 +167,7 @@ export function login() {
                             // On memorise l'utilisateur et on charge ses données de compte
                             userDataController.ident = emailInput.value.trim();
                             yield userDataController.comptesUtilisateur();
-                            confirmReserve();
+                            yield confirmReserve();
                             const pageToGo = userDataController.profil();
                             window.location.href = pageToGo;
                         }
