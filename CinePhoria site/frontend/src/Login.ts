@@ -72,6 +72,7 @@ export async function login(invite: string ="", enableEmail: boolean = false) {
 
         const closeModal = () => {
             modalConfirm.style.display = 'none';
+            window.location.reload();
         };
 
         closeModalBtn.addEventListener('click', closeModal);
@@ -174,7 +175,7 @@ export async function login(invite: string ="", enableEmail: boolean = false) {
                     // On memorise l'utilisateur et on charge ses données de compte
                     userDataController.ident = emailInput.value.trim();
                     await userDataController.comptesUtilisateur();
-                    confirmReserve();
+                    await confirmReserve();
                     const pageToGo = userDataController.profil();
                     window.location.href = pageToGo;
                 } catch (error) {

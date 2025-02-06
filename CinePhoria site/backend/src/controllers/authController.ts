@@ -29,7 +29,9 @@ export class AuthController {
 
   static confirmUser(req: Request, res: Response) : void {
     const { utilisateurId, displayName, password} = req.body;
+  }
 
-    
+  static isLogged(req: Request, res: Response) : void {
+    return;
   }
 }

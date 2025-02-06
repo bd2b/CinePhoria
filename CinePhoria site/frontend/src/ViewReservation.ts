@@ -17,7 +17,7 @@ export async function onLoadReservation() {
 
   // On restore le dataController avant tout
   await dataController.chargerComplet();
-  
+
   // On se positionne sur le cinema si il a été déjà défini ou on affiche une modale de selection du cinema
   await updateCinema();
 
@@ -41,26 +41,32 @@ export async function onLoadReservation() {
     console.log(`dataController.nameCinema = ${dataController.nameCinema} nombre de séances = ${dataController.allSeances.length}`);
   }
 
-  if (["ReserveCompteToConfirm", "ReserveMailToConfirm", 
+  if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
     "ReserveToConfirm"].includes(dataController.reservationState)) {
-      // On a une reservation pendante mise à jour de la page pour afficher la reservation
-      await updateDisplayReservation();
-
-      console.log("Affichage de la reservation à l'état : ", dataController.reservationState );
-
+    // On a une reservation pendante mise à jour de la page pour afficher la reservation
+    // Verification sur la reservation en cours est sur le cinema selectionne
+    if (dataController.selectedReservationCinema) {
+      if (dataController.nameCinema !== dataController.selectedReservationCinema) {
+        dataController.nameCinema = dataController.selectedReservationCinema;
+      }
     }
+    await updateDisplayReservation();
+
+    console.log("Affichage de la reservation à l'état : ", dataController.reservationState);
+
+  }
 };
 
-window.addEventListener('beforeunload', (event) => {
-  // Fonction de sauvegarde de dataController, 
-  // Cette fonction ne fait que enregistrer dans le storage, elle sera terminée avant le DOMContentLoaded
-  // dans le cadre d'un regchargement
-  if (dataController) {
-    dataController.sauverComplet(); // Sauvegarde des données dans le stockage local
-  }
+// window.addEventListener('beforeunload', (event) => {
+//   // Fonction de sauvegarde de dataController, 
+//   // Cette fonction ne fait que enregistrer dans le storage, elle sera terminée avant le DOMContentLoaded
+//   // dans le cadre d'un regchargement
+//   if (dataController) {
+//     dataController.sauverComplet(); // Sauvegarde des données dans le stockage local
+//   }
 
 
-});
+// });
 
 /**
  * Fonction de gestion de la selection du cinema
@@ -79,40 +85,26 @@ async function updateCinema() {
   // Fonction de mise à jour l'affichage du bouton du dropdown
   function updateDropdownDisplay(textButton: string): void {
     const dropdownButtons = document.querySelectorAll<HTMLButtonElement>('.titre__filter-dropdown-complexe');
+    const mustDisplayButton = ["PendingChoiceSeance", "PendingChoiceSeats"].includes(dataController.reservationState);
     dropdownButtons.forEach((button) => {
+      mustDisplayButton ? button.style.display = "block" : button.style.display = "none" ;
       button.innerHTML = `${textButton} <span class="chevron">▼</span>`;
     });
   }
 
-  // Vérifier si le cookie 'selectedCinema' existe et que l'on a deja chargé des films
-  // (le dataController est initialisé sur Paris pour la page d'accueil mais aucun chargement n'est fait)
-  let selectedCinema = getCookie('selectedCinema');
-  if (!selectedCinema) {
-    // Le cookie n'existe pas : on affiche la modale avec l'invite à sélectionner un cinema
-    // On construit la page sur le cinema de Paris pour avoir un contenu grisé attrayant
-    const modalCinema = document.getElementById('modal-cinema') as HTMLDivElement | null;
 
-    if (modalCinema) {
-      // Mise à jour du titre pour selectionnez un cinema
-      updateDropdownDisplay('Selectionnez un cinema');
-      modalCinema.classList.add('show'); // Afficher la modale
-      // On charge le dataController qui est positionné sur Paris pour avoir un affichage valide
-      await dataController.init();
-    }
-  } else {
-    // Le cookie existe on initialise le dataController
-    dataController.nameCinema = selectedCinema;
-    await dataController.init();
+  // Le cinema est initialisé dans DataController.ts , par défaut paris
+  await dataController.init();
 
-    // Mettre à jour l'affichage initial du dropdown sur le composant titre
-    updateDropdownDisplay("Changer de cinema");
+  // Mettre à jour l'affichage initial du dropdown sur le composant titre
+  updateDropdownDisplay("Changer de cinema");
 
-    // Mise à jour du titre
-    const titleLeft = document.getElementById('titleLeft') as HTMLDivElement | null;
-    if (titleLeft) {
-      titleLeft.innerText = `Réservez au CinePhoria de ${selectedCinema}`;
-    }
+  // Mise à jour du titre
+  const titleLeft = document.getElementById('titleLeft') as HTMLDivElement | null;
+  if (titleLeft) {
+    titleLeft.innerText = `Réservez au CinePhoria de ${dataController.nameCinema}`;
   }
+
 
   // Définition des interactions dans les dropdowns de selection de cinema (celui de la modale ou celui du titre droit)
   dropdownContents.forEach((content) => {
@@ -148,7 +140,7 @@ async function updateCinema() {
 
           // Bascule vers le panel choix
           basculerPanelChoix();
-          
+
 
           // Mise à jour de l'état
           dataController.reservationState = ReservationState.PendingChoiceSeance;
