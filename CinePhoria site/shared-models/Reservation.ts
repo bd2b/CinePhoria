@@ -44,7 +44,23 @@ export class ReservationForUtilisateur {
   totalSeats?:number;
   totalPrice?:number;
   numberPMR?:number;
-  constructor(data: Partial<Reservation>) {
+  filmId?:string;
+  seanceId?:string;
+  email?:string;
+  constructor(data: Partial<ReservationForUtilisateur>) {
     Object.assign(this, data);
   }
 };
+
+export class SeatsForReservation {
+  
+  numberSeats?:number;
+  nameTarif?:string;
+  price?:number;
+  
+  constructor(data: Partial<ReservationForUtilisateur>) {
+    Object.assign(this, data);
+  }
+};
+
+

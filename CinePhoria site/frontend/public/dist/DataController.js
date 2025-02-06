@@ -208,7 +208,7 @@ export class DataController {
                     // Enregistrement de la date 
                     setCookie(DataController.nomCookieDateAccess, (new Date()).toISOString(), 1);
                     // Sauvegarder dans localStorage
-                    // this.sauver();
+                    this.sauverComplet();
                 }
             }
             catch (error) {

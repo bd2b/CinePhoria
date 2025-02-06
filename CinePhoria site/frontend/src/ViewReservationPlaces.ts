@@ -2,10 +2,13 @@ import { seanceCardView, basculerPanelChoix } from './ViewReservation.js';
 import { ReservationState, dataController } from './DataController.js';
 
 import { isUUID, validateEmail } from './Helpers.js';
-import { TarifForSeats } from './shared-models/Reservation';
-import { reservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi } from './NetworkController.js';
+import { SeatsForReservation, TarifForSeats } from './shared-models/Reservation';
+import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { login } from './Login.js';
+
+
+
 
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
@@ -39,19 +42,7 @@ export function updateContentPlace() {
             setReservation();
         };
 
-        if (dataController.reservationState === ReservationState.ReserveCompteToConfirm) {
-            console.log("Abandon à la confirmation de compte");
 
-        }
-        if (dataController.reservationState === ReservationState.ReserveMailToConfirm) {
-            // On a confirmé le compte mais abandonne la verification de mail
-            console.log("Abandon à la vérification de mail");
-        }
-
-        if (dataController.reservationState === ReservationState.ReserveToConfirm) {
-            // On a confirmé le compte, verifier le mail, mais pas confirmer la reservation en se loguant.
-            console.log("Abandon au login");
-        };
     } catch (error) {
         console.error("Erreur lors de l'affichage du content de selection des places : ", error);
     }
@@ -72,7 +63,11 @@ function setReservation() {
     const containerTable = document.querySelector('.commande__tabtarif');
     if (!containerTable) return;
     containerTable.innerHTML = '';
-    if (qualiteFilm) containerTable.appendChild(updateTableContent(qualiteFilm));
+
+    if (qualiteFilm) {
+        const nodeTable = updateTableContent(qualiteFilm) as unknown;
+        containerTable.appendChild(nodeTable as Node);
+    }
 
     // Afficher le champ de renseignement du nombre de place PMR et gestion des boutons + et -
     const containerPMR = document.querySelector('.commande__pmr')
@@ -95,7 +90,7 @@ function setReservation() {
     if (userDataController.profil() === ProfilUtilisateur.Utilisateur) {
         // Il faut utiliser l'email de l'utilisateur et desactiver le changement.
         const emailUtilisateur = userDataController.compte()?.email
-        if (emailUtilisateur) { 
+        if (emailUtilisateur) {
             emailInput.value = emailUtilisateur;
             emailInput.disabled = true;
         }
@@ -103,7 +98,7 @@ function setReservation() {
         emailInvite.innerHTML = "Votre email ";
         const emailspan = document.getElementById("commande__mail-span") as HTMLSpanElement;
         emailspan.hidden = true;
-        
+
 
     } else {
         emailInput.value = "";
@@ -190,7 +185,7 @@ function setReservation() {
         try {
             const seanceId = dataController.seanceSelected().seanceId;
 
-            const { statut, utilisateurId, reservationId } = await reservationApi(email, seanceId, tarifSeatsMap, pmrSeats);
+            const { statut, utilisateurId, reservationId } = await setReservationApi(email, seanceId, tarifSeatsMap, pmrSeats);
 
             dataController.selectedUtilisateurUUID = utilisateurId;
             dataController.selectedReservationUUID = reservationId;
@@ -284,9 +279,11 @@ function collectEmail(selector: string): string {
 * Génère le contenu d'un tableau des tarifs en fonction d'une qualité spécifiée.
 * Les tarifs sont pris dans le dataController
 * @param qualite La valeur de qualite à filtrer (ex: "3D", "4DX", etc.)
+* @param isReadOnly indique si la table est afficher en lecture seule
 * @returns Un élément <table> 
 */
-function updateTableContent(qualite: string): HTMLTableElement {
+export async function updateTableContent(qualite: string, isReadOnly: boolean = false): Promise<HTMLTableElement> {
+
     // 1) Créer l'élément <table> et sa structure de base
     const table = document.createElement('table');
     table.classList.add('tabtarif__commande-table');
@@ -321,115 +318,178 @@ function updateTableContent(qualite: string): HTMLTableElement {
     table.appendChild(tfoot);
 
     const totalPriceTd = tfoot.querySelector('.content-totalprice-td') as HTMLTableCellElement;
-
-    // 2) Filtrer les tarifs correspondant à la qualité demandée
-    const filteredTarifs = dataController.allTarifQualite.filter(t => t.qualite === qualite);
-
-    // 3) Générer une ligne par tarif
-    let lineIndex = 1;
-    filteredTarifs.forEach((tarif) => {
-        const tr = document.createElement('tr');
-
-        tr.setAttribute('data-tarifid', tarif.id);
-        tr.classList.add('body__content-tr');
-
-        // Colonne #
-        const tdId = document.createElement('td');
-        tdId.classList.add('content-td', 'content-id-td');
-        tdId.textContent = String(lineIndex);
-
-        // Colonne Tarif : ex. "Plein tarif (10€)"
-        const tdTarif = document.createElement('td');
-        tdTarif.classList.add('content-td', 'content-tarif-td');
-        const priceNum = tarif.price ? parseFloat(tarif.price) : 0;
-        tdTarif.textContent = `${tarif.nameTarif ?? ''} (${priceNum}€)`;
-
-        // Colonne Places (boutons + -)
-        const tdNum = document.createElement('td');
-        tdNum.classList.add('content-td', 'content-num-td');
-
-        const btnAdd = document.createElement('button');
-        btnAdd.classList.add('num__add-button');
-        btnAdd.textContent = '+';
-
-        const spanPlaces = document.createElement('span');
-        spanPlaces.classList.add('num__num-span');
-        spanPlaces.id = 'num__place';
-        spanPlaces.textContent = '0'; // Au départ, 0
-
-        const btnRemove = document.createElement('button');
-        btnRemove.classList.add('num__remove-button');
-        btnRemove.textContent = '-';
-
-        tdNum.appendChild(btnAdd);
-        tdNum.appendChild(spanPlaces);
-        tdNum.appendChild(btnRemove);
-
-        // Colonne Total
-        const tdPrice = document.createElement('td');
-        tdPrice.classList.add('content-td', 'content-price-td');
-        tdPrice.textContent = '0 €'; // Au départ, 0
-
-        // Assembler la ligne
-        tr.appendChild(tdId);
-        tr.appendChild(tdTarif);
-        tr.appendChild(tdNum);
-        tr.appendChild(tdPrice);
-
-        tbody.appendChild(tr);
-
-        // 4) Gérer l'événement + et -
-        function updateRowTotal() {
-            // Récupérer la quantité
-            const quantity = parseInt(spanPlaces.textContent ?? '0', 10) || 0;
-            // Mettre à jour le total de la ligne
-            const lineTotal = priceNum * quantity;
-            tdPrice.textContent = `${lineTotal} €`;
-
-            // Recalculer le total global
-            updateTableTotal();
+    if (isReadOnly) {
+        // Si on est en readOnly, on va chercher les données des places à partir de la réservation en cours
+        let places: SeatsForReservation[] = []
+        const reservationId = dataController.selectedReservationUUID;
+        if (reservationId) {
+            places = await getPlacesReservationApi(reservationId);
+        }
+        else {
+            console.error("updateTableContent : Pas de reservation selectionnée pour un affichage de reservation");
         }
 
-        // Incrémente la quantité (max 4)
-        btnAdd.addEventListener('click', (event: MouseEvent) => {
-            event.preventDefault();
-            event.stopPropagation();
-            let currentVal = parseInt(spanPlaces.textContent ?? '0', 10) || 0;
-            if (currentVal < 4) {
-                currentVal++;
-                spanPlaces.textContent = String(currentVal);
-                updateRowTotal();
-            }
+        // 2) on affiche une ligne par place prise
+        let lineIndex = 1;
+        places.forEach((place) => {
+            const tr = document.createElement('tr');
+            tr.classList.add('body__content-tr');
+
+            // Colonne #
+            const tdId = document.createElement('td');
+            tdId.classList.add('content-td', 'content-id-td');
+            tdId.textContent = String(lineIndex);
+
+            // Colonne Tarif : ex. "Plein tarif (10€)"
+            const tdTarif = document.createElement('td');
+            tdTarif.classList.add('content-td', 'content-tarif-td');
+            tdTarif.textContent = `${place.nameTarif} (${place.numberSeats}€)`;
+
+            // Colonne Places 
+            const tdNum = document.createElement('td');
+            tdNum.classList.add('content-td', 'content-num-td');
+
+            // Colonne Places
+            const spanPlaces = document.createElement('span');
+            spanPlaces.classList.add('num__num-span');
+            spanPlaces.id = 'num__place';
+            spanPlaces.textContent = String(place.numberSeats) || '';
+            tdNum.appendChild(spanPlaces);
+
+            // Colonne Total
+            const tdPrice = document.createElement('td');
+            tdPrice.classList.add('content-td', 'content-price-td');
+            tdPrice.textContent = `${String(place.numberSeats! * place.price!)} €`; // Au départ, 0
+
+            // Assembler la ligne
+            tr.appendChild(tdId);
+            tr.appendChild(tdTarif);
+            tr.appendChild(tdNum);
+            tr.appendChild(tdPrice);
+
+            tbody.appendChild(tr);
+
+            lineIndex++;
+
         });
 
-        // Décrémente la quantité (min 0)
-        btnRemove.addEventListener('click', (event: MouseEvent) => {
-            event.preventDefault();
-            event.stopPropagation();
-            let currentVal = parseInt(spanPlaces.textContent ?? '0', 10) || 0;
-            if (currentVal > 0) {
-                currentVal--;
-                spanPlaces.textContent = String(currentVal);
-                updateRowTotal();
+        // Somme totale
+        
+        const somme = places.reduce((total, place) => 
+            total + ((place.numberSeats || 1) * (place.price || 1)), 0);
+        totalPriceTd.textContent = `${String(somme)} €`;
+
+    } else {
+        // 2) Filtrer les tarifs correspondant à la qualité demandée
+        const filteredTarifs = dataController.allTarifQualite.filter(t => t.qualite === qualite);
+
+        // 3) Générer une ligne par tarif
+        let lineIndex = 1;
+        filteredTarifs.forEach((tarif) => {
+            const tr = document.createElement('tr');
+
+            tr.setAttribute('data-tarifid', tarif.id);
+            tr.classList.add('body__content-tr');
+
+            // Colonne #
+            const tdId = document.createElement('td');
+            tdId.classList.add('content-td', 'content-id-td');
+            tdId.textContent = String(lineIndex);
+
+            // Colonne Tarif : ex. "Plein tarif (10€)"
+            const tdTarif = document.createElement('td');
+            tdTarif.classList.add('content-td', 'content-tarif-td');
+            const priceNum = tarif.price ? parseFloat(tarif.price) : 0;
+            tdTarif.textContent = `${tarif.nameTarif ?? ''} (${priceNum}€)`;
+
+            // Colonne Places (boutons + -)
+            const tdNum = document.createElement('td');
+            tdNum.classList.add('content-td', 'content-num-td');
+
+            const btnAdd = document.createElement('button');
+            btnAdd.classList.add('num__add-button');
+            btnAdd.textContent = '+';
+
+            const spanPlaces = document.createElement('span');
+            spanPlaces.classList.add('num__num-span');
+            spanPlaces.id = 'num__place';
+            spanPlaces.textContent = '0'; // Au départ, 0
+
+            const btnRemove = document.createElement('button');
+            btnRemove.classList.add('num__remove-button');
+            btnRemove.textContent = '-';
+
+            tdNum.appendChild(btnAdd);
+            tdNum.appendChild(spanPlaces);
+            tdNum.appendChild(btnRemove);
+
+            // Colonne Total
+            const tdPrice = document.createElement('td');
+            tdPrice.classList.add('content-td', 'content-price-td');
+            tdPrice.textContent = '0 €'; // Au départ, 0
+
+            // Assembler la ligne
+            tr.appendChild(tdId);
+            tr.appendChild(tdTarif);
+            tr.appendChild(tdNum);
+            tr.appendChild(tdPrice);
+
+            tbody.appendChild(tr);
+
+            // 4) Gérer l'événement + et -
+            function updateRowTotal() {
+                // Récupérer la quantité
+                const quantity = parseInt(spanPlaces.textContent ?? '0', 10) || 0;
+                // Mettre à jour le total de la ligne
+                const lineTotal = priceNum * quantity;
+                tdPrice.textContent = `${lineTotal} €`;
+
+                // Recalculer le total global
+                updateTableTotal();
             }
+
+            // Incrémente la quantité (max 4)
+            btnAdd.addEventListener('click', (event: MouseEvent) => {
+                event.preventDefault();
+                event.stopPropagation();
+                let currentVal = parseInt(spanPlaces.textContent ?? '0', 10) || 0;
+                if (currentVal < 4) {
+                    currentVal++;
+                    spanPlaces.textContent = String(currentVal);
+                    updateRowTotal();
+                }
+            });
+
+            // Décrémente la quantité (min 0)
+            btnRemove.addEventListener('click', (event: MouseEvent) => {
+                event.preventDefault();
+                event.stopPropagation();
+                let currentVal = parseInt(spanPlaces.textContent ?? '0', 10) || 0;
+                if (currentVal > 0) {
+                    currentVal--;
+                    spanPlaces.textContent = String(currentVal);
+                    updateRowTotal();
+                }
+            });
+
+            lineIndex++;
         });
 
-        lineIndex++;
-    });
 
-    // 5) Fonction pour mettre à jour le total global (tfoot)
-    function updateTableTotal() {
-        let grandTotal = 0;
-        // Parcourir chaque ligne du tbody pour sommer
-        tbody.querySelectorAll('tr.body__content-tr').forEach((row) => {
-            const priceCell = row.querySelector('.content-price-td') as HTMLTableCellElement;
-            if (priceCell) {
-                const text = priceCell.textContent?.replace(' €', '') ?? '0';
-                const value = parseFloat(text) || 0;
-                grandTotal += value;
-            }
-        });
-        totalPriceTd.textContent = `${grandTotal} €`;
+        // 5) Fonction pour mettre à jour le total global (tfoot)
+        function updateTableTotal() {
+            let grandTotal = 0;
+            // Parcourir chaque ligne du tbody pour sommer
+            tbody.querySelectorAll('tr.body__content-tr').forEach((row) => {
+                const priceCell = row.querySelector('.content-price-td') as HTMLTableCellElement;
+                if (priceCell) {
+                    const text = priceCell.textContent?.replace(' €', '') ?? '0';
+                    const value = parseFloat(text) || 0;
+                    grandTotal += value;
+                }
+            });
+            totalPriceTd.textContent = `${grandTotal} €`;
+        }
     }
 
     return table;

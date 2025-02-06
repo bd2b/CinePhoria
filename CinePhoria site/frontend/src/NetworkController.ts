@@ -1,8 +1,9 @@
 import { TarifForSeats } from './shared-models/Reservation';
 import { isUUID, validateEmail } from './Helpers.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js'; 
+import { ReservationForUtilisateur , SeatsForReservation } from './shared-models/Reservation.js';
 
-export async function reservationApi(
+export async function setReservationApi(
     email: string,
     seanceId: string,
     tarifSeats: TarifForSeats, // { tarifId: numberOfSeats, ... }
@@ -151,4 +152,46 @@ export async function profilApi(identUtilisateur: string) : Promise <ComptePerso
     const comptesUtilisateur = rawData.map((d: any) => new ComptePersonne(d));
     console.log("compte = ",comptesUtilisateur)
     return comptesUtilisateur;
+}
+
+//  Récupérer une reservation provisoire, api publique
+export async function getReservationApi(reservationId: string) : Promise <ReservationForUtilisateur[]> {
+    
+    const response = await fetch(`http://localhost:3500/api/reservation/id/${reservationId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    });
+
+    const rawData = await response.json();
+
+    if (!Array.isArray(rawData)) {
+        throw new Error('La réponse de l’API n’est pas un tableau.');
+    }
+    // Convertir les données brutes en instances de Seance
+    const reservations = rawData.map((d: any) => new ReservationForUtilisateur(d));
+    console.log("reservations = ",reservations)
+    return reservations;
+}
+
+//  Récupérer les places d'une reservation provisoire, api publique
+export async function getPlacesReservationApi(reservationId: string) : Promise <SeatsForReservation[]> {
+    
+    const response = await fetch(`http://localhost:3500/api/reservation/seats/id/${reservationId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    });
+
+    const rawData = await response.json();
+
+    if (!Array.isArray(rawData)) {
+        throw new Error('La réponse de l’API n’est pas un tableau.');
+    }
+    // Convertir les données brutes en instances de Seance
+    const places = rawData.map((d: any) => new SeatsForReservation(d));
+    console.log("places = ",places)
+    return places;
 }

@@ -16,3 +16,9 @@ export class ReservationForUtilisateur {
     }
 }
 ;
+export class SeatsForReservation {
+    constructor(data) {
+        Object.assign(this, data);
+    }
+}
+;

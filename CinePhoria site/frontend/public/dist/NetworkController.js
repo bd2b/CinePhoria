@@ -9,7 +9,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { isUUID } from './Helpers.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
-export function reservationApi(email, seanceId, tarifSeats, // { tarifId: numberOfSeats, ... }
+import { ReservationForUtilisateur, SeatsForReservation } from './shared-models/Reservation.js';
+export function setReservationApi(email, seanceId, tarifSeats, // { tarifId: numberOfSeats, ... }
 pmrSeats) {
     return __awaiter(this, void 0, void 0, function* () {
         const body = { email, seanceId, tarifSeats, pmrSeats };
@@ -149,5 +150,43 @@ export function profilApi(identUtilisateur) {
         const comptesUtilisateur = rawData.map((d) => new ComptePersonne(d));
         console.log("compte = ", comptesUtilisateur);
         return comptesUtilisateur;
+    });
+}
+//  Récupérer une reservation provisoire, api publique
+export function getReservationApi(reservationId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch(`http://localhost:3500/api/reservation/id/${reservationId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const rawData = yield response.json();
+        if (!Array.isArray(rawData)) {
+            throw new Error('La réponse de l’API n’est pas un tableau.');
+        }
+        // Convertir les données brutes en instances de Seance
+        const reservations = rawData.map((d) => new ReservationForUtilisateur(d));
+        console.log("reservations = ", reservations);
+        return reservations;
+    });
+}
+//  Récupérer les places d'une reservation provisoire, api publique
+export function getPlacesReservationApi(reservationId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const response = yield fetch(`http://localhost:3500/api/reservation/seats/id/${reservationId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        const rawData = yield response.json();
+        if (!Array.isArray(rawData)) {
+            throw new Error('La réponse de l’API n’est pas un tableau.');
+        }
+        // Convertir les données brutes en instances de Seance
+        const places = rawData.map((d) => new SeatsForReservation(d));
+        console.log("places = ", places);
+        return places;
     });
 }

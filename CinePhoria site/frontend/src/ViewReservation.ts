@@ -5,6 +5,7 @@ import { DataController, ReservationState, dataController } from './DataControll
 import { Film } from './shared-models/Film.js';
 
 import { updateContentPlace } from './ViewReservationPlaces.js';
+import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReservationDisplay.js';
 
 /** Chargement ou raffraichissement de la page
  * Au premier chargement une fenetre modale permet de choisir un site, dans ce cas le cookie selectedCinema est positionné avec la valeur choisie
@@ -14,10 +15,13 @@ import { updateContentPlace } from './ViewReservationPlaces.js';
 
 export async function onLoadReservation() {
 
+  // On restore le dataController avant tout
+  await dataController.chargerComplet();
+  
   // On se positionne sur le cinema si il a été déjà défini ou on affiche une modale de selection du cinema
   await updateCinema();
 
-  
+
   if (["PendingChoiceSeance", "PendingChoiceSeats"].includes(dataController.reservationState)) {
     // On est sans reservation pendante
 
@@ -37,7 +41,14 @@ export async function onLoadReservation() {
     console.log(`dataController.nameCinema = ${dataController.nameCinema} nombre de séances = ${dataController.allSeances.length}`);
   }
 
+  if (["ReserveCompteToConfirm", "ReserveMailToConfirm", 
+    "ReserveToConfirm"].includes(dataController.reservationState)) {
+      // On a une reservation pendante mise à jour de la page pour afficher la reservation
+      await updateDisplayReservation();
 
+      console.log("Affichage de la reservation à l'état : ", dataController.reservationState );
+
+    }
 };
 
 window.addEventListener('beforeunload', (event) => {
@@ -73,7 +84,8 @@ async function updateCinema() {
     });
   }
 
-  // Vérifier si le cookie 'selectedCinema' existe
+  // Vérifier si le cookie 'selectedCinema' existe et que l'on a deja chargé des films
+  // (le dataController est initialisé sur Paris pour la page d'accueil mais aucun chargement n'est fait)
   let selectedCinema = getCookie('selectedCinema');
   if (!selectedCinema) {
     // Le cookie n'existe pas : on affiche la modale avec l'invite à sélectionner un cinema
@@ -89,6 +101,7 @@ async function updateCinema() {
     }
   } else {
     // Le cookie existe on initialise le dataController
+    dataController.nameCinema = selectedCinema;
     await dataController.init();
 
     // Mettre à jour l'affichage initial du dropdown sur le composant titre
@@ -135,16 +148,15 @@ async function updateCinema() {
 
           // Bascule vers le panel choix
           basculerPanelChoix();
-          updateContentPage(dataController);
+          
 
           // Mise à jour de l'état
           dataController.reservationState = ReservationState.PendingChoiceSeance;
 
-          // Mise à jour de la page
           updateContentPage(dataController);
 
           // Fermeture de la modale
-          const modalCinema = document.getElementById('modalCinema') as HTMLDivElement | null;
+          const modalCinema = document.getElementById('modal-cinema') as HTMLDivElement | null;
           if (modalCinema) {
             console.log("2 - Fermeture de la modale ");
             modalCinema.classList.remove('show'); // Fermer la modale si elle est ouverte
@@ -178,23 +190,27 @@ export async function updateContentPage(dataController: DataController) {
     " Nombre de séances", dataController.seancesFilmJour(activeSelectedFilm.id).length,
     " Date : ", formatDateLocalYYYYMMDD(new Date(seancesFilm[0].dateJour || '')));
 
-  const seanceData = seancesFilm.map(seance => ({
-    titre: seance.titleFilm,
-    salle: seance.nameSalle,
-    date: seance.dateJour,
-    heureDebut: seance.hourBeginHHSMM
-  }));
-  console.log("UCP 3 - Liste des séances du film candidat = ", seanceData);
+  // const seanceData = seancesFilm.map(seance => ({
+  //   titre: seance.titleFilm,
+  //   salle: seance.nameSalle,
+  //   date: seance.dateJour,
+  //   heureDebut: seance.hourBeginHHSMM
+  // }));
+  // console.log("UCP 3 - Liste des séances du film candidat = ", seanceData);
 
 
-  // Afficher la liste de tous les films
-  afficherListeFilms(dataController);
-  console.log("UCP 5 - Liste des films affichés");
-  // Afficher les détails du film selectionné
-  afficherDetailsFilm(dataController);
-  console.log("UCP 6 - Detail du film selectionné affichés");
+  // Si on est sans reservation prise, on affiche la liste des films et le film selectionne
+  if (["PendingChoiceSeance", "PendingChoiceSeats"].includes(dataController.reservationState)) {
+    afficherListeFilms();
+
+    console.log("UCP 5 - Liste des films affichés");
+    // Afficher les détails du film selectionné
+    afficherDetailsFilm();
+    console.log("UCP 6 - Detail du film selectionné affichés");
+  }
 
   if (dataController.reservationState === ReservationState.PendingChoiceSeance) {
+    // On affiche le calendrier et les seances de chaque jour
     console.log("ETAT : choix de la séance");
     // Composer la ligne de tabulation du panel de choix des séances
     afficherSemaines(dataController);
@@ -204,13 +220,28 @@ export async function updateContentPage(dataController: DataController) {
     console.log(`UCP 8 - Séances affichées pour ${activeSelectedFilm.titleFilm} le ${new Date(seancesFilm[0].dateJour || '')}`);
 
   } else if (dataController.reservationState = ReservationState.PendingChoiceSeats) {
+    // on active le panel reserve et initialise le tableau de saisie de la réservation
     console.log("ETAT : choix des places");
-    basculerPanelReserve()
-    dataController.reservationState = ReservationState.PendingChoiceSeats
+    basculerPanelReserve();
     updateContentPlace();
     dataController.sauverComplet();
+  } else if (dataController.reservationState === ReservationState.ReserveCompteToConfirm) {
+    console.log("On doit confirmer le compte");
+    // On active le panel reserve, on affiche la réservation en lecture seule et la modal de confirmation d'utilisateur
+    basculerPanelReserve();
+    updateDisplayReservation();
+    modalConfirmUtilisateur();
 
-  }
+
+  } else if (dataController.reservationState === ReservationState.ReserveMailToConfirm) {
+    // On a confirmé le compte mais abandonne la verification de mail
+    console.log("Abandon à la vérification de mail");
+  } else if (dataController.reservationState === ReservationState.ReserveToConfirm) {
+    // On a confirmé le compte, verifier le mail, mais pas confirmer la reservation en se loguant.
+    console.log("Abandon au login");
+  };
+
+
 }
 
 
@@ -254,7 +285,7 @@ function trouverFilmSeancesCandidat(dataController: DataController): Seance[] {
 * Affiche la liste des films dans la zone .reservation__listFilms 
 */
 
-function afficherListeFilms(dataController: DataController): void {
+function afficherListeFilms(): void {
   const container = document.querySelector('.reservation__listFilms');
   if (!container) return;
 
@@ -324,7 +355,7 @@ function afficherListeFilms(dataController: DataController): void {
  * @param dataController L'objet gérant les données (dont la liste des films)
  * @param filmId L'identifiant du film à afficher
  */
-function afficherDetailsFilm(dataController: DataController): void {
+export function afficherDetailsFilm(): void {
   const container = document.querySelector('.reservation__detailFilm');
   if (!container) return;
 
@@ -682,7 +713,7 @@ export function seanceCardView(seance: Seance, dateSelectionne: Date, id: string
 /**
  * Bascule du panel choix vers le panel reserve
  */
-function basculerPanelReserve() {
+export function basculerPanelReserve() {
 
   const panelChoix = document.querySelector('.panel__choix') as HTMLDivElement | null;
   const panelReservation = document.querySelector('.panel__reserve') as HTMLDivElement | null;
