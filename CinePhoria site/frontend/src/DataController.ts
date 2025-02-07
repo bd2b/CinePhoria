@@ -87,12 +87,12 @@ export class DataController {
         );
     }
 
-    // Getter pour tous les films
+    // Getter pour tous les tarifs
     get allTarifQualite(): TarifQualite[] {
         return this._tarifQualite;
     }
 
-    // Getter pour tous les tarifQualite
+    // Getter pour tous les films
     get allFilms(): Film[] {
         return this._films;
     }
@@ -301,13 +301,14 @@ export class DataController {
         this._films = Array.from(filmMap.values());
     };
 
+    // Les séance d'un film pour un jour donne
     public seancesFilmJour(filmId: string, date: Date = new Date()): Seance[] {
         return this._seances.filter((s) =>
             s.filmId === filmId &&
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date)
         );
     }
-
+    // Les séances d'un film sur une periode de jours
     public seancesFilmDureeJour(filmId: string, dateDeb: Date = new Date(), nombreJours: number): Seance[] {
         return this._seances.filter((s) =>
             s.filmId === filmId &&
@@ -315,18 +316,20 @@ export class DataController {
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) < formatDateLocalYYYYMMDD(ajouterJours(dateDeb, nombreJours))
         );
     }
-
+    // Toutes les séances d'un jour
     public seancesJour(date: Date = new Date()): Seance[] {
         return this._seances.filter((s) =>
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date)
         );
     }
+
+    // Toutes les séances d'un film
     public seancesFilm(filmId: string): Seance[] {
         return this._seances.filter((s) =>
             s.filmId === filmId
         );
     }
-
+    // Tous les films pour un jour
     public filmsJour(date: Date = new Date()): Film[] {
 
         // Utilisation d'une Map pour éviter les doublons

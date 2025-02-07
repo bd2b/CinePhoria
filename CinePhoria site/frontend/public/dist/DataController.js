@@ -64,11 +64,11 @@ export class DataController {
     get seancesFutures() {
         return this._seances.filter(s => new Date(s.dateJour || '') >= new Date());
     }
-    // Getter pour tous les films
+    // Getter pour tous les tarifs
     get allTarifQualite() {
         return this._tarifQualite;
     }
-    // Getter pour tous les tarifQualite
+    // Getter pour tous les films
     get allFilms() {
         return this._films;
     }
@@ -254,21 +254,26 @@ export class DataController {
         this._films = Array.from(filmMap.values());
     }
     ;
+    // Les séance d'un film pour un jour donne
     seancesFilmJour(filmId, date = new Date()) {
         return this._seances.filter((s) => s.filmId === filmId &&
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date));
     }
+    // Les séances d'un film sur une periode de jours
     seancesFilmDureeJour(filmId, dateDeb = new Date(), nombreJours) {
         return this._seances.filter((s) => s.filmId === filmId &&
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) >= formatDateLocalYYYYMMDD(dateDeb) &&
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) < formatDateLocalYYYYMMDD(ajouterJours(dateDeb, nombreJours)));
     }
+    // Toutes les séances d'un jour
     seancesJour(date = new Date()) {
         return this._seances.filter((s) => formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date));
     }
+    // Toutes les séances d'un film
     seancesFilm(filmId) {
         return this._seances.filter((s) => s.filmId === filmId);
     }
+    // Tous les films pour un jour
     filmsJour(date = new Date()) {
         // Utilisation d'une Map pour éviter les doublons
         const filmMap = new Map();
