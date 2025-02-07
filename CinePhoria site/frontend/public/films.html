@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sections/main-films.css">
+
+    <script type="module" src="dist/global.js" defer></script>
+    <script type="module" src="dist/main.js" defer></script>
+
+    <title>CinePhoria</title>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="header__nav">
+            <div class="nav__logo ">
+                <a href="./visiteur.html">
+                    <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
+            </div>
+            <div class="nav__actions">
+                <button class="nav__actions-button nav__actions-button--link">Réservation</button>
+                <button class="nav__actions-button nav__actions-button--link">Films</button>
+                <button class="nav__actions-button nav__actions-button--link">Contact</button>
+                <button class="nav__actions-button nav__actions-button--signin">Connexion</button>
+            </div>
+            <div class="nav__mobile-menu" id="navMobileMenu">
+                <img src="assets/menu.svg" alt="Menu">
+            </div>
+
+            <div class="mobile-menu" id="mobileMenu">
+                <button class="mobile-menu__close" id="mobileMenuClose">&times;</button>
+                <nav class="mobile-menu__nav">
+                    <button class="nav__actions-button nav__actions-button--link">Réservation</button>
+                    <button class="nav__actions-button nav__actions-button--link">Films</button>
+                    <button class="nav__actions-button nav__actions-button--link">Contact</button>
+                    <button class="nav__actions-button nav__actions-button--signin">Connexion</button>
+                </nav>
+            </div>
+        </nav>
+    </header>
+    <main class="main main__container">
+        <div class="container__title">
+            <div class="title__left">
+                <h1 class="title__left-h1" id="titleLeft">Les Films</h1>
+            </div>
+            <div class="title__filters title__filters-films">
+                <!-- Genre -->
+                <div class="title__filter-dropdown titre__filter-dropdown-genre">
+                    <button class="title__filter-dropdown-button">Genre <span class="chevron">▼</span></button>
+                    <div class="title__filter-button-drowdown-content">
+                        <a href="#">Film d'action</a>
+                        <a href="#">Thriller</a>
+                        <!-- On dynamisera si besoin depuis JS -->
+                    </div>
+                </div>
+                <!-- Cinéma -->
+                <div class="title__filter-dropdown titre__filter-dropdown-cinema">
+                    <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">
+                        Choisissez votre complexe <span class="chevron">▼</span>
+                    </button>
+                    <div class="title__filter-button-drowdown-content">
+                        <a href="#" data-cinema="Tous les complexes">Tous les complexes</a>
+                        <a href="#" data-cinema="Paris">Paris</a>
+                        <a href="#" data-cinema="Bordeaux">Bordeaux</a>
+                        <a href="#" data-cinema="Nantes">Nantes</a>
+                        <a href="#" data-cinema="Lille">Lille</a>
+                        <a href="#" data-cinema="Toulouse">Toulouse</a>
+                        <a href="#" data-cinema="Charleroi" >Charleroi</a>
+                        <a href="#" data-cinema="Liège" >Liège</a>
+                    </div>
+                </div>
+                <!-- Jour 
+                <div class="title__filter-jour">
+                    <label for="filter-jour-input">Date :</label>
+                    <input type="date" id="filter-jour-input">
+                </div> -->
+            </div>
+        </div>
+
+        <div class="container__films">
+            <div class="films__listFilms">
+                <!-- Liste de cartes de films (remplies dynamiquement par JS) -->
+            </div>
+            <div class="films__detailFilm">
+                <!-- Détails du film sélectionné -->
+                <div class="detailFilm__twocolumns">
+                    <div class="twocolumns__left">
+                        <img src="assets/static/1-1024.jpg" alt="Affiche" class="twocolumns__left-img">
+                        <button class="twocolumns__left-button-bo" id="openModal">Bande Annonce</button>
+                    </div>
+                    <div class="twocolumns__right">
+                        <div class="right__film">
+                            <p class="right__title-p">Mourir peut attendre</p>
+                            <div class="right__caractFilm">
+                                <p class="caractFilm__genre-p">Action, Espionnage, Thriller</p>
+                                <p class="caractFilm__duree-p">1h53</p>
+                                <p class="caractFilm__public-p">TP</p>
+                            </div>
+                            <p class="right__description-p">...</p>
+                            <p class="right__author-p">De Cary Joji Fukunaga</p>
+                            <p class="right__distribution">Avec Daniel Craig, Léa Seydoux, Rami Malek</p>
+                        </div>
+                        <button class="right__jereserve-button">Je réserve</button>
+                    </div>
+                </div>
+                <!-- Conteneur supplémentaire pour afficher les séances du film -->
+                <div class="detailFilm__seancesListe">
+                    <!-- On insérera dynamiquement la liste des séances -->
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer">
+        <div class="footer__container">
+            <div class="container__legal">
+                <a href="#" class="container__legal-a">Mentions légales</a>
+                <a href="#" class="container__legal-a">Politique de confidentialité</a>
+                <a href="#" class="container__legal-a">&copy; 2024 - Tous droits réservés</a>
+            </div>
+
+            <div class="container__sites">
+                <div class="container__site"> <!-- Chaque site  -->
+                    <div class="site__title">
+                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
+                        <h1 class="site__title-h1">Paris</h1>
+                    </div>
+                    <div class="site__adresse">
+                        <p class="site_adresse-p">13 rue de la paix <br> 75000 Paris</p>
+                    </div>
+                    <div class="site__telephone">
+                        <img src="assets/tel.svg" class="site__telephone-img">
+                        <p class="site__telephone-p">01 02 03 04 05</p>
+                    </div>
+                    <div class="site__seance">
+                        <p class="site__seance-p">Première séance : 13h</p>
+                        <p class="site__seance-p"> 7j sur 7</p>
+                    </div>
+                </div>
+
+                <div class="container__site"> <!-- Chaque site  -->
+                    <div class="site__title">
+                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
+                        <h1 class="site__title-h1">Toulouse</h1>
+                    </div>
+                    <div class="site__adresse">
+                        <p class="site_adresse-p">10 rue Matabiau <br> 31000 Paris</p>
+                    </div>
+                    <div class="site__telephone">
+                        <img src="assets/tel.svg" class="site__telephone-img">
+                        <p class="site__telephone-p">01 02 03 04 05</p>
+                    </div>
+                    <div class="site__seance">
+                        <p class="site__seance-p">Première séance : 14h</p>
+                        <p class="site__seance-p"> 7j sur 7</p>
+                    </div>
+                </div>
+
+                <div class="container__site"> <!-- Chaque site  -->
+                    <div class="site__title">
+                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
+                        <h1 class="site__title-h1">Bordeaux</h1>
+                    </div>
+                    <div class="site__adresse">
+                        <p class="site_adresse-p">9 rue Sainte-Catherine<br> 75000 Paris</p>
+                    </div>
+                    <div class="site__telephone">
+                        <img src="assets/tel.svg" class="site__telephone-img">
+                        <p class="site__telephone-p">01 02 03 04 05</p>
+                    </div>
+                    <div class="site__seance">
+                        <p class="site__seance-p">Première séance : 13h</p>
+                        <p class="site__seance-p"> 7j sur 7</p>
+                    </div>
+                </div>
+
+                <div class="container__site"> <!-- Chaque site  -->
+                    <div class="site__title">
+                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
+                        <h1 class="site__title-h1">Nantes</h1>
+                    </div>
+                    <div class="site__adresse">
+                        <p class="site_adresse-p">25 avenue des déportés<br>44000 Nantes</p>
+                    </div>
+                    <div class="site__telephone">
+                        <img src="assets/tel.svg" class="site__telephone-img">
+                        <p class="site__telephone-p">01 02 03 04 05</p>
+                    </div>
+                    <div class="site__seance">
+                        <p class="site__seance-p">Première séance : 13h</p>
+                        <p class="site__seance-p"> 7j sur 7</p>
+                    </div>
+                </div>
+
+                <div class="container__site"> <!-- Chaque site  -->
+                    <div class="site__title">
+                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
+                        <h1 class="site__title-h1">Lille</h1>
+                    </div>
+                    <div class="site__adresse">
+                        <p class="site_adresse-p">13 rue de la paix <br> 59000 Lille</p>
+                    </div>
+                    <div class="site__telephone">
+                        <img src="assets/tel.svg" class="site__telephone-img">
+                        <p class="site__telephone-p">01 02 03 04 05</p>
+                    </div>
+                    <div class="site__seance">
+                        <p class="site__seance-p">Première séance : 13h</p>
+                        <p class="site__seance-p"> 7j sur 7</p>
+                    </div>
+                </div>
+
+                <div class="container__site"> <!-- Chaque site  -->
+                    <div class="site__title">
+                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
+                        <h1 class="site__title-h1">Charleroi</h1>
+                    </div>
+                    <div class="site__adresse">
+                        <p class="site_adresse-p">13 rue de la paix <br> 75000 Paris</p>
+                    </div>
+                    <div class="site__telephone">
+                        <img src="assets/tel.svg" class="site__telephone-img">
+                        <p class="site__telephone-p">01 02 03 04 05</p>
+                    </div>
+                    <div class="site__seance">
+                        <p class="site__seance-p">Première séance : 13h</p>
+                        <p class="site__seance-p"> 7j sur 7</p>
+                    </div>
+                </div>
+
+                <div class="container__site"> <!-- Chaque site  -->
+                    <div class="site__title">
+                        <img src="assets/camera-150-inverse.png" alt="Logo" class="site__title-img">
+                        <h1 class="site__title-h1">Liège</h1>
+                    </div>
+                    <div class="site__adresse">
+                        <p class="site_adresse-p">13 rue de la paix <br> 75000 Paris</p>
+                    </div>
+                    <div class="site__telephone">
+                        <img src="assets/tel.svg" class="site__telephone-img">
+                        <p class="site__telephone-p">01 02 03 04 05</p>
+                    </div>
+                    <div class="site__seance">
+                        <p class="site__seance-p">Première séance : 13h</p>
+                        <p class="site__seance-p"> 7j sur 7</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- Modal -->
+    <div id="videoModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <!-- Vidéo YouTube -->
+            <iframe id="youtubeVideo" width="560" height="315" src="" frameborder="0" allow="autoplay; encrypted-media"
+                allowfullscreen></iframe>
+        </div>
+    </div>
+    <script src="dist/boYouTube.js"></script>
+
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

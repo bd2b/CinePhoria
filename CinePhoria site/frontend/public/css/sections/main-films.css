@@ -287,6 +287,41 @@ border-radius: 10px;
     margin-bottom: 40px;
     max-width: 200px;
 }
+
+/* Table principale */
+.tabseance__commande-table {
+    width: 100%;
+    margin-top: 10px;
+    font-size: 16px;
+    color: rgb(var(--primary-color));
+    border-collapse: collapse; /* Éviter les double-bordures */
+  }
+  
+  /* En-tête de la table */
+  .tabseance__commande-table thead th {
+    text-align: left;
+    padding: 10px 15px;
+    background-color: rgba(var(--ternary-color), 0.5); /* Fond clair */
+    border-bottom: 2px solid #dee2e6; /* Bordure inférieure */
+    font-weight: bold;
+    color: #000; /* Couleur de l'en-tête */
+  }
+  
+  /* Cellules du contenu */
+  .tabseance__commande-table tbody td {
+    padding: 10px 15px;
+    border: 1px solid #dee2e6; /* Ligne séparatrice */
+    vertical-align: middle; /* Alignement vertical au centre */
+    text-align: center; /* Centré horizontalement */
+  }
+
+  .table-scroll {
+    /* Hauteur fixe ou max ? */
+    max-height: 250px;  /* ou 300px, selon votre mise en page */
+    overflow-y: auto;   /* Crée l'ascenseur vertical si le contenu dépasse */
+    width: 100%;        /* S'adapte à la largeur du conteneur */
+    margin-top: 10px;
+  }
 /* -------------------- Responsive */
 
 @media (max-width: 1140px) {

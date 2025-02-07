@@ -71,7 +71,7 @@ export function onLoadReservation() {
  *
  * Dans tous les cas on défini l'action de changement de cinema à partir de du dropdown
  */
-function updateCinema() {
+export function updateCinema() {
     return __awaiter(this, void 0, void 0, function* () {
         const dropdownContents = document.querySelectorAll('.title__filter-button-drowdown-content-complexe');
         // Fonction de mise à jour l'affichage du bouton du dropdown
