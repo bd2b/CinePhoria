@@ -10,14 +10,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 // ViewFilm.ts
 import { dataController } from './DataController.js';
 import { setCookie } from './Helpers.js';
-let filtreCinema = dataController.nameCinema;
-let filtreGenre = 'all';
+//let dataController.filterNameCinema = dataController.filterNameCinema;
+// let filtreGenre = dataController.filterGenre;
 let filtreJour = '';
 export function onLoadFilms() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("=====> chargement onLoadFilms");
-        // 1) Charger le dataController
-        yield dataController.chargerComplet();
+        // On initialise le dataController si il est vide
+        if (dataController.allSeances.length === 0)
+            yield dataController.init();
         // 2) Init filtres
         yield initFiltreCinema();
         yield initFiltreGenre();
@@ -53,11 +54,11 @@ function initFiltreCinema() {
         // Mettre à jour le titre droit
         const titleLeft = document.getElementById('titleLeft');
         if (titleLeft) {
-            if (filtreCinema === 'all') {
+            if (dataController.filterNameCinema === 'all') {
                 titleLeft.innerText = 'Les films de CinePhoria';
             }
             else {
-                titleLeft.innerText = `Les films de CinePhoria à ${filtreCinema}`;
+                titleLeft.innerText = `Les films de CinePhoria à ${dataController.filterNameCinema}`;
             }
         }
         // Dans le HTML, on a déjà <a href="#">Tous les complexes</a>, <a href="#">Paris</a> ...
@@ -70,31 +71,26 @@ function initFiltreCinema() {
                 ev.preventDefault();
                 const val = ((_a = link.dataset.cinema) === null || _a === void 0 ? void 0 : _a.trim()) || '';
                 if (val === 'Tous les complexes') {
-                    filtreCinema = 'all';
+                    dataController.filterNameCinema = 'all';
                 }
                 else {
-                    filtreCinema = val; // ex: "Paris"
+                    dataController.filterNameCinema = val; // ex: "Paris"
                 }
-                // Mettre à jour dataController.nameCinema si on veut recharger :
-                //    dataController.nameCinema = (filtreCinema === 'all') ? 'all' : filtreCinema;
-                //    => ça peut provoquer un rechargement depuis l'API si on a codé nameCinema ainsi
-                //    ou on peut simplement filtrer en local
-                console.log("Choix du filtre Cinema = ", filtreCinema);
+                console.log("Choix du filtre Cinema = ", dataController.filterNameCinema);
                 // Stocker dans le cookie pour 30 jours
-                setCookie('selectedCinema', filtreCinema, 30);
+                setCookie('selectedCinema', dataController.filterNameCinema, 30);
                 // Mettre à jour l'affichage du bouton
                 updateDropdownDisplay(val);
                 // Mettre à jour le titre droit
                 const titleLeft = document.getElementById('titleLeft');
                 if (titleLeft) {
-                    if (filtreCinema === 'all') {
+                    if (dataController.filterNameCinema === 'all') {
                         titleLeft.innerText = 'Les films de CinePhoria';
                     }
                     else {
                         titleLeft.innerText = `Les films de CinePhoria à ${val}`;
                     }
                 }
-                dataController.nameCinema = filtreCinema;
                 yield dataController.init();
                 // Rafraichir le dropdown des genres
                 initFiltreGenre;
@@ -114,14 +110,6 @@ function initFiltreGenre() {
         const dropdownContent = dropdownGenre.querySelector('.title__filter-button-drowdown-content');
         if (!dropdownContent)
             return;
-        // Pour être dynamique, on va extraire tous les genres dans dataController.allFilms ou allSeances
-        // Regrouper dans un set
-        const genreSet = new Set();
-        dataController.allFilms.forEach((f) => {
-            if (f.genreArray) {
-                f.genreArray.split(',').forEach((g) => genreSet.add(g.trim()));
-            }
-        });
         // Vider le dropdownContent, ajouter un item "Tous"
         dropdownContent.innerHTML = '';
         const aTous = document.createElement('a');
@@ -129,18 +117,18 @@ function initFiltreGenre() {
         aTous.textContent = 'Tous les genres';
         aTous.addEventListener('click', (ev) => {
             ev.preventDefault();
-            filtreGenre = 'all';
+            dataController.filterGenre = 'all';
             rafraichirListeFilms();
         });
         dropdownContent.appendChild(aTous);
         // Créer un <a> par genre
-        genreSet.forEach((genre) => {
+        dataController.genreSet.forEach((genre) => {
             const a = document.createElement('a');
             a.href = '#';
             a.textContent = genre;
             a.addEventListener('click', (ev) => {
                 ev.preventDefault();
-                filtreGenre = genre;
+                dataController.filterGenre = genre;
                 rafraichirListeFilms();
             });
             dropdownContent.appendChild(a);
@@ -184,18 +172,12 @@ function construireListeJours() {
     // Ici, on se contente de recalculer min/max 
     // en fonction du cinema filtré ?
     // Dans la démo, on fait simple : 
-    //   - si filtreCinema=all, on prend dataController.allSeances 
-    //   - sinon on filtre : .filter(s => s.nameCinema === filtreCinema)
     //   - on trie par date
     //   - on set le min / max
     const inputDate = document.querySelector('.filter-jour-input');
     if (!inputDate)
         return;
-    let seances = dataController.allSeances;
-    if (filtreCinema !== 'all') {
-        seances = seances.filter((s) => s.nameCinema === filtreCinema);
-    }
-    const datesValides = seances.map((s) => s.dateJour || '').filter(Boolean).sort();
+    const datesValides = dataController.seances.map((s) => s.dateJour || '').filter(Boolean).sort();
     if (datesValides.length === 0) {
         inputDate.min = '';
         inputDate.max = '';
@@ -213,23 +195,7 @@ function rafraichirListeFilms() {
         return;
     container.innerHTML = '';
     // Filtrer
-    let films = dataController.allFilms;
-    // Cinéma
-    if (filtreCinema !== 'all') {
-        films = films.filter((f) => {
-            const seancesFilm = dataController.seancesFilm(f.id);
-            return seancesFilm.some((s) => s.nameCinema === filtreCinema);
-        });
-    }
-    // Genre
-    if (filtreGenre !== 'all') {
-        films = films.filter((f) => {
-            if (!f.genreArray)
-                return false;
-            const genres = f.genreArray.split(',').map((g) => g.trim().toLowerCase());
-            return genres.includes(filtreGenre.toLowerCase());
-        });
-    }
+    let films = dataController.filmsGenre; // Film filtré par cinema et genre
     // Jour
     if (filtreJour) {
         films = films.filter((f) => {

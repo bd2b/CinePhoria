@@ -24,6 +24,9 @@ interface Film {
 
 export async function onLoadVisiteur() {
   console.log(" ===>  onLoadVisiteur");
+  // On initialise le dataController si il est vide
+  if (dataController.allSeances.length === 0 ) await dataController.init()
+  
 
 
 

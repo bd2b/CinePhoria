@@ -19,8 +19,12 @@ import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReserva
  */
 export function onLoadReservation() {
     return __awaiter(this, void 0, void 0, function* () {
-        // On restore le dataController avant tout
-        yield dataController.chargerComplet();
+        // On initialise le dataController si il est vide
+        if (dataController.allSeances.length === 0)
+            yield dataController.init();
+        // On se positionne sur le dernier cinema selectionne au cas ou on lance la fenetre avec all
+        if (dataController.filterNameCinema === 'all')
+            dataController.filterNameCinema = dataController.selectedNameCinema;
         // On se positionne sur le cinema si il a été déjà défini ou on affiche une modale de selection du cinema
         yield updateCinema();
         if (["PendingChoiceSeance", "PendingChoiceSeats"].includes(dataController.reservationState)) {
@@ -36,15 +40,15 @@ export function onLoadReservation() {
             // Mise a jour de la page
             yield updateContentPage(dataController);
             // Verification dataController
-            console.log(`dataController.nameCinema = ${dataController.nameCinema} nombre de séances = ${dataController.allSeances.length}`);
+            console.log(`dataController.filteredNameCinema = ${dataController.filterNameCinema} nombre de séances = ${dataController.allSeances.length}`);
         }
         if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
             "ReserveToConfirm"].includes(dataController.reservationState)) {
             // On a une reservation pendante mise à jour de la page pour afficher la reservation
             // Verification sur la reservation en cours est sur le cinema selectionne
             if (dataController.selectedReservationCinema) {
-                if (dataController.nameCinema !== dataController.selectedReservationCinema) {
-                    dataController.nameCinema = dataController.selectedReservationCinema;
+                if (dataController.filterNameCinema !== dataController.selectedReservationCinema) {
+                    dataController.filterNameCinema = dataController.selectedReservationCinema;
                 }
             }
             yield updateDisplayReservation();
@@ -90,7 +94,14 @@ export function updateCinema() {
         // Mise à jour du titre
         const titleLeft = document.getElementById('titleLeft');
         if (titleLeft) {
-            titleLeft.innerText = `Réservez au CinePhoria de ${dataController.nameCinema}`;
+            if (dataController.filterNameCinema === 'all') {
+                // Ne doit pas se produire car le choix all n'est pas permis sur la sélectionde la page
+                // A fixer
+                titleLeft.innerText = `Réservez au CinePhoria all à gérer`;
+            }
+            else {
+                titleLeft.innerText = `Réservez au CinePhoria de ${dataController.filterNameCinema}`;
+            }
         }
         // Définition des interactions dans les dropdowns de selection de cinema (celui de la modale ou celui du titre droit)
         dropdownContents.forEach((content) => {
@@ -113,9 +124,9 @@ export function updateCinema() {
                             titleLeft.innerText = `Réservez au CinePhoria de ${cinema}`;
                         }
                         // Mettre à jour le dataController
-                        dataController.nameCinema = cinema;
+                        dataController.filterNameCinema = cinema;
                         // Chargement des données
-                        yield dataController.init();
+                        // await dataController.init()
                         // Identifier le film par defaut
                         const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
                         if (!filmSeancesCandidat[0].filmId)
@@ -237,7 +248,7 @@ function afficherListeFilms() {
     if (!container)
         return;
     // Extraire les films uniques
-    const filmsUniques = dataController.allFilms;
+    const filmsUniques = dataController.films;
     const seances = dataController.seancesFutures;
     console.log("Nombre de films dans la liste : ", filmsUniques.length, " nombre de seances =", seances.length);
     container.innerHTML = '';
