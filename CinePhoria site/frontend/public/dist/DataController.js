@@ -9,13 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 /**
  * DataController : gestion de la persistence des données
- * On utilise un cache dans le storage qui reçoit l'ensemble des SeancesFilmsSalle du cinema
+ * On utilise un cache dans le storage qui reçoit l'ensemble des SeancesFilmsSalle du cinema pour tous les cinemas
  * L'initialisation se fait en deux temps car le chargement en asynchrone ne peut se faire dans le constructeur
  * - Le constructeur
- *      positionne le nom du cinema
+ *      positionne le nom du cinema filtré (all est l'ensemble de tous les cinémas)
  *      si le cache existe et est valide (date de moins d'1 heure) charge les données
  *      initialise le tableau des films
- * - Chargement des données déclenché en asynchrone par la ViewReservation
+ * - Chargement des données déclenché en asynchrone n'importe quelle page utilisatrice
  *      fetch les séances pour le cinema
  *      initialise le tableau des films
  *      sauvegarde dans le storage
@@ -23,6 +23,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
  * On dispose des propriétés :
  * - Toutes les séances sur lesquels on a des helpers , séancesFutures, Séances d'un jour pour un film....
  * - Tous les films avec des helpers également
+ * Les mêmes données mais filtré selon la valeur de filterNameCinema
  */
 import { Seance, TarifQualite } from './shared-models/Seance.js'; // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { Film } from './shared-models/Film.js';
@@ -47,6 +48,46 @@ export var ReservationState;
     ReservationState["ReserveConfirmed"] = "ReserveConfirmed"; // La reservation est confirmé après login sur un compte existant, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
 })(ReservationState || (ReservationState = {}));
 export class DataController {
+    // 🏆 Variable calculée : retourne les séances filtrées par cinéma
+    get seances() {
+        if (this.filterNameCinema === 'all') {
+            return this._allSeances;
+        }
+        else {
+            return this._allSeances.filter(seance => seance.nameCinema === this._filterNameCinema);
+        }
+    }
+    // 🏆 Variable calculée : retourne les films filtrés par cinéma ayant une séeance dans les 00 jours
+    get films() {
+        const dateMax = new Date();
+        dateMax.setDate((dateMax).getDate() + 90);
+        return this.extractFilmsFromSeances(new Date(), dateMax);
+    }
+    // Variable calculée : retourne tous les genres des films filtrés sur le nom du cinema
+    get genreSet() {
+        // Pour être dynamique, on va extraire tous les genres dans dataController.allFilms ou allSeances
+        // Regrouper dans un set
+        const genreSet = new Set();
+        dataController.films.forEach((f) => {
+            if (f.genreArray) {
+                f.genreArray.split(',').forEach((g) => genreSet.add(g.trim()));
+            }
+        });
+        return genreSet;
+    }
+    // Variable calculee : liste des films filtré sur le cinéma puis sur le genre Genre
+    get filmsGenre() {
+        let films = this.films;
+        if (this._filterGenre !== 'all') {
+            films = this.films.filter((f) => {
+                if (!f.genreArray)
+                    return false;
+                const genres = f.genreArray.split(',').map((g) => g.trim().toLowerCase());
+                return genres.includes(this._filterGenre.toLowerCase());
+            });
+        }
+        return films;
+    }
     // Getter pour reservationState
     get reservationState() {
         return this._reservationState;
@@ -56,44 +97,61 @@ export class DataController {
         console.log("Mise a jour statut reservation = " + value);
         this._reservationState = value;
     }
-    // Getter pour toutes les séances
+    // Getter pour toutes les séances de tous les cinemas
     get allSeances() {
-        return this._seances;
+        return this._allSeances;
     }
-    // Getter pour calculer les séances futures
+    // Getter pour calculer les séances futures sur le cinema filtre
     get seancesFutures() {
-        return this._seances.filter(s => new Date(s.dateJour || '') >= new Date());
+        return this.seances.filter(s => new Date(s.dateJour || '') >= new Date());
     }
     // Getter pour tous les tarifs
     get allTarifQualite() {
         return this._tarifQualite;
     }
-    // Getter pour tous les films
-    get allFilms() {
-        return this._films;
+    // // Getter pour tous les films
+    // get allFilms(): Film[] {
+    //     return this._films;
+    // }
+    // Getter pour filterNameCinema
+    get filterNameCinema() {
+        return this._filterNameCinema;
     }
-    // Getter pour nameCinema
-    get nameCinema() {
-        return this._nameCinema;
-    }
-    set nameCinema(value) {
+    // Setter pour filterNameCinema
+    set filterNameCinema(value) {
         if (value.trim() === '') {
             throw new Error('Le nom du cinéma ne peut pas être vide.');
         }
-        const isNewCinema = (value !== this._nameCinema);
-        this._nameCinema = value;
-        if (isNewCinema) {
-            // 1) Expiration du cookie dateAccess (pour forcer le rechargement)
-            setCookie(DataController.nomCookieDateAccess, ' ', -1);
-            // 2) Vider ou invalider le localStorage
-            localStorage.removeItem(DataController.nomStorage);
-            // 3) Vider les tableaux internes
-            this._seances = [];
-            this._films = [];
-            this._tarifQualite = [];
-            // 4) Re-lancement de la logique de chargement
-            this.init();
-        }
+        // On memorise le dernier cinema filté comme cinema selectionné dans la page Reservation
+        if (value.trim() !== 'all')
+            this._selectedNameCinema = value.trim();
+        // const isNewCinema = (value !== this._filterNameCinema);
+        this._filterNameCinema = value;
+        // if (isNewCinema) {
+        //   // 1) Expiration du cookie dateAccess (pour forcer le rechargement)
+        //   setCookie(DataController.nomCookieDateAccess, ' ', -1);
+        //   // 2) Vider ou invalider le localStorage
+        //   localStorage.removeItem(DataController.nomStorage); 
+        //   // 3) Vider les tableaux internes
+        //   this._seances = [];
+        //   this._films = [];
+        //   this._tarifQualite = [];
+        //   // 4) Re-lancement de la logique de chargement
+        //   this.init();
+        // }
+    }
+    // Getter pour cinema selectionne (non modifiable directement)
+    // Getter pour selectedNameCinema
+    get selectedNameCinema() {
+        return this._selectedNameCinema;
+    }
+    // Getter pour filterGenre
+    get filterGenre() {
+        return this._filterGenre;
+    }
+    // Setter pour filterGenre
+    set filterGenre(value) {
+        this._filterGenre = value;
     }
     // Getter pour selectedFilmUID
     get selectedFilmUUID() {
@@ -113,7 +171,7 @@ export class DataController {
         }
         else {
             console.error("selectedFilm : Film non trouvé, premier film pris");
-            return this._films[0]; // ne doit pas se produire
+            return this.films[0]; // ne doit pas se produire
         }
     }
     // Getter pour selectedSeanceDate
@@ -173,42 +231,45 @@ export class DataController {
     }
     constructor(nameCinema) {
         this._reservationState = ReservationState.PendingChoiceSeance;
-        this._seances = [];
-        this._films = [];
+        // Ensemble des données chargées systématiquement
+        this._allSeances = [];
         this._tarifQualite = [];
-        this._nameCinema = nameCinema;
-        console.log("New avec " + nameCinema);
+        this._filterNameCinema = "all"; // On filtre sur tous les cinémas par défaut
+        this._selectedNameCinema = "Paris"; // Par defaut le cinema selectionne dans la page Reservation
+        this._filterGenre = "all"; // Filtre sur tous les genres 
+        this._filterNameCinema = nameCinema;
+        console.log("New dataController avec filtre Cinema" + nameCinema);
         // Le constructeur ne fait pas d’appel asynchrone
         // On doit appeler manuellement dataController.init() après l’avoir construit
     }
     // Méthode asynchrone pour initialiser les données depuis l'API
+    // On charge l'ensemble des données de tous les cinemas, on filtrera en local
     chargerDepuisAPI() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                if (this._nameCinema !== "Selectionnez un cinema") {
-                    const response = yield fetch(`http://localhost:3500/api/seances/filter?cinemasList="${this.nameCinema}"`);
-                    const rawData = yield response.json();
-                    if (!Array.isArray(rawData)) {
-                        throw new Error('La réponse de l’API n’est pas un tableau.');
-                    }
-                    // Convertir les données brutes en instances de Seance
-                    this._seances = rawData.map((d) => new Seance(d));
-                    this.extractFilmsFromSeances();
-                    console.log(`Pour ${this.nameCinema} : chargement depuis l'API : ${this._seances.length} séances, ${this._films.length} films`);
-                    // On recupere les tarifs
-                    const responseTarif = yield fetch(`http://localhost:3500/api/seances/tarif`);
-                    const rawDataTarif = yield responseTarif.json();
-                    if (!Array.isArray(rawDataTarif)) {
-                        throw new Error('La réponse de l’API n’est pas un tableau.');
-                    }
-                    // Convertir les données brutes en instances de Tarif
-                    this._tarifQualite = rawDataTarif.map((t) => new TarifQualite(t));
-                    console.log(`Pour ${this.nameCinema} : chargement depuis l'API : ${this._tarifQualite.length} tarifs`);
-                    // Enregistrement de la date 
-                    setCookie(DataController.nomCookieDateAccess, (new Date()).toISOString(), 1);
-                    // Sauvegarder dans localStorage
-                    this.sauverComplet();
+                //  if (this._nameCinema !== "Selectionnez un cinema") {
+                const response = yield fetch(`http://localhost:3500/api/seances/filter?cinemasList="all"`);
+                const rawData = yield response.json();
+                if (!Array.isArray(rawData)) {
+                    throw new Error('La réponse de l’API n’est pas un tableau.');
                 }
+                // Convertir les données brutes en instances de Seance
+                this._allSeances = rawData.map((d) => new Seance(d));
+                console.log(`Pour l'ensembles des cinemas, chargement depuis l'API : ${this.seances.length} séances, ${this.films.length} films`);
+                // On recupere les tarifs
+                const responseTarif = yield fetch(`http://localhost:3500/api/seances/tarif`);
+                const rawDataTarif = yield responseTarif.json();
+                if (!Array.isArray(rawDataTarif)) {
+                    throw new Error('La réponse de l’API n’est pas un tableau.');
+                }
+                // Convertir les données brutes en instances de Tarif
+                this._tarifQualite = rawDataTarif.map((t) => new TarifQualite(t));
+                console.log(`Pour l'ensemble des tarifs : chargement depuis l'API : ${this._tarifQualite.length} tarifs`);
+                // Enregistrement de la date de validité
+                setCookie(DataController.nomCookieDateAccess, (new Date()).toISOString(), 1);
+                // Sauvegarder dans localStorage
+                this.sauverComplet();
+                //  }
             }
             catch (error) {
                 console.error('Erreur lors du chargement des données de séances : ', error);
@@ -216,21 +277,23 @@ export class DataController {
         });
     }
     /**
-     * Extraction des films à partir des dates
-     * @param date : permet de traiter une selection de séances à partir d'une date, initialisé par défaut à la date du jour
-     * cela donne les films qui ont une séance à aujourd'hui ou ultérieurment
+     * Extraction des films du tableau seance (filtré sur filterNameCinema) ayant une séance entre deux dates,
+     * @param dateInf : Date inférieur initialisée par défaut à la date du jour
+     * @param dateSup : Date supérieur initialisée par défaut à la date du jour
+     * cela donne par défaut les films qui ont une séance à aujourd'hui et possibilité de gérer une plage de date quelconque
      */
-    extractFilmsFromSeances(date = new Date()) {
+    extractFilmsFromSeances(dateInf = new Date(), dateSup = new Date()) {
         // Utiliser une Map pour éviter les duplications (clé : filmId)
         const filmMap = new Map();
-        this._seances.forEach((seance) => {
+        this.seances.forEach((seance) => {
             const filmId = seance.filmId;
             if (!filmId)
                 return; // Ignorer si filmId est absent
             //   console.log("iteration 2" , !filmMap.has(filmId), (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) === formatDateLocalYYYYMMDD(date)))
             //   console.log(formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')), " = " , formatDateLocalYYYYMMDD(date)) 
             if (!filmMap.has(filmId) &&
-                (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) === formatDateLocalYYYYMMDD(date))) {
+                (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) >= formatDateLocalYYYYMMDD(dateInf)) &&
+                (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) <= formatDateLocalYYYYMMDD(dateSup))) {
                 filmMap.set(filmId, new Film({
                     id: filmId,
                     titleFilm: seance.titleFilm,
@@ -250,101 +313,81 @@ export class DataController {
                 }));
             }
         });
-        // Convertir la Map en tableau de films
-        this._films = Array.from(filmMap.values());
+        // Convertir la Map en tableau de films et retour
+        return Array.from(filmMap.values());
     }
     ;
-    // Les séance d'un film pour un jour donne
+    // Les séances d'un film pour un jour donne
     seancesFilmJour(filmId, date = new Date()) {
-        return this._seances.filter((s) => s.filmId === filmId &&
+        return this.seances.filter((s) => s.filmId === filmId &&
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date));
     }
     // Les séances d'un film sur une periode de jours
     seancesFilmDureeJour(filmId, dateDeb = new Date(), nombreJours) {
-        return this._seances.filter((s) => s.filmId === filmId &&
+        return this.seances.filter((s) => s.filmId === filmId &&
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) >= formatDateLocalYYYYMMDD(dateDeb) &&
             formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) < formatDateLocalYYYYMMDD(ajouterJours(dateDeb, nombreJours)));
     }
     // Toutes les séances d'un jour
     seancesJour(date = new Date()) {
-        return this._seances.filter((s) => formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date));
+        return this.seances.filter((s) => formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date));
     }
     // Toutes les séances d'un film
     seancesFilm(filmId) {
-        return this._seances.filter((s) => s.filmId === filmId);
+        return this.seances.filter((s) => s.filmId === filmId);
     }
     // Tous les films pour un jour
     filmsJour(date = new Date()) {
-        // Utilisation d'une Map pour éviter les doublons
-        const filmMap = new Map();
-        this.seancesJour(date).forEach((seance) => {
-            const filmId = seance.filmId;
-            if (filmId && !filmMap.has(filmId)) {
-                filmMap.set(filmId, new Film({
-                    id: filmId,
-                    titleFilm: seance.titleFilm,
-                    filmPitch: seance.filmPitch,
-                    genreArray: seance.genreArray,
-                    duration: seance.duration,
-                    linkBO: seance.linkBO,
-                    dateSortieCinePhoria: seance.dateSortieCinePhoria,
-                    categorySeeing: seance.categorySeeing,
-                    note: seance.note ? parseFloat(seance.note) : undefined, // Convertir en number si nécessaire
-                    isCoupDeCoeur: seance.isCoupDeCoeur === '1', // Convertir en boolean
-                    filmDescription: seance.filmDescription,
-                    filmAuthor: seance.filmAuthor,
-                    filmDistribution: seance.filmDistribution,
-                    imageFilm128: seance.imageFilm128,
-                    imageFilm1024: seance.imageFilm1024,
-                }));
-            }
-        });
-        // Retourner les films uniques sous forme de tableau
-        return Array.from(filmMap.values());
+        return this.extractFilmsFromSeances(date, date);
+        // // Utilisation d'une Map pour éviter les doublons
+        // const filmMap = new Map<string, Film>();
+        // this.seancesJour(date).forEach((seance) => {
+        //     const filmId = seance.filmId;
+        //     if (filmId && !filmMap.has(filmId)) {
+        //         filmMap.set(filmId, new Film({
+        //             id: filmId,
+        //             titleFilm: seance.titleFilm,
+        //             filmPitch: seance.filmPitch,
+        //             genreArray: seance.genreArray,
+        //             duration: seance.duration,
+        //             linkBO: seance.linkBO,
+        //             dateSortieCinePhoria: seance.dateSortieCinePhoria,
+        //             categorySeeing: seance.categorySeeing,
+        //             note: seance.note ? parseFloat(seance.note) : undefined, // Convertir en number si nécessaire
+        //             isCoupDeCoeur: seance.isCoupDeCoeur === '1', // Convertir en boolean
+        //             filmDescription: seance.filmDescription,
+        //             filmAuthor: seance.filmAuthor,
+        //             filmDistribution: seance.filmDistribution,
+        //             imageFilm128: seance.imageFilm128,
+        //             imageFilm1024: seance.imageFilm1024,
+        //         }));
+        //     }
+        // });
+        // // Retourner les films uniques sous forme de tableau
+        // return Array.from(filmMap.values());
     }
     filmUUID(filmId) {
-        const film = this._films.find((film) => {
+        const film = this.films.find((film) => {
             return film.id == filmId;
         });
         if (!film) {
             console.error("filmUUID : Film non trouvé, premier film pris");
-            return this._films[0]; // ne doit jamais se produire
+            return this.films[0]; // ne doit jamais se produire
         }
         return film;
     }
     seanceSelected() {
-        return this._seances.filter((s) => s.seanceId === this._selectedSeanceUUID)[0];
-    }
-    sauver() {
-        const dataToSave = {
-            seances: this._seances,
-            tarifQualite: this._tarifQualite
-        };
-        localStorage.setItem(DataController.nomStorage, JSON.stringify(dataToSave));
-    }
-    charger() {
-        const saved = localStorage.getItem(DataController.nomStorage);
-        if (saved) {
-            const parsed = JSON.parse(saved);
-            // Restaurer les séances
-            this._seances = (parsed.seances || []).map((s) => (Object.assign(Object.assign({}, s), { date: new Date(s.date) // Convertir les dates en objets `Date`
-             })));
-            // Restaurer les films
-            this._tarifQualite = parsed.tarifQualite || [];
-        }
-        else {
-            console.warn("Aucune donnée trouvée dans le localStorage.");
-        }
+        return this.seances.filter((s) => s.seanceId === this._selectedSeanceUUID)[0];
     }
     sauverComplet() {
         var _a;
         // Construire un objet « snapshot » de tout ce qu’on veut persister
         const snapshot = {
             reservationState: this._reservationState,
-            seances: this._seances,
-            films: this._films,
+            seances: this._allSeances,
             tarifQualite: this._tarifQualite,
-            nameCinema: this._nameCinema,
+            nameCinema: this._filterNameCinema,
+            selectedNameCinema: this._selectedNameCinema,
             selectedFilmUUID: this._selectedFilmUUID,
             selectedSeanceDate: ((_a = this._selectedSeanceDate) === null || _a === void 0 ? void 0 : _a.toISOString()) || null,
             selectedSeanceUUID: this._selectedSeanceUUID,
@@ -372,18 +415,15 @@ export class DataController {
                 // Restauration des séances
                 if (Array.isArray(parsed.seances)) {
                     // Convertir en instances de Seance si besoin
-                    this._seances = parsed.seances.map((s) => new Seance(s));
-                }
-                // Restauration des films (si vous les enregistrez, attention à leur typage)
-                if (Array.isArray(parsed.films)) {
-                    this._films = parsed.films.map((f) => new Film(f));
+                    this._allSeances = parsed.seances.map((s) => new Seance(s));
                 }
                 // Restauration des tarifs
                 if (Array.isArray(parsed.tarifQualite)) {
                     this._tarifQualite = parsed.tarifQualite.map((t) => new TarifQualite(t));
                 }
                 // Autres champs
-                this._nameCinema = (_a = parsed.nameCinema) !== null && _a !== void 0 ? _a : 'Selectionnez un cinema';
+                this._filterNameCinema = (_a = parsed._filterNameCinema) !== null && _a !== void 0 ? _a : 'Selectionnez un cinema';
+                this._selectedNameCinema = parsed._selectedNameCinema || undefined;
                 this._selectedFilmUUID = parsed.selectedFilmUUID || undefined;
                 this._selectedSeanceUUID = parsed.selectedSeanceUUID || undefined;
                 this._selectedUtilisateurUUID = parsed.selectedUtilisateurUUID || undefined;
@@ -416,7 +456,7 @@ export class DataController {
                 }
             }
             // 3) Si invalidité du cache, on va recharger
-            if (!this._seances.length || mustReload) {
+            if (!this.seances.length || mustReload) {
                 console.log('[init] Cache inexistant ou expiré -> rechargement depuis l’API');
                 yield this.chargerDepuisAPI();
             }
@@ -429,6 +469,10 @@ export class DataController {
 DataController.validiteCache = 1; // Apres validiteCache heure on force le rechargement des données
 DataController.nomCookieDateAccess = 'dateAccess'; // Nom du cookie pour stocker la date de mise à jour
 DataController.nomStorage = 'storage'; // Nom du storage pour stocker toutes les SeancesFilmsSalle du cinema
+/* ---------------------------------------
+-- Initialisation du dataController
+-- partagé entre toutes les pages
+-----------------------------------------*/
 let cinema = getCookie('selectedCinema');
 if (!cinema) {
     cinema = "Paris";
