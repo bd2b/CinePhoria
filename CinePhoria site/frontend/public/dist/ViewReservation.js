@@ -7,16 +7,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { setCookie } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD } from './Helpers.js';
 import { ReservationState, dataController } from './DataController.js';
 import { updateContentPlace } from './ViewReservationPlaces.js';
 import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReservationDisplay.js';
-/** Chargement ou raffraichissement de la page
- * Au premier chargement une fenetre modale permet de choisir un site, dans ce cas le cookie selectedCinema est positionné avec la valeur choisie
- * Aux chargements on recupère la valeur du cookie
- * On peut changer cette valeur via le dropdown button droit sur le titre
- */
 export function onLoadReservation() {
     return __awaiter(this, void 0, void 0, function* () {
         // On initialise le dataController si il est vide
@@ -88,9 +82,9 @@ export function updateCinema() {
             });
         }
         // Le cinema est initialisé dans DataController.ts , par défaut paris
-        yield dataController.init();
+        // await dataController.init();
         // Mettre à jour l'affichage initial du dropdown sur le composant titre
-        updateDropdownDisplay("Changer de cinema");
+        updateDropdownDisplay(dataController.selectedNameCinema);
         // Mise à jour du titre
         const titleLeft = document.getElementById('titleLeft');
         if (titleLeft) {
@@ -114,10 +108,8 @@ export function updateCinema() {
                     const cinema = (_a = link.textContent) === null || _a === void 0 ? void 0 : _a.trim();
                     if (cinema) {
                         console.log("1 - Nouvelle valeur de cinema = ", cinema);
-                        // Stocker dans le cookie pour 30 jours
-                        setCookie('selectedCinema', cinema, 30);
                         // Mettre à jour l'affichage du bouton
-                        updateDropdownDisplay("Changez de cinema");
+                        updateDropdownDisplay(cinema);
                         // Mettre à jour le titre droit
                         const titleLeft = document.getElementById('titleLeft');
                         if (titleLeft) {
@@ -164,15 +156,9 @@ export function updateContentPage(dataController) {
         if (!activeSelectedFilmUUID)
             return;
         const activeSelectedFilm = dataController.selectedFilm;
-        const seancesFilm = dataController.seancesFilmJour(activeSelectedFilmUUID);
-        console.log("UCP 2 - Film par defaut = ", activeSelectedFilm.titleFilm, " Nombre de séances", dataController.seancesFilmJour(activeSelectedFilm.id).length, " Date : ", formatDateLocalYYYYMMDD(new Date(seancesFilm[0].dateJour || '')));
-        // const seanceData = seancesFilm.map(seance => ({
-        //   titre: seance.titleFilm,
-        //   salle: seance.nameSalle,
-        //   date: seance.dateJour,
-        //   heureDebut: seance.hourBeginHHSMM
-        // }));
-        // console.log("UCP 3 - Liste des séances du film candidat = ", seanceData);
+        const premierJour = dataController.premierJour(activeSelectedFilmUUID);
+        const seancesFilm = dataController.seancesFilmJour(activeSelectedFilmUUID, premierJour);
+        console.log("UCP 2 - Film par defaut = ", activeSelectedFilm.titleFilm, " Nombre de séances", dataController.seancesFilmJour(activeSelectedFilm.id, premierJour).length, " Date : ", premierJour);
         // Si on est sans reservation prise, on affiche la liste des films et le film selectionne
         if (["PendingChoiceSeance", "PendingChoiceSeats"].includes(dataController.reservationState)) {
             afficherListeFilms();
@@ -185,10 +171,11 @@ export function updateContentPage(dataController) {
             // On affiche le calendrier et les seances de chaque jour
             console.log("ETAT : choix de la séance");
             // Composer la ligne de tabulation du panel de choix des séances
-            afficherSemaines(dataController);
+            afficherSemaines(premierJour);
             console.log("UCP 7 - Lignes de tabulation des jours affichées");
             // Afficher les séances du jour pour le film sélectionné
-            afficherSeancesDuJour(dataController, new Date(seancesFilm[0].dateJour || ''));
+            // afficherSeancesDuJour(new Date(seancesFilm[0].dateJour || ''));
+            afficherSeancesDuJour(premierJour);
             console.log(`UCP 8 - Séances affichées pour ${activeSelectedFilm.titleFilm} le ${new Date(seancesFilm[0].dateJour || '')}`);
         }
         else if (dataController.reservationState = ReservationState.PendingChoiceSeats) {
@@ -364,7 +351,7 @@ export function afficherDetailsFilm() {
 * @param dateDebut de la plage Date de début (par défaut : aujourd'hui) ou un mercredi
 * @param isInitial Indique si c'est la première fois (affichage jusqu'au mardi)
 */
-function afficherSemaines(dataController, dateDebut = new Date(), isInitial = true) {
+function afficherSemaines(dateDebut = new Date(), isInitial = true) {
     const panelTabs = document.querySelector('.panel__tabs');
     if (!panelTabs)
         return;
@@ -374,34 +361,35 @@ function afficherSemaines(dataController, dateDebut = new Date(), isInitial = tr
     // Vider le contenu
     panelTabs.innerHTML = '';
     // Dates localisées à midi, pour éviter le décalage de fuseau horaire
-    const dAujourdhui = creerDateLocale(new Date());
+    // On se positionne par rapport à la date du jour de premiere projection
+    const dPremierJour = dataController.premierJour(dataController.selectedFilmUUID);
     const dDebut = creerDateLocale(dateDebut);
     // Calcul de la date de fin : 
     //   - Soit jusqu'au mardi suivant (cas initial)
     //   - Soit +6 jours (7 jours) dans les autres cas
-    const finAffichage = isInitial ? dateProchainMardi(dAujourdhui) : ajouterJours(dDebut, 6);
+    const finAffichage = isInitial ? dateProchainMardi(dateDebut) : ajouterJours(dDebut, 6);
     // Si on n'a pas de seance pour le film dans la semaine, on ne fait rien.
     if (dataController.seancesFilmDureeJour(filmId, dDebut, 6).length === 0)
         return;
     // === Bouton "Avant" ===
     // On ne l’affiche pas pour le cas initial
-    // Et seulement si la dateDebut est postérieure à aujourd’hui
-    if (!isInitial && dDebut.getTime() > dAujourdhui.getTime()) {
+    // Et seulement si la dateDebut est postérieure à la date de premiere projection
+    if (!isInitial && dDebut.getTime() > dPremierJour.getTime()) {
         const avant = document.createElement('p');
         avant.classList.add('tabs__tab-p', 'tabs__tab-nav-p', 'tabs__tab-nav-prec-p');
         avant.textContent = 'Avant';
         avant.addEventListener('click', () => {
             const dateAvant = ajouterJours(dDebut, -7);
-            // Si on revient sur ou avant aujourd’hui, on repasse en mode initial
+            // Si on revient sur ou avant la date de premiere projection, on repasse en mode initial
             // On affiche la semaine ou le debut de semaine dans tab
             // On se positionne sur le premier jour de la semaine
-            if (dateAvant.getTime() <= dAujourdhui.getTime()) {
-                afficherSemaines(dataController, dAujourdhui, true);
-                afficherSeancesDuJour(dataController, dAujourdhui);
+            if (dateAvant.getTime() <= dPremierJour.getTime()) {
+                afficherSemaines(dPremierJour, true);
+                afficherSeancesDuJour(dPremierJour);
             }
             else {
-                afficherSemaines(dataController, dateAvant, false);
-                afficherSeancesDuJour(dataController, dateAvant);
+                afficherSemaines(dateAvant, false);
+                afficherSeancesDuJour(dateAvant);
             }
         });
         panelTabs.appendChild(avant);
@@ -411,7 +399,7 @@ function afficherSemaines(dataController, dateDebut = new Date(), isInitial = tr
     let nJourAvecSeance = 0;
     while (current.getTime() <= finAffichage.getTime()) {
         // On n’affiche jamais avant aujourd’hui
-        if (current.getTime() >= dAujourdhui.getTime()) {
+        if (current.getTime() >= dPremierJour.getTime()) {
             if (dataController.seancesFilmJour(dataController.selectedFilmUUID, current).length > 0) {
                 // Il y a au moins une séance pour ce film ce jour
                 nJourAvecSeance += 1;
@@ -421,7 +409,7 @@ function afficherSemaines(dataController, dateDebut = new Date(), isInitial = tr
                 // Capturer la date dans une closure pour éviter le décalage
                 const dateForHandler = new Date(current.getTime());
                 jourItem.addEventListener('click', () => {
-                    afficherSeancesDuJour(dataController, dateForHandler);
+                    afficherSeancesDuJour(dateForHandler);
                 });
                 panelTabs.appendChild(jourItem);
             }
@@ -440,8 +428,8 @@ function afficherSemaines(dataController, dateDebut = new Date(), isInitial = tr
             const dateApres = ajouterJours(finAffichage, 1);
             console.log("Apres = ", dateApres);
             dataController.selectedSeanceDate = dateApres;
-            afficherSemaines(dataController, dateApres, false);
-            afficherSeancesDuJour(dataController, dateApres);
+            afficherSemaines(dateApres, false);
+            afficherSeancesDuJour(dateApres);
         });
         panelTabs.appendChild(apres);
     }
@@ -450,7 +438,7 @@ function afficherSemaines(dataController, dateDebut = new Date(), isInitial = tr
 * Affiche la liste des séances dans la zone .panel__choix .panel__seances
 * pour un filmId donné à une date précise.
 */
-function afficherSeancesDuJour(dataController, dateSelectionnee) {
+function afficherSeancesDuJour(dateSelectionnee) {
     var _a, _b;
     // Moment le plus pratique pour capter la mise à jour de la date selectionnee dans le panel de tabs de jour
     // et effacer la mémorisation d'une éventuelle sélection

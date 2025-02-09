@@ -9,7 +9,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 // ViewFilm.ts
 import { dataController } from './DataController.js';
-import { setCookie } from './Helpers.js';
 //let dataController.filterNameCinema = dataController.filterNameCinema;
 // let filtreGenre = dataController.filterGenre;
 let filtreJour = '';
@@ -77,8 +76,6 @@ function initFiltreCinema() {
                     dataController.filterNameCinema = val; // ex: "Paris"
                 }
                 console.log("Choix du filtre Cinema = ", dataController.filterNameCinema);
-                // Stocker dans le cookie pour 30 jours
-                setCookie('selectedCinema', dataController.filterNameCinema, 30);
                 // Mettre à jour l'affichage du bouton
                 updateDropdownDisplay(val);
                 // Mettre à jour le titre droit
