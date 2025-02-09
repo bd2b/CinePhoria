@@ -76,8 +76,7 @@ async function initFiltreCinema(): Promise<void> {
             }
             
             console.log("Choix du filtre Cinema = ", dataController.filterNameCinema);
-            // Stocker dans le cookie pour 30 jours
-            setCookie('selectedCinema', dataController.filterNameCinema, 30);
+            
             // Mettre à jour l'affichage du bouton
             updateDropdownDisplay(val);
             // Mettre à jour le titre droit

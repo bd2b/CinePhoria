@@ -190,3 +190,15 @@ export function getPlacesReservationApi(reservationId) {
         return places;
     });
 }
+export function isLogged() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = localStorage.getItem('jwtToken');
+        const response = yield fetch(`http://localhost:3500/api/login/isLogged`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+    });
+}

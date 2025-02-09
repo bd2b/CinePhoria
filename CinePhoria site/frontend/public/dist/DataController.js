@@ -48,6 +48,13 @@ export var ReservationState;
     ReservationState["ReserveConfirmed"] = "ReserveConfirmed"; // La reservation est confirmé après login sur un compte existant, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
 })(ReservationState || (ReservationState = {}));
 export class DataController {
+    constructor() {
+        this._reservationState = ReservationState.PendingChoiceSeance;
+        // Ensemble des données chargées systématiquement
+        this._allSeances = [];
+        this._tarifQualite = [];
+        this._filterGenre = "all"; // Filtre sur tous les genres 
+    }
     // 🏆 Variable calculée : retourne les séances filtrées par cinéma
     get seances() {
         if (this.filterNameCinema === 'all') {
@@ -109,13 +116,9 @@ export class DataController {
     get allTarifQualite() {
         return this._tarifQualite;
     }
-    // // Getter pour tous les films
-    // get allFilms(): Film[] {
-    //     return this._films;
-    // }
     // Getter pour filterNameCinema
     get filterNameCinema() {
-        return this._filterNameCinema;
+        return this._filterNameCinema || "all";
     }
     // Setter pour filterNameCinema
     set filterNameCinema(value) {
@@ -123,27 +126,23 @@ export class DataController {
             throw new Error('Le nom du cinéma ne peut pas être vide.');
         }
         // On memorise le dernier cinema filté comme cinema selectionné dans la page Reservation
-        if (value.trim() !== 'all')
+        if (value.trim() !== 'all') {
             this._selectedNameCinema = value.trim();
+            console.log("DataC: Cinema selected = ", value);
+        }
+        else {
+            console.log("DataC: Cinema selected = ", this._selectedNameCinema);
+        }
         // const isNewCinema = (value !== this._filterNameCinema);
+        console.log("DataC: Cinema filter = ", value);
         this._filterNameCinema = value;
-        // if (isNewCinema) {
-        //   // 1) Expiration du cookie dateAccess (pour forcer le rechargement)
-        //   setCookie(DataController.nomCookieDateAccess, ' ', -1);
-        //   // 2) Vider ou invalider le localStorage
-        //   localStorage.removeItem(DataController.nomStorage); 
-        //   // 3) Vider les tableaux internes
-        //   this._seances = [];
-        //   this._films = [];
-        //   this._tarifQualite = [];
-        //   // 4) Re-lancement de la logique de chargement
-        //   this.init();
-        // }
+        // On sauvegarde le nouvelle configuration
+        this.sauverComplet();
     }
     // Getter pour cinema selectionne (non modifiable directement)
     // Getter pour selectedNameCinema
     get selectedNameCinema() {
-        return this._selectedNameCinema;
+        return this._selectedNameCinema || "Paris";
     }
     // Getter pour filterGenre
     get filterGenre() {
@@ -229,23 +228,11 @@ export class DataController {
     get selectedReservationCinema() {
         return this._selectedReservationCinema || undefined;
     }
-    constructor(nameCinema) {
-        this._reservationState = ReservationState.PendingChoiceSeance;
-        // Ensemble des données chargées systématiquement
-        this._allSeances = [];
-        this._tarifQualite = [];
-        this._filterNameCinema = "all"; // On filtre sur tous les cinémas par défaut
-        this._selectedNameCinema = "Paris"; // Par defaut le cinema selectionne dans la page Reservation
-        this._filterGenre = "all"; // Filtre sur tous les genres 
-        this._filterNameCinema = nameCinema;
-        console.log("New dataController avec filtre Cinema" + nameCinema);
-        // Le constructeur ne fait pas d’appel asynchrone
-        // On doit appeler manuellement dataController.init() après l’avoir construit
-    }
     // Méthode asynchrone pour initialiser les données depuis l'API
     // On charge l'ensemble des données de tous les cinemas, on filtrera en local
     chargerDepuisAPI() {
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("DataC: ChargerDepuisAPI");
             try {
                 //  if (this._nameCinema !== "Selectionnez un cinema") {
                 const response = yield fetch(`http://localhost:3500/api/seances/filter?cinemasList="all"`);
@@ -268,7 +255,7 @@ export class DataController {
                 // Enregistrement de la date de validité
                 setCookie(DataController.nomCookieDateAccess, (new Date()).toISOString(), 1);
                 // Sauvegarder dans localStorage
-                this.sauverComplet();
+                // this.sauverComplet();
                 //  }
             }
             catch (error) {
@@ -317,6 +304,10 @@ export class DataController {
         return Array.from(filmMap.values());
     }
     ;
+    // Premier jour de projection du film
+    premierJour(filmId) {
+        return new Date(this.seancesFilm(filmId)[0].dateJour || '');
+    }
     // Les séances d'un film pour un jour donne
     seancesFilmJour(filmId, date = new Date()) {
         return this.seances.filter((s) => s.filmId === filmId &&
@@ -332,39 +323,16 @@ export class DataController {
     seancesJour(date = new Date()) {
         return this.seances.filter((s) => formatDateLocalYYYYMMDD(new Date(s.dateJour || '')) === formatDateLocalYYYYMMDD(date));
     }
-    // Toutes les séances d'un film
+    // Toutes les séances d'un film trier par jour
     seancesFilm(filmId) {
-        return this.seances.filter((s) => s.filmId === filmId);
+        return this.seances
+            .filter((s) => s.filmId === filmId)
+            .sort((a, b) => new Date(a.dateJour || '').getTime() - new Date(b.dateJour || '').getTime());
+        ;
     }
     // Tous les films pour un jour
     filmsJour(date = new Date()) {
         return this.extractFilmsFromSeances(date, date);
-        // // Utilisation d'une Map pour éviter les doublons
-        // const filmMap = new Map<string, Film>();
-        // this.seancesJour(date).forEach((seance) => {
-        //     const filmId = seance.filmId;
-        //     if (filmId && !filmMap.has(filmId)) {
-        //         filmMap.set(filmId, new Film({
-        //             id: filmId,
-        //             titleFilm: seance.titleFilm,
-        //             filmPitch: seance.filmPitch,
-        //             genreArray: seance.genreArray,
-        //             duration: seance.duration,
-        //             linkBO: seance.linkBO,
-        //             dateSortieCinePhoria: seance.dateSortieCinePhoria,
-        //             categorySeeing: seance.categorySeeing,
-        //             note: seance.note ? parseFloat(seance.note) : undefined, // Convertir en number si nécessaire
-        //             isCoupDeCoeur: seance.isCoupDeCoeur === '1', // Convertir en boolean
-        //             filmDescription: seance.filmDescription,
-        //             filmAuthor: seance.filmAuthor,
-        //             filmDistribution: seance.filmDistribution,
-        //             imageFilm128: seance.imageFilm128,
-        //             imageFilm1024: seance.imageFilm1024,
-        //         }));
-        //     }
-        // });
-        // // Retourner les films uniques sous forme de tableau
-        // return Array.from(filmMap.values());
     }
     filmUUID(filmId) {
         const film = this.films.find((film) => {
@@ -381,12 +349,13 @@ export class DataController {
     }
     sauverComplet() {
         var _a;
+        console.log("DataC: SauverComplet filternameCinema = ", this._filterNameCinema, " selectedNameCinema = ", this._selectedNameCinema);
         // Construire un objet « snapshot » de tout ce qu’on veut persister
         const snapshot = {
             reservationState: this._reservationState,
             seances: this._allSeances,
             tarifQualite: this._tarifQualite,
-            nameCinema: this._filterNameCinema,
+            filterNameCinema: this._filterNameCinema,
             selectedNameCinema: this._selectedNameCinema,
             selectedFilmUUID: this._selectedFilmUUID,
             selectedSeanceDate: ((_a = this._selectedSeanceDate) === null || _a === void 0 ? void 0 : _a.toISOString()) || null,
@@ -401,7 +370,7 @@ export class DataController {
     }
     chargerComplet() {
         return __awaiter(this, void 0, void 0, function* () {
-            var _a;
+            console.log("DataC: ChargerComplet");
             const saved = localStorage.getItem(DataController.nomStorage);
             if (!saved) {
                 console.warn("Aucune donnée trouvée dans le localStorage.");
@@ -409,8 +378,8 @@ export class DataController {
             }
             try {
                 const parsed = JSON.parse(saved);
+                console.log("Données chargées du localStorage :", parsed); // 🔍 DEBUG
                 // Restauration du state
-                debugger;
                 this._reservationState = parsed.reservationState || ReservationState.PendingChoiceSeance;
                 // Restauration des séances
                 if (Array.isArray(parsed.seances)) {
@@ -422,8 +391,8 @@ export class DataController {
                     this._tarifQualite = parsed.tarifQualite.map((t) => new TarifQualite(t));
                 }
                 // Autres champs
-                this._filterNameCinema = (_a = parsed._filterNameCinema) !== null && _a !== void 0 ? _a : 'Selectionnez un cinema';
-                this._selectedNameCinema = parsed._selectedNameCinema || undefined;
+                this._filterNameCinema = parsed.filterNameCinema || undefined;
+                this._selectedNameCinema = parsed.selectedNameCinema || undefined;
                 this._selectedFilmUUID = parsed.selectedFilmUUID || undefined;
                 this._selectedSeanceUUID = parsed.selectedSeanceUUID || undefined;
                 this._selectedUtilisateurUUID = parsed.selectedUtilisateurUUID || undefined;
@@ -436,6 +405,7 @@ export class DataController {
                     this._selectedSeanceDate = new Date(parsed.selectedSeanceDate);
                     console.log("Rechargement = ", this._selectedSeanceDate);
                 }
+                console.log("DataC: ChargerComplet filternameCinema = ", this._filterNameCinema, " selectedNameCinema = ", this._selectedNameCinema);
             }
             catch (e) {
                 console.error('Erreur de parsing du localStorage : ', e);
@@ -444,19 +414,27 @@ export class DataController {
     }
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            // // 1) Charger depuis le localStorage
-            // console.log("init 1");
-            // await this.chargerComplet(); // ou this.charger()
+            console.log("DataC: Init");
+            // 1) Charger depuis le localStorage
+            yield this.chargerComplet();
             // 2) Vérifier la validité du cache
             let mustReload = true;
             const dateAccessString = getCookie(DataController.nomCookieDateAccess);
             if (dateAccessString) {
                 if (!isDifferenceGreaterThanHours(new Date(), new Date(dateAccessString), DataController.validiteCache)) {
                     mustReload = false;
+                    console.log("DataC: cookie valide");
+                }
+                else {
+                    console.log("DataC: cookie validite expiré");
                 }
             }
-            // 3) Si invalidité du cache, on va recharger
+            else {
+                console.log("DataC: cookie validite absent");
+            }
+            // 3) Si invalidité du cache ou seances vides, on va recharger
             if (!this.seances.length || mustReload) {
+                //           if ( mustReload) {
                 console.log('[init] Cache inexistant ou expiré -> rechargement depuis l’API');
                 yield this.chargerDepuisAPI();
             }
@@ -473,9 +451,4 @@ DataController.nomStorage = 'storage'; // Nom du storage pour stocker toutes les
 -- Initialisation du dataController
 -- partagé entre toutes les pages
 -----------------------------------------*/
-let cinema = getCookie('selectedCinema');
-if (!cinema) {
-    cinema = "Paris";
-    setCookie('selectedCinema', cinema, 1);
-}
-export let dataController = new DataController(cinema);
+export let dataController = new DataController();
