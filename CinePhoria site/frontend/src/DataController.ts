@@ -89,6 +89,8 @@ export class DataController {
         return films;
     }
 
+    
+
     private _tarifQualite: TarifQualite[] = [];
 
     private _filterNameCinema?: string // = "all"; // On filtre sur tous les cinémas par défaut

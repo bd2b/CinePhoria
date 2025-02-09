@@ -13,8 +13,8 @@ export async function onLoadFilms() {
     console.log("=====> chargement onLoadFilms");
 
     // On initialise le dataController si il est vide
-  if (dataController.allSeances.length === 0 ) await dataController.init()
-  
+    if (dataController.allSeances.length === 0) await dataController.init()
+
 
     // 2) Init filtres
     await initFiltreCinema();
@@ -36,7 +36,6 @@ async function initFiltreCinema(): Promise<void> {
     // Fonction de mise à jour l'affichage du bouton du dropdown
     function updateDropdownDisplay(textButton: string): void {
         const dropdownButtons = document.querySelectorAll<HTMLButtonElement>('.titre__filter-dropdown-complexe');
-        const mustDisplayButton = ["PendingChoiceSeance", "PendingChoiceSeats"].includes(dataController.reservationState);
         dropdownButtons.forEach((button) => {
             button.style.display = "block";
             button.innerHTML = `${textButton} <span class="chevron">▼</span>`;
@@ -59,7 +58,12 @@ async function initFiltreCinema(): Promise<void> {
             titleLeft.innerText = `Les films de CinePhoria à ${dataController.filterNameCinema}`;
         }
     }
-
+    // Mettre à jour le bouton
+    if (dataController.filterNameCinema === 'all') {
+    updateDropdownDisplay('Tous les complexes');
+    } else {
+        updateDropdownDisplay(dataController.filterNameCinema);
+    }
 
     // Dans le HTML, on a déjà <a href="#">Tous les complexes</a>, <a href="#">Paris</a> ...
     // On écoute le clic sur chaque <a>
@@ -74,9 +78,9 @@ async function initFiltreCinema(): Promise<void> {
             } else {
                 dataController.filterNameCinema = val; // ex: "Paris"
             }
-            
+
             console.log("Choix du filtre Cinema = ", dataController.filterNameCinema);
-            
+
             // Mettre à jour l'affichage du bouton
             updateDropdownDisplay(val);
             // Mettre à jour le titre droit
@@ -91,31 +95,41 @@ async function initFiltreCinema(): Promise<void> {
             await dataController.init()
 
             // Rafraichir le dropdown des genres
-            initFiltreGenre
+            await initFiltreGenre();
             // Rafraichir la liste des jours
-            construireListeJours();
+            await construireListeJours();
             // Rafraichir la liste des films
-            rafraichirListeFilms();
+            await rafraichirListeFilms();
         });
     });
 }
 
 async function initFiltreGenre(): Promise<void> {
+
+    // Fonction de mise à jour l'affichage du bouton du dropdown
+    function updateDropdownDisplay(textButton: string): void {
+        const dropdownButton = document.getElementById('title__filter-dropdown-button-genre');
+        if (!dropdownButton) return;
+        dropdownButton.innerHTML = `${textButton} <span class="chevron">▼</span>`;
+    }
     const dropdownGenre = document.querySelector('.titre__filter-dropdown-genre');
     if (!dropdownGenre) return;
     const dropdownContent = dropdownGenre.querySelector('.title__filter-button-drowdown-content');
     if (!dropdownContent) return;
 
-    
+
+
     // Vider le dropdownContent, ajouter un item "Tous"
     dropdownContent.innerHTML = '';
     const aTous = document.createElement('a');
     aTous.href = '#';
     aTous.textContent = 'Tous les genres';
-    aTous.addEventListener('click', (ev) => {
+    aTous.addEventListener('click', async (ev) => {
         ev.preventDefault();
         dataController.filterGenre = 'all';
-        rafraichirListeFilms();
+        updateDropdownDisplay('Tous les genres');
+        await construireListeJours();
+        await rafraichirListeFilms();
     });
     dropdownContent.appendChild(aTous);
 
@@ -124,20 +138,20 @@ async function initFiltreGenre(): Promise<void> {
         const a = document.createElement('a');
         a.href = '#';
         a.textContent = genre;
-        a.addEventListener('click', (ev) => {
+        a.addEventListener('click', async (ev) => {
             ev.preventDefault();
             dataController.filterGenre = genre;
-            rafraichirListeFilms();
+            updateDropdownDisplay(genre);
+            await construireListeJours();
+            await rafraichirListeFilms();
         });
         dropdownContent.appendChild(a);
     });
 }
 
 async function initFiltreJour(): Promise<void> {
-    // On va imaginer un simple <input type="date"> qu’on injecte, 
-    // ou un dropdown -> Pour la démo, on crée un <div class="filter-jour">...
-    // On va remplir dynamiquement les <option> (ou <a>) correspondant aux jours
-    // dans la fourchette couverte par dataController.allSeances
+    // On met en place un input que l'on ajuste aux jours
+    // dans la fourchette couverte par dataController.genre (soit all filtré par le cinema et le filtre genres)
 
     // 1) On insère un <input type="date"> en plus, ou on le rajoute dans la page
     let containerFilters = document.querySelector('.title__filters-films');
@@ -146,53 +160,51 @@ async function initFiltreJour(): Promise<void> {
     let inputDate = document.createElement('input');
     inputDate.type = 'date';
     inputDate.classList.add('filter-jour-input');
-    containerFilters.appendChild(inputDate);
+    containerFilters.prepend(inputDate);
 
-    // 2) On limite les min et max
-    const allDates = dataController.allSeances.map((s) => s.dateJour).filter(Boolean) as string[];
-    if (allDates.length > 0) {
-        const sortedDates = allDates.sort();
-        inputDate.min = sortedDates[0]!;
-        inputDate.max = sortedDates[sortedDates.length - 1]!;
-    }
-
-    // 3) On écoute les changements
-    inputDate.addEventListener('change', () => {
+    // 4) On écoute les changements
+    inputDate.removeEventListener('change', async () => { });
+    inputDate.addEventListener('change', async () => {
         filtreJour = inputDate.value; // ex. "2025-03-15"
-        rafraichirListeFilms();
+        await rafraichirListeFilms();
     });
 
-    // 4) Construire initialement la liste des jours activables
-    construireListeJours();
+    // 5) Construire initialement la liste des jours activables
+    await construireListeJours();
 }
 
-function construireListeJours(): void {
-    // Si on veut restreindre inputDate aux jours qui ont des séances 
-    // correspondant au cinema sélectionné (et potentiellement d’autres filtres),
-    // on peut ajuster inputDate.min / inputDate.max ou un <datalist>.
-    // Ici, on se contente de recalculer min/max 
-    // en fonction du cinema filtré ?
+async function construireListeJours(): Promise<void> {
 
-    // Dans la démo, on fait simple : 
-    //   - on trie par date
-    //   - on set le min / max
     const inputDate = document.querySelector('.filter-jour-input') as HTMLInputElement | null;
     if (!inputDate) return;
 
-    const datesValides: string[] = dataController.seances.map((s) => s.dateJour || '').filter(Boolean).sort();
-    if (datesValides.length === 0) {
+    // 1) On isole les séances qui correspondent au filtre Cinema et genre
+    const filmsGenre = dataController.filmsGenre;
+    // Définition d'un Set des IDs des films
+    const filmIdsSet = new Set(filmsGenre.map(film => film.id));
+    // Filtrer les séances qui ont un filmId présent dans filmsGenre
+    const seancesGenre = dataController.seances.filter(s => s.filmId !== undefined && filmIdsSet.has(s.filmId));
+
+    // 3) On calcule les dates min et max et on applique sur le champ date
+    const allDates = seancesGenre.map((s) => s.dateJour).filter(Boolean).sort() as string[];
+
+    if (allDates.length > 0) {
+        const dateMinYYYYMMDD = formatDateLocalYYYYMMDD(new Date(allDates[0]));
+        const dateMaxYYYYMMDD = formatDateLocalYYYYMMDD(new Date(allDates[allDates.length - 1]));
+        inputDate.min = dateMinYYYYMMDD;
+        inputDate.max = dateMaxYYYYMMDD;
+    } else {
         inputDate.min = '';
         inputDate.max = '';
-        return;
     }
-    inputDate.min = datesValides[0];
-    inputDate.max = datesValides[datesValides.length - 1];
+
+
 }
 
 /* -------------------------------------------
    Affichage Liste de Films
 ------------------------------------------- */
-function rafraichirListeFilms(): void {
+async function rafraichirListeFilms(): Promise<void> {
     const container = document.querySelector('.films__listFilms');
     if (!container) return;
     container.innerHTML = '';
@@ -204,7 +216,9 @@ function rafraichirListeFilms(): void {
     if (filtreJour) {
         films = films.filter((f) => {
             const seancesFilm = dataController.seancesFilm(f.id);
-            return seancesFilm.some((s) => s.dateJour === filtreJour);
+            return seancesFilm.some((s) => 
+                s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false
+            );
         });
     }
 
