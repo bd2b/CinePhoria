@@ -1,10 +1,17 @@
 /* Affichage masquage des boutons filtre */
 .titre__filter-dropdown-genre {
     display: block;
+    
+
+}
+
+#title__filter-dropdown-button-genre {
+width: 170px;
 }
 
 .titre__filter-dropdown-complexe {
     display: block;
+    width: 250px;
 }
 
 .container__films {

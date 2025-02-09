@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 // ViewFilm.ts
 import { dataController } from './DataController.js';
+import { formatDateLocalYYYYMMDD } from './Helpers.js';
 //let dataController.filterNameCinema = dataController.filterNameCinema;
 // let filtreGenre = dataController.filterGenre;
 let filtreJour = '';
@@ -36,7 +37,6 @@ function initFiltreCinema() {
         // Fonction de mise à jour l'affichage du bouton du dropdown
         function updateDropdownDisplay(textButton) {
             const dropdownButtons = document.querySelectorAll('.titre__filter-dropdown-complexe');
-            const mustDisplayButton = ["PendingChoiceSeance", "PendingChoiceSeats"].includes(dataController.reservationState);
             dropdownButtons.forEach((button) => {
                 button.style.display = "block";
                 button.innerHTML = `${textButton} <span class="chevron">▼</span>`;
@@ -59,6 +59,13 @@ function initFiltreCinema() {
             else {
                 titleLeft.innerText = `Les films de CinePhoria à ${dataController.filterNameCinema}`;
             }
+        }
+        // Mettre à jour le bouton
+        if (dataController.filterNameCinema === 'all') {
+            updateDropdownDisplay('Tous les complexes');
+        }
+        else {
+            updateDropdownDisplay(dataController.filterNameCinema);
         }
         // Dans le HTML, on a déjà <a href="#">Tous les complexes</a>, <a href="#">Paris</a> ...
         // On écoute le clic sur chaque <a>
@@ -90,17 +97,24 @@ function initFiltreCinema() {
                 }
                 yield dataController.init();
                 // Rafraichir le dropdown des genres
-                initFiltreGenre;
+                yield initFiltreGenre();
                 // Rafraichir la liste des jours
-                construireListeJours();
+                yield construireListeJours();
                 // Rafraichir la liste des films
-                rafraichirListeFilms();
+                yield rafraichirListeFilms();
             }));
         });
     });
 }
 function initFiltreGenre() {
     return __awaiter(this, void 0, void 0, function* () {
+        // Fonction de mise à jour l'affichage du bouton du dropdown
+        function updateDropdownDisplay(textButton) {
+            const dropdownButton = document.getElementById('title__filter-dropdown-button-genre');
+            if (!dropdownButton)
+                return;
+            dropdownButton.innerHTML = `${textButton} <span class="chevron">▼</span>`;
+        }
         const dropdownGenre = document.querySelector('.titre__filter-dropdown-genre');
         if (!dropdownGenre)
             return;
@@ -112,32 +126,34 @@ function initFiltreGenre() {
         const aTous = document.createElement('a');
         aTous.href = '#';
         aTous.textContent = 'Tous les genres';
-        aTous.addEventListener('click', (ev) => {
+        aTous.addEventListener('click', (ev) => __awaiter(this, void 0, void 0, function* () {
             ev.preventDefault();
             dataController.filterGenre = 'all';
-            rafraichirListeFilms();
-        });
+            updateDropdownDisplay('Tous les genres');
+            yield construireListeJours();
+            yield rafraichirListeFilms();
+        }));
         dropdownContent.appendChild(aTous);
         // Créer un <a> par genre
         dataController.genreSet.forEach((genre) => {
             const a = document.createElement('a');
             a.href = '#';
             a.textContent = genre;
-            a.addEventListener('click', (ev) => {
+            a.addEventListener('click', (ev) => __awaiter(this, void 0, void 0, function* () {
                 ev.preventDefault();
                 dataController.filterGenre = genre;
-                rafraichirListeFilms();
-            });
+                updateDropdownDisplay(genre);
+                yield construireListeJours();
+                yield rafraichirListeFilms();
+            }));
             dropdownContent.appendChild(a);
         });
     });
 }
 function initFiltreJour() {
     return __awaiter(this, void 0, void 0, function* () {
-        // On va imaginer un simple <input type="date"> qu’on injecte, 
-        // ou un dropdown -> Pour la démo, on crée un <div class="filter-jour">...
-        // On va remplir dynamiquement les <option> (ou <a>) correspondant aux jours
-        // dans la fourchette couverte par dataController.allSeances
+        // On met en place un input que l'on ajuste aux jours
+        // dans la fourchette couverte par dataController.genre (soit all filtré par le cinema et le filtre genres)
         // 1) On insère un <input type="date"> en plus, ou on le rajoute dans la page
         let containerFilters = document.querySelector('.title__filters-films');
         if (!containerFilters)
@@ -145,74 +161,74 @@ function initFiltreJour() {
         let inputDate = document.createElement('input');
         inputDate.type = 'date';
         inputDate.classList.add('filter-jour-input');
-        containerFilters.appendChild(inputDate);
-        // 2) On limite les min et max
-        const allDates = dataController.allSeances.map((s) => s.dateJour).filter(Boolean);
-        if (allDates.length > 0) {
-            const sortedDates = allDates.sort();
-            inputDate.min = sortedDates[0];
-            inputDate.max = sortedDates[sortedDates.length - 1];
-        }
-        // 3) On écoute les changements
-        inputDate.addEventListener('change', () => {
+        containerFilters.prepend(inputDate);
+        // 4) On écoute les changements
+        inputDate.removeEventListener('change', () => __awaiter(this, void 0, void 0, function* () { }));
+        inputDate.addEventListener('change', () => __awaiter(this, void 0, void 0, function* () {
             filtreJour = inputDate.value; // ex. "2025-03-15"
-            rafraichirListeFilms();
-        });
-        // 4) Construire initialement la liste des jours activables
-        construireListeJours();
+            yield rafraichirListeFilms();
+        }));
+        // 5) Construire initialement la liste des jours activables
+        yield construireListeJours();
     });
 }
 function construireListeJours() {
-    // Si on veut restreindre inputDate aux jours qui ont des séances 
-    // correspondant au cinema sélectionné (et potentiellement d’autres filtres),
-    // on peut ajuster inputDate.min / inputDate.max ou un <datalist>.
-    // Ici, on se contente de recalculer min/max 
-    // en fonction du cinema filtré ?
-    // Dans la démo, on fait simple : 
-    //   - on trie par date
-    //   - on set le min / max
-    const inputDate = document.querySelector('.filter-jour-input');
-    if (!inputDate)
-        return;
-    const datesValides = dataController.seances.map((s) => s.dateJour || '').filter(Boolean).sort();
-    if (datesValides.length === 0) {
-        inputDate.min = '';
-        inputDate.max = '';
-        return;
-    }
-    inputDate.min = datesValides[0];
-    inputDate.max = datesValides[datesValides.length - 1];
+    return __awaiter(this, void 0, void 0, function* () {
+        const inputDate = document.querySelector('.filter-jour-input');
+        if (!inputDate)
+            return;
+        // 1) On isole les séances qui correspondent au filtre Cinema et genre
+        const filmsGenre = dataController.filmsGenre;
+        // Définition d'un Set des IDs des films
+        const filmIdsSet = new Set(filmsGenre.map(film => film.id));
+        // Filtrer les séances qui ont un filmId présent dans filmsGenre
+        const seancesGenre = dataController.seances.filter(s => s.filmId !== undefined && filmIdsSet.has(s.filmId));
+        // 3) On calcule les dates min et max et on applique sur le champ date
+        const allDates = seancesGenre.map((s) => s.dateJour).filter(Boolean).sort();
+        if (allDates.length > 0) {
+            const dateMinYYYYMMDD = formatDateLocalYYYYMMDD(new Date(allDates[0]));
+            const dateMaxYYYYMMDD = formatDateLocalYYYYMMDD(new Date(allDates[allDates.length - 1]));
+            inputDate.min = dateMinYYYYMMDD;
+            inputDate.max = dateMaxYYYYMMDD;
+        }
+        else {
+            inputDate.min = '';
+            inputDate.max = '';
+        }
+    });
 }
 /* -------------------------------------------
    Affichage Liste de Films
 ------------------------------------------- */
 function rafraichirListeFilms() {
-    const container = document.querySelector('.films__listFilms');
-    if (!container)
-        return;
-    container.innerHTML = '';
-    // Filtrer
-    let films = dataController.filmsGenre; // Film filtré par cinema et genre
-    // Jour
-    if (filtreJour) {
-        films = films.filter((f) => {
-            const seancesFilm = dataController.seancesFilm(f.id);
-            return seancesFilm.some((s) => s.dateJour === filtreJour);
+    return __awaiter(this, void 0, void 0, function* () {
+        const container = document.querySelector('.films__listFilms');
+        if (!container)
+            return;
+        container.innerHTML = '';
+        // Filtrer
+        let films = dataController.filmsGenre; // Film filtré par cinema et genre
+        // Jour
+        if (filtreJour) {
+            films = films.filter((f) => {
+                const seancesFilm = dataController.seancesFilm(f.id);
+                return seancesFilm.some((s) => s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false);
+            });
+        }
+        // Construire les cards
+        films.forEach((film) => {
+            const card = buildFilmCard(film);
+            container.appendChild(card);
         });
-    }
-    // Construire les cards
-    films.forEach((film) => {
-        const card = buildFilmCard(film);
-        container.appendChild(card);
+        // (3) Afficher le premier film dans le détail s'il y en a
+        if (films.length > 0) {
+            afficherDetailFilm(films[0]);
+        }
+        else {
+            // Sinon, vider la zone détail
+            effacerDetailFilm();
+        }
     });
-    // (3) Afficher le premier film dans le détail s'il y en a
-    if (films.length > 0) {
-        afficherDetailFilm(films[0]);
-    }
-    else {
-        // Sinon, vider la zone détail
-        effacerDetailFilm();
-    }
 }
 function buildFilmCard(film) {
     var _a, _b, _c, _d;
