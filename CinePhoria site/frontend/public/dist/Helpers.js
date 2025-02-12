@@ -53,6 +53,18 @@ export function dateProchainMardi(dateRef) {
     return creerDateLocale(d);
 }
 /**
+ * date du précedent mercredi
+ * @param date par defaut la date du jour
+ * @returns la date du précédent mercredi
+ */
+export function datePrecedentMercredi(date = new Date()) {
+    const previousDate = new Date(date); // Copie de la date donnée
+    const dayOfWeek = previousDate.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 3 = Mercredi, ..., 6 = Samedi
+    const daysToSubtract = (dayOfWeek >= 3) ? dayOfWeek - 3 : 7 - (3 - dayOfWeek);
+    previousDate.setDate(previousDate.getDate() - daysToSubtract);
+    return previousDate;
+}
+/**
  * Formate la date (locale) au format jj/mm (ex : 09/01)
  */
 export function formatDateJJMM(date) {

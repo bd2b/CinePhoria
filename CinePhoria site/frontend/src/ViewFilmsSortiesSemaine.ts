@@ -1,4 +1,4 @@
-import { getCookie , setCookie } from "./Helpers.js";
+import { getCookie, setCookie } from "./Helpers.js";
 import { dataController } from "./DataController.js";
 
 interface Film {
@@ -25,17 +25,16 @@ interface Film {
 export async function onLoadVisiteur() {
   console.log(" ===>  onLoadVisiteur");
   // On initialise le dataController si il est vide
-  if (dataController.allSeances.length === 0 ) await dataController.init()
-  
+  if (dataController.allSeances.length === 0) await dataController.init()
+
 
 
 
   const container = document.getElementById('films-container');
-    if (!container) return;
-    container.innerHTML = '';
+  if (!container) return;
+  container.innerHTML = '';
   try {
-    const response = await fetch('http://localhost:3500/api/films/sorties');
-    let films: Film[] = await response.json();
+    let films = dataController.filmsSortiesRecentes;
     if (films.length === 0) {
       const card = document.createElement('div');
       card.classList.add('filmsreservation__film');
@@ -50,13 +49,13 @@ export async function onLoadVisiteur() {
       container.appendChild(card);
 
       // Chargement de tous les films
-      const response = await fetch('http://localhost:3500/api/films');
-      films = await response.json();
+      films = dataController.films;
     }
 
     films.forEach((film) => {
       const card = document.createElement('div');
       card.classList.add('filmsreservation__film');
+      card.innerHTML = '';
 
       card.innerHTML = `
           <div class="film__cardreservation"> <!-- Card pour chaque film-->
@@ -81,8 +80,27 @@ export async function onLoadVisiteur() {
           </div>
         `;
       container.appendChild(card);
+
+      // Bouton detail du film
+      const detailBtn = card.querySelector('.cardreservation__reserver-button') as HTMLButtonElement | null;
+      if (detailBtn) {
+        detailBtn.removeEventListener('click',  async (evt) => {});
+        detailBtn.addEventListener('click', async (evt) => {
+          evt.preventDefault();
+          evt.stopPropagation();
+          // On positionne les données pour afficher le film dans la page film
+          dataController.selectedFilmUUID = film.id || '';
+          console.log("Visiteur ", film.id)
+          dataController.filterNameCinema = 'all';
+          await dataController.sauverComplet();
+
+          window.location.href = 'films.html';
+        });
+
+      };
     });
   } catch (error) {
     console.error('Erreur lors du chargement des films', error);
+
   }
 }
