@@ -446,7 +446,7 @@ function buildTableSeances(film: Film): HTMLDivElement {
             .map((t) => `${t.nameTarif} (${t.price}€)`).join(', ');
         const seanceId = seance.seanceId;
 
-        // 5 cellules + seanceId
+        // 5 cellules
         const tdDay = document.createElement('td');
         tdDay.textContent = dayStr;
         const tdCinema = document.createElement('td');
@@ -457,10 +457,8 @@ function buildTableSeances(film: Film): HTMLDivElement {
         tdQual.textContent = qualite;
         const tdTarifs = document.createElement('td');
         tdTarifs.textContent = listTarifs;
-        const tdSeanceId = document.createElement('td');
-        tdSeanceId.textContent = seanceId;
-
-        row.append(tdDay, tdCinema, tdHoraire, tdQual, tdTarifs, tdSeanceId);
+        
+        row.append(tdDay, tdCinema, tdHoraire, tdQual, tdTarifs);
 
         // Clic => selection
         row.addEventListener('click', () => {
@@ -497,95 +495,6 @@ function buildTableSeances(film: Film): HTMLDivElement {
 }
 
 
-
-function buildTableSeances2(film: Film): HTMLDivElement {
-    // Au lieu de renvoyer un <table>, on renvoie un <div>
-    const container = document.createElement('div');
-    container.classList.add('table-scroll');
-
-    // Créer le tableau
-    const table = document.createElement('table');
-    table.classList.add('tabseance__commande-table');
-
-    // Thead
-    const thead = document.createElement('thead');
-    const trHead = document.createElement('tr');
-    ['Jour', 'Cinéma', 'Horaire', 'Qualité', 'Tarifs'].forEach((hdr) => {
-        const th = document.createElement('th');
-        th.textContent = hdr;
-        trHead.appendChild(th);
-    });
-    thead.appendChild(trHead);
-    table.appendChild(thead);
-
-    // Tbody
-    const tbody = document.createElement('tbody');
-    table.appendChild(tbody);
-
-
-    // Récupérer toutes les séances du film, trier
-    let seances = dataController.seancesFilm(film.id);
-
-    // Application d'un éventuel filtre jour
-    if (filtreJour) {
-        seances = seances.filter((s) => s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false);
-    }
-
-    seances.sort((a, b) => {
-        if (a.dateJour === b.dateJour) {
-            return (a.hourBeginHHSMM ?? '').localeCompare(b.hourBeginHHSMM ?? '');
-        }
-        return (a.dateJour ?? '').localeCompare(b.dateJour ?? '');
-    });
-
-    seances.forEach((seance) => {
-        const row = document.createElement('tr');
-
-        // Format date
-        let dayStr = '';
-        if (seance.dateJour) {
-            const dateObj = new Date(seance.dateJour);
-            if (!isNaN(dateObj.getTime())) {
-                const d = String(dateObj.getDate()).padStart(2, '0');
-                const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-                const y = dateObj.getFullYear();
-                dayStr = `${d}/${m}/${y}`;
-            }
-        }
-        const cinema = seance.nameCinema || '';
-        const horaire = `${seance.hourBeginHHSMM || ''} - ${seance.hourEndHHSMM || ''}`;
-        const qualite = seance.qualite || '';
-
-        // Tarifs
-        const listTarifs = dataController.allTarifQualite
-            .filter((t) => t.qualite === qualite)
-            .map((t) => `${t.nameTarif} (${t.price}€)`)
-            .join(', ');
-
-        // 5 cellules
-        const tdJour = document.createElement('td');
-        tdJour.textContent = dayStr;
-
-        const tdCinema = document.createElement('td');
-        tdCinema.textContent = cinema;
-
-        const tdHoraire = document.createElement('td');
-        tdHoraire.textContent = horaire;
-
-        const tdQualite = document.createElement('td');
-        tdQualite.textContent = qualite;
-
-        const tdTarifs = document.createElement('td');
-        tdTarifs.textContent = listTarifs;
-
-        row.append(tdJour, tdCinema, tdHoraire, tdQualite, tdTarifs);
-        tbody.appendChild(row);
-    });
-
-    // Mettre le tableau dans le conteneur
-    container.appendChild(table);
-    return container;
-}
 
 /* -------------------------------------------
    Modal Bande-Annonce
