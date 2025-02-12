@@ -1,8 +1,8 @@
-import { seanceCardView, basculerPanelChoix } from './ViewReservation.js';
-import { ReservationState, dataController } from './DataController.js';
+import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewReservation.js';
+import { dataController } from './DataController.js';
 
 import { isUUID, validateEmail } from './Helpers.js';
-import { SeatsForReservation, TarifForSeats } from './shared-models/Reservation';
+import { SeatsForReservation, TarifForSeats , ReservationState } from './shared-models/Reservation.js';
 import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { login } from './Login.js';
@@ -30,12 +30,15 @@ export async function updateContentPlace() {
             // 2) Gestion du bouton "Changer de séance" -> basculerPanelChoix()
             const btnChanger = document.querySelector('.panel__changer-button') as HTMLButtonElement;
             if (btnChanger) {
-                btnChanger.removeEventListener('click', () => { });
-                btnChanger.addEventListener('click', (evt: MouseEvent) => {
+                btnChanger.removeEventListener('click', async () => { });
+                btnChanger.addEventListener('click', async (evt: MouseEvent) => {
                     evt.preventDefault();
                     evt.stopPropagation();
                     dataController.reservationState = ReservationState.PendingChoiceSeance;
+                    await dataController.sauverComplet();
                     basculerPanelChoix();
+                    // On reconstruit la page pour se caler sur les dates du calendrier pour ce film
+                    updateContentPage(dataController);
                 });
             }
             // 3) Gestion de la table des tarifs, de la saisie du nombre PMR, de la saisie de l'email et du bouton "Je reserve pour cette seance"

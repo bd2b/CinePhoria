@@ -127,6 +127,41 @@ export class ReservationController {
     }
   }
 
+  static async cancelReservation(req: Request, res: Response): Promise<void> {
+    try {
+      const { reservationId } = req.body;
+
+      // Validation des données d'entrée
+      if (!reservationId) {
+        res.status(400).json({ message: 'Données manquantes ou invalides.' });
+        return;
+      }
+
+      // Appel au DAO pour exécuter la procédure stockée
+      const result = await ReservationDAO.cancelReserve(
+        reservationId
+      );
+
+      // Gestion du résultat
+      if (result.startsWith('Erreur')) {
+        res.status(400).json({ message: result });
+        logger.error(`Échec de l'opération: ${result}`);
+      } else if (result === "OK") {
+        res.status(201).json({ result: "OK" });
+        logger.info("Opération réussie.");
+      } else if (result.startsWith('Warning')) {
+        res.status(201).json({ result: "Warning", message: result });
+        logger.warn(`Avertissement: ${result}`);
+      } else {
+        res.status(500).json({ message: "Réponse inattendue du serveur." });
+        logger.error(`Réponse inattendue: ${result}`);
+      }
+    } catch (error) {
+      console.error('Erreur dans cancelReservation:', error);
+      res.status(500).json({ message: 'Erreur interne du serveur.' });
+    }
+  }
+
   static async getReservationForUtilisateur(req: Request, res: Response): Promise<void> {
     try {
       // Récupération de l'ID utilisateur

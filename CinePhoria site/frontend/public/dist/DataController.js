@@ -27,6 +27,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
  */
 import { Seance, TarifQualite } from './shared-models/Seance.js'; // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { Film } from './shared-models/Film.js';
+import { ReservationState } from './shared-models/Reservation.js';
 import { getCookie, setCookie } from './Helpers.js';
 import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 // import { onLoadReservation } from "./ViewReservation.js";
@@ -34,19 +35,6 @@ import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, is
 // import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
 // import { chargerMenu } from './ViewMenu.js';
 // import { chargerCinemaSites } from './ViewFooter.js';
-const tabReservationState = ["PendingChoiceSeance", "PendingChoiceSeats", "ReserveCompteToConfirm", "ReserveMailToConfirm",
-    "ReserveToConfirm", "ReserveConfirmed"];
-export var ReservationState;
-(function (ReservationState) {
-    ReservationState["PendingChoiceSeance"] = "PendingChoiceSeance";
-    ReservationState["PendingChoiceSeats"] = "PendingChoiceSeats";
-    ReservationState["ReserveCompteToConfirm"] = "ReserveCompteToConfirm";
-    // avec un compte provisoire qu'il faut confirmer
-    ReservationState["ReserveMailToConfirm"] = "ReserveMailToConfirm";
-    ReservationState["ReserveToConfirm"] = "ReserveToConfirm";
-    // avec un email qui est celui d'un compte existant                                     
-    ReservationState["ReserveConfirmed"] = "ReserveConfirmed"; // La reservation est confirmé après login sur un compte existant, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
-})(ReservationState || (ReservationState = {}));
 export class DataController {
     constructor() {
         this._reservationState = ReservationState.PendingChoiceSeance;
@@ -64,7 +52,7 @@ export class DataController {
             return this._allSeances.filter(seance => seance.nameCinema === this._filterNameCinema);
         }
     }
-    // 🏆 Variable calculée : retourne les films filtrés par cinéma ayant une séeance dans les 00 jours
+    // 🏆 Variable calculée : retourne les films filtrés par cinéma ayant une séeance dans les 90 jours
     get films() {
         const dateMax = new Date();
         dateMax.setDate((dateMax).getDate() + 90);
@@ -348,25 +336,27 @@ export class DataController {
         return this.seances.filter((s) => s.seanceId === this._selectedSeanceUUID)[0];
     }
     sauverComplet() {
-        var _a;
-        console.log("DataC: SauverComplet filternameCinema = ", this._filterNameCinema, " selectedNameCinema = ", this._selectedNameCinema);
-        // Construire un objet « snapshot » de tout ce qu’on veut persister
-        const snapshot = {
-            reservationState: this._reservationState,
-            seances: this._allSeances,
-            tarifQualite: this._tarifQualite,
-            filterNameCinema: this._filterNameCinema,
-            selectedNameCinema: this._selectedNameCinema,
-            selectedFilmUUID: this._selectedFilmUUID,
-            selectedSeanceDate: ((_a = this._selectedSeanceDate) === null || _a === void 0 ? void 0 : _a.toISOString()) || null,
-            selectedSeanceUUID: this._selectedSeanceUUID,
-            selectedUtilisateurUUID: this._selectedUtilisateurUUID,
-            selectedUtilisateurMail: this._selectedUtilisateurMail,
-            selectedUtilisateurDisplayName: this._selectedUtilisateurDisplayName,
-            selectedReservationUUID: this._selectedReservationUUID,
-            selectedReservationCinema: this._selectedReservationCinema
-        };
-        localStorage.setItem(DataController.nomStorage, JSON.stringify(snapshot));
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a;
+            console.log("DataC: SauverComplet filternameCinema = ", this._filterNameCinema, " selectedNameCinema = ", this._selectedNameCinema);
+            // Construire un objet « snapshot » de tout ce qu’on veut persister
+            const snapshot = {
+                reservationState: this._reservationState,
+                seances: this._allSeances,
+                tarifQualite: this._tarifQualite,
+                filterNameCinema: this._filterNameCinema,
+                selectedNameCinema: this._selectedNameCinema,
+                selectedFilmUUID: this._selectedFilmUUID,
+                selectedSeanceDate: ((_a = this._selectedSeanceDate) === null || _a === void 0 ? void 0 : _a.toISOString()) || null,
+                selectedSeanceUUID: this._selectedSeanceUUID,
+                selectedUtilisateurUUID: this._selectedUtilisateurUUID,
+                selectedUtilisateurMail: this._selectedUtilisateurMail,
+                selectedUtilisateurDisplayName: this._selectedUtilisateurDisplayName,
+                selectedReservationUUID: this._selectedReservationUUID,
+                selectedReservationCinema: this._selectedReservationCinema
+            };
+            localStorage.setItem(DataController.nomStorage, JSON.stringify(snapshot));
+        });
     }
     chargerComplet() {
         return __awaiter(this, void 0, void 0, function* () {

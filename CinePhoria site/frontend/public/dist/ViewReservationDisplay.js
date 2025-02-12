@@ -8,9 +8,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { seanceCardView, basculerPanelReserve, afficherDetailsFilm } from './ViewReservation.js';
-import { ReservationState, dataController } from './DataController.js';
+import { dataController } from './DataController.js';
 import { updateTableContent, confirmUtilisateur, confirmMail } from "./ViewReservationPlaces.js";
-import { getReservationApi } from './NetworkController.js';
+import { ReservationState } from './shared-models/Reservation.js';
+import { cancelReserveApi, getReservationApi } from './NetworkController.js';
 import { login } from './Login.js';
 export function updateDisplayReservation() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -91,12 +92,23 @@ function afficherDetailsReservation(reservation) {
         const btnChanger = document.querySelector('.panel__changer-button');
         if (btnChanger) {
             btnChanger.textContent = "Annuler la reservation";
-            btnChanger.removeEventListener('click', () => { });
-            btnChanger.addEventListener('click', (evt) => {
+            btnChanger.removeEventListener('click', () => __awaiter(this, void 0, void 0, function* () { }));
+            btnChanger.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
                 evt.preventDefault();
                 evt.stopPropagation();
-                // Code a venir
-            });
+                // Annulation
+                const result = yield cancelReserveApi(dataController.selectedReservationUUID || '');
+                if (result.result === 'OK') {
+                    dataController.reservationState = ReservationState.PendingChoiceSeance;
+                    dataController.sauverComplet();
+                    // On recharge la page
+                    window.location.reload();
+                    alert("La reservation est annulée");
+                }
+                else {
+                    console.log("Resultat de l'annulation : ", result.message);
+                }
+            }));
         }
         if (messageStatut) {
             messageStatut.style.display = 'flex';

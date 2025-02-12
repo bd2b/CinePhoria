@@ -1,7 +1,8 @@
 import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { getCookie, setCookie } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID } from './Helpers.js';
-import { DataController, ReservationState, dataController } from './DataController.js';
+import { DataController, dataController } from './DataController.js';
+import { ReservationState } from './shared-models/Reservation.js';
 import { Film } from './shared-models/Film.js';
 
 import { updateContentPlace } from './ViewReservationPlaces.js';
@@ -273,7 +274,7 @@ function trouverFilmSeancesCandidat(dataController: DataController): Seance[] {
 */
 
 function afficherListeFilms(): void {
-  const container = document.querySelector('.reservation__listFilms');
+  const container = document.querySelector('.reservation__listFilms') as HTMLDivElement;
   if (!container) return;
 
   // Extraire les films uniques
@@ -282,6 +283,7 @@ function afficherListeFilms(): void {
   console.log("Nombre de films dans la liste : ", filmsUniques.length, " nombre de seances =", seances.length);
 
   container.innerHTML = '';
+  container.style.display = 'flex';
   filmsUniques.forEach((film) => {
     const divCard = document.createElement('div');
     divCard.classList.add('listFilms__simpleCard');
@@ -423,8 +425,11 @@ function afficherSemaines(dateDebut: Date = new Date(), isInitial = true): void 
   panelTabs.innerHTML = '';
 
   // Dates localisées à midi, pour éviter le décalage de fuseau horaire
-  // On se positionne par rapport à la date du jour de premiere projection
-  const dPremierJour = dataController.premierJour(dataController.selectedFilmUUID);
+  // On se positionne par rapport à la date de la premiere projection situé dans le futur
+  let dPremierJour = dataController.premierJour(dataController.selectedFilmUUID);
+  if (formatDateLocalYYYYMMDD(dPremierJour) < formatDateLocalYYYYMMDD(new Date())) {
+    dPremierJour = new Date();
+  }
 
   const dDebut = creerDateLocale(dateDebut);
 
