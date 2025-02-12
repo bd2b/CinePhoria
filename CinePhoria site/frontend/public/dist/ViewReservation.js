@@ -8,7 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD } from './Helpers.js';
-import { ReservationState, dataController } from './DataController.js';
+import { dataController } from './DataController.js';
+import { ReservationState } from './shared-models/Reservation.js';
 import { updateContentPlace } from './ViewReservationPlaces.js';
 import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReservationDisplay.js';
 export function onLoadReservation() {
@@ -239,6 +240,7 @@ function afficherListeFilms() {
     const seances = dataController.seancesFutures;
     console.log("Nombre de films dans la liste : ", filmsUniques.length, " nombre de seances =", seances.length);
     container.innerHTML = '';
+    container.style.display = 'flex';
     filmsUniques.forEach((film) => {
         var _a;
         const divCard = document.createElement('div');
@@ -361,8 +363,11 @@ function afficherSemaines(dateDebut = new Date(), isInitial = true) {
     // Vider le contenu
     panelTabs.innerHTML = '';
     // Dates localisées à midi, pour éviter le décalage de fuseau horaire
-    // On se positionne par rapport à la date du jour de premiere projection
-    const dPremierJour = dataController.premierJour(dataController.selectedFilmUUID);
+    // On se positionne par rapport à la date de la premiere projection situé dans le futur
+    let dPremierJour = dataController.premierJour(dataController.selectedFilmUUID);
+    if (formatDateLocalYYYYMMDD(dPremierJour) < formatDateLocalYYYYMMDD(new Date())) {
+        dPremierJour = new Date();
+    }
     const dDebut = creerDateLocale(dateDebut);
     // Calcul de la date de fin : 
     //   - Soit jusqu'au mardi suivant (cas initial)

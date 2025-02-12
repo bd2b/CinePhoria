@@ -121,7 +121,7 @@ CREATE TABLE Utilisateur (
   displayName     varchar(100) NOT NULL, 
   timeStampCreate timestamp NULL, 
   PRIMARY KEY (id));
-CREATE VIEW `ViewComptePersonne` AS
+CREATE VIEW ViewComptePersonne AS
 
 SELECT 
 	compte.email, 
@@ -153,7 +153,7 @@ compte.email,
 FROM Compte
 JOIN Employe ON compte.email = employe.email
 JOIN Employe_Cinema ON employe.matricule = employe_cinema.matricule;
-CREATE VIEW `ViewFilmReservationDate` AS
+CREATE VIEW ViewFilmReservationDate AS
     SELECT filmTitre, jour, SUM(Places) AS totalPlaces
 FROM (
     SELECT 
@@ -211,27 +211,27 @@ INNER JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
 WHERE
        ( Seance.dateJour  >= CURRENT_DATE)
 ;
-CREATE VIEW `ViewFilmsSortiesDeLaSemaine` AS
+CREATE VIEW ViewFilmsSortiesDeLaSemaine AS
  SELECT 
-        `film`.`titleFilm` AS `titleFilm`,
-        `film`.`filmPitch` AS `filmPitch`,
-        `film`.`duration` AS `duration`,
-        `film`.`genreArray` AS `genreArray`,
-        `film`.`filmDescription` AS `filmDescription`,
-        `film`.`filmAuthor` AS `filmAuthor`,
-        `film`.`filmDistribution` AS `filmDistribution`,
-        `film`.`dateSortieCinePhoria` AS `dateSortieCinePhoria`,
-        `film`.`note` AS `note`,
-        `film`.`isCoupDeCoeur` AS `isCoupDeCoeur`,
-        `film`.`categorySeeing` AS `categorySeeing`,
-        `film`.`linkBO` AS `linkBO`,
-        `film`.`imageFilm128` AS `imageFilm128`,
-        `film`.`imageFilm1024` AS `imageFilm1024`
+        film.titleFilm AS titleFilm,
+        film.filmPitch AS filmPitch,
+        film.duration AS duration,
+        film.genreArray AS genreArray,
+        film.filmDescription AS filmDescription,
+        film.filmAuthor AS filmAuthor,
+        film.filmDistribution AS filmDistribution,
+        film.dateSortieCinePhoria AS dateSortieCinePhoria,
+        film.note AS note,
+        film.isCoupDeCoeur AS isCoupDeCoeur,
+        film.categorySeeing AS categorySeeing,
+        film.linkBO AS linkBO,
+        film.imageFilm128 AS imageFilm128,
+        film.imageFilm1024 AS imageFilm1024
         
     FROM
         film
     WHERE
-        (`film`.`dateSortieCinePhoria` = (CURDATE() - INTERVAL (((WEEKDAY(CURDATE()) - 2) + 7) % 7) DAY));
+        (film.dateSortieCinePhoria = (CURDATE() - INTERVAL (((WEEKDAY(CURDATE()) - 2) + 7) % 7) DAY));
 CREATE VIEW ViewFilmsSortiesRecentes AS
 SELECT
   Seance.id AS seanceId , 
@@ -275,7 +275,7 @@ INNER JOIN Salle ON Seance.Salleid = Salle.id
 INNER JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
 
 WHERE Film.dateSortieCinePhoria = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE()) - 2 + 7) % 7 DAY);
-CREATE VIEW `ViewUtilisateurReservation` AS
+CREATE VIEW ViewUtilisateurReservation AS
 SELECT 
     utilisateurid AS utilisateurId,
     reservation.id AS reservationId,
@@ -521,7 +521,7 @@ BEGIN
 			INSERT INTO Reservation
 				(Id, Utilisateurid, seanceid, stateReservation, numberPMR,timeStampCreate)
 			VALUES
-				(v_newReservationId, v_utilisateurID, p_SeanceId, "future", p_PMRSeats, CURRENT_TIMESTAMP);
+				(v_newReservationId, v_utilisateurID, p_SeanceId, "ReserveToConfirm", p_PMRSeats, CURRENT_TIMESTAMP);
 			-- Insérer les données dans SeatsForTarif pour chaque élément du dictionnaire JSON
 			SET v_key_index = 0;
 			WHILE v_key_index < v_key_count DO
@@ -1015,6 +1015,102 @@ CREATE PROCEDURE ConfirmReserve(
 	END$$
     DELIMITER ;
 select 1;
+
+-- Hors Visual Paradigm
+DROP PROCEDURE IF EXISTS CancelReserve;
+DELIMITER $$
+CREATE PROCEDURE CancelReserve(
+    IN p_reservationId VARCHAR(100) ,-- L'Id de la reservation a annuler
+    OUT p_Result VARCHAR(100)
+)
+-- Place la reseration a l'état ReserveCanceled si la reservation n'a pas deja été annulé et si elle est antérieure à la date courante
+-- Recredite le nombre de places et de places PMR sur la seance
+-- Retour = "OK" ou "Erreur : "
+BEGIN
+    
+    
+    DECLARE v_reservationid VARCHAR(100);
+    DECLARE v_seanceId VARCHAR(100);
+    DECLARE v_utilisateurId VARCHAR(100);
+    DECLARE v_stateReservation VARCHAR(100);
+    DECLARE v_numberPlaces  INT DEFAULT 0;
+    DECLARE v_numberPMR  INT DEFAULT 0;
+	DECLARE v_timeStampCreate TIMESTAMP;
+    
+     DECLARE v_dateJour ,  v_hourbeginHHSMM VARCHAR(100);
+    
+    
+     -- Gestion des erreurs
+	DECLARE EXIT HANDLER FOR SQLEXCEPTION
+	BEGIN
+	-- En cas d'erreur SQL, effectuer un rollback
+	 ROLLBACK;
+	 CALL logTrace('CancelReserve: ROLLBACK : ');
+     SET p_Result = 'Erreur : Erreur interne SQL';
+	END;
+
+	block_label: BEGIN
+    
+    SET p_Result = 'OK';
+    
+	START TRANSACTION ;
+    
+    -- Recherche de la reservation
+    SELECT Seanceid, UtilisateurId, numberPMR, timeStampCreate, stateReservation
+    INTO v_seanceId, v_utilisateurId, v_numberPMR, v_timeStampCreate, v_stateReservation
+	FROM Reservation
+	WHERE Reservation.id = p_reservationId
+    ;
+    
+    -- Recherche de la Seance associee
+    SELECT dateJour, hourbeginHHSMM
+    INTO v_dateJour, v_hourbeginHHSMM
+    FROM Seance
+    WHERE Seance.id = v_seanceId 
+    ;
+
+	IF v_seanceId is null THEN
+		ROLLBACK;
+		SET p_Result = CONCAT("Erreur : reservation Id non valide -> ", p_reservationId);
+		LEAVE block_label;
+	END IF;
+    
+    IF v_stateReservation =  'ReserveCanceled'  THEN
+		ROLLBACK;
+		SET p_Result = CONCAT("Warning : reservation deja annulée -> ", p_reservationId);
+		LEAVE block_label;
+	END IF;
+    
+     IF STR_TO_DATE(CONCAT(v_dateJour, ' ', v_hourBeginHHSMM), '%Y-%m-%d %H:%i') < NOW()  THEN
+		ROLLBACK;
+		SET p_Result = CONCAT("Erreur : reservation sur une date passee -> ", v_dateJour, " à ", v_hourBeginHHSMM);
+		LEAVE block_label;
+	END IF;
+    
+    -- Récupération des nombres de places reserves
+    select count(*) into v_numberPlaces from SeatsForTarif WHERE ReservationId = p_reservationId;
+    
+    -- Mise à jour des places disponibles
+    UPDATE SEANCE
+    SET numFreeSeats = NumFreeSeats + v_numberPlaces,
+			numFreePMR = numFreePMR + v_numberPMR
+    WHERE seance.id = v_seanceId;
+    
+    -- Mise à jour de la reservation
+    UPDATE Reservation
+    SET stateReservation = "ReserveCanceled"
+    where id = p_reservationId
+    ;
+    
+    COMMIT;
+    END block_label ;
+END$$
+
+DELIMITER ;
+select 1;
+
+
+
 DROP PROCEDURE IF EXISTS PurgeOldReservations;
 DELIMITER $$
 CREATE PROCEDURE PurgeOldReservations(

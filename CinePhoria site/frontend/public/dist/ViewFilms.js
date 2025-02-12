@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 // ViewFilm.ts
 import { dataController } from './DataController.js';
 import { formatDateLocalYYYYMMDD } from './Helpers.js';
+import { ReservationState } from './shared-models/Reservation.js';
 //let dataController.filterNameCinema = dataController.filterNameCinema;
 // let filtreGenre = dataController.filterGenre;
 let filtreJour = '';
@@ -280,55 +281,89 @@ function buildFilmCard(film) {
     return divCard;
 }
 /* -------------------------------------------
-   Affichage Détail Film
+Affichage Détail Film
 ------------------------------------------- */
 function afficherDetailFilm(film) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
-    const containerDetail = document.querySelector('.films__detailFilm');
-    if (!containerDetail)
-        return;
-    // Image
-    const imgAffiche = containerDetail.querySelector('.twocolumns__left-img');
-    if (imgAffiche) {
-        imgAffiche.src = `assets/static/${(_a = film.imageFilm1024) !== null && _a !== void 0 ? _a : ''}`;
-        imgAffiche.alt = (_b = film.titleFilm) !== null && _b !== void 0 ? _b : 'Affiche';
-    }
-    // Titre
-    const titleP = containerDetail.querySelector('.right__title-p');
-    if (titleP)
-        titleP.textContent = (_c = film.titleFilm) !== null && _c !== void 0 ? _c : '';
-    // Genre / Durée / Public
-    const genreP = containerDetail.querySelector('.caractFilm__genre-p');
-    if (genreP)
-        genreP.textContent = (_d = film.genreArray) !== null && _d !== void 0 ? _d : '';
-    const dureeP = containerDetail.querySelector('.caractFilm__duree-p');
-    if (dureeP)
-        dureeP.textContent = (_e = film.duration) !== null && _e !== void 0 ? _e : '';
-    const publicP = containerDetail.querySelector('.caractFilm__public-p');
-    if (publicP)
-        publicP.textContent = (_f = film.categorySeeing) !== null && _f !== void 0 ? _f : '';
-    // Description
-    const descP = containerDetail.querySelector('.right__description-p');
-    if (descP)
-        descP.textContent = (_g = film.filmDescription) !== null && _g !== void 0 ? _g : '';
-    // Auteur
-    const authorP = containerDetail.querySelector('.right__author-p');
-    if (authorP)
-        authorP.textContent = (_h = film.filmAuthor) !== null && _h !== void 0 ? _h : '';
-    // Distribution
-    const distrP = containerDetail.querySelector('.right__distribution');
-    if (distrP)
-        distrP.textContent = (_j = film.filmDistribution) !== null && _j !== void 0 ? _j : '';
-    // (1) Insérer le tableau des séances sous la distribution
-    const rightFilmDiv = containerDetail.querySelector('.right__film');
-    if (!rightFilmDiv)
-        return;
-    // Nettoyer un éventuel tableau précédent
-    const oldTable = rightFilmDiv.querySelector('.tabseance__commande-table');
-    if (oldTable)
-        oldTable.remove();
-    const tableSeances = buildTableSeances(film);
-    rightFilmDiv.appendChild(tableSeances);
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+        const containerDetail = document.querySelector('.films__detailFilm');
+        if (!containerDetail)
+            return;
+        // Image
+        const imgAffiche = containerDetail.querySelector('.twocolumns__left-img');
+        if (imgAffiche) {
+            imgAffiche.src = `assets/static/${(_a = film.imageFilm1024) !== null && _a !== void 0 ? _a : ''}`;
+            imgAffiche.alt = (_b = film.titleFilm) !== null && _b !== void 0 ? _b : 'Affiche';
+        }
+        // Titre
+        const titleP = containerDetail.querySelector('.right__title-p');
+        if (titleP)
+            titleP.textContent = (_c = film.titleFilm) !== null && _c !== void 0 ? _c : '';
+        // Genre / Durée / Public
+        const genreP = containerDetail.querySelector('.caractFilm__genre-p');
+        if (genreP)
+            genreP.textContent = (_d = film.genreArray) !== null && _d !== void 0 ? _d : '';
+        const dureeP = containerDetail.querySelector('.caractFilm__duree-p');
+        if (dureeP)
+            dureeP.textContent = (_e = film.duration) !== null && _e !== void 0 ? _e : '';
+        const publicP = containerDetail.querySelector('.caractFilm__public-p');
+        if (publicP)
+            publicP.textContent = (_f = film.categorySeeing) !== null && _f !== void 0 ? _f : '';
+        // Description
+        const descP = containerDetail.querySelector('.right__description-p');
+        if (descP)
+            descP.textContent = (_g = film.filmDescription) !== null && _g !== void 0 ? _g : '';
+        // Auteur
+        const authorP = containerDetail.querySelector('.right__author-p');
+        if (authorP)
+            authorP.textContent = (_h = film.filmAuthor) !== null && _h !== void 0 ? _h : '';
+        // Distribution
+        const distrP = containerDetail.querySelector('.right__distribution');
+        if (distrP)
+            distrP.textContent = (_j = film.filmDistribution) !== null && _j !== void 0 ? _j : '';
+        const rightFilmDiv = containerDetail.querySelector('.right__film');
+        if (!rightFilmDiv)
+            return;
+        // Supprimer .table-scroll (et pas seulement .tabseance__commande-table)
+        const oldScrollDiv = rightFilmDiv.querySelector('.table-scroll');
+        if (oldScrollDiv) {
+            oldScrollDiv.remove();
+        }
+        // Recréer
+        const tableSeances = buildTableSeances(film);
+        rightFilmDiv.appendChild(tableSeances);
+        // Désactiver le bouton "Je réserve" à chaque fois qu'on change de film
+        const reserveBtn = containerDetail.querySelector('.right__jereserve-button');
+        if (reserveBtn) {
+            reserveBtn.disabled = true;
+            reserveBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+                if (!lastSelectedSeanceData) {
+                    alert('Veuillez sélectionner une séance dans la liste.');
+                }
+                else {
+                    if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
+                        "ReserveToConfirm"].includes(dataController.reservationState)) {
+                        alert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle");
+                    }
+                    else {
+                        // Afficher un message
+                        const { Jour, Cinema, Horaire, Qualite, Tarifs, SeanceId } = lastSelectedSeanceData;
+                        const seance = dataController.seances.find((s) => s.seanceId === SeanceId);
+                        if (seance) {
+                            dataController.filterNameCinema = Cinema;
+                            dataController.selectedSeanceUUID = SeanceId;
+                            dataController.selectedFilmUUID = seance.filmId || '';
+                            dataController.selectedSeanceDate = new Date(seance.dateJour || '');
+                            dataController.reservationState = ReservationState.PendingChoiceSeats;
+                            yield dataController.sauverComplet();
+                            window.location.href = 'reservation.html';
+                            alert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
+                        }
+                    }
+                }
+            }));
+        }
+    });
 }
 function effacerDetailFilm() {
     // Optionnel : Vider la zone
@@ -340,7 +375,99 @@ function effacerDetailFilm() {
         imgAffiche.src = '';
     // etc. ou tout effacer
 }
+/**
+ * Construit un conteneur <div> + tableau pour afficher les séances du film.
+ * - Thead doit rester fixe
+ * - Tbody défile
+ * - Hover sur la ligne
+ * - Au clic sur la ligne => stocker la séance, activer le bouton "Je réserve"
+ */
+let lastSelectedSeanceData = null;
+let lastSelectedRow = null;
 function buildTableSeances(film) {
+    const container = document.createElement('div');
+    container.classList.add('table-scroll');
+    const table = document.createElement('table');
+    table.classList.add('tabseance__commande-table');
+    // THEAD
+    const thead = document.createElement('thead');
+    const trHead = document.createElement('tr');
+    ['Jour', 'Cinéma', 'Horaire', 'Qualité', 'Tarifs'].forEach((hdr) => {
+        const th = document.createElement('th');
+        th.textContent = hdr;
+        trHead.appendChild(th);
+    });
+    thead.appendChild(trHead);
+    table.appendChild(thead);
+    // TBODY
+    const tbody = document.createElement('tbody');
+    table.appendChild(tbody);
+    // Récup seances, tri...
+    let seances = dataController.seancesFilm(film.id);
+    // Tri
+    seances.sort((a, b) => {
+        var _a, _b, _c, _d;
+        if (a.dateJour === b.dateJour) {
+            return ((_a = a.hourBeginHHSMM) !== null && _a !== void 0 ? _a : '').localeCompare((_b = b.hourBeginHHSMM) !== null && _b !== void 0 ? _b : '');
+        }
+        return ((_c = a.dateJour) !== null && _c !== void 0 ? _c : '').localeCompare((_d = b.dateJour) !== null && _d !== void 0 ? _d : '');
+    });
+    // Remplir tbody
+    seances.forEach((seance) => {
+        const row = document.createElement('tr');
+        // Calcul dayStr, cinema, horaire, qualite, listTarifs et seanceId
+        const dayStr = formatDateLocalYYYYMMDD(new Date(seance.dateJour || ''));
+        const cinema = seance.nameCinema || '';
+        const horaire = `${seance.hourBeginHHSMM || ''} - ${seance.hourEndHHSMM || ''}`;
+        const qualite = seance.qualite || '';
+        const listTarifs = dataController.allTarifQualite
+            .filter((t) => t.qualite === qualite)
+            .map((t) => `${t.nameTarif} (${t.price}€)`).join(', ');
+        const seanceId = seance.seanceId;
+        // 5 cellules + seanceId
+        const tdDay = document.createElement('td');
+        tdDay.textContent = dayStr;
+        const tdCinema = document.createElement('td');
+        tdCinema.textContent = cinema;
+        const tdHoraire = document.createElement('td');
+        tdHoraire.textContent = horaire;
+        const tdQual = document.createElement('td');
+        tdQual.textContent = qualite;
+        const tdTarifs = document.createElement('td');
+        tdTarifs.textContent = listTarifs;
+        const tdSeanceId = document.createElement('td');
+        tdSeanceId.textContent = seanceId;
+        row.append(tdDay, tdCinema, tdHoraire, tdQual, tdTarifs, tdSeanceId);
+        // Clic => selection
+        row.addEventListener('click', () => {
+            // 1) Retirer la classe selected-row de l'ancienne row
+            if (lastSelectedRow && lastSelectedRow !== row) {
+                lastSelectedRow.classList.remove('selected-row');
+            }
+            // 2) Ajouter la classe selected-row sur la row
+            row.classList.add('selected-row');
+            lastSelectedRow = row;
+            // 3) Stocker les infos
+            lastSelectedSeanceData = {
+                Jour: dayStr,
+                Cinema: cinema,
+                Horaire: horaire,
+                Qualite: qualite,
+                Tarifs: listTarifs,
+                SeanceId: seanceId
+            };
+            // 4) Activer le bouton
+            const reserveBtn = document.querySelector('.right__jereserve-button');
+            if (reserveBtn) {
+                reserveBtn.disabled = false;
+            }
+        });
+        tbody.appendChild(row);
+    });
+    container.appendChild(table);
+    return container;
+}
+function buildTableSeances2(film) {
     // Au lieu de renvoyer un <table>, on renvoie un <div>
     const container = document.createElement('div');
     container.classList.add('table-scroll');
@@ -362,6 +489,10 @@ function buildTableSeances(film) {
     table.appendChild(tbody);
     // Récupérer toutes les séances du film, trier
     let seances = dataController.seancesFilm(film.id);
+    // Application d'un éventuel filtre jour
+    if (filtreJour) {
+        seances = seances.filter((s) => s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false);
+    }
     seances.sort((a, b) => {
         var _a, _b, _c, _d;
         if (a.dateJour === b.dateJour) {

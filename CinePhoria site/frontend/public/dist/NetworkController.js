@@ -132,6 +132,26 @@ export function confirmReserveApi(reservationId, utilisateurId, seanceId) {
         return responseJSON;
     });
 }
+export function cancelReserveApi(reservationId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const body = { reservationId };
+        const response = yield fetch(`http://localhost:3500/api/reservation/cancel`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+        if (!response.ok) {
+            const errData = yield response.json();
+            throw new Error(errData.message || 'Erreur inconnue');
+        }
+        // Examen de la reponse
+        const responseJSON = yield response.json();
+        console.log("Message retour", responseJSON);
+        return responseJSON;
+    });
+}
 export function profilApi(identUtilisateur) {
     return __awaiter(this, void 0, void 0, function* () {
         const token = localStorage.getItem('jwtToken');

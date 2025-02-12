@@ -1,10 +1,10 @@
-import { seanceCardView, basculerPanelChoix, basculerPanelReserve, afficherDetailsFilm } from './ViewReservation.js';
-import { ReservationState, dataController } from './DataController.js';
+import { seanceCardView, basculerPanelChoix, basculerPanelReserve, afficherDetailsFilm , updateContentPage} from './ViewReservation.js';
+import { dataController } from './DataController.js';
 import { updateTableContent, confirmUtilisateur , confirmMail } from "./ViewReservationPlaces.js";
 
 import { isUUID, validateEmail } from './Helpers.js';
-import { TarifForSeats, ReservationForUtilisateur } from './shared-models/Reservation';
-import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getReservationApi } from './NetworkController.js';
+import { TarifForSeats, ReservationForUtilisateur, ReservationState } from './shared-models/Reservation.js';
+import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, cancelReserveApi, getReservationApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { login } from './Login.js';
 
@@ -91,11 +91,21 @@ async function afficherDetailsReservation(reservation: ReservationForUtilisateur
     const btnChanger = document.querySelector('.panel__changer-button') as HTMLButtonElement;
     if (btnChanger) {
         btnChanger.textContent = "Annuler la reservation";
-        btnChanger.removeEventListener('click', () => { });
-        btnChanger.addEventListener('click', (evt: MouseEvent) => {
+        btnChanger.removeEventListener('click', async () => { });
+        btnChanger.addEventListener('click', async (evt: MouseEvent) => {
             evt.preventDefault();
             evt.stopPropagation();
-            // Code a venir
+            // Annulation
+            const result = await cancelReserveApi(dataController.selectedReservationUUID || '') as any;
+            if (result.result as string  === 'OK') {
+                dataController.reservationState = ReservationState.PendingChoiceSeance;
+                dataController.sauverComplet();
+                // On recharge la page
+                window.location.reload();
+                alert("La reservation est annulée");
+            } else {
+                console.log("Resultat de l'annulation : ", result.message)
+            }
         });
     }
 

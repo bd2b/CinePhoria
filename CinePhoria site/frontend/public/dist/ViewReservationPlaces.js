@@ -7,9 +7,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { seanceCardView, basculerPanelChoix } from './ViewReservation.js';
-import { ReservationState, dataController } from './DataController.js';
+import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewReservation.js';
+import { dataController } from './DataController.js';
 import { validateEmail } from './Helpers.js';
+import { ReservationState } from './shared-models/Reservation.js';
 import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { login } from './Login.js';
@@ -34,13 +35,16 @@ export function updateContentPlace() {
                 // 2) Gestion du bouton "Changer de séance" -> basculerPanelChoix()
                 const btnChanger = document.querySelector('.panel__changer-button');
                 if (btnChanger) {
-                    btnChanger.removeEventListener('click', () => { });
-                    btnChanger.addEventListener('click', (evt) => {
+                    btnChanger.removeEventListener('click', () => __awaiter(this, void 0, void 0, function* () { }));
+                    btnChanger.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
                         evt.preventDefault();
                         evt.stopPropagation();
                         dataController.reservationState = ReservationState.PendingChoiceSeance;
+                        yield dataController.sauverComplet();
                         basculerPanelChoix();
-                    });
+                        // On reconstruit la page pour se caler sur les dates du calendrier pour ce film
+                        updateContentPage(dataController);
+                    }));
                 }
                 // 3) Gestion de la table des tarifs, de la saisie du nombre PMR, de la saisie de l'email et du bouton "Je reserve pour cette seance"
                 yield setReservation();

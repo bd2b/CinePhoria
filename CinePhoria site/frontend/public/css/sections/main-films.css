@@ -295,40 +295,57 @@ border-radius: 10px;
     max-width: 200px;
 }
 
-/* Table principale */
-.tabseance__commande-table {
-    width: 100%;
+/* Le conteneur scroll global */
+.table-scroll {
+    /* Hauteur max du bloc de lignes */
+    max-height: 200px; /* Ajustez selon vos besoins */
+    /* Forcer le tableau en layout "bloqué" */
+    overflow-y: auto;
+    position: relative; 
     margin-top: 10px;
-    font-size: 16px;
-    color: rgb(var(--primary-color));
-    border-collapse: collapse; /* Éviter les double-bordures */
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
   }
   
-  /* En-tête de la table */
-  .tabseance__commande-table thead th {
+  /* Table principale */
+  /* En-tête opaque */
+.tabseance__commande-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: rgba(var(--ternary-color), 0.8); /* plus opaque */
+    /* Autres styles inchangés */
     text-align: left;
     padding: 10px 15px;
-    background-color: rgba(var(--ternary-color), 0.5); /* Fond clair */
-    border-bottom: 2px solid #dee2e6; /* Bordure inférieure */
+    border-bottom: 2px solid #dee2e6;
     font-weight: bold;
-    color: #000; /* Couleur de l'en-tête */
+    color: #000;
   }
   
-  /* Cellules du contenu */
-  .tabseance__commande-table tbody td {
-    padding: 10px 15px;
-    border: 1px solid #dee2e6; /* Ligne séparatrice */
-    vertical-align: middle; /* Alignement vertical au centre */
-    text-align: center; /* Centré horizontalement */
+  /* Survol (hover) d'une ligne */
+  .tabseance__commande-table tbody tr:hover {
+    background-color: rgba(0,0,0,0.05);
+    cursor: pointer;
   }
-
+  
+  /* Ligne sélectionnée */
+  .tabseance__commande-table tbody tr.selected-row {
+    background-color: rgba(255, 215, 0, 0.2); /* Un léger jaune par ex. */
+  }
+  
+  /* Le conteneur scroll global */
   .table-scroll {
-    /* Hauteur fixe ou max ? */
-    max-height: 250px;  /* ou 300px, selon votre mise en page */
-    overflow-y: auto;   /* Crée l'ascenseur vertical si le contenu dépasse */
-    width: 100%;        /* S'adapte à la largeur du conteneur */
+    max-height: 200px; /* ou 300px */
+    overflow-y: auto;
+    position: relative;
     margin-top: 10px;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    /* Pour éviter le "see-through" derrière l'en-tête sticky */
+    background-color: #fff; 
   }
+  
+  
 /* -------------------- Responsive */
 
 @media (max-width: 1140px) {

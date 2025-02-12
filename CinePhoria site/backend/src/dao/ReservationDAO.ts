@@ -86,6 +86,57 @@ return resultValue;
 
 }
 
+static async cancelReserve ( p_reservationId : string ) : Promise<string> {
+  const connection = await mysql.createConnection(dbConfig);
+
+  logger.info("Cancel reservation : "+ p_reservationId );
+
+  // // Étape 1 : Récupérer les informations de la reservation dans la base
+  // const [rows] = await connection.execute(
+  //   `SELECT utilisateurId, seanceId, stateReservation
+  //    FROM Reservation 
+  //    WHERE id = ?`,
+  //   [p_reservationId]
+  // );
+
+  // const reservationData = (rows as any[])[0];
+
+  // if (!reservationData) {
+  //   logger.info(`Reservation inexistante pour ${p_reservationId}`);
+  //   return 'Reservation inexistante';
+  // }
+  // logger.info("Resultat select = " + JSON.stringify(reservationData));
+  // const { utilisateurId, seanceId, stateReservation } = reservationData;
+  
+  // if ((p_utilisateurId !== utilisateurId) || (p_seanceId !== seanceId) || (stateReservation !== 'future') ) {
+  //   logger.info(`Reservation incoherente pour les données communiquées u = ${p_utilisateurId} s = ${p_seanceId} , st =  ${stateReservation}`);
+  //   return 'Reservation incoherente pour les données communiquées';
+  // }
+  // On peut confirmer la reservation
+  const [results] = await connection.query(
+    `CALL cancelReserve(?, @result);
+     SELECT @result AS result;`,
+    [p_reservationId]
+  ) as [any[], any]; ;
+// Exemple de retour 
+// {
+//   "0": { "affectedRows": 0, "changedRows": 0, "fieldCount": 0, "info": "", "insertId": 0, "serverStatus": 16394, "warningStatus": 0 },
+//   "1": [{ "result": "OK" }],
+//   "service": "backend-CinePhoria"
+// }
+// console.log("Type de results:", typeof results);
+// console.log("Contenu de results:", JSON.stringify(results, null, 2));
+
+// Vérification et extraction correcte du résultat
+const resultRows = results["1"]; // Accès à la clé "1"
+const resultValue = Array.isArray(resultRows) && resultRows.length > 0
+  ? resultRows[0].result
+  : "Erreur : Résultat non trouvé";
+
+  logger.info("resultValue =", resultValue);
+return resultValue;
+
+}
 
 static async reserveForUtilisateur ( p_utilisateurId: string) : Promise<ReservationForUtilisateur[]> {
   const connection = await mysql.createConnection(dbConfig);

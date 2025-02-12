@@ -18,6 +18,7 @@
  */
 import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { Film } from './shared-models/Film.js';
+import { ReservationState } from './shared-models/Reservation.js';
 import { getCookie, setCookie } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 // import { onLoadReservation } from "./ViewReservation.js";
@@ -26,20 +27,7 @@ import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, f
 // import { chargerMenu } from './ViewMenu.js';
 // import { chargerCinemaSites } from './ViewFooter.js';
 
-const tabReservationState = ["PendingChoiceSeance", "PendingChoiceSeats", "ReserveCompteToConfirm", "ReserveMailToConfirm",
-    "ReserveToConfirm", "ReserveConfirmed"];
 
-
-export enum ReservationState {
-    PendingChoiceSeance = "PendingChoiceSeance",    // Choix de seance en cours , le panel choix est affiché
-    PendingChoiceSeats = "PendingChoiceSeats",      // Choix de tarifs en cours, le panel reserve est affiché
-    ReserveCompteToConfirm = "ReserveCompteToConfirm",    // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués) 
-    // avec un compte provisoire qu'il faut confirmer
-    ReserveMailToConfirm = "ReserveMailToConfirm",  // Le compte a été confirmé, il faut maintenant confirmer le mail en saisissant le code reçu dans la modal
-    ReserveToConfirm = "ReserveToConfirm",          // Une reservation a été enregistrée (film, seance, nombre de siege, nombre de prm, email communiqués) 
-    // avec un email qui est celui d'un compte existant                                     
-    ReserveConfirmed = "ReserveConfirmed"           // La reservation est confirmé après login sur un compte existant, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
-}
 
 export class DataController {
 
@@ -57,7 +45,7 @@ export class DataController {
         }
     }
 
-    // 🏆 Variable calculée : retourne les films filtrés par cinéma ayant une séeance dans les 00 jours
+    // 🏆 Variable calculée : retourne les films filtrés par cinéma ayant une séeance dans les 90 jours
     get films(): Film[] {
         const dateMax = new Date();
         dateMax.setDate((dateMax).getDate() + 90);
@@ -415,7 +403,7 @@ export class DataController {
         )[0];
     }
 
-    public sauverComplet(): void {
+    public async sauverComplet(): Promise<void> {
 
         console.log("DataC: SauverComplet filternameCinema = ", this._filterNameCinema, " selectedNameCinema = ", this._selectedNameCinema);
 

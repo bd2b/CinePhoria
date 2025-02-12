@@ -133,6 +133,28 @@ export async function confirmReserveApi(reservationId: string, utilisateurId: st
     return responseJSON;
 }
 
+export async function cancelReserveApi(reservationId: string) {
+    const body = { reservationId };
+    
+    const response = await fetch(`http://localhost:3500/api/reservation/cancel`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    });
+    if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || 'Erreur inconnue');
+    }
+
+    // Examen de la reponse
+    const responseJSON = await response.json();
+    console.log("Message retour", responseJSON);
+    return responseJSON;
+}
+
+
 export async function profilApi(identUtilisateur: string) : Promise <ComptePersonne[]> {
     const token = localStorage.getItem('jwtToken');
     const response = await fetch(`http://localhost:3500/api/utilisateur/${identUtilisateur}`, {
