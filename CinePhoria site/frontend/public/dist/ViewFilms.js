@@ -26,8 +26,6 @@ export function onLoadFilms() {
         yield initFiltreJour();
         // 3) Rafraîchir la liste
         rafraichirListeFilms();
-        // 4) Gérer la modal BO
-        initModalBandeAnnonce();
     });
 }
 /* -------------------------------------------
@@ -221,9 +219,18 @@ function rafraichirListeFilms() {
             const card = buildFilmCard(film);
             container.appendChild(card);
         });
-        // (3) Afficher le premier film dans le détail s'il y en a
+        // (3) Afficher le film selectionne ou le premier film de la liste
         if (films.length > 0) {
-            afficherDetailFilm(films[0]);
+            const filmselected = dataController.selectedFilmUUID;
+            if (filmselected) {
+                const filmaAfficher = films.find((f) => f.id === filmselected);
+                if (filmaAfficher) {
+                    afficherDetailFilm(filmaAfficher);
+                }
+            }
+            else {
+                afficherDetailFilm(films[0]);
+            }
         }
         else {
             // Sinon, vider la zone détail
@@ -321,6 +328,11 @@ function afficherDetailFilm(film) {
         const distrP = containerDetail.querySelector('.right__distribution');
         if (distrP)
             distrP.textContent = (_j = film.filmDistribution) !== null && _j !== void 0 ? _j : '';
+        // Bande-Annonce
+        const linkBO = film.linkBO;
+        if (linkBO)
+            initModalBandeAnnonce(linkBO);
+        // Tableau des seances
         const rightFilmDiv = containerDetail.querySelector('.right__film');
         if (!rightFilmDiv)
             return;
@@ -468,7 +480,41 @@ function buildTableSeances(film) {
 /* -------------------------------------------
    Modal Bande-Annonce
 ------------------------------------------- */
-function initModalBandeAnnonce() {
+function initModalBandeAnnonce(linkBO) {
+    /* Configuration du bouton d'affichage de la bande annonce */
+    /* Bouton dans le corps HTML */
+    const openModalBtn = document.getElementById('openModal');
+    /* div de la modal dans le HTML */
+    const modal = document.getElementById('videoModal');
+    const closeModalBtn = modal === null || modal === void 0 ? void 0 : modal.querySelector('.closeyoutube');
+    const youtubeVideo = document.getElementById('youtubeVideo');
+    // const youtubeUrl = encodeURI(film.linkBO?.trim() ?? '');
+    // const youtubeUrlDynamique = `${film.linkBO}?autoplay=1`;;
+    const youtubeUrlDynamique = `${linkBO}?autoplay=1`;
+    ;
+    console.log("URL dynamique = ", youtubeUrlDynamique);
+    if (openModalBtn && modal && closeModalBtn && youtubeVideo && youtubeUrlDynamique) {
+        openModalBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            youtubeVideo.src = youtubeUrlDynamique;
+            //  youtubeVideo.src ='https://www.youtube.com/embed/Tkej_ULljR8?autoplay=1';
+            console.log("URL utilisée = ", youtubeVideo.src);
+        });
+        const closeModal = () => {
+            modal.style.display = 'none';
+            youtubeVideo.src = '';
+        };
+        closeModalBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal)
+                closeModal();
+        });
+    }
+    else {
+        console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal sont introuvables.');
+    }
+}
+function initModalBandeAnnonce2() {
     const modal = document.getElementById('videoModal');
     const spanClose = modal === null || modal === void 0 ? void 0 : modal.querySelector('.close');
     if (spanClose) {

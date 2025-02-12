@@ -25,8 +25,6 @@ export async function onLoadFilms() {
     // 3) Rafraîchir la liste
     rafraichirListeFilms();
 
-    // 4) Gérer la modal BO
-    initModalBandeAnnonce();
 }
 
 /* -------------------------------------------
@@ -229,9 +227,18 @@ async function rafraichirListeFilms(): Promise<void> {
         container.appendChild(card);
     });
 
-    // (3) Afficher le premier film dans le détail s'il y en a
+    // (3) Afficher le film selectionne ou le premier film de la liste
     if (films.length > 0) {
-        afficherDetailFilm(films[0]);
+        const filmselected = dataController.selectedFilmUUID;
+        if (filmselected) {
+            const filmaAfficher = films.find((f) => f.id === filmselected);
+            if (filmaAfficher) 
+                {
+                    afficherDetailFilm(filmaAfficher);
+                }
+        } else {
+            afficherDetailFilm(films[0]);
+        }
     } else {
         // Sinon, vider la zone détail
         effacerDetailFilm();
@@ -335,6 +342,11 @@ async function afficherDetailFilm(film: Film): Promise<void> {
     const distrP = containerDetail.querySelector('.right__distribution') as HTMLParagraphElement | null;
     if (distrP) distrP.textContent = film.filmDistribution ?? '';
 
+    // Bande-Annonce
+    const linkBO = film.linkBO
+    if (linkBO) initModalBandeAnnonce(linkBO)
+
+    // Tableau des seances
     const rightFilmDiv = containerDetail.querySelector('.right__film') as HTMLElement | null;
     if (!rightFilmDiv) return;
 
@@ -457,7 +469,7 @@ function buildTableSeances(film: Film): HTMLDivElement {
         tdQual.textContent = qualite;
         const tdTarifs = document.createElement('td');
         tdTarifs.textContent = listTarifs;
-        
+
         row.append(tdDay, tdCinema, tdHoraire, tdQual, tdTarifs);
 
         // Clic => selection
@@ -499,7 +511,46 @@ function buildTableSeances(film: Film): HTMLDivElement {
 /* -------------------------------------------
    Modal Bande-Annonce
 ------------------------------------------- */
-function initModalBandeAnnonce(): void {
+
+function initModalBandeAnnonce(linkBO: string): void {
+    /* Configuration du bouton d'affichage de la bande annonce */
+    /* Bouton dans le corps HTML */
+    const openModalBtn = document.getElementById('openModal');
+    /* div de la modal dans le HTML */
+    const modal = document.getElementById('videoModal') as HTMLDivElement | null;
+    const closeModalBtn = modal?.querySelector('.closeyoutube') as HTMLButtonElement | null;
+    const youtubeVideo = document.getElementById('youtubeVideo') as HTMLIFrameElement | null;
+
+    // const youtubeUrl = encodeURI(film.linkBO?.trim() ?? '');
+    // const youtubeUrlDynamique = `${film.linkBO}?autoplay=1`;;
+
+    const youtubeUrlDynamique = `${linkBO}?autoplay=1`;;
+    console.log("URL dynamique = ", youtubeUrlDynamique);
+
+
+    if (openModalBtn && modal && closeModalBtn && youtubeVideo && youtubeUrlDynamique) {
+        openModalBtn.addEventListener('click', () => {
+            modal.style.display = 'flex';
+            youtubeVideo.src = youtubeUrlDynamique;
+            //  youtubeVideo.src ='https://www.youtube.com/embed/Tkej_ULljR8?autoplay=1';
+            console.log("URL utilisée = ", youtubeVideo.src)
+        });
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+            youtubeVideo.src = '';
+        };
+
+        closeModalBtn.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', (event: MouseEvent) => {
+            if (event.target === modal) closeModal();
+        });
+    } else {
+        console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal sont introuvables.');
+    }
+}
+function initModalBandeAnnonce2(): void {
     const modal = document.getElementById('videoModal');
     const spanClose = modal?.querySelector('.close') as HTMLElement | null;
     if (spanClose) {

@@ -28,7 +28,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { Seance, TarifQualite } from './shared-models/Seance.js'; // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { Film } from './shared-models/Film.js';
 import { ReservationState } from './shared-models/Reservation.js';
-import { getCookie, setCookie } from './Helpers.js';
+import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
 import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 // import { onLoadReservation } from "./ViewReservation.js";
 // import { onLoadMesReservations } from "./ViewMesReservations.js";
@@ -57,6 +57,15 @@ export class DataController {
         const dateMax = new Date();
         dateMax.setDate((dateMax).getDate() + 90);
         return this.extractFilmsFromSeances(new Date(), dateMax);
+    }
+    get filmsSortiesRecentes() {
+        const precedentMercredi = datePrecedentMercredi();
+        return this.films.filter((f) => {
+            if (!f.dateSortieCinePhoria)
+                return false;
+            const sortieDate = new Date(f.dateSortieCinePhoria);
+            return formatDateLocalYYYYMMDD(sortieDate) === formatDateLocalYYYYMMDD(precedentMercredi);
+        });
     }
     // Variable calculée : retourne tous les genres des films filtrés sur le nom du cinema
     get genreSet() {

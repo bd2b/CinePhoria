@@ -19,8 +19,7 @@ export function onLoadVisiteur() {
             return;
         container.innerHTML = '';
         try {
-            const response = yield fetch('http://localhost:3500/api/films/sorties');
-            let films = yield response.json();
+            let films = dataController.filmsSortiesRecentes;
             if (films.length === 0) {
                 const card = document.createElement('div');
                 card.classList.add('filmsreservation__film');
@@ -33,12 +32,12 @@ export function onLoadVisiteur() {
         `;
                 container.appendChild(card);
                 // Chargement de tous les films
-                const response = yield fetch('http://localhost:3500/api/films');
-                films = yield response.json();
+                films = dataController.films;
             }
             films.forEach((film) => {
                 const card = document.createElement('div');
                 card.classList.add('filmsreservation__film');
+                card.innerHTML = '';
                 card.innerHTML = `
           <div class="film__cardreservation"> <!-- Card pour chaque film-->
             <div class="cardreservation__image">
@@ -62,6 +61,22 @@ export function onLoadVisiteur() {
           </div>
         `;
                 container.appendChild(card);
+                // Bouton detail du film
+                const detailBtn = card.querySelector('.cardreservation__reserver-button');
+                if (detailBtn) {
+                    detailBtn.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
+                    detailBtn.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        // On positionne les données pour afficher le film dans la page film
+                        dataController.selectedFilmUUID = film.id || '';
+                        console.log("Visiteur ", film.id);
+                        dataController.filterNameCinema = 'all';
+                        yield dataController.sauverComplet();
+                        window.location.href = 'films.html';
+                    }));
+                }
+                ;
             });
         }
         catch (error) {
