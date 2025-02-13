@@ -5,16 +5,23 @@ import { Film } from './shared-models/Film.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { Seance } from './shared-models/Seance.js';
 import { TarifQualite } from './shared-models/Seance.js';
+import { chargerMenu } from './ViewMenu.js';
+import { chargerCinemaSites } from './ViewFooter.js';
 
-//let dataController.filterNameCinema = dataController.filterNameCinema;
-// let filtreGenre = dataController.filterGenre;
+// Filtre pour les cinema pris dans le dataController : dataController.filterNameCinema
+// Filtre pour les grenres pris dans le dataControllerdataController.filterGenre;
+// Filtre sur le jour en local car pas utilisé dans d'autres pages
 let filtreJour = '';
 
 export async function onLoadFilms() {
     console.log("=====> chargement onLoadFilms");
 
-    // On initialise le dataController si il est vide
+    // 1) On initialise le dataController si il est vide
     if (dataController.allSeances.length === 0) await dataController.init()
+
+    // On charge menu et footer
+    chargerMenu(); // Header
+    chargerCinemaSites() // Footer
 
 
     // 2) Init filtres
@@ -232,10 +239,9 @@ async function rafraichirListeFilms(): Promise<void> {
         const filmselected = dataController.selectedFilmUUID;
         if (filmselected) {
             const filmaAfficher = films.find((f) => f.id === filmselected);
-            if (filmaAfficher) 
-                {
-                    afficherDetailFilm(filmaAfficher);
-                }
+            if (filmaAfficher) {
+                afficherDetailFilm(filmaAfficher);
+            }
         } else {
             afficherDetailFilm(films[0]);
         }
@@ -381,7 +387,7 @@ async function afficherDetailFilm(film: Film): Promise<void> {
                         dataController.selectedFilmUUID = seance.filmId || '';
                         dataController.selectedSeanceDate = new Date(seance.dateJour || '');
                         dataController.reservationState = ReservationState.PendingChoiceSeats;
-                        await dataController.sauverComplet();
+                        await dataController.sauverEtatGlobal();
 
                         window.location.href = 'reservation.html';
 

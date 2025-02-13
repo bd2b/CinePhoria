@@ -40,7 +40,7 @@ export function updateContentPlace() {
                         evt.preventDefault();
                         evt.stopPropagation();
                         dataController.reservationState = ReservationState.PendingChoiceSeance;
-                        yield dataController.sauverComplet();
+                        yield dataController.sauverEtatGlobal();
                         basculerPanelChoix();
                         // On reconstruit la page pour se caler sur les dates du calendrier pour ce film
                         updateContentPage(dataController);
@@ -185,7 +185,7 @@ function setReservation() {
                         // L'email est inconnu -> compte créé en provisoire : il faudra confirmer l'utilisateur puis le mail et se logguer
                         console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
                         dataController.reservationState = ReservationState.ReserveCompteToConfirm;
-                        dataController.sauverComplet();
+                        yield dataController.sauverEtatGlobal();
                         yield confirmUtilisateur();
                         break;
                     case 'Compte Confirme':
@@ -203,7 +203,7 @@ function setReservation() {
                         }
                         console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
                         dataController.reservationState = ReservationState.ReserveToConfirm;
-                        dataController.sauverComplet();
+                        yield dataController.sauverEtatGlobal();
                         yield login("Veuillez vous connecter pour valider la réservation");
                         break;
                     default:
@@ -717,7 +717,7 @@ export function confirmUtilisateur() {
                         dataController.reservationState = ReservationState.ReserveMailToConfirm;
                         // On lance la modal de confirmation d'email
                         yield confirmMail();
-                        dataController.sauverComplet();
+                        yield dataController.sauverEtatGlobal();
                     }
                     ;
                 }));
@@ -886,7 +886,7 @@ un code à renseigner ci-dessous.
                                 dataController.reservationState = ReservationState.ReserveToConfirm;
                                 // On lance la modal de connexion
                                 yield login("Veuillez vous connecter pour valider la réservation");
-                                dataController.sauverComplet();
+                                yield dataController.sauverEtatGlobal();
                             }
                             ;
                         }
@@ -932,7 +932,7 @@ export function confirmReserve() {
                 // On efface la reservation pending et on autorise de nouvelle reservation
                 dataController.reservationState = ReservationState.PendingChoiceSeance;
                 dataController.selectedReservationUUID = undefined;
-                dataController.sauverComplet();
+                yield dataController.sauverEtatGlobal();
             }
             catch (error) {
                 alert("Erreur dans la confirmation de la réservation = " + error);

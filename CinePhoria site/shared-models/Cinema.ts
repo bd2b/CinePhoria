@@ -13,13 +13,13 @@ export class Cinema {
      }
   };
 
-export interface CinemaInterface {
-    nameCinema : string;
-    adresse    : string;
-    ville      : string;
-    postalcode : string;
-    emailCinema: string;
-    telCinema  : string;
-    ligne1     : string;
-    ligne2     : string;
-};
+// export interface Cinema {
+//   nameCinema : string;
+//   adresse    : string;
+//   ville      : string;
+//   postalcode : string;
+//   emailCinema : string;
+//   telCinema  : string;
+//   ligne1     : string;
+//   ligne2     : string;
+// }

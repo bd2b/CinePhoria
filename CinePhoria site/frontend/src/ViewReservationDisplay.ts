@@ -129,7 +129,7 @@ async function afficherDetailsReservation(reservation: ReservationForUtilisateur
                 evt.preventDefault();
                 evt.stopPropagation();
 
-                dataController.sauverComplet();
+                await dataController.sauverEtatGlobal();
                 await confirmUtilisateur();
             });
 

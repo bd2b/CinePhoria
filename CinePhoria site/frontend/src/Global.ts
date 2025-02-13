@@ -2,8 +2,7 @@ import { onLoadReservation } from "./ViewReservation.js";
 import { onLoadFilms } from "./ViewFilms.js";
 import { onLoadMesReservations } from "./ViewMesReservations.js";
 import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
-import { chargerMenu } from './ViewMenu.js';
-import { chargerCinemaSites } from './ViewFooter.js';
+
 const pageHandlers: Record<string, () => void> = {
     "visiteur.html" : onLoadVisiteur,
     "reservation.html": onLoadReservation,
@@ -22,8 +21,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.log("Chargement dynamique de ", page , " ", )
     if (page && pageHandlers[page]) {
         pageHandlers[page](); // Exécute la fonction associée à la page
-         chargerMenu(); // Header
-         chargerCinemaSites() // Footer
+        
     } else {
         console.warn("⚠️ Aucune fonction associée pour cette page.");
     }

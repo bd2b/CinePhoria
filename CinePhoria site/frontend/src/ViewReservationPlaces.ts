@@ -35,7 +35,7 @@ export async function updateContentPlace() {
                     evt.preventDefault();
                     evt.stopPropagation();
                     dataController.reservationState = ReservationState.PendingChoiceSeance;
-                    await dataController.sauverComplet();
+                    await dataController.sauverEtatGlobal();
                     basculerPanelChoix();
                     // On reconstruit la page pour se caler sur les dates du calendrier pour ce film
                     updateContentPage(dataController);
@@ -203,7 +203,7 @@ async function setReservation() {
                     console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
 
                     dataController.reservationState = ReservationState.ReserveCompteToConfirm;
-                    dataController.sauverComplet();
+                    await dataController.sauverEtatGlobal();
                     await confirmUtilisateur();
                     break;
 
@@ -225,7 +225,7 @@ async function setReservation() {
                     }
                     console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
                     dataController.reservationState = ReservationState.ReserveToConfirm;
-                    dataController.sauverComplet();
+                    await dataController.sauverEtatGlobal();
                     await login("Veuillez vous connecter pour valider la réservation");
 
                     break;
@@ -808,7 +808,7 @@ export async function confirmUtilisateur() {
                 dataController.reservationState = ReservationState.ReserveMailToConfirm;
                 // On lance la modal de confirmation d'email
                 await confirmMail();
-                dataController.sauverComplet();
+                await dataController.sauverEtatGlobal();
             };
         });
     }
@@ -993,7 +993,7 @@ un code à renseigner ci-dessous.
                         dataController.reservationState = ReservationState.ReserveToConfirm;
                         // On lance la modal de connexion
                         await login("Veuillez vous connecter pour valider la réservation");
-                        dataController.sauverComplet();
+                        await dataController.sauverEtatGlobal();
                     };
                 } catch (error) {
                     console.log("Erreur = ", error)
@@ -1034,7 +1034,7 @@ export async function confirmReserve() {
             // On efface la reservation pending et on autorise de nouvelle reservation
             dataController.reservationState = ReservationState.PendingChoiceSeance;
             dataController.selectedReservationUUID = undefined;
-            dataController.sauverComplet();
+            await dataController.sauverEtatGlobal();
 
         } catch (error) {
             alert("Erreur dans la confirmation de la réservation = " + error as string)

@@ -7,8 +7,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { dataController } from './DataController.js';
 export function chargerCinemaSites() {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log("===== chargerCinemaSites");
         const footerElement = document.getElementById('footer');
         if (!footerElement)
             return;
@@ -16,8 +18,8 @@ export function chargerCinemaSites() {
   <div class="footer__container">
       <div class="container__legal">
           <a href="#" class="container__legal-a">Mentions légales</a>
-              <a href="#" class="container__legal-a">Politique de confidentialité</a>
-              <a href="#" class="container__legal-a">&copy; 2024 - Tous droits réservés</a>
+          <a href="#" class="container__legal-a">Politique de confidentialité</a>
+          <a href="#" class="container__legal-a">&copy; 2024 - Tous droits réservés</a>
       </div>
       
       <div class="container__sites" id="container__sites">  
@@ -26,8 +28,7 @@ export function chargerCinemaSites() {
   `;
         footerElement.offsetHeight; // Force un reflow
         try {
-            const response = yield fetch('http://localhost:3500/api/cinemas');
-            const cinemas = yield response.json();
+            const cinemas = dataController.cinemas;
             const container = document.getElementById('container__sites');
             if (!container) {
                 console.log("pas de container__sites");
@@ -36,6 +37,7 @@ export function chargerCinemaSites() {
             ;
             container.innerHTML = '';
             cinemas.forEach((cinema) => {
+                console.log("Pied de page = ", cinema.nameCinema);
                 const cinemaElement = document.createElement('div');
                 cinemaElement.classList.add('container__site');
                 cinemaElement.innerHTML = `
@@ -64,4 +66,3 @@ export function chargerCinemaSites() {
         }
     });
 }
-document.addEventListener('DOMContentLoaded', chargerCinemaSites);

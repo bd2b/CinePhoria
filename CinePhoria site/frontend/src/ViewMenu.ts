@@ -9,7 +9,7 @@ import { login, logout } from './Login.js'; // si vous avez besoin de l’appele
  * Chargement des items de menus en fonction du profil
  */
 export async function chargerMenu() {
-  console.log("===== chargerMenu")
+  console.log("===== chargerMenu");
 
   // 0) L'ident est chargé ?
   const ident = userDataController.ident;

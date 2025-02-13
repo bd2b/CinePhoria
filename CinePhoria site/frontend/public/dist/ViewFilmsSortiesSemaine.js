@@ -8,12 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { dataController } from "./DataController.js";
+import { chargerMenu } from './ViewMenu.js';
+import { chargerCinemaSites } from './ViewFooter.js';
 export function onLoadVisiteur() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(" ===>  onLoadVisiteur");
         // On initialise le dataController si il est vide
         if (dataController.allSeances.length === 0)
             yield dataController.init();
+        // On charge menu et footer
+        chargerMenu(); // Header
+        chargerCinemaSites(); // Footer
         const container = document.getElementById('films-container');
         if (!container)
             return;
@@ -72,7 +77,7 @@ export function onLoadVisiteur() {
                         dataController.selectedFilmUUID = film.id || '';
                         console.log("Visiteur ", film.id);
                         dataController.filterNameCinema = 'all';
-                        yield dataController.sauverComplet();
+                        yield dataController.sauverEtatGlobal();
                         window.location.href = 'films.html';
                     }));
                 }

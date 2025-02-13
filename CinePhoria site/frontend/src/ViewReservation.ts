@@ -2,17 +2,25 @@ import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension 
 import { getCookie, setCookie } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID } from './Helpers.js';
 import { DataController, dataController } from './DataController.js';
+import { DataControllerSauveCharge } from './DataController-SauverCharger.js';
+
 import { ReservationState } from './shared-models/Reservation.js';
 import { Film } from './shared-models/Film.js';
 
 import { updateContentPlace } from './ViewReservationPlaces.js';
 import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReservationDisplay.js';
+import { chargerMenu } from './ViewMenu.js';
+import { chargerCinemaSites } from './ViewFooter.js';
 
 
 export async function onLoadReservation() {
 
   // On initialise le dataController si il est vide
   if (dataController.allSeances.length === 0 ) await dataController.init()
+
+    // On charge menu et footer
+    chargerMenu(); // Header
+    chargerCinemaSites() // Footer
   
   // On se positionne sur le dernier cinema selectionne au cas ou on lance la fenetre avec all
   if (dataController.filterNameCinema === 'all') dataController.filterNameCinema = dataController.selectedNameCinema;
@@ -171,7 +179,7 @@ export async function updateCinema() {
  * @param selectedFilmUUID // film selectionné
  * @returns rien
  */
-export async function updateContentPage(dataController: DataController) {
+export async function updateContentPage(dataController: DataControllerSauveCharge) {
 
   console.log("UCP 1 - Update content page");
 
@@ -212,7 +220,7 @@ export async function updateContentPage(dataController: DataController) {
     console.log("ETAT : choix des places");
     basculerPanelReserve();
     updateContentPlace();
-    dataController.sauverComplet();
+    await dataController.sauverEtatGlobal();
   } else if (dataController.reservationState === ReservationState.ReserveCompteToConfirm) {
     console.log("On doit confirmer le compte");
     // On active le panel reserve, on affiche la réservation en lecture seule et la modal de confirmation d'utilisateur
@@ -521,7 +529,7 @@ function afficherSemaines(dateDebut: Date = new Date(), isInitial = true): void 
 * Affiche la liste des séances dans la zone .panel__choix .panel__seances
 * pour un filmId donné à une date précise.
 */
-function afficherSeancesDuJour(dateSelectionnee: Date): void {
+async function afficherSeancesDuJour(dateSelectionnee: Date): Promise<void> {
 
   // Moment le plus pratique pour capter la mise à jour de la date selectionnee dans le panel de tabs de jour
   // et effacer la mémorisation d'une éventuelle sélection
@@ -618,13 +626,13 @@ function afficherSeancesDuJour(dateSelectionnee: Date): void {
         buttonPanel.replaceWith(newButtonPanel);
         // Configuration du passage à l'étape de choix des places
 
-        newButtonPanel.addEventListener('click', () => {
+        newButtonPanel.addEventListener('click', async () => {
           if (buttonPanel) {
             basculerPanelReserve();
             dataController.reservationState = ReservationState.PendingChoiceSeats
 
             updateContentPlace();
-            dataController.sauverComplet();
+            await dataController.sauverEtatGlobal();
           }
         })
       }

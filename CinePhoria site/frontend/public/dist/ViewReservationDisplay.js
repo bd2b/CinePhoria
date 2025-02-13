@@ -127,7 +127,7 @@ function afficherDetailsReservation(reservation) {
                 btnConfirm.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
                     evt.preventDefault();
                     evt.stopPropagation();
-                    dataController.sauverComplet();
+                    yield dataController.sauverEtatGlobal();
                     yield confirmUtilisateur();
                 }));
             }
