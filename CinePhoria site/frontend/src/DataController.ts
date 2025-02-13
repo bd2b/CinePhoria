@@ -19,22 +19,18 @@
 import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { Film } from './shared-models/Film.js';
 import { ReservationState } from './shared-models/Reservation.js';
-import { getCookie, setCookie , datePrecedentMercredi } from './Helpers.js';
+import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
-// import { onLoadReservation } from "./ViewReservation.js";
-// import { onLoadMesReservations } from "./ViewMesReservations.js";
-// import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
-// import { chargerMenu } from './ViewMenu.js';
-// import { chargerCinemaSites } from './ViewFooter.js';
-
+import { Cinema } from './shared-models/Cinema.js';
 
 
 export class DataController {
 
-    private _reservationState: ReservationState = ReservationState.PendingChoiceSeance;
+    protected _reservationState: ReservationState = ReservationState.PendingChoiceSeance;
 
     // Ensemble des données chargées systématiquement
-    private _allSeances: Seance[] = [];
+    protected _allSeances: Seance[] = [];
+    protected _Cinemas: Cinema[] = [];
 
     // 🏆 Variable calculée : retourne les séances filtrées par cinéma
     get seances(): Seance[] {
@@ -52,6 +48,7 @@ export class DataController {
         return this.extractFilmsFromSeances(new Date(), dateMax);
     }
 
+    // 🏆 Variable calculée : retourne les films qui ont une date de sortie au dernier mercredi
     get filmsSortiesRecentes(): Film[] {
         const precedentMercredi = datePrecedentMercredi();
         return this.films.filter((f) => {
@@ -73,7 +70,7 @@ export class DataController {
         });
         return genreSet;
     }
-    // Variable calculee : liste des films filtré sur le cinéma puis sur le genre Genre
+    // Variable calculee : liste des films filtrés sur le cinéma puis sur le genre Genre
     get filmsGenre(): Film[] {
         let films = this.films;
         if (this._filterGenre !== 'all') {
@@ -86,28 +83,31 @@ export class DataController {
         return films;
     }
 
-    
+    // getter pour tous les cinema
+    public get cinemas(): Cinema[] {
+        return this._Cinemas;
+    }
 
-    private _tarifQualite: TarifQualite[] = [];
+    protected _tarifQualite: TarifQualite[] = [];
 
-    private _filterNameCinema?: string // = "all"; // On filtre sur tous les cinémas par défaut
-    private _selectedNameCinema?: string // = "Paris" // Par defaut le cinema selectionne dans la page Reservation
-    private _filterGenre: string = "all"; // Filtre sur tous les genres 
+    protected _filterNameCinema?: string // = "all"; // On filtre sur tous les cinémas par défaut
+    protected _selectedNameCinema?: string // = "Paris" // Par defaut le cinema selectionne dans la page Reservation
+    protected _filterGenre: string = "all"; // Filtre sur tous les genres 
 
-    private _selectedFilmUUID?: string; // UUID du film actuellement selectionne
-    private _selectedSeanceDate?: Date; // date du jour actuellement selectionnee
-    private _selectedSeanceUUID?: string | undefined // UUID de la séance selectionnée
+    protected _selectedFilmUUID?: string; // UUID du film actuellement selectionne
+    protected _selectedSeanceDate?: Date; // date du jour actuellement selectionnee
+    protected _selectedSeanceUUID?: string | undefined // UUID de la séance selectionnée
 
-    private _selectedUtilisateurUUID?: string | undefined // UUID de l'utilisateur
-    private _selectedUtilisateurMail?: string | undefined // Mail de l'utilisateur
-    private _selectedUtilisateurDisplayName?: string | undefined // displayName de l'utilisateur
+    protected _selectedUtilisateurUUID?: string | undefined // UUID de l'utilisateur
+    protected _selectedUtilisateurMail?: string | undefined // Mail de l'utilisateur
+    protected _selectedUtilisateurDisplayName?: string | undefined // displayName de l'utilisateur
 
-    private _selectedReservationUUID?: string | undefined // UUID de la reservation
-    private _selectedReservationCinema?: string | undefined // Cinema de localisation de la reservation
+    protected _selectedReservationUUID?: string | undefined // UUID de la reservation
+    protected _selectedReservationCinema?: string | undefined // Cinema de localisation de la reservation
 
-    private static validiteCache: number = 1; // Apres validiteCache heure on force le rechargement des données
-    private static nomCookieDateAccess: string = 'dateAccess'; // Nom du cookie pour stocker la date de mise à jour
-    private static nomStorage: string = 'storage'; // Nom du storage pour stocker toutes les SeancesFilmsSalle du cinema
+    protected static validiteCache: number = 1; // Apres validiteCache heure on force le rechargement des données
+    protected static nomCookieDateAccess: string = 'dateAccess'; // Nom du cookie pour stocker la date de mise à jour
+    protected static nomStorage: string = 'storage'; // Nom du storage pour stocker toutes les SeancesFilmsSalle du cinema
 
 
     // Getter pour reservationState
@@ -160,7 +160,7 @@ export class DataController {
         this._filterNameCinema = value;
 
         // On sauvegarde le nouvelle configuration
-        this.sauverComplet();
+        this.sauverEtatGlobal();
 
     }
 
@@ -272,12 +272,11 @@ export class DataController {
     }
 
     // Méthode asynchrone pour initialiser les données depuis l'API
-    // On charge l'ensemble des données de tous les cinemas, on filtrera en local
+    // On charge l'ensemble des données de toutes les séances, on filtrera en local
     public async chargerDepuisAPI(): Promise<void> {
         console.log("DataC: ChargerDepuisAPI")
         try {
-
-            //  if (this._nameCinema !== "Selectionnez un cinema") {
+            // 1) Chargement de toutes les séances
             const response = await fetch(`http://localhost:3500/api/seances/filter?cinemasList="all"`);
             const rawData = await response.json();
 
@@ -289,7 +288,7 @@ export class DataController {
             this._allSeances = rawData.map((d: any) => new Seance(d));
             console.log(`Pour l'ensembles des cinemas, chargement depuis l'API : ${this.seances.length} séances, ${this.films.length} films`);
 
-            // On recupere les tarifs
+            // 2) On recupere les tarifs
             const responseTarif = await fetch(`http://localhost:3500/api/seances/tarif`);
             const rawDataTarif = await responseTarif.json();
 
@@ -301,12 +300,21 @@ export class DataController {
             this._tarifQualite = rawDataTarif.map((t: any) => new TarifQualite(t));
             console.log(`Pour l'ensemble des tarifs : chargement depuis l'API : ${this._tarifQualite.length} tarifs`);
 
+            // 3) Chargement de tous les cinemas (pour le pied de page)
+            const responseCinema = await fetch('http://localhost:3500/api/cinemas');
+            const rawDataCinema = await responseCinema.json();
+
+            if (!Array.isArray(rawDataCinema)) {
+                throw new Error('La réponse de l’API n’est pas un tableau.');
+            }
+
+            // Convertir les données brutes en instances de Cinema
+            this._Cinemas = rawDataCinema.map((c: any) => new Cinema(c));
+            console.log(`Pour l'ensemble des cinemas, chargement depuis l'API : ${this._Cinemas.length} cinemas`);
+
             // Enregistrement de la date de validité
             setCookie(DataController.nomCookieDateAccess, (new Date()).toISOString(), 1);
 
-            // Sauvegarder dans localStorage
-            // this.sauverComplet();
-            //  }
         } catch (error) {
             console.error('Erreur lors du chargement des données de séances : ', error);
         }
@@ -354,8 +362,8 @@ export class DataController {
     };
 
     // Premier jour de projection du film
-    public premierJour(filmId: string) : Date {
-        return new Date (this.seancesFilm(filmId)[0].dateJour || '');
+    public premierJour(filmId: string): Date {
+        return new Date(this.seancesFilm(filmId)[0].dateJour || '');
     }
     // Les séances d'un film pour un jour donne
     public seancesFilmJour(filmId: string, date: Date = new Date()): Seance[] {
@@ -382,8 +390,8 @@ export class DataController {
     // Toutes les séances d'un film trier par jour
     public seancesFilm(filmId: string): Seance[] {
         return this.seances
-        .filter((s) => s.filmId === filmId)
-        .sort((a, b) => new Date(a.dateJour || '').getTime() - new Date(b.dateJour || '').getTime());
+            .filter((s) => s.filmId === filmId)
+            .sort((a, b) => new Date(a.dateJour || '').getTime() - new Date(b.dateJour || '').getTime());
         ;
     }
     // Tous les films pour un jour
@@ -412,15 +420,137 @@ export class DataController {
         )[0];
     }
 
-    public async sauverComplet(): Promise<void> {
+    // public async sauverComplet(): Promise<void> {
 
-        console.log("DataC: SauverComplet filternameCinema = ", this._filterNameCinema, " selectedNameCinema = ", this._selectedNameCinema);
+    //     console.log("DataC: SauverComplet filternameCinema = ", this._filterNameCinema, " selectedNameCinema = ", this._selectedNameCinema);
 
-        // Construire un objet « snapshot » de tout ce qu’on veut persister
-        const snapshot = {
+    //     // Construire un objet « snapshot » de tout ce qu’on veut persister
+    //     const snapshot = {
+    //         reservationState: this._reservationState,
+    //         seances: this._allSeances,
+    //         cinemas: this._Cinemas,
+    //         tarifQualite: this._tarifQualite,
+    //         filterNameCinema: this._filterNameCinema,
+    //         selectedNameCinema: this._selectedNameCinema,
+    //         selectedFilmUUID: this._selectedFilmUUID,
+    //         selectedSeanceDate: this._selectedSeanceDate?.toISOString() || null,
+    //         selectedSeanceUUID: this._selectedSeanceUUID,
+    //         selectedUtilisateurUUID: this._selectedUtilisateurUUID,
+    //         selectedUtilisateurMail: this._selectedUtilisateurMail,
+    //         selectedUtilisateurDisplayName: this._selectedUtilisateurDisplayName,
+    //         selectedReservationUUID: this._selectedReservationUUID,
+    //         selectedReservationCinema: this._selectedReservationCinema
+
+    //     };
+    //     const snapshotString = JSON.stringify(snapshot);
+    //     console.log(`Taille du snapshot en caractères: ${snapshotString.length}`);
+    //     console.log(`Taille du snapshot en Ko: ${new Blob([snapshotString]).size / 1024} Ko`);
+    //     localStorage.setItem(DataController.nomStorage, JSON.stringify(snapshot));
+    // }
+
+    // public async chargerComplet(): Promise<void> {
+    //     console.log("DataC: ChargerComplet")
+    //     const saved = localStorage.getItem(DataController.nomStorage);
+
+    //     if (!saved) {
+    //         console.warn("Aucune donnée trouvée dans le localStorage.");
+    //         return;
+    //     }
+    //     try {
+    //         const parsed = JSON.parse(saved);
+
+    //         console.log("Données chargées du localStorage :", parsed); // 🔍 DEBUG
+
+    //         // Restauration du state
+    //         this._reservationState = parsed.reservationState || ReservationState.PendingChoiceSeance;
+
+    //         // Restauration des séances
+    //         if (Array.isArray(parsed.seances)) {
+    //             // Convertir en instances de Seance si besoin
+    //             this._allSeances = parsed.seances.map((s: any) => new Seance(s));
+    //         }
+
+    //         // Restauration des tarifs
+    //         if (Array.isArray(parsed.tarifQualite)) {
+    //             this._tarifQualite = parsed.tarifQualite.map((t: any) => new TarifQualite(t));
+    //         }
+
+    //         // Restauration des cinemas
+    //         if (Array.isArray(parsed.cinemas)) {
+    //             this._Cinemas = parsed.cinema.map((t: any) => new Cinema(t));
+    //         }
+
+    //         // Autres champs
+    //         this._filterNameCinema = parsed.filterNameCinema || undefined;
+    //         this._selectedNameCinema = parsed.selectedNameCinema || undefined;
+    //         this._selectedFilmUUID = parsed.selectedFilmUUID || undefined;
+    //         this._selectedSeanceUUID = parsed.selectedSeanceUUID || undefined;
+    //         this._selectedUtilisateurUUID = parsed.selectedUtilisateurUUID || undefined;
+    //         this._selectedUtilisateurMail = parsed.selectedUtilisateurMail || undefined;
+    //         this._selectedUtilisateurDisplayName = parsed.selectedUtilisateurDisplayName || undefined;
+    //         this._selectedReservationUUID = parsed.selectedReservationUUID || undefined;
+    //         this._selectedReservationCinema = parsed.selectedReservationCinema || undefined;
+
+
+    //         // Reconstruire la date
+    //         if (parsed.selectedSeanceDate) {
+    //             this._selectedSeanceDate = new Date(parsed.selectedSeanceDate);
+    //             console.log("Rechargement = ", this._selectedSeanceDate);
+    //         }
+    //         console.log("DataC: ChargerComplet filternameCinema = ", this._filterNameCinema, " selectedNameCinema = ", this._selectedNameCinema);
+
+
+    //     } catch (e) {
+    //         console.error('Erreur de parsing du localStorage : ', e);
+    //     }
+    // }
+
+    // public async init(): Promise<void> {
+    //     console.log("DataC: Init")
+    //     // 1) Charger depuis le localStorage
+    //     await this.chargerComplet();
+
+    //     // 2) Vérifier la validité du cache
+    //     let mustReload = true;
+    //     const dateAccessString = getCookie(DataController.nomCookieDateAccess);
+
+    //     if (dateAccessString) {
+    //         if (!isDifferenceGreaterThanHours(new Date(), new Date(dateAccessString), DataController.validiteCache)) {
+    //             mustReload = false;
+    //             console.log("DataC: cookie valide")
+    //         } else {
+    //             console.log("DataC: cookie validite expiré")
+    //         }
+    //     } else {
+    //         console.log("DataC: cookie validite absent")
+    //     }
+
+    //     // 3) Si invalidité du cache ou seances vides, on va recharger
+    //     if (!this.seances.length || mustReload) {
+    //         //           if ( mustReload) {
+    //         console.log('[init] Cache inexistant ou expiré -> rechargement depuis l’API');
+    //         await this.chargerDepuisAPI();
+
+    //     } else {
+    //         console.log('[init] Données restaurées depuis localStorage');
+    //     }
+    // }
+
+/* ---------------------------------------
+-- Gestion de la persistence des dpnnées dans le storage 
+-- La limitation de taille à 5Mo nécessite de fractionner les données en plusieurs storage
+-----------------------------------------*/
+
+    protected static KEY_GLOBAL = 'myAppState';             // Pour l’état global (reservationState, selectedFilm, etc.)
+    protected static KEY_TARIFS = 'myAppTarifs';            // Pour le tarifQualite
+    protected static KEY_CINEMAS = 'myAppCinemas';          // Pour la liste des Cinema
+    // Pour les seances, on fera KEY_SEANCES + "_" + cinemaName => "myAppSeances_Paris", etc.
+    protected static KEY_SEANCES = 'myAppSeances';
+
+
+    public async sauverEtatGlobal(): Promise<void> {
+        const snapshotGlobal = {
             reservationState: this._reservationState,
-            seances: this._allSeances,
-            tarifQualite: this._tarifQualite,
             filterNameCinema: this._filterNameCinema,
             selectedNameCinema: this._selectedNameCinema,
             selectedFilmUUID: this._selectedFilmUUID,
@@ -430,41 +560,72 @@ export class DataController {
             selectedUtilisateurMail: this._selectedUtilisateurMail,
             selectedUtilisateurDisplayName: this._selectedUtilisateurDisplayName,
             selectedReservationUUID: this._selectedReservationUUID,
-            selectedReservationCinema: this._selectedReservationCinema
+            selectedReservationCinema: this._selectedReservationCinema,
 
         };
 
-        localStorage.setItem(DataController.nomStorage, JSON.stringify(snapshot));
+        const strGlobal = JSON.stringify(snapshotGlobal);
+        console.log(`DataC: Taille du snapshotGlobal = ${strGlobal.length} caractères`);
+        localStorage.setItem(DataController.KEY_GLOBAL, strGlobal);
     }
 
-    public async chargerComplet(): Promise<void> {
-        console.log("DataC: ChargerComplet")
-        const saved = localStorage.getItem(DataController.nomStorage);
+    public async sauverTarifs(): Promise<void> {
+        if (!this._tarifQualite) return;
 
+        const arr = this._tarifQualite; // tableau de TarifQualite
+        const str = JSON.stringify(arr);
+        console.log(`DataC: Sauvegarde des tarifs => taille = ${str.length}`);
+        localStorage.setItem(DataController.KEY_TARIFS, str);
+    }
+
+    public async sauverCinemas(): Promise<void> {
+        if (!this._Cinemas) return;
+
+        const arr = this._Cinemas; // tableau de Cinema
+        const str = JSON.stringify(arr);
+        console.log(`DataC: Sauvegarde des Cinemas => taille = ${str.length}`);
+        localStorage.setItem(DataController.KEY_CINEMAS, str);
+    }
+    public async sauverSeancesParCinema(): Promise<void> {
+        // On suppose que this._allSeances contient toutes les séances de tous les cinémas
+        if (!this._allSeances) return;
+
+        // Regrouper par cinema
+        const mapCinemaToSeances = new Map<string, Seance[]>();
+
+        this._allSeances.forEach((s) => {
+            const cName = s.nameCinema?.trim() || 'unknown';
+            if (!mapCinemaToSeances.has(cName)) {
+                mapCinemaToSeances.set(cName, []);
+            }
+            mapCinemaToSeances.get(cName)?.push(s);
+        });
+
+        // Pour chaque cinéma, on sauvegarde
+        mapCinemaToSeances.forEach((seances, cName) => {
+            const str = JSON.stringify(seances);
+            const key = `${DataController.KEY_SEANCES}_${cName}`;
+            console.log(`DataC: Sauvegarde seances pour '${cName}' => taille ${str.length} chars`);
+            localStorage.setItem(key, str);
+        });
+    }
+
+    public async sauverComplet(): Promise<void> {
+        await this.sauverEtatGlobal();
+        await this.sauverTarifs();
+        await this.sauverCinemas();
+        await this.sauverSeancesParCinema();
+    }
+
+    public async chargerEtatGlobal(): Promise<void> {
+        const saved = localStorage.getItem(DataController.KEY_GLOBAL);
         if (!saved) {
-            console.warn("Aucune donnée trouvée dans le localStorage.");
+            console.warn("DataC: Aucune donnée globale trouvée");
             return;
         }
         try {
             const parsed = JSON.parse(saved);
-
-            console.log("Données chargées du localStorage :", parsed); // 🔍 DEBUG
-
-            // Restauration du state
             this._reservationState = parsed.reservationState || ReservationState.PendingChoiceSeance;
-
-            // Restauration des séances
-            if (Array.isArray(parsed.seances)) {
-                // Convertir en instances de Seance si besoin
-                this._allSeances = parsed.seances.map((s: any) => new Seance(s));
-            }
-
-            // Restauration des tarifs
-            if (Array.isArray(parsed.tarifQualite)) {
-                this._tarifQualite = parsed.tarifQualite.map((t: any) => new TarifQualite(t));
-            }
-
-            // Autres champs
             this._filterNameCinema = parsed.filterNameCinema || undefined;
             this._selectedNameCinema = parsed.selectedNameCinema || undefined;
             this._selectedFilmUUID = parsed.selectedFilmUUID || undefined;
@@ -475,50 +636,124 @@ export class DataController {
             this._selectedReservationUUID = parsed.selectedReservationUUID || undefined;
             this._selectedReservationCinema = parsed.selectedReservationCinema || undefined;
 
-
-            // Reconstruire la date
             if (parsed.selectedSeanceDate) {
                 this._selectedSeanceDate = new Date(parsed.selectedSeanceDate);
-                console.log("Rechargement = ", this._selectedSeanceDate);
             }
-            console.log("DataC: ChargerComplet filternameCinema = ", this._filterNameCinema, " selectedNameCinema = ", this._selectedNameCinema);
-
-
         } catch (e) {
-            console.error('Erreur de parsing du localStorage : ', e);
+            console.error('DataC: Erreur parsing état global', e);
         }
     }
 
+    public async chargerTarifs(): Promise<void> {
+        const saved = localStorage.getItem(DataController.KEY_TARIFS);
+        if (!saved) return;
+        try {
+            const arr = JSON.parse(saved);
+            if (Array.isArray(arr)) {
+                this._tarifQualite = arr.map((t: any) => new TarifQualite(t));
+            }
+        } catch (e) {
+            console.error('DataC: Erreur parsing tarifs', e);
+        }
+    }
+
+    public async chargerCinemas(): Promise<void> {
+        const saved = localStorage.getItem(DataController.KEY_CINEMAS);
+        if (!saved) return;
+        try {
+            const arr = JSON.parse(saved);
+            if (Array.isArray(arr)) {
+                this._Cinemas = arr.map((c: any) => new Cinema(c));
+            }
+        } catch (e) {
+            console.error('DataC: Erreur parsing cinemas', e);
+        }
+    }
+
+    public async chargerSeancesPourCinema(cinemaName: string): Promise<Seance[]> {
+        const key = `${DataController.KEY_SEANCES}_${cinemaName}`;
+        const saved = localStorage.getItem(key);
+        if (!saved) return [];
+        try {
+            const arr = JSON.parse(saved);
+            if (Array.isArray(arr)) {
+                return arr.map((s: any) => new Seance(s));
+            }
+        } catch (e) {
+            console.error('DataC: Erreur parsing seances pour', cinemaName, e);
+        }
+        return [];
+    }
+
+    public async chargerSeancesTousCinemas(): Promise<void> {
+        // S’assurer qu’on a la liste des cinémas
+        if (!this._Cinemas || this._Cinemas.length === 0) {
+            console.warn("DataC: Aucun cinéma n’est chargé, impossible de charger les séances tous cinémas.");
+            return;
+        }
+
+        // Vider ou reconstituer _allSeances
+        this._allSeances = [];
+
+        for (const cinemaObj of this._Cinemas) {
+            const cName = cinemaObj.nameCinema?.trim() || 'unknown';
+            const partialSeances = await this.chargerSeancesPourCinema(cName);
+            // Ajouter au grand tableau
+            this._allSeances.push(...partialSeances);
+        }
+
+        console.log(`DataC: Toutes les séances de ${this._Cinemas.length} cinémas chargées. Nombre total de séances : ${this._allSeances.length}.`);
+    }
+
+    public async chargerComplet(): Promise<void> {
+        console.log("DataC: ChargerComplet multi storage");
+
+        // 1) Charger l’état global
+        await this.chargerEtatGlobal();
+
+        // 2) Charger les tarifs
+        await this.chargerTarifs();
+
+        // 3) Charger la liste des cinémas
+        await this.chargerCinemas();
+
+        // 4) Charger toutes les séances pour tous les cinémas
+        await this.chargerSeancesTousCinemas();
+
+        // => À la fin, this._allSeances contient l’ensemble des séances
+    }
+
     public async init(): Promise<void> {
-        console.log("DataC: Init")
-        // 1) Charger depuis le localStorage
+        console.log("DataC: Init");
+
+        // 1) Charger depuis localStorage
         await this.chargerComplet();
 
-        // 2) Vérifier la validité du cache
+        // 2) Vérifier la validité du cache via cookie
         let mustReload = true;
         const dateAccessString = getCookie(DataController.nomCookieDateAccess);
 
         if (dateAccessString) {
             if (!isDifferenceGreaterThanHours(new Date(), new Date(dateAccessString), DataController.validiteCache)) {
                 mustReload = false;
-                console.log("DataC: cookie valide")
+                console.log("DataC: cookie valide");
             } else {
-                console.log("DataC: cookie validite expiré")
+                console.log("DataC: cookie validite expiré");
             }
         } else {
-            console.log("DataC: cookie validite absent")
+            console.log("DataC: cookie validite absent");
         }
 
-        // 3) Si invalidité du cache ou seances vides, on va recharger
-        if (!this.seances.length || mustReload) {
-            //           if ( mustReload) {
-            console.log('[init] Cache inexistant ou expiré -> rechargement depuis l’API');
+        // 3) Si invalidité du cache ou pas de séances, on recharge depuis API
+        if (!this._allSeances.length || mustReload) {
+            console.log('[init] Cache inexistant/vide ou expiré -> rechargement depuis l’API');
             await this.chargerDepuisAPI();
-
+            await this.sauverComplet();
         } else {
             console.log('[init] Données restaurées depuis localStorage');
         }
     }
+
 }
 
 /* ---------------------------------------

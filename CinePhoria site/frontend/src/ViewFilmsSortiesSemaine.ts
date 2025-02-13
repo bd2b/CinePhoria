@@ -1,5 +1,7 @@
 import { getCookie, setCookie } from "./Helpers.js";
 import { dataController } from "./DataController.js";
+import { chargerMenu } from './ViewMenu.js';
+import { chargerCinemaSites } from './ViewFooter.js';
 
 interface Film {
   id: string;
@@ -24,11 +26,13 @@ interface Film {
 
 export async function onLoadVisiteur() {
   console.log(" ===>  onLoadVisiteur");
+
   // On initialise le dataController si il est vide
   if (dataController.allSeances.length === 0) await dataController.init()
 
-
-
+  // On charge menu et footer
+  chargerMenu(); // Header
+  chargerCinemaSites() // Footer
 
   const container = document.getElementById('films-container');
   if (!container) return;
@@ -84,7 +88,7 @@ export async function onLoadVisiteur() {
       // Bouton detail du film
       const detailBtn = card.querySelector('.cardreservation__reserver-button') as HTMLButtonElement | null;
       if (detailBtn) {
-        detailBtn.removeEventListener('click',  async (evt) => {});
+        detailBtn.removeEventListener('click', async (evt) => { });
         detailBtn.addEventListener('click', async (evt) => {
           evt.preventDefault();
           evt.stopPropagation();
@@ -92,7 +96,7 @@ export async function onLoadVisiteur() {
           dataController.selectedFilmUUID = film.id || '';
           console.log("Visiteur ", film.id)
           dataController.filterNameCinema = 'all';
-          await dataController.sauverComplet();
+          await dataController.sauverEtatGlobal();
 
           window.location.href = 'films.html';
         });

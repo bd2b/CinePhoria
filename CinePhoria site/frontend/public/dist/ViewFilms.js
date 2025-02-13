@@ -11,15 +11,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { dataController } from './DataController.js';
 import { formatDateLocalYYYYMMDD } from './Helpers.js';
 import { ReservationState } from './shared-models/Reservation.js';
-//let dataController.filterNameCinema = dataController.filterNameCinema;
-// let filtreGenre = dataController.filterGenre;
+import { chargerMenu } from './ViewMenu.js';
+import { chargerCinemaSites } from './ViewFooter.js';
+// Filtre pour les cinema pris dans le dataController : dataController.filterNameCinema
+// Filtre pour les grenres pris dans le dataControllerdataController.filterGenre;
+// Filtre sur le jour en local car pas utilisé dans d'autres pages
 let filtreJour = '';
 export function onLoadFilms() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("=====> chargement onLoadFilms");
-        // On initialise le dataController si il est vide
+        // 1) On initialise le dataController si il est vide
         if (dataController.allSeances.length === 0)
             yield dataController.init();
+        // On charge menu et footer
+        chargerMenu(); // Header
+        chargerCinemaSites(); // Footer
         // 2) Init filtres
         yield initFiltreCinema();
         yield initFiltreGenre();
@@ -367,7 +373,7 @@ function afficherDetailFilm(film) {
                             dataController.selectedFilmUUID = seance.filmId || '';
                             dataController.selectedSeanceDate = new Date(seance.dateJour || '');
                             dataController.reservationState = ReservationState.PendingChoiceSeats;
-                            yield dataController.sauverComplet();
+                            yield dataController.sauverEtatGlobal();
                             window.location.href = 'reservation.html';
                             alert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
                         }
