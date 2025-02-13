@@ -56,7 +56,7 @@ export class ReservationDAO {
     logger.info("Resultat select = " + JSON.stringify(reservationData));
     const { utilisateurId, seanceId, stateReservation } = reservationData;
     
-    if ((p_utilisateurId !== utilisateurId) || (p_seanceId !== seanceId) || (stateReservation !== 'future') ) {
+    if ((p_utilisateurId !== utilisateurId) || (p_seanceId !== seanceId) || (stateReservation !== 'ReserveToConfirm') ) {
       logger.info(`Reservation incoherente pour les données communiquées u = ${p_utilisateurId} s = ${p_seanceId} , st =  ${stateReservation}`);
       return 'Reservation incoherente pour les données communiquées';
     }
