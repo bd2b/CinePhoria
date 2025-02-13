@@ -1005,7 +1005,8 @@ CREATE PROCEDURE ConfirmReserve(
 	END IF;
     
      UPDATE Reservation
-     SET timeStampCreate = NULL
+     SET timeStampCreate = NULL,
+			 stateReservation = 'ReserveConfirmed'
      WHERE id = p_reservationId;
      
      Commit;
