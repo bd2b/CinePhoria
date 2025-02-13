@@ -20,8 +20,8 @@ export function onLoadReservation() {
         if (dataController.allSeances.length === 0)
             yield dataController.init();
         // On charge menu et footer
-        chargerMenu(); // Header
-        chargerCinemaSites(); // Footer
+        yield chargerMenu(); // Header
+        yield chargerCinemaSites(); // Footer
         // On se positionne sur le dernier cinema selectionne au cas ou on lance la fenetre avec all
         if (dataController.filterNameCinema === 'all')
             dataController.filterNameCinema = dataController.selectedNameCinema;

@@ -174,7 +174,7 @@ export async function login(invite: string ="", enableEmail: boolean = false) {
                     if (modalConfirm) modalConfirm.style.display = 'none';
                     // On memorise l'utilisateur et on charge ses données de compte
                     userDataController.ident = emailInput.value.trim();
-                    await userDataController.comptesUtilisateur();
+                    await userDataController.init();
                     await confirmReserve();
                     const pageToGo = userDataController.profil();
                     window.location.href = pageToGo;
@@ -197,7 +197,7 @@ export async function login(invite: string ="", enableEmail: boolean = false) {
                     userDataController.ident = emailInput.value.trim();
                     console.log("ident stockée = ", userDataController.ident)
                     
-                    await userDataController.comptesUtilisateur();
+                    await userDataController.init();
                     console.log("Compte charge = ", userDataController.compte());
 
                     const pageToGo = userDataController.profil();

@@ -24,8 +24,8 @@ export function onLoadFilms() {
         if (dataController.allSeances.length === 0)
             yield dataController.init();
         // On charge menu et footer
-        chargerMenu(); // Header
-        chargerCinemaSites(); // Footer
+        yield chargerMenu(); // Header
+        yield chargerCinemaSites(); // Footer
         // 2) Init filtres
         yield initFiltreCinema();
         yield initFiltreGenre();

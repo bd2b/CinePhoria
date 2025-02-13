@@ -194,7 +194,7 @@ function setReservation() {
                             // On est logue, on peut valider la reservation directement
                             // On memorise l'utilisateur et on charge ses données de compte
                             userDataController.ident = emailInput.value.trim();
-                            yield userDataController.comptesUtilisateur();
+                            yield userDataController.init();
                             yield confirmReserve();
                             const pageToGo = userDataController.profil();
                             window.location.href = pageToGo;

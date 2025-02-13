@@ -2,7 +2,7 @@ import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension 
 import { getCookie, setCookie } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID } from './Helpers.js';
 import { DataController, dataController } from './DataController.js';
-import { DataControllerSauveCharge } from './DataController-SauverCharger.js';
+
 
 import { ReservationState } from './shared-models/Reservation.js';
 import { Film } from './shared-models/Film.js';
@@ -19,8 +19,8 @@ export async function onLoadReservation() {
   if (dataController.allSeances.length === 0 ) await dataController.init()
 
     // On charge menu et footer
-    chargerMenu(); // Header
-    chargerCinemaSites() // Footer
+    await chargerMenu(); // Header
+    await chargerCinemaSites() // Footer
   
   // On se positionne sur le dernier cinema selectionne au cas ou on lance la fenetre avec all
   if (dataController.filterNameCinema === 'all') dataController.filterNameCinema = dataController.selectedNameCinema;
@@ -179,7 +179,7 @@ export async function updateCinema() {
  * @param selectedFilmUUID // film selectionné
  * @returns rien
  */
-export async function updateContentPage(dataController: DataControllerSauveCharge) {
+export async function updateContentPage(dataController: DataController) {
 
   console.log("UCP 1 - Update content page");
 

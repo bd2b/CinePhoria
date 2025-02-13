@@ -213,7 +213,7 @@ async function setReservation() {
                         // On est logue, on peut valider la reservation directement
                         // On memorise l'utilisateur et on charge ses données de compte
                         userDataController.ident = emailInput.value.trim();
-                        await userDataController.comptesUtilisateur();
+                        await userDataController.init();
                         await confirmReserve();
                         const pageToGo = userDataController.profil();
                         window.location.href = pageToGo;
