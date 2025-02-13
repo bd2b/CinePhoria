@@ -31,8 +31,8 @@ export async function onLoadVisiteur() {
   if (dataController.allSeances.length === 0) await dataController.init()
 
   // On charge menu et footer
-  chargerMenu(); // Header
-  chargerCinemaSites() // Footer
+  await chargerMenu(); // Header
+  await chargerCinemaSites() // Footer
 
   const container = document.getElementById('films-container');
   if (!container) return;

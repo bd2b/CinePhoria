@@ -166,7 +166,7 @@ export function login() {
                                 modalConfirm.style.display = 'none';
                             // On memorise l'utilisateur et on charge ses données de compte
                             userDataController.ident = emailInput.value.trim();
-                            yield userDataController.comptesUtilisateur();
+                            yield userDataController.init();
                             yield confirmReserve();
                             const pageToGo = userDataController.profil();
                             window.location.href = pageToGo;
@@ -189,7 +189,7 @@ export function login() {
                             console.log("email logué = ", emailInput.value.trim());
                             userDataController.ident = emailInput.value.trim();
                             console.log("ident stockée = ", userDataController.ident);
-                            yield userDataController.comptesUtilisateur();
+                            yield userDataController.init();
                             console.log("Compte charge = ", userDataController.compte());
                             const pageToGo = userDataController.profil();
                             console.log("Page redirigée", pageToGo);

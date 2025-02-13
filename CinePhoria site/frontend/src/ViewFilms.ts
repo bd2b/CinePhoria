@@ -20,8 +20,8 @@ export async function onLoadFilms() {
     if (dataController.allSeances.length === 0) await dataController.init()
 
     // On charge menu et footer
-    chargerMenu(); // Header
-    chargerCinemaSites() // Footer
+    await chargerMenu(); // Header
+    await chargerCinemaSites() // Footer
 
 
     // 2) Init filtres

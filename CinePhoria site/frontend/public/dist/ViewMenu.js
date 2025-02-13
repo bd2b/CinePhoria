@@ -22,7 +22,7 @@ export function chargerMenu() {
         const ident = userDataController.ident;
         if (ident !== undefined) {
             console.log("Identification chargee = ", ident);
-            yield userDataController.comptesUtilisateur();
+            yield userDataController.init();
             console.log("Compte charge = ", userDataController.compte());
         }
         // 1) Identifier le profil

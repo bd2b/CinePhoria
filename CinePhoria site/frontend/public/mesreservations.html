@@ -5,9 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/style.css">
-    
+    <link rel="stylesheet" href="css/sections/main-mesreservations.css">
 
-    
     <script type="module" src="dist/global.js" defer></script>
     <script type="module" src="dist/main.js" defer></script>
 
@@ -19,7 +18,7 @@
         <nav class="header__nav">
             <div class="nav__logo ">
                 <a href="./visiteur.html">
-                <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
+                    <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
             </div>
             <nav class="nav__actions">
                 <button class="nav__actions-button nav__actions-button--link">Réservation</button>
@@ -48,38 +47,69 @@
                 <div class="title__left">
                     <h1 class="title__left-h1" id="titleLeft">Mes réservations</h1>
                 </div>
-                <div class="title__filters title__filters-visiteur">
-                    <div class="title__filter-dropdown titre__filter-dropdown-genre">
-                        <button class="title__filter-dropdown-button">Genre <span
-                                class="chevron">▼</span></button><!-- Boutons de sélection-->
-                        <div class="title__filter-button-drowdown-content">
-                            <a href="#">Film d'action</a>
-                            <a href="#">Thriller</a>
-                        </div>
-                    </div>
-                    <div class="title__filter-dropdown">
-                        <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">Choisissez votre
-                            complexe <span class="chevron">▼</span></button><!-- Boutons de sélection-->
-                        <div
-                            class="title__filter-button-drowdown-content title__filter-button-drowdown-content-complexe">
-                            <a href="#" data-cinema="Paris">Paris</a>
-                            <a href="#" data-cinema="Bordeaux">Bordeaux</a>
-                            <a href="#" data-cinema="Nantes">Nantes</a>
-                            <a href="#" data-cinema="Lille">Lille</a>
-                            <a href="#" data-cinema="Toulouse">Toulouse</a>
-                            <a href="#" data-cinema="Charleroi">Charleroi</a>
-                            <a href="#" data-cinema="Liège">Liège</a>
-                        </div>
-                    </div>
-                </div>
             </div>
-            <div class="container__mesreservations"> <!--- Mes Reservations -->
-               <h1>Mes reservations</h1>
+            <!-- Conteneur des réservations -->
+            <div class="container__mesreservations">
+                <!-- Le script insère la table dans ce div -->
+                <div id="mesreservations-table-container"></div>
             </div>
         </div>
         </div>
     </main>
     <footer class="footer" id="footer">
     </footer>
+
+
+    <!-- MODALES -->
+
+    <!-- A) Modal détailReservation -->
+    <div id="modal-detailReservation" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-detailReservation">&times;</span>
+            <h2>Détail de la réservation</h2>
+            <p id="detailReservationContent">...</p>
+        </div>
+    </div>
+
+    <!-- B) Modal evaluationReservation -->
+    <div id="modal-evaluationReservation" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-evaluationReservation">&times;</span>
+            <h2>Votre avis</h2>
+            <label for="eval-note">Note :</label>
+            <input type="number" id="eval-note" min="0" max="5" step="0.5" /><br /><br />
+            <label for="eval-text">Commentaire :</label>
+            <textarea id="eval-text" rows="4" cols="40"></textarea><br /><br />
+            <button id="evalAnnulerBtn">Annuler</button>
+            <button id="evalEnregistrerBtn">Enregistrer</button>
+        </div>
+    </div>
+
+    <!-- C) Modal modifEvaluationReservation -->
+    <div id="modal-modifEvaluationReservation" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-modifEvaluation">&times;</span>
+            <h2>Modifier votre avis</h2>
+            <label for="modif-note">Note :</label>
+            <input type="number" id="modif-note" min="0" max="5" step="0.5" /><br /><br />
+            <label for="modif-text">Commentaire :</label>
+            <textarea id="modif-text" rows="4" cols="40"></textarea><br /><br />
+            <button id="modifAnnulerBtn">Annuler</button>
+            <button id="modifEnregistrerBtn">Enregistrer</button>
+        </div>
+    </div>
+
+    <!-- D) Modal suppressionReservation -->
+    <div id="modal-suppressionReservation" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-suppReservation">&times;</span>
+            <h2>Supprimer la réservation ?</h2>
+            <p>Etes vous sûr de vouloir supprimer cette réservation ?
+                (Nous conserverons la note anonymisée mais supprimerons
+                l'éventuel commentaire de notre site ainsi que les données de la réservation).</p>
+            <button id="supAnnulerBtn">Annuler</button>
+            <button id="supConfirmerBtn">Je confirme la suppression</button>
+        </div>
+    </div>
 
 </body>

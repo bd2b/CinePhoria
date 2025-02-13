@@ -72,15 +72,15 @@ export class DataControllerUser {
         this._ident = undefined;
         this._comptes = undefined;
     }
-    /**
-     * Charge les comptes utilisateur si l'ident est defini et si le compte n'a pas été déja chargé
+    /** Initialisation du dataController
+     *
      */
-    comptesUtilisateur() {
+    init() {
         return __awaiter(this, void 0, void 0, function* () {
             if (this._ident !== undefined) {
-                console.log("111");
                 const comptesCharge = yield profilApi(this._ident);
                 if (comptesCharge) {
+                    console.log("Compte chargé pour ", this._ident);
                     this._comptes = comptesCharge;
                 }
             }

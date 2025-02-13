@@ -222,3 +222,23 @@ export function isLogged() {
         });
     });
 }
+export function getReservationForUtilisateur(utilisateurId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = localStorage.getItem('jwtToken');
+        const response = yield fetch(`http://localhost:3500/api/reservation/${utilisateurId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const rawData = yield response.json();
+        if (!Array.isArray(rawData)) {
+            throw new Error('La réponse de l’API n’est pas un tableau.');
+        }
+        // Convertir les données brutes en instances de Seance
+        const reservationForUtilisateur = rawData.map((r) => new ReservationForUtilisateur(r));
+        console.log("Reservation pour un utilisateur = ", reservationForUtilisateur);
+        return reservationForUtilisateur;
+    });
+}

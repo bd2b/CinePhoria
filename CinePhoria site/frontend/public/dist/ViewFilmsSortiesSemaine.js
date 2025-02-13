@@ -17,8 +17,8 @@ export function onLoadVisiteur() {
         if (dataController.allSeances.length === 0)
             yield dataController.init();
         // On charge menu et footer
-        chargerMenu(); // Header
-        chargerCinemaSites(); // Footer
+        yield chargerMenu(); // Header
+        yield chargerCinemaSites(); // Footer
         const container = document.getElementById('films-container');
         if (!container)
             return;

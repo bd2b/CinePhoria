@@ -285,6 +285,7 @@ SELECT
     seance.dateJour AS dateJour,
     film.titleFilm AS titleFilm,
     cinema.nameCinema AS nameCinema,
+    reservation.isEvaluationMustBeReview AS isEvaluationMustBeReview,
     reservation.note AS note,
     reservation.evaluation as evaluation,
     SUM(seatsForTarif.numberSeats) AS totalSeats,

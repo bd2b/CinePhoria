@@ -37,7 +37,6 @@ export class DataControllerUser {
 
     // Getter pour comptes
     public get comptes(): ComptePersonne[] {
-        
         return this._comptes || [];
     }
 
@@ -72,18 +71,19 @@ export class DataControllerUser {
         this._comptes = undefined;
     }
     
-    /**
-     * Charge les comptes utilisateur si l'ident est defini et si le compte n'a pas été déja chargé
+    
+
+    /** Initialisation du dataController
+     * 
      */
-    public async comptesUtilisateur() {
-            if (this._ident !== undefined) {
-                console.log("111");
-                const comptesCharge = await profilApi(this._ident);
-                if (comptesCharge) {
-                    this._comptes = comptesCharge
-                }
+    public async init() {
+        if (this._ident !== undefined) {
+            const comptesCharge = await profilApi(this._ident);
+            if (comptesCharge) {
+                console.log("Compte chargé pour ", this._ident);
+                this._comptes = comptesCharge
             }
-        
+        }
     }
 
 }

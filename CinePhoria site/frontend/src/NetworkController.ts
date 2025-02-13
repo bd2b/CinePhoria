@@ -229,5 +229,27 @@ export async function isLogged () : Promise<void> {
     });
 }
 
+export async function getReservationForUtilisateur (utilisateurId: string) : Promise<ReservationForUtilisateur[]> {
+    const token = localStorage.getItem('jwtToken');
+    const response = await fetch(`http://localhost:3500/api/reservation/${utilisateurId}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    const rawData = await response.json();
+
+    if (!Array.isArray(rawData)) {
+        throw new Error('La réponse de l’API n’est pas un tableau.');
+    }
+    // Convertir les données brutes en instances de Seance
+    const reservationForUtilisateur = rawData.map((r: any) => new ReservationForUtilisateur(r));
+    console.log("Reservation pour un utilisateur = ",reservationForUtilisateur)
+    return reservationForUtilisateur;
+}
+
+
+
 
 

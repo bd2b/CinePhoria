@@ -57,6 +57,7 @@ export class ReservationForUtilisateur {
   dateJour?:Date;
   titleFilm?:string;
   nameCinema?:string;
+  isevaluationmustbereview?:boolean;
   note?:number;
   evaluation?:string;
   totalSeats?:number;

@@ -15,7 +15,7 @@ export async function chargerMenu() {
   const ident = userDataController.ident;
   if (ident !== undefined) {
     console.log("Identification chargee = ", ident);
-    await userDataController.comptesUtilisateur();
+    await userDataController.init();
     console.log("Compte charge = ", userDataController.compte());
   }
 
