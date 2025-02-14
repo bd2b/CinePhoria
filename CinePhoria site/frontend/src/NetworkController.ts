@@ -218,7 +218,7 @@ export async function getPlacesReservationApi(reservationId: string) : Promise <
     return places;
 }
 
-export async function isLogged () : Promise<void> {
+export async function isLogged () : Promise<string> {
     const token = localStorage.getItem('jwtToken');
     const response = await fetch(`http://localhost:3500/api/login/isLogged`, {
         method: 'GET',
@@ -227,6 +227,13 @@ export async function isLogged () : Promise<void> {
             'Authorization': `Bearer ${token}`
         }
     });
+
+    if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.message || 'Erreur inconnue');
+    }
+    // La réponse est le compte
+    return (response as unknown) as string;
 }
 
 export async function getReservationForUtilisateur (utilisateurId: string) : Promise<ReservationForUtilisateur[]> {

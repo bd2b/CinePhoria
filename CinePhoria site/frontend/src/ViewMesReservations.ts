@@ -3,11 +3,20 @@ import { dataController } from "./DataController.js";
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { ReservationForUtilisateur, ReservationState } from "./shared-models/Reservation.js";
-import { getReservationForUtilisateur } from "./NetworkController.js";
+import { getReservationForUtilisateur , isLogged } from "./NetworkController.js";
 
 
 export async function onLoadMesReservations() {
     console.log("=====> chargement onLoadMesReservations")
+
+    // On verifie que l'on est connecté sinon on retourne sur la page visiteur
+    // try {
+    // const ident = await isLogged();
+    // if (ident.trim() !== userDataController.ident?.trim()) throw new Error("Jeton non confirme");
+    // } catch {
+    //     // On reachemine vars la page visiteur.html
+    //     window.location.href = "visiteur.html"
+    // }
 
     // On initialise le dataController si il est vide
     if (dataController.allSeances.length === 0) await dataController.init()

@@ -1,8 +1,12 @@
-// src/types/express.d.ts
-import { Request } from 'express';
+ 
 
-declare module 'express' {
-  interface Request {
-    user?: { compte: string }; // Ajoute la propriété `user` à Request
+// Étendre Request pour ajouter la propriété `user`
+import { Request } from "express";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: { compte: string };
+    }
   }
 }

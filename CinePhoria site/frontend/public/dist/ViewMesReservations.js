@@ -17,6 +17,14 @@ export function onLoadMesReservations() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b;
         console.log("=====> chargement onLoadMesReservations");
+        // On verifie que l'on est connecté sinon on retourne sur la page visiteur
+        // try {
+        // const ident = await isLogged();
+        // if (ident.trim() !== userDataController.ident?.trim()) throw new Error("Jeton non confirme");
+        // } catch {
+        //     // On reachemine vars la page visiteur.html
+        //     window.location.href = "visiteur.html"
+        // }
         // On initialise le dataController si il est vide
         if (dataController.allSeances.length === 0)
             yield dataController.init();

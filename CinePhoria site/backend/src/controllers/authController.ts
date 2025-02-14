@@ -31,7 +31,10 @@ export class AuthController {
     const { utilisateurId, displayName, password} = req.body;
   }
 
-  static isLogged(req: Request, res: Response) : void {
-    return;
+  static async isLogged(req: Request, res: Response) : Promise<string> {
+    
+    const user = (req as any).user;
+    if (user) return user  
+    throw new Error("Jeton mal formé")
   }
 }
