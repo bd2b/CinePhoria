@@ -220,6 +220,12 @@ export function isLogged() {
                 'Authorization': `Bearer ${token}`
             }
         });
+        if (!response.ok) {
+            const errData = yield response.json();
+            throw new Error(errData.message || 'Erreur inconnue');
+        }
+        // La réponse est le compte
+        return response;
     });
 }
 export function getReservationForUtilisateur(utilisateurId) {
