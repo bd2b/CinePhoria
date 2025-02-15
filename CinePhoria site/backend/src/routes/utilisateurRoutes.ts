@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { authenticateJWT } from '../middlewares/authMiddleware';
-import { isAuthenticated } from '../middlewares/sessionMidleWare';
 import logger from '../config/configLog'
 
 import { UtilisateurController } from '../controllers/utilisateurController';
@@ -18,8 +17,6 @@ router.post('/confirmCompte', UtilisateurController.confirmCompte);
 
 // GET /api/utilisateur
 router.get('/:ident', UtilisateurController.getUtilisateur);
-
-
 
 
 // (Futur) GET /api/reservation/:email

@@ -1,7 +1,7 @@
 import { deleteCookie, validateEmail } from "./Helpers.js";
 import { dataController } from "./DataController.js";
 import { userDataController } from "./DataControllerUser.js";
-import { loginApi } from "./NetworkController.js";
+import { loginApi, logoutApi } from "./NetworkController.js";
 import { confirmReserve } from "./ViewReservationPlaces.js";
 
 const modalLoginLocalHTML = `
@@ -43,7 +43,7 @@ const modalLoginLocalHTML = `
  * Quand on reçoit "Compte Provisoire" => on exécute loginWithEmail
  * - On affiche la modale de connexion
  */
-export async function login(invite: string ="", enableEmail: boolean = false) {
+export async function login(invite: string = "", enableEmail: boolean = false) {
     // Afficher la modale de login
     // Param : 
     // - invite par defaut vide, présente un message d'invitation
@@ -104,7 +104,7 @@ export async function login(invite: string ="", enableEmail: boolean = false) {
 
         // Affichage de l'invite
         if (inviteP) {
-        inviteP.innerHTML = '<p>' + invite + '</p>';
+            inviteP.innerHTML = '<p>' + invite + '</p>';
         } else console.log("Pas d'invite dans la modale");
 
         // Permettre ou pas la saisie d'email, par defaut, non.
@@ -192,11 +192,11 @@ export async function login(invite: string ="", enableEmail: boolean = false) {
                     console.log("Connexion simple réussie");
                     if (modalConfirm) modalConfirm.style.display = 'none';
                     // On memorise l'utilisateur et on charge ses données de compte
-                    console.log("email logué = ",emailInput.value.trim())
+                    console.log("email logué = ", emailInput.value.trim())
 
                     userDataController.ident = emailInput.value.trim();
                     console.log("ident stockée = ", userDataController.ident)
-                    
+
                     await userDataController.init();
                     console.log("Compte charge = ", userDataController.compte());
 
@@ -204,7 +204,7 @@ export async function login(invite: string ="", enableEmail: boolean = false) {
                     console.log("Page redirigée", pageToGo);
 
                     window.location.href = pageToGo;
-                    
+
                 } catch (error) {
                     console.log(error);
                     loginError.hidden = false;
@@ -216,10 +216,16 @@ export async function login(invite: string ="", enableEmail: boolean = false) {
     }
 }
 
-export function logout() {
-    localStorage.removeItem('jwtToken');
-    userDataController.invalidate();
-    window.location.href = 'visiteur.html';
+export async function logout() {
+    try {
+        // A reprendre quand on sera en mode hébergé
+        // await logoutApi();
+        localStorage.removeItem('jwtAccessToken');
+        userDataController.invalidate();
+        window.location.href = 'visiteur.html';
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 

@@ -208,7 +208,16 @@ export function login() {
     });
 }
 export function logout() {
-    localStorage.removeItem('jwtToken');
-    userDataController.invalidate();
-    window.location.href = 'visiteur.html';
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            // A reprendre quand on sera en mode hébergé
+            // await logoutApi();
+            localStorage.removeItem('jwtAccessToken');
+            userDataController.invalidate();
+            window.location.href = 'visiteur.html';
+        }
+        catch (error) {
+            console.error(error);
+        }
+    });
 }

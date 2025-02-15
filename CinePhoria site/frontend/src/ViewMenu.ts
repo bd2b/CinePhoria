@@ -42,7 +42,7 @@ export async function chargerMenu() {
 
     case ProfilUtilisateur.Utilisateur: {
       // a) Vérifier la présence d’un jeton JWT
-      const jwtToken = localStorage.getItem('jwtToken');
+      const jwtToken = localStorage.getItem('jwtAccessToken');
       if (!jwtToken) {
         // Pas de token => invalider + rediriger
         userDataController.invalidate();
@@ -59,7 +59,7 @@ export async function chargerMenu() {
 
     case ProfilUtilisateur.Administrateur: {
       // a) Vérifier la présence d’un jeton JWT
-      const jwtToken = localStorage.getItem('jwtToken');
+      const jwtToken = localStorage.getItem('jwtAccessToken');
       if (!jwtToken) {
         userDataController.invalidate();
         window.location.href = 'visiteur.html';
@@ -76,7 +76,7 @@ export async function chargerMenu() {
 
     case ProfilUtilisateur.Employee: {
       // a) Vérifier la présence d’un jeton JWT
-      const jwtToken = localStorage.getItem('jwtToken');
+      const jwtToken = localStorage.getItem('jwtAccessToken');
       if (!jwtToken) {
         userDataController.invalidate();
         window.location.href = 'visiteur.html';
@@ -164,8 +164,8 @@ function buildMenuUtilisateur(): void {
   const btnDeconnexion = document.createElement('button');
   btnDeconnexion.classList.add('nav__actions-button', 'nav__actions-button--signin');
   btnDeconnexion.textContent = initials;
-  btnDeconnexion.addEventListener('click', () => {
-    logout();
+  btnDeconnexion.addEventListener('click', async () => {
+    await logout();
   });
 
   // nav__actions
@@ -381,4 +381,4 @@ function createLevel2Item(label: string, href: string): HTMLDivElement {
   return divItem;
 }
 
-document.addEventListener('DOMContentLoaded', chargerMenu);
+// document.addEventListener('DOMContentLoaded', chargerMenu);

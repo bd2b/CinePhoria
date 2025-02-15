@@ -44,7 +44,7 @@ export function chargerMenu() {
                 break;
             case ProfilUtilisateur.Utilisateur: {
                 // a) Vérifier la présence d’un jeton JWT
-                const jwtToken = localStorage.getItem('jwtToken');
+                const jwtToken = localStorage.getItem('jwtAccessToken');
                 if (!jwtToken) {
                     // Pas de token => invalider + rediriger
                     userDataController.invalidate();
@@ -59,7 +59,7 @@ export function chargerMenu() {
             }
             case ProfilUtilisateur.Administrateur: {
                 // a) Vérifier la présence d’un jeton JWT
-                const jwtToken = localStorage.getItem('jwtToken');
+                const jwtToken = localStorage.getItem('jwtAccessToken');
                 if (!jwtToken) {
                     userDataController.invalidate();
                     window.location.href = 'visiteur.html';
@@ -73,7 +73,7 @@ export function chargerMenu() {
             }
             case ProfilUtilisateur.Employee: {
                 // a) Vérifier la présence d’un jeton JWT
-                const jwtToken = localStorage.getItem('jwtToken');
+                const jwtToken = localStorage.getItem('jwtAccessToken');
                 if (!jwtToken) {
                     userDataController.invalidate();
                     window.location.href = 'visiteur.html';
@@ -150,9 +150,9 @@ function buildMenuUtilisateur() {
     const btnDeconnexion = document.createElement('button');
     btnDeconnexion.classList.add('nav__actions-button', 'nav__actions-button--signin');
     btnDeconnexion.textContent = initials;
-    btnDeconnexion.addEventListener('click', () => {
-        logout();
-    });
+    btnDeconnexion.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+        yield logout();
+    }));
     // nav__actions
     navActions.append(btnMesResa, btnReserve, btnFilms, btnContact, btnDeconnexion);
     // mobileNav
@@ -336,4 +336,4 @@ function createLevel2Item(label, href) {
     // Gérer survol (hover) en CSS (ou JS)
     return divItem;
 }
-document.addEventListener('DOMContentLoaded', chargerMenu);
+// document.addEventListener('DOMContentLoaded', chargerMenu);

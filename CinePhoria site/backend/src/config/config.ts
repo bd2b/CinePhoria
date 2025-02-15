@@ -28,19 +28,6 @@ logger.info('Configuration DB chargée :' + JSON.stringify(maskeddbConfig));
 
 
 
-export const sessionTK = {
-    secret: process.env.SESSION_SECRET || 'secretsession',
-    resave: false,
-    saveUninitialized: false,
-}
-// copie de l'objet pour masquer la valeur de "secret"
-const maskedSessionTK = {
-  ...sessionTK,
-  secret: "*".repeat(sessionTK.secret.length), // Remplace la valeur par des étoiles
-};
-logger.info('Configuration secret Session :' + JSON.stringify(maskedSessionTK));
-
-
 export const jwtTK = process.env.JWT_SECRET || 'secretjws';
 // copie de l'objet pour masquer la valeur
 const masquedjwtTK = "*".repeat(jwtTK.length); // Remplace la valeur par des étoiles
