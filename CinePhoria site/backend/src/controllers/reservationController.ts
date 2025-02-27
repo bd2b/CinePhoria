@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import logger from '../config/configLog';
 import { ReservationDAO } from '../dao/ReservationDAO';
+import { ReservationState } from '../shared-models/Reservation';
 
 // Étendre le type Request pour utiliser "user"
 
@@ -67,7 +68,72 @@ export class ReservationController {
     }
 
   }
+  static async setReservationStateById(req: Request, res: Response): Promise<void> {
+    try {
+        // Récupération des paramètres de la requête
+        const { reservationId, stateReservation } = req.body;
 
+        // Vérification des entrées
+        if (!reservationId || !stateReservation) {
+            res.status(400).json({ message: `L'ID de la réservation et l'état sont requis.` });
+            return;
+        }
+
+        // Vérification si stateReservation est une valeur valide de l'ENUM
+        if (!Object.values(ReservationState).includes(stateReservation as ReservationState)) {
+            res.status(400).json({ message: `Valeur de l'état non conforme: ${stateReservation}` });
+            return;
+        }
+
+        // Appel au DAO pour mettre à jour l'état de la réservation
+        const updateSuccess = await ReservationDAO.setReservationStateById(reservationId, stateReservation);
+
+        // Gestion du résultat
+        if (updateSuccess) {
+            res.status(200).json({ message: `L'état de la réservation ${reservationId} a été mis à jour avec succès.` });
+            logger.info(`setReservationStateById: Réservation ${reservationId} mise à jour avec état "${stateReservation}".`);
+        } else {
+            res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}.` });
+            logger.warn(`setReservationStateById: Échec de mise à jour, réservation ${reservationId} introuvable.`);
+        }
+    } catch (error: any) {
+        logger.error(`Erreur lors de la mise à jour de la réservation ${req.body.reservationId}: ${error.message}`);
+        res.status(500).json({ error: "Erreur interne du serveur." });
+    }
+}
+static async setReservationEvaluationById(req: Request, res: Response): Promise<void> {
+  try {
+      // Récupération des paramètres de la requête
+      const { reservationId, note, evaluation, isEvaluationMustBeReview } = req.body;
+
+      // Vérification des entrées
+      if (!reservationId || !note || !evaluation || !isEvaluationMustBeReview ) {
+          res.status(400).json({ message: `L'ID de la réservation et les parametres sont requis.` });
+          return;
+      }
+
+      // Vérification si la note est valide
+      if (![0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5].includes(note)) {
+        res.status(400).json({ message: `Valeur de la note non conforme: ${note}` });
+          return;
+      }
+
+      // Appel au DAO pour mettre à jour l'état de la réservation
+      const updateSuccess = await ReservationDAO.setReservationEvaluationById(reservationId, note, evaluation, isEvaluationMustBeReview);
+
+      // Gestion du résultat
+      if (updateSuccess) {
+          res.status(200).json({ message: `L'evaluation de la réservation ${reservationId} a été mis à jour avec succès.` });
+          logger.info(`setReservationEvaluationById: Evaluation de réservation ${reservationId} mise à jour avec succes.`);
+      } else {
+          res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}.` });
+          logger.warn(`setReservationEvaluationById: Échec de mise à jour, réservation ${reservationId} introuvable.`);
+      }
+  } catch (error: any) {
+      logger.error(`Erreur lors de la mise à jour de la réservation ${req.body.reservationId}: ${error.message}`);
+      res.status(500).json({ error: "Erreur interne du serveur." });
+  }
+}
   static async getSeatsForReservation(req: Request, res: Response): Promise<void> {
     try {
       // Recuperation de l'ID de la reservation

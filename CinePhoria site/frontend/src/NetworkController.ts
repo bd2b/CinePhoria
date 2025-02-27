@@ -1,4 +1,4 @@
-import { TarifForSeats } from './shared-models/Reservation';
+import { ReservationState, TarifForSeats } from './shared-models/Reservation';
 import { isUUID, validateEmail } from './Helpers.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
 import { ReservationForUtilisateur, SeatsForReservation } from './shared-models/Reservation.js';
@@ -303,6 +303,47 @@ export async function confirmReserveApi(
     });
 }
 
+/**
+ * Fonction de modification de l'état de la reservation
+ * api securisée
+ * @param reservationId 
+ * @param stateReservation
+ * @returns 
+ */
+export async function setStateReservationApi (
+    reservationId: string,
+    stateReservation: ReservationState
+): Promise<boolean> {
+    return apiRequest<boolean>('http://localhost:3500/api/reservation/setstate', 'POST', {
+        reservationId,
+        stateReservation
+    });
+}
+
+/**
+ * Fonction de modification de l'évaluation de la reservation
+ * api securisée
+ * @param reservationId 
+ * @param stateReservation
+ * @returns 
+ */
+export async function setEvaluationReservationApi(
+    reservationId: string,
+    note: number,
+    evaluation: string,
+    p_isEvaluationMustBeReview: boolean
+) : Promise<boolean> {
+    const isEvaluationMustBeReview = p_isEvaluationMustBeReview ? "true" : "false";
+    return apiRequest<boolean>('http://localhost:3500/api/reservation/setevaluation', 'POST', {
+        reservationId,
+        note,
+        evaluation,
+        isEvaluationMustBeReview
+    });
+}
+
+
+// TODO: mettre en place les deux jetons (nécessite SSL)
 export async function confirmReserveApi2(reservationId: string, utilisateurId: string, seanceId: string) {
     const body = { reservationId, utilisateurId, seanceId };
     let token = localStorage.getItem('jwtAccessToken');

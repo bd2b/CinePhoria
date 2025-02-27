@@ -17,6 +17,12 @@ router.post('/confirm', authenticateJWT ,ReservationController.confirmReservatio
 // Annuler une reservation
 router.post('/cancel', ReservationController.cancelReservation);
 
+// Modifier un etat de reservation
+router.post('/setstate', authenticateJWT , ReservationController.setReservationStateById);
+
+// Modifier une évaluation
+router.post('/setevaluation', authenticateJWT, ReservationController.setReservationEvaluationById);
+
 // Recupérer les reservations d'un utilisateur
 router.get('/:utilisateurId', authenticateJWT ,ReservationController.getReservationForUtilisateur);
 

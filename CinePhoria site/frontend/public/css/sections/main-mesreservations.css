@@ -175,3 +175,21 @@
   }
   
   /* Par défaut, on peut faire un .modal.show { display: flex; } en JS pour l’ouvrir */
+
+  /* ------------------------------------------------
+     MODALES - éléments spécifiques
+     ------------------------------------------------ */
+#content__DetailReservation {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#content__EvaluationReservation {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  gap: 15px;
+}
