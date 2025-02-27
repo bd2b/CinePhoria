@@ -51,7 +51,7 @@ export async function updateDisplayReservation() {
     };
 };
 
-async function afficherDetailsReservation(reservation: ReservationForUtilisateur) {
+export async function afficherDetailsReservation(reservation: ReservationForUtilisateur) {
 
     const containerTable = document.querySelector('.commande__tabtarif');
     if (!containerTable) return;

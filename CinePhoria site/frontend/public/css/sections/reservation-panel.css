@@ -159,7 +159,7 @@ border: 3px solid #2C3E50;
 
 .horaire__hour-begin-p {
     font-family: var(--digit);
-    font-size: 32px;
+    font-size: 32px ;
     font-style: bold;
     font-weight: 400;
     line-height: 34px;
@@ -208,6 +208,7 @@ border: 3px solid #2C3E50;
     gap: 10px;
 
     padding: 2px 0px;
+    margin-bottom: 0px;
 
     width: 40px;
     height: 12px;

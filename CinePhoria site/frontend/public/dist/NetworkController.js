@@ -265,6 +265,40 @@ export function confirmReserveApi(reservationId, utilisateurId, seanceId) {
         });
     });
 }
+/**
+ * Fonction de modification de l'état de la reservation
+ * api securisée
+ * @param reservationId
+ * @param stateReservation
+ * @returns
+ */
+export function setStateReservationApi(reservationId, stateReservation) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return apiRequest('http://localhost:3500/api/reservation/setstate', 'POST', {
+            reservationId,
+            stateReservation
+        });
+    });
+}
+/**
+ * Fonction de modification de l'évaluation de la reservation
+ * api securisée
+ * @param reservationId
+ * @param stateReservation
+ * @returns
+ */
+export function setEvaluationReservationApi(reservationId, note, evaluation, p_isEvaluationMustBeReview) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const isEvaluationMustBeReview = p_isEvaluationMustBeReview ? "true" : "false";
+        return apiRequest('http://localhost:3500/api/reservation/setevaluation', 'POST', {
+            reservationId,
+            note,
+            evaluation,
+            isEvaluationMustBeReview
+        });
+    });
+}
+// TODO: mettre en place les deux jetons (nécessite SSL)
 export function confirmReserveApi2(reservationId, utilisateurId, seanceId) {
     return __awaiter(this, void 0, void 0, function* () {
         const body = { reservationId, utilisateurId, seanceId };

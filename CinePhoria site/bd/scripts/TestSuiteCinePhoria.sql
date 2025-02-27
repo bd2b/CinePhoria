@@ -3,7 +3,11 @@
 -- 1) test bon pwd -> result OK, dateDerniereConnexion mise à jour, entrée dans Connexions
 -- 2) test pwd erreur -> KO , dans trace message 
 -- 3) test de blocage
--- 
+-- TODO
+-- faire un test sur cancelObservation
+-- id incorrecte, date de la seance dans le passé, deja cancelé
+-- TODO
+-- dans ConfirmReserve on met stateReservation à ReserveConfirmed
 
 
 -- Test CheckAvailabilityAndReserve

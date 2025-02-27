@@ -174,6 +174,53 @@ export class ReservationDAO {
 
   }
 
+  static async setReservationStateById(p_reservationId: string, p_stateReservation: string): Promise<boolean> {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        const [result] = await connection.execute(
+            `UPDATE Reservation 
+            SET stateReservation = ?
+            WHERE id = ?`,
+            [p_stateReservation, p_reservationId]
+        );
+
+        logger.info(`UPDATE Reservation SET stateReservation = ${p_stateReservation} WHERE id = ${p_reservationId}`);
+
+        // Vérification du succès de l'update
+        const updateResult = result as any; // Type générique pour accéder aux propriétés MySQL
+        return updateResult.affectedRows > 0; // Retourne true si au moins une ligne a été affectée
+    } catch (error) {
+        logger.error(`Erreur lors de la mise à jour de la réservation ${p_reservationId}:`, error);
+        return false;
+    } finally {
+        await connection.end();
+    }
+}
+
+static async setReservationEvaluationById(p_reservationId: string, p_note: number, p_evaluation: string, p_isEvaluationMustBeReview: boolean): Promise<boolean> {
+  const connection = await mysql.createConnection(dbConfig);
+  try {
+      const [result] = await connection.execute(
+          `UPDATE Reservation 
+          SET note = ?,
+          evaluation = ?,
+          isEvaluationMustBeReview = ?
+          WHERE id = ?`,
+          [p_note, p_evaluation, (p_isEvaluationMustBeReview ? 1 : 0) , p_reservationId]
+      );
+
+      logger.info(`UPDATE Reservation SET note = ${p_note}, evaluation = ${p_evaluation}, isEvaluationMustBeReview = ${(p_isEvaluationMustBeReview ? 1 : 0)} WHERE id = ${p_reservationId}`);
+
+      // Vérification du succès de l'update
+      const updateResult = result as any; // Type générique pour accéder aux propriétés MySQL
+      return updateResult.affectedRows > 0; // Retourne true si au moins une ligne a été affectée
+  } catch (error) {
+      logger.error(`Erreur lors de la mise à jour de la réservation ${p_reservationId}:`, error);
+      return false;
+  } finally {
+      await connection.end();
+  }
+}
 
 
   static async getSeatsForReservation(p_reservationId: string): Promise<SeatsForReservation[]> {
