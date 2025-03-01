@@ -2,13 +2,94 @@ import { ReservationState, TarifForSeats } from './shared-models/Reservation';
 import { isUUID, validateEmail } from './Helpers.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
 import { ReservationForUtilisateur, SeatsForReservation } from './shared-models/Reservation.js';
+import { userDataController } from './DataControllerUser.js';
+import { handleApiError } from './Global.js';
+import { CinephoriaErrorCode , CinephoriaError } from"./shared-models/Error.js";
+
 
 /**
  * Fonction générique de gestion de l'API qui gère
  * - L’authentification avec JWT
  * - La gestion automatique du refresh token en cas d’expiration
  */
-async function apiRequest<T>(endpoint: string, method: string = 'GET', body?: any, requiresAuth: boolean = true): Promise<T> {
+async function apiRequest<T>(
+    endpoint: string,
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+    body?: any,
+    requiresAuth: boolean = true
+): Promise<T> {
+    try {
+        let token = localStorage.getItem('jwtAccessToken');
+
+        if (requiresAuth && !token) {
+            console.warn("⛔ Aucun token disponible, redirection immédiate.");
+            throw new CinephoriaError(CinephoriaErrorCode.AUTH_REQUIRED, "Authentification requise et pas de token.");
+        }
+
+        const headers: HeadersInit = {
+            'Content-Type': 'application/json'
+        };
+
+        if (requiresAuth) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
+        let response = await fetch(endpoint, {
+            method,
+            headers,
+            body: body ? JSON.stringify(body) : undefined,
+            credentials: requiresAuth ? 'include' : 'same-origin'
+        });
+
+        if (requiresAuth && (response.status === 401 || response.status === 403)) {
+            console.warn("🔄 Token expiré, tentative de refresh...");
+
+            try {
+                await refreshAccessToken(); 
+                token = localStorage.getItem('jwtAccessToken');
+
+                if (!token) {
+                    console.error("🔴 Refresh échoué, suppression du token local.");
+                    throw new CinephoriaError(CinephoriaErrorCode.TOKEN_REFRESH_FAIL, "Echec du refresh, token expiré ou invalidé");
+                }
+
+                // 🔄 Re-tenter la requête avec le nouveau token
+                response = await fetch(endpoint, {
+                    method,
+                    headers: {
+                        ...headers,
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: body ? JSON.stringify(body) : undefined,
+                    credentials: 'include'
+                });
+
+            } catch (err) {
+                console.error("🔴 Echec du refreshToken :", err);
+                throw err;
+            }
+        }
+
+        if (!response.ok) {
+            const errData = await response.json();
+            throw new CinephoriaError(CinephoriaErrorCode.API_ERROR, errData.message || 'Erreur inconnue');
+        }
+
+        return response.json();
+
+    } catch (error) {
+        return handleApiError(error);  // ✅ Capture et redirige via handleApiError
+    }
+}
+
+
+async function apiRequest2<T>(
+    endpoint: string,
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
+    body?: any,
+    requiresAuth: boolean = true
+): Promise<T> {
+    let token = localStorage.getItem('jwtAccessToken');
     const headers: HeadersInit = {
         'Content-Type': 'application/json'
     };
@@ -30,7 +111,7 @@ async function apiRequest<T>(endpoint: string, method: string = 'GET', body?: an
 
     if (!response.ok) {
         if (requiresAuth && (response.status === 401 || response.status === 403)) {
-            await refreshAccessToken(); // Rafraîchir le token en cas d'expiration
+            await refreshAccessToken(); // Rafraîchir le token en cas d'expiration 
             return apiRequest<T>(endpoint, method, body, requiresAuth); // Retenter la requête avec le nouveau token
         }
         const errData = await response.json();
@@ -42,18 +123,27 @@ async function apiRequest<T>(endpoint: string, method: string = 'GET', body?: an
 
 
 async function refreshAccessToken() {
-    const response = await fetch('http://localhost:3500/api/refresh', {
-        method: 'POST',
-        // on peut mettre credentials: 'include' si le refresh nécessite le cookie
-        credentials: 'include'
-    });
-    if (!response.ok) {
-        throw new Error('Echec du refresh, token expiré ou invalidé');
+    try {
+        console.log("🔄 Tentative de refresh du token...");
+        const response = await fetch('http://localhost:3500/api/refresh', {
+            method: 'POST',
+            // on peut mettre credentials: 'include' si le refresh nécessite le cookie
+            credentials: 'include'
+        });
+        if (!response.ok) {
+            console.error("🔴 Echec du refresh, suppression du token local");
+            localStorage.removeItem('jwtAccessToken');
+            throw new Error('Echec du refresh, token expiré ou invalidé');
+        }
+        const json = await response.json();
+        const { accessToken } = json;
+        localStorage.setItem('jwtAccessToken', accessToken);
+        console.log("Nouveau accessToken obtenu via /api/refresh");
+    } catch (err) {
+        console.error("🔴 Erreur dans refreshAccessToken :", err);
+        localStorage.removeItem('jwtAccessToken');
+        throw err; // Propage l'erreur pour que apiRequest la capture
     }
-    const json = await response.json();
-    const { accessToken } = json;
-    localStorage.setItem('jwtAccessToken', accessToken);
-    console.log("Nouveau accessToken obtenu via /api/refresh");
 }
 
 /**
@@ -310,7 +400,7 @@ export async function confirmReserveApi(
  * @param stateReservation
  * @returns 
  */
-export async function setStateReservationApi (
+export async function setStateReservationApi(
     reservationId: string,
     stateReservation: ReservationState
 ): Promise<boolean> {
@@ -332,7 +422,7 @@ export async function setEvaluationReservationApi(
     note: number,
     evaluation: string,
     p_isEvaluationMustBeReview: boolean
-) : Promise<boolean> {
+): Promise<boolean> {
     const isEvaluationMustBeReview = p_isEvaluationMustBeReview ? "true" : "false";
     return apiRequest<boolean>('http://localhost:3500/api/reservation/setevaluation', 'POST', {
         reservationId,
@@ -454,7 +544,7 @@ export async function cancelReserveApi2(reservationId: string) {
  */
 export async function profilApi(identUtilisateur: string): Promise<ComptePersonne[]> {
     const endpoint = `http://localhost:3500/api/utilisateur/${identUtilisateur}`;
-    
+
     // Appel de apiRequest pour gérer l'authentification et les erreurs
     const rawData = await apiRequest<any[]>(endpoint, 'GET', null);
 
@@ -505,7 +595,7 @@ export async function getReservationApi(reservationId: string): Promise<Reservat
     // Convertir les données brutes en instances de ReservationForUtilisateur
     const reservations = rawData.map((d) => new ReservationForUtilisateur(d));
     console.log("reservations = ", reservations);
-    
+
     return reservations;
 }
 

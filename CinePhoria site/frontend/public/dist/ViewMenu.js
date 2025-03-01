@@ -18,16 +18,9 @@ import { login, logout } from './Login.js'; // si vous avez besoin de l’appele
 export function chargerMenu() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("===== chargerMenu");
-        // 0) L'ident est chargé ?
-        const ident = userDataController.ident;
-        if (ident !== undefined) {
-            console.log("Identification chargee = ", ident);
-            yield userDataController.init();
-            console.log("Compte charge = ", userDataController.compte());
-        }
         // 1) Identifier le profil
         const profil = userDataController.profil();
-        console.log("Profil charge = ", profil);
+        console.log("Profil charge depuis global= ", profil);
         // 2) Récupérer l’élément .header pour changer son background
         const header = document.querySelector('.header');
         if (!header) {
@@ -48,6 +41,13 @@ export function chargerMenu() {
                 if (!jwtToken) {
                     // Pas de token => invalider + rediriger
                     userDataController.invalidate();
+                    // const currentPage = window.location.pathname.split("/").pop();
+                    // if (currentPage !== "visiteur.html") {
+                    //   window.location.replace("visiteur.html");
+                    // } else {
+                    //   console.log("Chargement manuel de onLoadVisiteur()");
+                    //   onLoadVisiteur(); // Appeler directement la fonction si déjà sur la page
+                    // }
                     window.location.href = 'visiteur.html';
                     return;
                 }

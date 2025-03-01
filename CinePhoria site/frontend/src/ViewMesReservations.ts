@@ -9,7 +9,7 @@ import { seanceCardView } from "./ViewReservation.js";
 import { Seance } from "./shared-models/Seance.js";
 import { updateTableContent } from "./ViewReservationPlaces.js";
 import { logout } from "./Login.js";
-
+import { CinephoriaErrorCode , CinephoriaError } from"./shared-models/Error.js";
 
 export async function onLoadMesReservations() {
     console.log("=====> chargement onLoadMesReservations")
@@ -29,6 +29,8 @@ export async function onLoadMesReservations() {
         // On charge menu et footer
         await chargerMenu(); // Header
         await chargerCinemaSites() // Footer
+
+
 
         // On verifie qu'on est bien connecté avec un utilisateur
         let utilisateurId: string;
@@ -53,6 +55,7 @@ export async function onLoadMesReservations() {
 
         } catch (error) {
             console.log("Erreur recupération des reservations = ", error)
+
         }
 
     }
@@ -83,13 +86,17 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
 
     // TBODY
     const tbody = document.createElement('tbody');
+    tbody.classList.add('liste-table__body');
     table.appendChild(tbody);
 
     // Pour chaque reservation
     reservations.forEach((resa) => {
         // Acces à la seance
         const seance = dataController.allSeances.find((s) => { return s.seanceId === resa.seanceId });
-        if (!seance) return;
+        if (!seance) {
+            console.error("Pas de seance pour la réservation")
+            return;
+        }
 
         const tr = document.createElement('tr');
 
@@ -125,8 +132,8 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
 
 
             // Variable heure : "HH:MM"
-            // const heureVar = seance.hourBeginHHSMM || "00:00";
-            const heureVar = "08:00";
+            const heureVar = seance.hourBeginHHSMM || "00:00";
+            // const heureVar = "08:00";
 
             // Convertir heureVar en nombre
             const [hh, mm] = heureVar.split(':').map(Number);
@@ -278,12 +285,10 @@ async function onClickDetailReservation(resa: ReservationForUtilisateur, seance:
             if (event.target === modalDetailLocal) closeModal();
         });
 
-
-        dataController.selectedReservationUUID = resa.reservationId;
         const selectedSeance = seanceCardView(seance, new Date(resa.dateJour || ''));
         modalContent.appendChild(selectedSeance);
 
-        const tableauPlaces = await updateTableContent(seance.qualite || '', true);
+        const tableauPlaces = await updateTableContent(seance.qualite || '', true , resa.reservationId);
         modalContent.appendChild(tableauPlaces);
 
         if (resa.numberPMR && resa.numberPMR > 0) {
@@ -437,14 +442,7 @@ function onClickEvaluationReservation(resa: ReservationForUtilisateur, isModif: 
     });
 }
 
-// function onClickModifEvaluationReservation(resa: ReservationForUtilisateur) {
-//     // Ouvrir modal-modifEvaluationReservation
-//     const modal = document.getElementById('modal-modifEvaluationReservation');
-//     if (!modal) return;
-//     (document.getElementById('modif-note') as HTMLInputElement).value = resa.note?.toString() || '';
-//     (document.getElementById('modif-text') as HTMLTextAreaElement).value = resa.evaluation || '';
-//     modal.style.display = 'block';
-// }
+
 
 function onClickSuppressionReservation(resa: ReservationForUtilisateur) {
     // Ouvrir modal-suppressionReservation

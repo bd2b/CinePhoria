@@ -77,13 +77,17 @@ export class DataControllerUser {
      * 
      */
     public async init() {
+        try {
         if (this._ident !== undefined) {
             const comptesCharge = await profilApi(this._ident);
             if (comptesCharge) {
                 console.log("Compte chargé pour ", this._ident);
                 this._comptes = comptesCharge
-            }
+            } 
         }
+    } catch {
+        this._ident = undefined;
+    }
     }
 
 }

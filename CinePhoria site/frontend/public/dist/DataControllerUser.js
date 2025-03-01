@@ -77,12 +77,17 @@ export class DataControllerUser {
      */
     init() {
         return __awaiter(this, void 0, void 0, function* () {
-            if (this._ident !== undefined) {
-                const comptesCharge = yield profilApi(this._ident);
-                if (comptesCharge) {
-                    console.log("Compte chargé pour ", this._ident);
-                    this._comptes = comptesCharge;
+            try {
+                if (this._ident !== undefined) {
+                    const comptesCharge = yield profilApi(this._ident);
+                    if (comptesCharge) {
+                        console.log("Compte chargé pour ", this._ident);
+                        this._comptes = comptesCharge;
+                    }
                 }
+            }
+            catch (_a) {
+                this._ident = undefined;
             }
         });
     }

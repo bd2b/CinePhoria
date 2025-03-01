@@ -83,14 +83,17 @@ export function updateTableMesReservations(reservations) {
     table.appendChild(thead);
     // TBODY
     const tbody = document.createElement('tbody');
+    tbody.classList.add('liste-table__body');
     table.appendChild(tbody);
     // Pour chaque reservation
     reservations.forEach((resa) => {
         var _a, _b, _c;
         // Acces à la seance
         const seance = dataController.allSeances.find((s) => { return s.seanceId === resa.seanceId; });
-        if (!seance)
+        if (!seance) {
+            console.error("Pas de seance pour la réservation");
             return;
+        }
         const tr = document.createElement('tr');
         // 1) Date => bouton pour modal détail
         const tdDate = document.createElement('td');
@@ -119,8 +122,8 @@ export function updateTableMesReservations(reservations) {
             if (!dateVar)
                 return;
             // Variable heure : "HH:MM"
-            // const heureVar = seance.hourBeginHHSMM || "00:00";
-            const heureVar = "08:00";
+            const heureVar = seance.hourBeginHHSMM || "00:00";
+            // const heureVar = "08:00";
             // Convertir heureVar en nombre
             const [hh, mm] = heureVar.split(':').map(Number);
             // Créer une date en combinant dateVar (année/mois/jour) avec l'heureVar (HH:MM)
@@ -259,10 +262,9 @@ function onClickDetailReservation(resa, seance) {
                 if (event.target === modalDetailLocal)
                     closeModal();
             });
-            dataController.selectedReservationUUID = resa.reservationId;
             const selectedSeance = seanceCardView(seance, new Date(resa.dateJour || ''));
             modalContent.appendChild(selectedSeance);
-            const tableauPlaces = yield updateTableContent(seance.qualite || '', true);
+            const tableauPlaces = yield updateTableContent(seance.qualite || '', true, resa.reservationId);
             modalContent.appendChild(tableauPlaces);
             if (resa.numberPMR && resa.numberPMR > 0) {
                 const nombrePMR = document.createElement('p');
@@ -398,14 +400,6 @@ function onClickEvaluationReservation(resa, isModif = false) {
         onLoadMesReservations();
     }));
 }
-// function onClickModifEvaluationReservation(resa: ReservationForUtilisateur) {
-//     // Ouvrir modal-modifEvaluationReservation
-//     const modal = document.getElementById('modal-modifEvaluationReservation');
-//     if (!modal) return;
-//     (document.getElementById('modif-note') as HTMLInputElement).value = resa.note?.toString() || '';
-//     (document.getElementById('modif-text') as HTMLTextAreaElement).value = resa.evaluation || '';
-//     modal.style.display = 'block';
-// }
 function onClickSuppressionReservation(resa) {
     // Ouvrir modal-suppressionReservation
     const modal = document.getElementById('modal-suppressionReservation');

@@ -1,4 +1,5 @@
-"use strict";
+// Point de chargement du module Global
+import "./Global.js";
 const handleMobileMenu = () => {
     const navMobileMenu = document.getElementById('navMobileMenu');
     const mobileMenu = document.getElementById('mobileMenu');

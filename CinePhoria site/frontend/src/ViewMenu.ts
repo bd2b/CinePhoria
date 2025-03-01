@@ -2,6 +2,7 @@
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 // On suppose qu'il existe un localStorage key = "jwtToken" pour vérifier la connexion
 import { login, logout } from './Login.js'; // si vous avez besoin de l’appeler
+import { onLoadVisiteur } from './ViewFilmsSortiesSemaine.js';
 // Ou tout autre endroit où est définie la fonction login()
 
 
@@ -11,17 +12,9 @@ import { login, logout } from './Login.js'; // si vous avez besoin de l’appele
 export async function chargerMenu() {
   console.log("===== chargerMenu");
 
-  // 0) L'ident est chargé ?
-  const ident = userDataController.ident;
-  if (ident !== undefined) {
-    console.log("Identification chargee = ", ident);
-    await userDataController.init();
-    console.log("Compte charge = ", userDataController.compte());
-  }
-
   // 1) Identifier le profil
   const profil = userDataController.profil();
-  console.log("Profil charge = ",profil);
+  console.log("Profil charge depuis global= ", profil);
 
   // 2) Récupérer l’élément .header pour changer son background
   const header = document.querySelector('.header') as HTMLElement | null;
@@ -46,6 +39,17 @@ export async function chargerMenu() {
       if (!jwtToken) {
         // Pas de token => invalider + rediriger
         userDataController.invalidate();
+
+        // const currentPage = window.location.pathname.split("/").pop();
+        // if (currentPage !== "visiteur.html") {
+        //   window.location.replace("visiteur.html");
+        // } else {
+        //   console.log("Chargement manuel de onLoadVisiteur()");
+        //   onLoadVisiteur(); // Appeler directement la fonction si déjà sur la page
+        // }
+
+
+
         window.location.href = 'visiteur.html';
         return;
       }
@@ -130,11 +134,11 @@ function buildMenuVisiteur(): void {
   btnConnexion.addEventListener('click', () => {
     // Exécuter la logique de connexion
     // ex: login() ou window.location.href="login.html"
-    login('Saisissez votre email et votre mot de passe',true); 
+    login('Saisissez votre email et votre mot de passe', true);
   });
 
   // Ajouter dans .nav__actions
-  navActions.append( btnReservation, btnFilms, btnContact, btnConnexion);
+  navActions.append(btnReservation, btnFilms, btnContact, btnConnexion);
   // Ajouter dans .mobile-menu__nav
   mobileNav.append(btnReservation.cloneNode(true), btnFilms.cloneNode(true), btnContact.cloneNode(true), btnConnexion.cloneNode(true));
 }
@@ -256,7 +260,7 @@ function buildIntranetMenuAdmin(): HTMLElement {
   const mainBtn = document.createElement('button');
   mainBtn.textContent = 'Intranet';
   mainBtn.classList.add('nav__actions-button', 'nav__actions-button--link');
-  
+
   // Sous-menu
   const subMenu = document.createElement('div');
   subMenu.style.display = 'none'; // masqué par défaut

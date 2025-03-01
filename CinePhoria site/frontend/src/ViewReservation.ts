@@ -1,6 +1,6 @@
 import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
-import { getCookie, setCookie } from './Helpers.js';
-import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID } from './Helpers.js';
+
+import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID , validateEmail } from './Helpers.js';
 import { DataController, dataController } from './DataController.js';
 
 
@@ -28,12 +28,29 @@ export async function onLoadReservation() {
   // On se positionne sur le cinema si il a été déjà défini ou on affiche une modale de selection du cinema
   await updateCinema();
 
+  // On recupere les cas où on est dans un état instable dans la mémorisation de la reservation pendante.
+  if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
+    "ReserveToConfirm"].includes(dataController.reservationState)) {
+      // Si on est sur une reservation pendante, on verifie la conformité des données de reservation
+      if (  !isUUID(dataController.selectedReservationUUID || '') || 
+            !isUUID(dataController.selectedSeanceUUID  || '') || 
+            !validateEmail(dataController.selectedUtilisateurMail || '')
+          ) {
+            // On revient à une selection complete
+            dataController.reservationState = ReservationState.PendingChoiceSeance;
+      }
+    }
+  
 
-  if (["PendingChoiceSeance", "PendingChoiceSeats"].includes(dataController.reservationState)) {
+  if (["PendingChoiceSeance", "PendingChoiceSeats", "ReserveConfirmed"].includes(dataController.reservationState)) {
     // On est sans reservation pendante
 
     // Identifier le film par defaut si on n'a pas de film selectionné dans le dataController
     if (dataController.selectedFilmUUID === undefined) {
+      dataController.selectedReservationUUID = undefined;
+      if (["PendingChoiceSeance", "ReserveConfirmed"].includes(dataController.reservationState)) {
+        dataController.selectedSeanceUUID = undefined;
+      }
       const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);
       if (!filmSeancesCandidat[0].filmId) return;
 
@@ -63,17 +80,6 @@ export async function onLoadReservation() {
 
   }
 };
-
-// window.addEventListener('beforeunload', (event) => {
-//   // Fonction de sauvegarde de dataController, 
-//   // Cette fonction ne fait que enregistrer dans le storage, elle sera terminée avant le DOMContentLoaded
-//   // dans le cadre d'un regchargement
-//   if (dataController) {
-//     dataController.sauverComplet(); // Sauvegarde des données dans le stockage local
-//   }
-
-
-// });
 
 /**
  * Fonction de gestion de la selection du cinema

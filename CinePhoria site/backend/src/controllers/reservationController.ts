@@ -107,7 +107,7 @@ static async setReservationEvaluationById(req: Request, res: Response): Promise<
       const { reservationId, note, evaluation, isEvaluationMustBeReview } = req.body;
 
       // Vérification des entrées
-      if (!reservationId || !note || !evaluation || !isEvaluationMustBeReview ) {
+      if (!reservationId || !note ||  !isEvaluationMustBeReview ) {
           res.status(400).json({ message: `L'ID de la réservation et les parametres sont requis.` });
           return;
       }

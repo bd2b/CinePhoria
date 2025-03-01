@@ -299,7 +299,7 @@ function collectEmail(selector: string): string {
 * @param isReadOnly indique si la table est afficher en lecture seule
 * @returns Un élément <table> 
 */
-export async function updateTableContent(qualite: string, isReadOnly: boolean = false): Promise<HTMLTableElement> {
+export async function updateTableContent(qualite: string, isReadOnly: boolean = false, reservationId: string = ""): Promise<HTMLTableElement> {
 
     // 1) Créer l'élément <table> et sa structure de base
     const table = document.createElement('table');
@@ -336,14 +336,14 @@ export async function updateTableContent(qualite: string, isReadOnly: boolean = 
 
     const totalPriceTd = tfoot.querySelector('.content-totalprice-td') as HTMLTableCellElement;
     if (isReadOnly) {
-        // Si on est en readOnly, on va chercher les données des places à partir de la réservation en cours
+        // Si on est en readOnly, on va chercher les données des places à partir de la réservation communiquée
         let places: SeatsForReservation[] = []
-        const reservationId = dataController.selectedReservationUUID;
-        if (reservationId) {
+        
+        if (reservationId !== "") {
             places = await getPlacesReservationApi(reservationId);
         }
         else {
-            console.error("updateTableContent : Pas de reservation selectionnée pour un affichage de reservation");
+            console.error("updateTableContent : Pas de reservation communiquee pour un affichage de reservation");
         }
 
         // 2) on affiche une ligne par place prise
