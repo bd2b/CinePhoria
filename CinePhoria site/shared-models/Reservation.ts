@@ -31,7 +31,9 @@ export enum ReservationState {
   ReserveConfirmed = "ReserveConfirmed",           // La reservation est confirmé après login sur un compte existant, il y a assez de place (sieges et PMR), et l'email est enregistré comme compte
   DoneUnevaluated = "DoneUnevaluated",             // la réservation est passée mais il n'y a pas d'évaluation, on doit présenter la saisie d'une évaluation
   DoneEvaluated = "DoneEvaluated",                 // la réservation est passée et il y a une évaluation, on affiche l'évaluation sans action
-  ReserveCanceled = "ReserveCanceled"              // La reservation est annulée par l'utilisateur, les places et nombre de PMR ne sont pas comptés dans la séance
+  ReserveCanceled = "ReserveCanceled" ,             // La reservation est annulée par l'utilisateur, les places et nombre de PMR ne sont pas comptés dans la séance
+  ReserveDeleted = "ReserveDeleted"              // La reservation est supprimée par l'utilisateur, elle n'apparaitra plus dans son tableau
+
 }
 
 export class SeatsForTarif {

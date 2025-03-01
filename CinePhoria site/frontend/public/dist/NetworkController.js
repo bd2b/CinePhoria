@@ -10,13 +10,69 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { isUUID } from './Helpers.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
 import { ReservationForUtilisateur, SeatsForReservation } from './shared-models/Reservation.js';
+import { handleApiError } from './Global.js';
+import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 /**
  * Fonction générique de gestion de l'API qui gère
  * - L’authentification avec JWT
  * - La gestion automatique du refresh token en cas d’expiration
  */
-function apiRequest(endpoint_1) {
-    return __awaiter(this, arguments, void 0, function* (endpoint, method = 'GET', body, requiresAuth = true) {
+function apiRequest(endpoint_1, method_1, body_1) {
+    return __awaiter(this, arguments, void 0, function* (endpoint, method, body, requiresAuth = true) {
+        try {
+            let token = localStorage.getItem('jwtAccessToken');
+            if (requiresAuth && !token) {
+                console.warn("⛔ Aucun token disponible, redirection immédiate.");
+                throw new CinephoriaError(CinephoriaErrorCode.AUTH_REQUIRED, "Authentification requise et pas de token.");
+            }
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            if (requiresAuth) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            let response = yield fetch(endpoint, {
+                method,
+                headers,
+                body: body ? JSON.stringify(body) : undefined,
+                credentials: requiresAuth ? 'include' : 'same-origin'
+            });
+            if (requiresAuth && (response.status === 401 || response.status === 403)) {
+                console.warn("🔄 Token expiré, tentative de refresh...");
+                try {
+                    yield refreshAccessToken();
+                    token = localStorage.getItem('jwtAccessToken');
+                    if (!token) {
+                        console.error("🔴 Refresh échoué, suppression du token local.");
+                        throw new CinephoriaError(CinephoriaErrorCode.TOKEN_REFRESH_FAIL, "Echec du refresh, token expiré ou invalidé");
+                    }
+                    // 🔄 Re-tenter la requête avec le nouveau token
+                    response = yield fetch(endpoint, {
+                        method,
+                        headers: Object.assign(Object.assign({}, headers), { 'Authorization': `Bearer ${token}` }),
+                        body: body ? JSON.stringify(body) : undefined,
+                        credentials: 'include'
+                    });
+                }
+                catch (err) {
+                    console.error("🔴 Echec du refreshToken :", err);
+                    throw err;
+                }
+            }
+            if (!response.ok) {
+                const errData = yield response.json();
+                throw new CinephoriaError(CinephoriaErrorCode.API_ERROR, errData.message || 'Erreur inconnue');
+            }
+            return response.json();
+        }
+        catch (error) {
+            return handleApiError(error); // ✅ Capture et redirige via handleApiError
+        }
+    });
+}
+function apiRequest2(endpoint_1, method_1, body_1) {
+    return __awaiter(this, arguments, void 0, function* (endpoint, method, body, requiresAuth = true) {
+        let token = localStorage.getItem('jwtAccessToken');
         const headers = {
             'Content-Type': 'application/json'
         };
@@ -35,7 +91,7 @@ function apiRequest(endpoint_1) {
         });
         if (!response.ok) {
             if (requiresAuth && (response.status === 401 || response.status === 403)) {
-                yield refreshAccessToken(); // Rafraîchir le token en cas d'expiration
+                yield refreshAccessToken(); // Rafraîchir le token en cas d'expiration 
                 return apiRequest(endpoint, method, body, requiresAuth); // Retenter la requête avec le nouveau token
             }
             const errData = yield response.json();
@@ -46,18 +102,28 @@ function apiRequest(endpoint_1) {
 }
 function refreshAccessToken() {
     return __awaiter(this, void 0, void 0, function* () {
-        const response = yield fetch('http://localhost:3500/api/refresh', {
-            method: 'POST',
-            // on peut mettre credentials: 'include' si le refresh nécessite le cookie
-            credentials: 'include'
-        });
-        if (!response.ok) {
-            throw new Error('Echec du refresh, token expiré ou invalidé');
+        try {
+            console.log("🔄 Tentative de refresh du token...");
+            const response = yield fetch('http://localhost:3500/api/refresh', {
+                method: 'POST',
+                // on peut mettre credentials: 'include' si le refresh nécessite le cookie
+                credentials: 'include'
+            });
+            if (!response.ok) {
+                console.error("🔴 Echec du refresh, suppression du token local");
+                localStorage.removeItem('jwtAccessToken');
+                throw new Error('Echec du refresh, token expiré ou invalidé');
+            }
+            const json = yield response.json();
+            const { accessToken } = json;
+            localStorage.setItem('jwtAccessToken', accessToken);
+            console.log("Nouveau accessToken obtenu via /api/refresh");
         }
-        const json = yield response.json();
-        const { accessToken } = json;
-        localStorage.setItem('jwtAccessToken', accessToken);
-        console.log("Nouveau accessToken obtenu via /api/refresh");
+        catch (err) {
+            console.error("🔴 Erreur dans refreshAccessToken :", err);
+            localStorage.removeItem('jwtAccessToken');
+            throw err; // Propage l'erreur pour que apiRequest la capture
+        }
     });
 }
 /**

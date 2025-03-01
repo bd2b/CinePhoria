@@ -11,6 +11,9 @@
   
   /* Table du listing */
   .tab__mesreservations-liste {
+    max-height: 700px; /* Hauteur maximale du tableau */
+    overflow-y: auto; /* Activation du scroll vertical */
+    border: 1px solid #dee2e6; /* Bordure autour du tableau */
     width: 100%;
     margin-top: 10px;
     font-size: 16px;
@@ -22,25 +25,53 @@
     width: 100%;
     border-collapse: collapse; /* Éviter les doubles bordures */
     background-color: #fff;    /* Fond blanc */
+    table-layout: fixed; /* Permet un bon alignement des colonnes */
   }
   
-  /* En-tête de la table */
-  .tab__mesreservations-liste-table thead th {
-    text-align: left;
-    padding: 10px 15px;
-    background-color: rgba(var(--ternary-color), 0.5); /* Fond clair (votre variable ternary-color) */
-    border-bottom: 2px solid #dee2e6; /* Bordure inférieure plus marquée */
-    font-weight: bold;
-    color: #000; /* Texte noir */
-  }
+  /* En-tête fixé */
+.tab__mesreservations-liste-table thead {
+  display: table;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  background-color: rgba(var(--ternary-color), 0.5); /* Fond du header */
   
-  /* Lignes du contenu */
-  .tab__mesreservations-liste-table tbody td {
-    padding: 10px 15px;
-    border: 1px solid #dee2e6; /* Bordure fine autour */
-    vertical-align: middle;    /* Alignement vertical au centre */
-    text-align: center;        /* Alignement horizontal centré */
-  }
+  z-index: 2; /* Priorité pour éviter qu'il ne soit recouvert */
+}
+
+/* Contenu défilant */
+.tab__mesreservations-liste-table tbody {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  max-height: 500px; /* Définit la hauteur maximale du contenu scrollable */
+}
+
+/* Assurer que les colonnes restent alignées */
+.tab__mesreservations-liste-table th, 
+.tab__mesreservations-liste-table td {
+  width: 12.5%; /* Répartition équitable des colonnes */
+  text-align: center;
+  padding: 10px 15px;
+  
+  white-space: nowrap; /* Empêche le retour à la ligne */
+}
+
+.tab__mesreservations-liste-table th {
+font-weight: bold;
+}
+
+
+/* Appliquer une bordure pour séparer les colonnes */
+.tab__mesreservations-liste-table td {
+  border: 1px solid #dee2e6;
+}
+
+/* Ajout d'un effet au survol */
+.tab__mesreservations-liste-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
   
   /* Colonne ID (si vous voulez la styliser en particulier) */
   .tab__mesreservations-liste-table .content-id-td {

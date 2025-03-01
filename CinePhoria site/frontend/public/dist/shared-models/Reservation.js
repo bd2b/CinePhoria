@@ -18,7 +18,8 @@ export var ReservationState;
     ReservationState["ReserveConfirmed"] = "ReserveConfirmed";
     ReservationState["DoneUnevaluated"] = "DoneUnevaluated";
     ReservationState["DoneEvaluated"] = "DoneEvaluated";
-    ReservationState["ReserveCanceled"] = "ReserveCanceled"; // La reservation est annulée par l'utilisateur, les places et nombre de PMR ne sont pas comptés dans la séance
+    ReservationState["ReserveCanceled"] = "ReserveCanceled";
+    ReservationState["ReserveDeleted"] = "ReserveDeleted"; // La reservation est supprimée par l'utilisateur, elle n'apparaitra plus dans son tableau
 })(ReservationState || (ReservationState = {}));
 export class SeatsForTarif {
     constructor(data) {

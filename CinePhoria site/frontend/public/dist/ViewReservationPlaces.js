@@ -276,7 +276,7 @@ function collectEmail(selector) {
 * @returns Un élément <table>
 */
 export function updateTableContent(qualite_1) {
-    return __awaiter(this, arguments, void 0, function* (qualite, isReadOnly = false) {
+    return __awaiter(this, arguments, void 0, function* (qualite, isReadOnly = false, reservationId = "") {
         // 1) Créer l'élément <table> et sa structure de base
         const table = document.createElement('table');
         table.classList.add('tabtarif__commande-table');
@@ -308,14 +308,13 @@ export function updateTableContent(qualite_1) {
         table.appendChild(tfoot);
         const totalPriceTd = tfoot.querySelector('.content-totalprice-td');
         if (isReadOnly) {
-            // Si on est en readOnly, on va chercher les données des places à partir de la réservation en cours
+            // Si on est en readOnly, on va chercher les données des places à partir de la réservation communiquée
             let places = [];
-            const reservationId = dataController.selectedReservationUUID;
-            if (reservationId) {
+            if (reservationId !== "") {
                 places = yield getPlacesReservationApi(reservationId);
             }
             else {
-                console.error("updateTableContent : Pas de reservation selectionnée pour un affichage de reservation");
+                console.error("updateTableContent : Pas de reservation communiquee pour un affichage de reservation");
             }
             // 2) on affiche une ligne par place prise
             let lineIndex = 1;
