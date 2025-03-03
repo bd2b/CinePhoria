@@ -70,36 +70,6 @@ function apiRequest(endpoint_1, method_1, body_1) {
         }
     });
 }
-function apiRequest2(endpoint_1, method_1, body_1) {
-    return __awaiter(this, arguments, void 0, function* (endpoint, method, body, requiresAuth = true) {
-        let token = localStorage.getItem('jwtAccessToken');
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-        if (requiresAuth) {
-            const token = localStorage.getItem('jwtAccessToken');
-            if (!token) {
-                throw new Error('Authentification requise mais aucun token disponible.');
-            }
-            headers['Authorization'] = `Bearer ${token}`;
-        }
-        const response = yield fetch(endpoint, {
-            method,
-            headers,
-            body: body ? JSON.stringify(body) : undefined,
-            credentials: requiresAuth ? 'include' : 'same-origin' // Gère les cookies si nécessaire
-        });
-        if (!response.ok) {
-            if (requiresAuth && (response.status === 401 || response.status === 403)) {
-                yield refreshAccessToken(); // Rafraîchir le token en cas d'expiration 
-                return apiRequest(endpoint, method, body, requiresAuth); // Retenter la requête avec le nouveau token
-            }
-            const errData = yield response.json();
-            throw new Error(errData.message || 'Erreur inconnue');
-        }
-        return response.json();
-    });
-}
 function refreshAccessToken() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -112,7 +82,8 @@ function refreshAccessToken() {
             if (!response.ok) {
                 console.error("🔴 Echec du refresh, suppression du token local");
                 localStorage.removeItem('jwtAccessToken');
-                throw new Error('Echec du refresh, token expiré ou invalidé');
+                // throw new Error('Echec du refresh, token expiré ou invalidé');
+                throw new CinephoriaError(CinephoriaErrorCode.TOKEN_REFRESH_FAIL, "Echec du refresh, token expiré ou invalidé");
             }
             const json = yield response.json();
             const { accessToken } = json;

@@ -83,45 +83,6 @@ async function apiRequest<T>(
 }
 
 
-async function apiRequest2<T>(
-    endpoint: string,
-    method: 'GET' | 'POST' | 'PUT' | 'DELETE',
-    body?: any,
-    requiresAuth: boolean = true
-): Promise<T> {
-    let token = localStorage.getItem('jwtAccessToken');
-    const headers: HeadersInit = {
-        'Content-Type': 'application/json'
-    };
-
-    if (requiresAuth) {
-        const token = localStorage.getItem('jwtAccessToken');
-        if (!token) {
-            throw new Error('Authentification requise mais aucun token disponible.');
-        }
-        headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const response = await fetch(endpoint, {
-        method,
-        headers,
-        body: body ? JSON.stringify(body) : undefined,
-        credentials: requiresAuth ? 'include' : 'same-origin' // Gère les cookies si nécessaire
-    });
-
-    if (!response.ok) {
-        if (requiresAuth && (response.status === 401 || response.status === 403)) {
-            await refreshAccessToken(); // Rafraîchir le token en cas d'expiration 
-            return apiRequest<T>(endpoint, method, body, requiresAuth); // Retenter la requête avec le nouveau token
-        }
-        const errData = await response.json();
-        throw new Error(errData.message || 'Erreur inconnue');
-    }
-
-    return response.json();
-}
-
-
 async function refreshAccessToken() {
     try {
         console.log("🔄 Tentative de refresh du token...");
@@ -133,7 +94,8 @@ async function refreshAccessToken() {
         if (!response.ok) {
             console.error("🔴 Echec du refresh, suppression du token local");
             localStorage.removeItem('jwtAccessToken');
-            throw new Error('Echec du refresh, token expiré ou invalidé');
+            // throw new Error('Echec du refresh, token expiré ou invalidé');
+            throw new CinephoriaError(CinephoriaErrorCode.TOKEN_REFRESH_FAIL, "Echec du refresh, token expiré ou invalidé");
         }
         const json = await response.json();
         const { accessToken } = json;
