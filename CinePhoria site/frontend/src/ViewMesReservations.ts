@@ -3,13 +3,13 @@ import { dataController } from "./DataController.js";
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { ReservationForUtilisateur, ReservationState } from "./shared-models/Reservation.js";
-import { getReservationForUtilisateur, setStateReservationApi, setEvaluationReservationApi,  isLogged } from "./NetworkController.js";
+import { getReservationForUtilisateur, setStateReservationApi, setEvaluationReservationApi, isLogged, cancelReserveApi } from "./NetworkController.js";
 
 import { seanceCardView } from "./ViewReservation.js";
 import { Seance } from "./shared-models/Seance.js";
 import { updateTableContent } from "./ViewReservationPlaces.js";
 import { logout } from "./Login.js";
-import { CinephoriaErrorCode , CinephoriaError } from"./shared-models/Error.js";
+import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 
 export async function onLoadMesReservations() {
     console.log("=====> chargement onLoadMesReservations")
@@ -43,14 +43,28 @@ export async function onLoadMesReservations() {
         // On recupere les reservations de l'utilisateur
         try {
             // On charge les reservations de cet utilisateur
-            const reservations = await getReservationForUtilisateur(utilisateurId);
+            let reservations = await getReservationForUtilisateur(utilisateurId);
+            // On filtre les reservations non annulées ou non effacées 
+            reservations = reservations.filter((r) => { return ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.statereservation as ReservationState) }
+            );
+            console.log(reservations);
+            if (reservations.length === 0) {
+                const container = document.getElementById('mesreservations-table-container');
+                if (container) {
+                    container.innerHTML = '';
+                    const message = document.createElement('p');
+                    message.textContent = "Vous n'avez pas de reservation active ou historisée."
+                    container.appendChild(message);
+                }
+            } else {
 
-            // On rend le tableau dans la page HTML
-            const container = document.getElementById('mesreservations-table-container');
-            if (container) {
-                container.innerHTML = '';
-                const tableDiv = updateTableMesReservations(reservations);
-                container.appendChild(tableDiv);
+                // On rend le tableau dans la page HTML
+                const container = document.getElementById('mesreservations-table-container');
+                if (container) {
+                    container.innerHTML = '';
+                    const tableDiv = updateTableMesReservations(reservations);
+                    container.appendChild(tableDiv);
+                }
             }
 
         } catch (error) {
@@ -92,9 +106,52 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
     // Pour chaque reservation
     reservations.forEach((resa) => {
         // Acces à la seance
-        const seance = dataController.allSeances.find((s) => { return s.seanceId === resa.seanceId });
-        if (!seance) {
-            console.error("Pas de seance pour la réservation")
+        // const seance = dataController.allSeances.find((s) => { return s.seanceId === resa.seanceId });
+        // if (!seance) {
+        //     console.error("Pas de seance pour la réservation")
+        //     return;
+        // }
+
+        // const resaSeanceId = resa.seanceId;
+        // if (!resaSeanceId) {
+        //     console.error("resa.seanceId est undefined ou null !");
+        // }
+
+        // const seances = dataController.allSeances.filter((s) => s.seanceId === resaSeanceId);
+        // if (!seances) {
+        //     console.error("Pas de seance pour la réservation filtre")
+        // }
+
+        // const seance = dataController.allSeances.find((s) => s.seanceId === resaSeanceId);
+        // if (!seance) {
+        //     console.error(`Pas de séance trouvée pour la réservation avec seanceId = ${resaSeanceId}`);
+        // } else {
+        //     console.log("Séance trouvée :", seance);
+        // }
+
+        const resaSeanceId = resa.seanceId!;
+        if (!resaSeanceId) {
+            console.error("resa.seanceId est undefined ou null !");
+        } else {
+            console.log("resaSeanceId =", resaSeanceId);
+        }
+
+        // Vérification des types et valeurs
+        // console.log("Liste des séances :");
+        // dataController.allSeances.forEach((s) => console.log(s.seanceId));
+
+        // Vérifie `filter()`
+        // const seances = dataController.allSeances.filter((s) => s.seanceId === resaSeanceId);
+        // if (seances.length === 0) {
+        //     console.error("Pas de séance pour la réservation (via filter)");
+        // } else {
+        //     console.log("Séances trouvées via filter :", seances);
+        // }
+
+        // Vérifie `find()`
+        let seance = dataController.allSeances.find((s) => s.seanceId === resaSeanceId);
+        if (!seance ) {
+            console.error(`❌ Pas de séance trouvée pour seanceId = ${resaSeanceId}`);
             return;
         }
 
@@ -123,7 +180,8 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
 
         console.log("-------" + resa.dateJour + "-" + seance.hourBeginHHSMM);
         // Statut dynamique
-        let statutResa = resa.statereservation;
+        let statutResa = resa.statereservation as ReservationState;
+
         if (statutResa === ReservationState.ReserveConfirmed) {
             // ACtualisation du statut de la réservation si l'heure de la reservation est dans le passé
 
@@ -151,7 +209,7 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
                 // La reservation est passée
                 statutResa = ReservationState.DoneUnevaluated;
                 // Mise a jour en asynchrone
-                setStateReservationApi(resa.reservationId, ReservationState.DoneUnevaluated );
+                setStateReservationApi(resa.reservationId, ReservationState.DoneUnevaluated);
 
             }
         }
@@ -183,7 +241,7 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
             // Clic => modifEvaluation
             tdNote.style.cursor = 'pointer';
             tdNote.addEventListener('click', () => {
-                onClickEvaluationReservation(resa,true);
+                onClickEvaluationReservation(resa, true);
             });
             tr.appendChild(tdNote);
 
@@ -198,7 +256,7 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
                 tdComment.title = 'Votre commentaire sera publié après relecture';
             }
             tdComment.addEventListener('click', () => {
-                onClickEvaluationReservation(resa,true);
+                onClickEvaluationReservation(resa, true);
             });
             tr.appendChild(tdComment);
         } else {
@@ -224,12 +282,23 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
         const tdSuppr = document.createElement('td');
         const btnSuppr = document.createElement('button');
         btnSuppr.classList.add("button");
-        btnSuppr.textContent = '🗑️'; // icone poubelle
-        btnSuppr.addEventListener('click', () => {
-            onClickSuppressionReservation(resa);
-        });
-        tdSuppr.appendChild(btnSuppr);
-        tr.appendChild(tdSuppr);
+
+        let textButton = "";
+
+        if (statutResa === ReservationState.ReserveConfirmed) {
+            textButton = "Annuler";
+        } else if ([ReservationState.DoneEvaluated, ReservationState.DoneUnevaluated].includes(statutResa)) {
+            textButton = "Effacer";
+        }
+        if (textButton !== "") {
+            // btnSuppr.textContent = '🗑️'; // icone poubelle
+            btnSuppr.textContent = textButton;
+            btnSuppr.addEventListener('click', () => {
+                onClickSuppressionReservation(resa, textButton);
+            });
+            tdSuppr.appendChild(btnSuppr);
+            tr.appendChild(tdSuppr);
+        }
 
         tbody.appendChild(tr);
     });
@@ -288,7 +357,7 @@ async function onClickDetailReservation(resa: ReservationForUtilisateur, seance:
         const selectedSeance = seanceCardView(seance, new Date(resa.dateJour || ''));
         modalContent.appendChild(selectedSeance);
 
-        const tableauPlaces = await updateTableContent(seance.qualite || '', true , resa.reservationId);
+        const tableauPlaces = await updateTableContent(seance.qualite || '', true, resa.reservationId);
         modalContent.appendChild(tableauPlaces);
 
         if (resa.numberPMR && resa.numberPMR > 0) {
@@ -341,8 +410,8 @@ function onClickEvaluationReservation(resa: ReservationForUtilisateur, isModif: 
                     </button>
                     <div class="title__filter-button-drowdown-content" id="eval-note-dropdown">
                         ${[0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
-                            .map(n => `<a href="#" data-value="${n}">${n}</a>`)
-                            .join('')}
+            .map(n => `<a href="#" data-value="${n}">${n}</a>`)
+            .join('')}
                     </div>
                 </div>
                 <span id="eval-error" style="color: red; font-size: 0.8em; display: none;">Note obligatoire</span>
@@ -438,25 +507,98 @@ function onClickEvaluationReservation(resa: ReservationForUtilisateur, isModif: 
         closeModal();
         // On recharge.
         onLoadMesReservations();
-        
+
     });
 }
 
 
 
-function onClickSuppressionReservation(resa: ReservationForUtilisateur) {
+async function onClickSuppressionReservation(resa: ReservationForUtilisateur, textButton: string) {
+
+
+    // Configuration de l'action de suppression
+    let action: () => {};
+    let messageModal = "";
+    let titleModal = "";
+    let titleConfirme = "";
+
+    if (textButton === "Annuler") {
+        // On annule la reservation en remettant les places reservées dans le pot
+        action = async () => { await cancelReserveApi(resa.reservationId) };
+        messageModal = "Etes vous sûr de vouloir annuler cette réservation ?";
+        titleModal = "Annulation de la reservation";
+        titleConfirme = "Je confirmer l'annulation";
+
+    }
+    if (textButton === "Effacer") {
+        // On efface, la reservation est supprimée logiquement
+        action = async () => { await setStateReservationApi(resa.reservationId, ReservationState.ReserveDeleted) };
+        messageModal = `Etes vous sûr de vouloir effacer cette réservation ? 
+        (Nous conserverons la note anonymisée mais effacerons l'éventuel commentaire de notre site et les données de la réservation)`;
+        titleModal = "Suppression de la reservation";
+        titleConfirme = "Je confirmer la suppression";
+    }
+
     // Ouvrir modal-suppressionReservation
-    const modal = document.getElementById('modal-suppressionReservation');
+    const modal = document.getElementById('modal-suppressionReservation') as HTMLDivElement | null;
     if (!modal) return;
+
+
+    // HTML de la modale pour confirmer la suppression
+    const modalSuppressionLocalHTML = `
+    <div class="modal__content-wrapper">
+        <div class="modal__title">
+            <div class="title__SuppressionReservation title-h2">
+                <h2>${titleModal}</h2>
+            </div>
+            <span class="close-modal" id="close-suppressionReservation">×</span>
+        </div>
+        <div class="modal__content" id="content__SuppressionReservation">
+            <p>${messageModal}</p>
+            <div class="modal__btns">
+            <button class="button" id="supAnnulerBtn">Annuler</button>
+            <button class="button" id="supConfirmerBtn">${titleConfirme}</button>
+            </div>
+        </div>
+    </div>`;
+
+    // Injecter la modale
+    modal.innerHTML = modalSuppressionLocalHTML;
+    document.body.appendChild(modal);
+    modal.style.display = 'flex';
+
+    // Sélection des éléments
+    const closeModalBtn = document.getElementById("close-suppressionReservation") as HTMLButtonElement | null;
+    const confirmerBtn = document.getElementById('supConfirmerBtn') as HTMLButtonElement | null;
+    const annulerBtn = document.getElementById('supAnnulerBtn') as HTMLButtonElement | null;
+
+    // Fonction pour fermer la modale
+    const closeModal = () => {
+        modal.style.display = 'none';
+    };
+
+    // Fermer la modale avec le bouton (X)
+    closeModalBtn?.addEventListener('click', closeModal);
+
+    // Fermer la modale en cliquant en dehors
+    modal.addEventListener('click', (event: MouseEvent) => {
+        if (event.target === modal) closeModal();
+    });
+
+    // Gestion du bouton "Annuler"
+    annulerBtn?.addEventListener('click', closeModal);
+
     // Gérer le "Je confirme la suppression"
-    const confirmerBtn = document.getElementById('supConfirmerBtn');
     if (confirmerBtn) {
         confirmerBtn.onclick = () => {
-            alert('Suppression demandée');
+            console.log('Suppression demandée');
+            action();
             // Fermer la modal
-            modal.style.display = 'none';
+            closeModal();
+            // On recharge.
+            onLoadMesReservations();
         };
     }
-    modal.style.display = 'block';
+
 }
 

@@ -224,3 +224,11 @@ font-weight: bold;
   align-items: start;
   gap: 15px;
 }
+
+#content__SuppressionReservation {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  gap: 15px;
+}
