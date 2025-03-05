@@ -132,6 +132,7 @@
   .form__group {
     display: flex;
     flex-direction: column;
+    gap: 10px;
     margin-bottom: 15px;
     text-align: left;
   }
@@ -152,6 +153,13 @@
     outline: none;
     transition: border-color 0.3s;
   }
+
+  /* Style des textarea */
+  .form__group textarea {
+    min-width: 200px;
+    width: 100%;
+    min-height: 100px;
+  }
   
   .form__group input:focus {
     border-color: #3498db; /* Bleu */
@@ -167,6 +175,13 @@
     cursor: pointer;
     transition: background-color 0.3s;
     width: 100%;
+  }
+
+  .modal__btns {
+    display: flex;
+    gap: 20px;
+    justify-content: flex-end;
+}
   }
   
   

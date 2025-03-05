@@ -3,6 +3,7 @@ import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 // On suppose qu'il existe un localStorage key = "jwtToken" pour vérifier la connexion
 import { login, logout } from './Login.js'; // si vous avez besoin de l’appeler
 import { onLoadVisiteur } from './ViewFilmsSortiesSemaine.js';
+import { onClickContact } from './ViewContact.js';
 // Ou tout autre endroit où est définie la fonction login()
 
 
@@ -125,7 +126,14 @@ function buildMenuVisiteur(): void {
 
   const btnReservation = createLinkButton('Réservation', 'reservation.html');
   const btnFilms = createLinkButton('Films', 'films.html');
-  const btnContact = createLinkButton('Contact', 'contact.html');
+  // const btnContact = createLinkButton('Contact', 'contact.html');
+
+  // Bouton Contact
+  const btnContact = createLinkButton('Contact', '#');
+  btnContact.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    onClickContact();
+  });
 
   // Bouton Connexion (appelle login() quand on clique, ou ouvre modal)
   const btnConnexion = document.createElement('button');
@@ -161,7 +169,14 @@ function buildMenuUtilisateur(): void {
   const btnMesResa = createLinkButton('Mes Réservations', 'mesreservations.html');
   const btnReserve = createLinkButton('Reservation', 'reservation.html');
   const btnFilms = createLinkButton('Films', 'films.html');
-  const btnContact = createLinkButton('Contact', 'contact.html');
+const btnContact = createLinkButton('Contact', '#');
+
+// 2) Ajouter un écouteur qui remplace le comportement
+btnContact.addEventListener('click', (event) => {
+  event.preventDefault();  // empêche la navigation
+  onClickContact();        // ouvre la modale de contact
+});
+
 
   // Bouton Déconnexion stylisé à partir des initiales
   const initials = getUserInitials();

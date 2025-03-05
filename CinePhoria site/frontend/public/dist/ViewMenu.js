@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 // On suppose qu'il existe un localStorage key = "jwtToken" pour vérifier la connexion
 import { login, logout } from './Login.js'; // si vous avez besoin de l’appeler
+import { onClickContact } from './ViewContact.js';
 // Ou tout autre endroit où est définie la fonction login()
 /**
  * Chargement des items de menus en fonction du profil
@@ -112,7 +113,13 @@ function buildMenuVisiteur() {
     // Construire les boutons
     const btnReservation = createLinkButton('Réservation', 'reservation.html');
     const btnFilms = createLinkButton('Films', 'films.html');
-    const btnContact = createLinkButton('Contact', 'contact.html');
+    // const btnContact = createLinkButton('Contact', 'contact.html');
+    // Bouton Contact
+    const btnContact = createLinkButton('Contact', '#');
+    btnContact.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        onClickContact();
+    });
     // Bouton Connexion (appelle login() quand on clique, ou ouvre modal)
     const btnConnexion = document.createElement('button');
     btnConnexion.classList.add('nav__actions-button', 'nav__actions-button--signin');
@@ -144,7 +151,12 @@ function buildMenuUtilisateur() {
     const btnMesResa = createLinkButton('Mes Réservations', 'mesreservations.html');
     const btnReserve = createLinkButton('Reservation', 'reservation.html');
     const btnFilms = createLinkButton('Films', 'films.html');
-    const btnContact = createLinkButton('Contact', 'contact.html');
+    const btnContact = createLinkButton('Contact', '#');
+    // 2) Ajouter un écouteur qui remplace le comportement
+    btnContact.addEventListener('click', (event) => {
+        event.preventDefault(); // empêche la navigation
+        onClickContact(); // ouvre la modale de contact
+    });
     // Bouton Déconnexion stylisé à partir des initiales
     const initials = getUserInitials();
     const btnDeconnexion = document.createElement('button');
