@@ -579,7 +579,7 @@ export function sendMailApi(mail) {
     return __awaiter(this, void 0, void 0, function* () {
         const body = JSON.stringify({ mailInput: mail });
         console.log(body);
-        const endpoint = 'http://localhost:3500/api/mail/sendmail';
+        const endpoint = 'http://localhost:3500/api/mail/sendmailcontact';
         const responseJSON = yield apiRequest(endpoint, 'POST', body, false // Pas d'authentification requise
         );
         console.log("Message retour", responseJSON);
