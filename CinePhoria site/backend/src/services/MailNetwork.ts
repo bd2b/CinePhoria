@@ -9,7 +9,7 @@ const isBouchon = false;
 logger.info ( isBouchon ? "ENVOI DE MAIL bouchonne" : "ENVOI DE MAIL en service");
 // Ce contrôleur effectue l'envoi de mail en s'appuyant sur la configuration
 export class MailNetwork {
-  static async sendMail(mail: Mail): Promise<string> {
+  static async sendMailContact(mail: Mail): Promise<string> {
     try {
       
       // Paramètres de connexion SMTP
@@ -34,7 +34,7 @@ export class MailNetwork {
         // Si isHtml => 'html' sinon 'text'
         [mail.isHtml ? 'html' : 'text']: mail.body || '',
         cc: mail.cc?.length ? mail.cc.join(',') : undefined,
-        bcc: mail.bcc?.length ? mail.bcc.join(',') : undefined,
+        bcc: mailConfig.SMTP_FROM
         // attachments: ...
       };
       logger.info( "mailOptions = " + JSON.stringify(mailOptions))

@@ -39,7 +39,7 @@ export class MailController {
       );
 
       // Appeler la fonction d’envoi
-      const result = await MailNetwork.sendMail(mail);
+      const result = await MailNetwork.sendMailContact(mail);
       logger.info("Résultat envoi mail => ", result);
 
       // Gérer le résultat
