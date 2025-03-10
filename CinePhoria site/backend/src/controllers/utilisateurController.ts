@@ -24,7 +24,7 @@ export class UtilisateurController {
       if (result.startsWith('Erreur')) {
         res.status(400).json({ message: result });
       } else {
-        res.status(200).json({ id: result })
+        res.status(200).json({ id: result });
       };
     } catch (error) {
       console.error('Erreur dans createUtilisateur:', error);

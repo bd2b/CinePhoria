@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import logger from '../config/configLog';
 import { ReservationDAO } from '../dao/ReservationDAO';
 import { ReservationState } from '../shared-models/Reservation';
+import { UtilisateurDAO } from '../dao/UtilisateurDAO';
+import { MailNetwork } from '../services/MailNetwork';
 
 // Étendre le type Request pour utiliser "user"
 
@@ -32,6 +34,15 @@ export class ReservationController {
       if (result.startsWith('Erreur')) {
         res.status(400).json({ message: result });
       } else {
+        
+        // Récupération du code de verification d'email
+        const codeConfirmMail = await UtilisateurDAO.getCodeConfirm(email);
+        logger.info("Code de confirmation du mail = " + codeConfirmMail);
+        // Envoie du mail
+        const statutMail = await MailNetwork.sendMailCodeConfirm(email, codeConfirmMail);
+        if (!statutMail.startsWith('OK')) res.status(500).json({ message: "Erreur sur l'envoi du code de vérification de mail " + statutMail });
+
+        // Retour des résultats
         const [statut, utilisateurId, reservationId] = result.split(',');
         res.status(201).json({ statut, utilisateurId, reservationId });
         logger.info("Resultat =", [statut, utilisateurId, reservationId]);

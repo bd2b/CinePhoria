@@ -34,11 +34,11 @@ async function apiRequest<T>(
         if (requiresAuth) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-        
+
         let response = await fetch(endpoint, {
             method,
             headers,
-            body: typeof body === 'string' ? body : JSON.stringify(body),
+            body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
             credentials: requiresAuth ? 'include' : 'same-origin'
         });
 
@@ -61,7 +61,7 @@ async function apiRequest<T>(
                         ...headers,
                         'Authorization': `Bearer ${token}`
                     },
-                    body: body ? JSON.stringify(body) : undefined,
+                    body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
                     credentials: 'include'
                 });
 

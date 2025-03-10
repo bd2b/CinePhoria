@@ -34,7 +34,7 @@ function apiRequest(endpoint_1, method_1, body_1) {
             let response = yield fetch(endpoint, {
                 method,
                 headers,
-                body: typeof body === 'string' ? body : JSON.stringify(body),
+                body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
                 credentials: requiresAuth ? 'include' : 'same-origin'
             });
             if (requiresAuth && (response.status === 401 || response.status === 403)) {
@@ -50,7 +50,7 @@ function apiRequest(endpoint_1, method_1, body_1) {
                     response = yield fetch(endpoint, {
                         method,
                         headers: Object.assign(Object.assign({}, headers), { 'Authorization': `Bearer ${token}` }),
-                        body: body ? JSON.stringify(body) : undefined,
+                        body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
                         credentials: 'include'
                     });
                 }

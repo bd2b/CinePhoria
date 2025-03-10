@@ -1,8 +1,8 @@
 import * as bcrypt from 'bcrypt';
 import mysql from 'mysql2/promise';
-import { dbConfig , nombreTentativeLoginKO } from '../config/config';
+import { dbConfig, nombreTentativeLoginKO } from '../config/config';
 import logger from '../config/configLog';
-import { UtilisateurCompte , ComptePersonne} from '../shared-models/Utilisateur';
+import { UtilisateurCompte, ComptePersonne } from '../shared-models/Utilisateur';
 
 
 async function hashPassword(password: string): Promise<string> {
@@ -16,8 +16,8 @@ async function hashPassword(password: string): Promise<string> {
  * @param hashedPassword password hasché
  * @returns boolean
  */
-async function isPasswordEqual (password: string, hashedPassword: string): Promise<boolean> {
-    return await bcrypt.compare(password, hashedPassword);
+async function isPasswordEqual(password: string, hashedPassword: string): Promise<boolean> {
+  return await bcrypt.compare(password, hashedPassword);
 }
 
 /**
@@ -80,6 +80,44 @@ export class UtilisateurDAO {
     }
   };
 
+  static async getCodeConfirm(
+    email: string
+  ): Promise<string> {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+      const results = await connection.query(
+        `SELECT oldpasswordsArray, isValidated
+            FROM Compte
+            WHERE Compte.email  = ?
+			      INTO @v_codeStocke, @v_isValidated;
+            select @v_codeStocke as codeStocke`,
+        [email]);
+      // Forcer TypeScript à comprendre la structure des résultats
+      const callResults = results as any[][];  // Correction du typage
+      const selectResult = callResults[0][1] as Array<{ codeStocke: string }>;
+
+      // Vérification et extraction du résultat
+      if (selectResult && selectResult.length > 0 && selectResult[0].codeStocke) {
+        const codeConfMail = selectResult[0].codeStocke;
+        logger.info("Code trouve = " + codeConfMail);
+
+        // Retourner uniquement la chaîne utilisateurId
+        return codeConfMail;
+      } else {
+        logger.error("Erreur : Résultat non disponible.");
+        throw new Error('Erreur : Résultat non disponible.');
+      }
+    } catch (error) {
+      logger.error('Erreur dans select getCodeConfirm', error);
+      throw new Error('Erreur dans select getCodeConfirm.');
+    } finally {
+      await connection.end();
+    }
+
+  }
+
+
+
   static async confirmUtilisateur(
     utilisateurId: string,
     password: string,
@@ -96,7 +134,7 @@ export class UtilisateurDAO {
         [utilisateurId, passwordHashed, displayName]
       );
       logger.info("Execution de la procedure ConfirmUtilisateur ")
-      logger.info("Parametre = " + utilisateurId + " , " + passwordHashed + " , "  + displayName);
+      logger.info("Parametre = " + utilisateurId + " , " + passwordHashed + " , " + displayName);
       // Forcer TypeScript à comprendre la structure des résultats
       const callResults = results as any[][];  // Correction du typage
       const selectResult = callResults[0][1] as Array<{ result: string }>;
@@ -179,15 +217,15 @@ export class UtilisateurDAO {
     let requete = ""
     if (validateEmail(ident)) {
       requete = 'select * from viewComptePersonne where email = ? ;';
-      logger.info ("Recherche par email = " + ident );
-    
+      logger.info("Recherche par email = " + ident);
+
     } else if (isUUID(ident)) {
       requete = 'select * from viewComptePersonne where utilisateurid = ? ;';
-      logger.info ("Recherche par id = " + ident );
-    
+      logger.info("Recherche par id = " + ident);
+
     } else {
       requete = 'select * from viewComptePersonne where matricule = ? ;';
-      logger.info ("Recherche par matricule = " + ident );
+      logger.info("Recherche par matricule = " + ident);
     }
     const [rows] = await connection.execute(requete, [ident]);
     await connection.end();
@@ -253,7 +291,7 @@ export class UtilisateurDAO {
         );
         return 'KO : Compte non validé';
       }
-      
+
       const isPasswordCorrect = await bcrypt.compare(password, passwordText);
       if (!isPasswordCorrect) {
         logger.info(`Mot de passe incorrect pour ${compte}`);
