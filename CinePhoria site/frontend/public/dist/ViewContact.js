@@ -1,5 +1,16 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { validateEmail } from './Helpers.js';
 import { userDataController } from './DataControllerUser.js';
+import { Mail } from './shared-models/Mail.js';
+import { sendMailApi } from './NetworkController.js';
 export function onClickContact() {
     var _a;
     // 1) Vérifier si un div#modal-contact existe déjà
@@ -141,19 +152,22 @@ export function onClickContact() {
     // 10) Bouton Annuler
     annulerBtn === null || annulerBtn === void 0 ? void 0 : annulerBtn.addEventListener('click', closeModal);
     // 11) Bouton Envoyer la demande
-    envoyerBtn === null || envoyerBtn === void 0 ? void 0 : envoyerBtn.addEventListener('click', () => {
+    envoyerBtn === null || envoyerBtn === void 0 ? void 0 : envoyerBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
         // Tout est déjà validé dans checkFormValidity
         // => On affiche une alert ou on appelle un code d’envoi
         const mailVal = (mailInput === null || mailInput === void 0 ? void 0 : mailInput.value.trim()) || '';
         const titreVal = (titreInput === null || titreInput === void 0 ? void 0 : titreInput.value.trim()) || '';
         const descVal = (descInput === null || descInput === void 0 ? void 0 : descInput.value.trim()) || '';
+        const mail = new Mail(mailVal, titreVal, descVal, "false");
+        const resultat = yield sendMailApi(mail);
+        console.log("Resultat envoi mail = " + resultat);
         alert(`Demande envoyée !
 Mail : ${mailVal || 'Pas de mail'}
 Titre : ${titreVal}
 Description : ${descVal}`);
         // Fermer
         closeModal();
-    });
+    }));
     // 12) Initial check
     checkFormValidity();
 }
