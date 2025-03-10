@@ -5,6 +5,7 @@ import { ReservationForUtilisateur, SeatsForReservation } from './shared-models/
 import { userDataController } from './DataControllerUser.js';
 import { handleApiError } from './Global.js';
 import { CinephoriaErrorCode , CinephoriaError } from"./shared-models/Error.js";
+import { Mail } from './shared-models/Mail.js';
 
 
 /**
@@ -33,11 +34,11 @@ async function apiRequest<T>(
         if (requiresAuth) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-
+        
         let response = await fetch(endpoint, {
             method,
             headers,
-            body: body ? JSON.stringify(body) : undefined,
+            body: typeof body === 'string' ? body : JSON.stringify(body),
             credentials: requiresAuth ? 'include' : 'same-origin'
         });
 
@@ -661,27 +662,19 @@ export async function getReservationForUtilisateur(utilisateurId: string): Promi
     return rawData.map((r) => new ReservationForUtilisateur(r));
 }
 
-export async function getReservationForUtilisateur2(utilisateurId: string): Promise<ReservationForUtilisateur[]> {
-    const token = localStorage.getItem('jwtAccessToken');
-    const response = await fetch(`http://localhost:3500/api/reservation/${utilisateurId}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-    });
-    const rawData = await response.json();
 
-    if (!Array.isArray(rawData)) {
-        throw new Error('La réponse de l’API n’est pas un tableau.');
-    }
-    // Convertir les données brutes en instances de Seance
-    const reservationForUtilisateur = rawData.map((r: any) => new ReservationForUtilisateur(r));
-    console.log("Reservation pour un utilisateur = ", reservationForUtilisateur)
-    return reservationForUtilisateur;
+
+export async function sendMailApi(mail: Mail): Promise<{ statut: string }> {
+    const body = JSON.stringify({ mailInput: mail });
+    console.log(body);
+    const endpoint = 'http://localhost:3500/api/mail/sendmail';
+    const responseJSON = await apiRequest<{ statut: string }>(
+        endpoint,
+        'POST',
+        body,
+        false // Pas d'authentification requise
+    );
+    console.log("Message retour", responseJSON);
+    return responseJSON;
+
 }
-
-
-
-
-

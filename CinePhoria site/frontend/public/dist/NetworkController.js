@@ -34,7 +34,7 @@ function apiRequest(endpoint_1, method_1, body_1) {
             let response = yield fetch(endpoint, {
                 method,
                 headers,
-                body: body ? JSON.stringify(body) : undefined,
+                body: typeof body === 'string' ? body : JSON.stringify(body),
                 credentials: requiresAuth ? 'include' : 'same-origin'
             });
             if (requiresAuth && (response.status === 401 || response.status === 403)) {
@@ -575,23 +575,14 @@ export function getReservationForUtilisateur(utilisateurId) {
         return rawData.map((r) => new ReservationForUtilisateur(r));
     });
 }
-export function getReservationForUtilisateur2(utilisateurId) {
+export function sendMailApi(mail) {
     return __awaiter(this, void 0, void 0, function* () {
-        const token = localStorage.getItem('jwtAccessToken');
-        const response = yield fetch(`http://localhost:3500/api/reservation/${utilisateurId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        const rawData = yield response.json();
-        if (!Array.isArray(rawData)) {
-            throw new Error('La réponse de l’API n’est pas un tableau.');
-        }
-        // Convertir les données brutes en instances de Seance
-        const reservationForUtilisateur = rawData.map((r) => new ReservationForUtilisateur(r));
-        console.log("Reservation pour un utilisateur = ", reservationForUtilisateur);
-        return reservationForUtilisateur;
+        const body = JSON.stringify({ mailInput: mail });
+        console.log(body);
+        const endpoint = 'http://localhost:3500/api/mail/sendmail';
+        const responseJSON = yield apiRequest(endpoint, 'POST', body, false // Pas d'authentification requise
+        );
+        console.log("Message retour", responseJSON);
+        return responseJSON;
     });
 }

@@ -1,9 +1,11 @@
 import { dataController } from './DataController.js';
 import { validateEmail } from './Helpers.js';
 import { userDataController } from './DataControllerUser.js';
+import { Mail } from './shared-models/Mail.js';
+import { sendMailApi } from './NetworkController.js';
 
 export function onClickContact() {
-    // 1) Vérifier si un div#modal-contact existe déjà
+  // 1) Vérifier si un div#modal-contact existe déjà
   let modal = document.getElementById('modal-contact') as HTMLDivElement | null;
   if (!modal) {
     // Le créer s’il n’existe pas
@@ -14,17 +16,17 @@ export function onClickContact() {
   }
 
 
-    if (!modal) return;
+  if (!modal) return;
 
-    const mailCourant = userDataController.compte()?.email;
-let mailValue = '';
+  const mailCourant = userDataController.compte()?.email;
+  let mailValue = '';
 
-if (mailCourant && validateEmail(mailCourant)) {
-  mailValue = mailCourant;  // On l’utilise si c’est défini ET valide
-}
+  if (mailCourant && validateEmail(mailCourant)) {
+    mailValue = mailCourant;  // On l’utilise si c’est défini ET valide
+  }
 
-    // 2) Construire le HTML interne de la modale
-    const modalContactHTML = `
+  // 2) Construire le HTML interne de la modale
+  const modalContactHTML = `
   <div class="modal__content-wrapper">
     <div class="modal__title">
       <div class="title__Contact title-h2">
@@ -53,130 +55,134 @@ if (mailCourant && validateEmail(mailCourant)) {
   </div>
   `;
 
-    // 3) Injecter le contenu HTML dans la modale
-    modal.innerHTML = modalContactHTML;
+  // 3) Injecter le contenu HTML dans la modale
+  modal.innerHTML = modalContactHTML;
 
-    // 4) Ajouter la modale au document si nécessaire
-    // (Si modal est déjà dans le HTML de base, pas besoin de l’appendChild)
-    document.body.appendChild(modal);
+  // 4) Ajouter la modale au document si nécessaire
+  // (Si modal est déjà dans le HTML de base, pas besoin de l’appendChild)
+  document.body.appendChild(modal);
 
-    // 5) Afficher la modale
-    modal.style.display = 'flex';  // ou 'block' selon vos styles
+  // 5) Afficher la modale
+  modal.style.display = 'flex';  // ou 'block' selon vos styles
 
-    // 6) Sélection des éléments
-    const closeModalBtn = document.getElementById('close-contact') as HTMLButtonElement | null;
-    const mailInput = document.getElementById('contact-mail') as HTMLInputElement | null;
-    const titreInput = document.getElementById('contact-titre') as HTMLInputElement | null;
-    const descInput = document.getElementById('contact-desc') as HTMLTextAreaElement | null;
-    const annulerBtn = document.getElementById('contactAnnulerBtn') as HTMLButtonElement | null;
-    const envoyerBtn = document.getElementById('contactEnvoyerBtn') as HTMLButtonElement | null;
-    const errorSpan = document.getElementById('contact-error') as HTMLSpanElement | null;
+  // 6) Sélection des éléments
+  const closeModalBtn = document.getElementById('close-contact') as HTMLButtonElement | null;
+  const mailInput = document.getElementById('contact-mail') as HTMLInputElement | null;
+  const titreInput = document.getElementById('contact-titre') as HTMLInputElement | null;
+  const descInput = document.getElementById('contact-desc') as HTMLTextAreaElement | null;
+  const annulerBtn = document.getElementById('contactAnnulerBtn') as HTMLButtonElement | null;
+  const envoyerBtn = document.getElementById('contactEnvoyerBtn') as HTMLButtonElement | null;
+  const errorSpan = document.getElementById('contact-error') as HTMLSpanElement | null;
 
-    // Fonction pour fermer la modale
-    const closeModal = () => {
-        modal.style.display = 'none';
-    };
+  // Fonction pour fermer la modale
+  const closeModal = () => {
+    modal.style.display = 'none';
+  };
 
-    // 7) Vérifier l’état du formulaire et activer/désactiver le bouton
-    function checkFormValidity() {
-        // a) Vérifier le mail (facultatif). S’il y a un contenu => validateEmail
-        const mailVal = mailInput?.value.trim() || '';
-        if (mailVal && !validateEmail(mailVal)) {
-            // Erreur possible, mais la consigne : “mail est facultatif”.
-            // On peut juste avertir si mal formé => le bouton n’est pas activé si c’est incorrect.
-            showError("Veuillez indiquer un email valide si vous souhaitez un retour.");
-            setButtonDisabled(true);
-            return;
-        }
-
-        // b) Vérifier le titre
-        const titreVal = titreInput?.value.trim() || '';
-        // “au moins un mot de 5 caractères”
-        // On peut faire un petit test avec un split ou un test direct
-        const words = titreVal.split(/\s+/);
-        const hasLongWord = words.some((w) => w.length >= 5);
-
-        if (!hasLongWord) {
-            showError("Veuillez préciser le sujet de votre demande");
-            setButtonDisabled(true);
-            return;
-        }
-
-        // c) Vérifier la description => “au moins 3 mots de 5 caractères”
-        const descVal = descInput?.value.trim() || '';
-        const descWords = descVal.split(/\s+/).filter(Boolean);
-        // Compter combien ont au moins 5 caractères
-        const count5Chars = descWords.filter((w) => w.length >= 5).length;
-        if (count5Chars < 3) {
-            showError("Veuillez décrire plus précisément votre demande en 3 mots.");
-            setButtonDisabled(true);
-            return;
-        }
-
-        // Si tout est bon, pas d’erreur
-        hideError();
-        setButtonDisabled(false);
+  // 7) Vérifier l’état du formulaire et activer/désactiver le bouton
+  function checkFormValidity() {
+    // a) Vérifier le mail (facultatif). S’il y a un contenu => validateEmail
+    const mailVal = mailInput?.value.trim() || '';
+    if (mailVal && !validateEmail(mailVal)) {
+      // Erreur possible, mais la consigne : “mail est facultatif”.
+      // On peut juste avertir si mal formé => le bouton n’est pas activé si c’est incorrect.
+      showError("Veuillez indiquer un email valide si vous souhaitez un retour.");
+      setButtonDisabled(true);
+      return;
     }
 
-    function showError(msg: string) {
-        if (errorSpan) {
-            errorSpan.style.display = 'inline';
-            errorSpan.textContent = msg;
-        }
-    }
-    function hideError() {
-        if (errorSpan) {
-            errorSpan.style.display = 'none';
-            errorSpan.textContent = '';
-        }
-    }
-    function setButtonDisabled(dis: boolean) {
-        if (!envoyerBtn) return;
-        if (dis) {
-            envoyerBtn.classList.add('inactif');
-            envoyerBtn.disabled = true;
-        } else {
-            envoyerBtn.classList.remove('inactif');
-            envoyerBtn.disabled = false;
-        }
+    // b) Vérifier le titre
+    const titreVal = titreInput?.value.trim() || '';
+    // “au moins un mot de 5 caractères”
+    // On peut faire un petit test avec un split ou un test direct
+    const words = titreVal.split(/\s+/);
+    const hasLongWord = words.some((w) => w.length >= 5);
+
+    if (!hasLongWord) {
+      showError("Veuillez préciser le sujet de votre demande");
+      setButtonDisabled(true);
+      return;
     }
 
-    // 8) Brancher la vérification sur les events input
-    mailInput?.addEventListener('input', checkFormValidity);
-    titreInput?.addEventListener('input', checkFormValidity);
-    descInput?.addEventListener('input', checkFormValidity);
+    // c) Vérifier la description => “au moins 3 mots de 5 caractères”
+    const descVal = descInput?.value.trim() || '';
+    const descWords = descVal.split(/\s+/).filter(Boolean);
+    // Compter combien ont au moins 5 caractères
+    const count5Chars = descWords.filter((w) => w.length >= 5).length;
+    if (count5Chars < 3) {
+      showError("Veuillez décrire plus précisément votre demande en 3 mots.");
+      setButtonDisabled(true);
+      return;
+    }
 
-    // 9) Fermer la modale avec (X)
-    closeModalBtn?.addEventListener('click', closeModal);
+    // Si tout est bon, pas d’erreur
+    hideError();
+    setButtonDisabled(false);
+  }
 
-    // Fermer la modale en cliquant en dehors
-    modal.addEventListener('click', (event: MouseEvent) => {
-        if (event.target === modal) {
-            closeModal();
-        }
-    });
+  function showError(msg: string) {
+    if (errorSpan) {
+      errorSpan.style.display = 'inline';
+      errorSpan.textContent = msg;
+    }
+  }
+  function hideError() {
+    if (errorSpan) {
+      errorSpan.style.display = 'none';
+      errorSpan.textContent = '';
+    }
+  }
+  function setButtonDisabled(dis: boolean) {
+    if (!envoyerBtn) return;
+    if (dis) {
+      envoyerBtn.classList.add('inactif');
+      envoyerBtn.disabled = true;
+    } else {
+      envoyerBtn.classList.remove('inactif');
+      envoyerBtn.disabled = false;
+    }
+  }
 
-    // 10) Bouton Annuler
-    annulerBtn?.addEventListener('click', closeModal);
+  // 8) Brancher la vérification sur les events input
+  mailInput?.addEventListener('input', checkFormValidity);
+  titreInput?.addEventListener('input', checkFormValidity);
+  descInput?.addEventListener('input', checkFormValidity);
 
-    // 11) Bouton Envoyer la demande
-    envoyerBtn?.addEventListener('click', () => {
-        // Tout est déjà validé dans checkFormValidity
-        // => On affiche une alert ou on appelle un code d’envoi
+  // 9) Fermer la modale avec (X)
+  closeModalBtn?.addEventListener('click', closeModal);
 
-        const mailVal = mailInput?.value.trim() || '';
-        const titreVal = titreInput?.value.trim() || '';
-        const descVal = descInput?.value.trim() || '';
+  // Fermer la modale en cliquant en dehors
+  modal.addEventListener('click', (event: MouseEvent) => {
+    if (event.target === modal) {
+      closeModal();
+    }
+  });
 
-        alert(`Demande envoyée !
+  // 10) Bouton Annuler
+  annulerBtn?.addEventListener('click', closeModal);
+
+  // 11) Bouton Envoyer la demande
+  envoyerBtn?.addEventListener('click', async () => {
+    // Tout est déjà validé dans checkFormValidity
+    // => On affiche une alert ou on appelle un code d’envoi
+
+    const mailVal = mailInput?.value.trim() || '';
+    const titreVal = titreInput?.value.trim() || '';
+    const descVal = descInput?.value.trim() || '';
+
+    const mail = new Mail(mailVal, titreVal, descVal, "false");
+    const resultat = await sendMailApi(mail);
+    console.log("Resultat envoi mail = " + resultat);
+
+    alert(`Demande envoyée !
 Mail : ${mailVal || 'Pas de mail'}
 Titre : ${titreVal}
 Description : ${descVal}`);
 
-        // Fermer
-        closeModal();
-    });
+    // Fermer
+    closeModal();
+  });
 
-    // 12) Initial check
-    checkFormValidity();
+  // 12) Initial check
+  checkFormValidity();
 }
