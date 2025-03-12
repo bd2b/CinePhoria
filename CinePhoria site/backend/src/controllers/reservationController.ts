@@ -4,6 +4,9 @@ import { ReservationDAO } from '../dao/ReservationDAO';
 import { ReservationState } from '../shared-models/Reservation';
 import { UtilisateurDAO } from '../dao/UtilisateurDAO';
 import { MailNetwork } from '../services/MailNetwork';
+import { QRCodeController , generateQRCode } from '../controllers/QRCodeController';
+import { SeanceDAO } from '../dao/SeanceDAO';
+import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
 
 // Étendre le type Request pour utiliser "user"
 
@@ -174,8 +177,6 @@ static async setReservationEvaluationById(req: Request, res: Response): Promise<
     res.status(501).json({ message: 'Non implémenté.' });
   }
 
-  
-
   static async confirmReservation(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
         const { reservationId, utilisateurId, seanceId } = req.body;
@@ -183,8 +184,6 @@ static async setReservationEvaluationById(req: Request, res: Response): Promise<
         if (user ) {
           logger.info("Compte récupéré = ", user);
       }
-
-      
 
         // Validation des données d'entrée
         if (!reservationId || !utilisateurId || !seanceId) {
@@ -226,7 +225,7 @@ static async setReservationEvaluationById(req: Request, res: Response): Promise<
             res.status(500).json({ message: 'Erreur interne du serveur.' });
         }
     }
-}
+  }
 
   static async cancelReservation(req: Request, res: Response): Promise<void> {
     try {
@@ -314,6 +313,52 @@ static async setReservationEvaluationById(req: Request, res: Response): Promise<
       if (!res.headersSent) { // ✅ Vérifie si une réponse a déjà été envoyée
         res.status(500).json({ error: "Erreur interne du serveur." });
       }
+    }
+  }
+
+  static async getQRCode(req: Request, res: Response): Promise<void> {
+    try {
+      
+      // Recuperation de l'ID de la reservation
+      const reservationId = req.params.reservationid?.trim();
+
+      if (!reservationId) {
+        res.status(400).json({ message: `L'ID de la réservation est requis.` });
+        return;
+
+      }
+
+      // Récupération des réservations
+      const reservations = await ReservationDAO.getReservationById(reservationId);
+      if (!reservations || reservations.length === 0) {
+        res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}` });
+        return;
+      }
+
+      // Récupération de la la seanceFilmSalle
+      const seanceId = reservations[0].seanceId || '';
+      logger.info("seance = " + seanceId);
+      const seances = await SeanceDAO.findById(seanceId);
+      if (!seances || seances.length === 0) {
+        res.status(404).json({ message: `Aucune seance trouvée pour ${reservationId}` });
+        return;
+      }
+      logger.info("Suite");
+      // Génération du QRCode
+      let textQRCode = reservations[0].displayname + ",";
+      textQRCode += seances[0].nameCinema + ",";
+      textQRCode += seances[0].nameSalle + ",";
+      textQRCode += reservations[0].titleFilm + ",";
+      textQRCode += formatDateLocalYYYYMMDD(reservations[0].dateJour!) + ",";
+      textQRCode += seances[0].hourBeginHHSMM + ",";
+      textQRCode += reservations[0].totalSeats + " siège(s),";
+      textQRCode += reservations[0].numberPMR + " placePMR";
+      logger.info("Génération du QRCode " + textQRCode)
+      await generateQRCode(textQRCode);
+      
+    } catch (error: any) {
+      logger.error(`Erreur lors de la récupération des places d'une réservation : ${error.message}`);
+      res.status(500).json({ error: "Erreur interne du serveur." });
     }
   }
 

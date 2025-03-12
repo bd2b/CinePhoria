@@ -5,6 +5,7 @@ import logger from '../config/configLog';
 
 import { ReservationController } from '../controllers/reservationController';
 
+
 const router = Router();
 
 // POST /api/reservation
@@ -31,6 +32,9 @@ router.get('/id/:reservationid', ReservationController.getReservationById);
 
 // GET /api/seats/id/:reservationid'
 router.get('/seats/id/:reservationid', ReservationController.getSeatsForReservation);
+
+// GET /api/reservation/qrcode
+router.get('/qrcode/:reservationid', ReservationController.getQRCode)
 
 // (Futur) GET /api/reservation/:id/seats
 // router.get('/:id/seats', ReservationController.getSeatsForTarif);
