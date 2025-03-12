@@ -5,7 +5,8 @@
 // Charger les variables d'environnement depuis le fichier .env
 // dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-import logger from '../config/configLog'
+import logger from '../config/configLog';
+import mongoose from 'mongoose';
 
 export const currentEnv = process.env.NODE_ENV || 'development';
 logger.info(`Environnement actif : '${currentEnv}'`);
@@ -45,6 +46,18 @@ logger.info('Configuration secret JWS :'+ masquedjwtTK);
 
 export const nombreTentativeLoginKO = parseInt(process.env.MAX_TENTATIVE_LOGIN_KO_BEFORE_BLOCKED || '3',10);
 
+export const ConfigMongo = {
+  mongoUri: process.env.MONGO_URI || '',
+};
+
+export const connectDBMongo = async () => {
+  try {
+      await mongoose.connect(ConfigMongo.mongoUri);
+      logger.info('MongoDB connecté.');
+  } catch (error) {
+      logger.error('Erreur connexion MongoDB :', error);
+  }
+};
 // Autres configs (port, secrets JWT, etc.)
 // export const SERVER_PORT = process.env.SERVER_PORT || 3000;
 // 
