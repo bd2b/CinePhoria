@@ -198,8 +198,8 @@ function setReservation() {
                             yield confirmReserve();
                             const pageToGo = userDataController.profil();
                             window.location.href = pageToGo;
-                            yield confirmReserve();
-                            dataController.reservationState = ReservationState.PendingChoiceSeance;
+                            // await confirmReserve();
+                            // dataController.reservationState = ReservationState.PendingChoiceSeance;
                         }
                         console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
                         dataController.reservationState = ReservationState.ReserveToConfirm;

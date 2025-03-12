@@ -9,6 +9,10 @@ import logger  from './config/configLog';
 
 import sanitizeQueryMiddleware from './middlewares/sanitiseQueryMiddleware'
 
+// Connexion à la base MongoDB
+import { connectDBMongo } from './config/config';
+connectDBMongo()
+
 const app = express();
 
 // Middleware de protection contre les injections

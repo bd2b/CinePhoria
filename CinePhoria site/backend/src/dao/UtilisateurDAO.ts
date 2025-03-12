@@ -104,8 +104,7 @@ export class UtilisateurDAO {
         // Retourner uniquement la chaîne utilisateurId
         return codeConfMail;
       } else {
-        logger.error("Erreur : Résultat non disponible.");
-        throw new Error('Erreur : Résultat non disponible.');
+        return "Compte sans code";
       }
     } catch (error) {
       logger.error('Erreur dans select getCodeConfirm', error);

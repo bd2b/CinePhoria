@@ -4,10 +4,8 @@ import { ReservationDAO } from '../dao/ReservationDAO';
 import { ReservationState } from '../shared-models/Reservation';
 import { UtilisateurDAO } from '../dao/UtilisateurDAO';
 import { MailNetwork } from '../services/MailNetwork';
-import { QRCodeController , generateQRCode } from '../controllers/QRCodeController';
-import { SeanceDAO } from '../dao/SeanceDAO';
-import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
 
+import { createQRCode } from '../controllers/QRCodeController';
 // Étendre le type Request pour utiliser "user"
 
 interface AuthenticatedRequest extends Request {
@@ -37,13 +35,15 @@ export class ReservationController {
       if (result.startsWith('Erreur')) {
         res.status(400).json({ message: result });
       } else {
-        
+
         // Récupération du code de verification d'email
         const codeConfirmMail = await UtilisateurDAO.getCodeConfirm(email);
-        logger.info("Code de confirmation du mail = " + codeConfirmMail);
-        // Envoie du mail
-        const statutMail = await MailNetwork.sendMailCodeConfirm(email, codeConfirmMail);
-        if (!statutMail.startsWith('OK')) res.status(500).json({ message: "Erreur sur l'envoi du code de vérification de mail " + statutMail });
+        if (codeConfirmMail !== "Compte sans code") {
+          logger.info("Code de confirmation du mail = " + codeConfirmMail);
+          // Envoie du mail
+          const statutMail = await MailNetwork.sendMailCodeConfirm(email, codeConfirmMail);
+          if (!statutMail.startsWith('OK')) res.status(500).json({ message: "Erreur sur l'envoi du code de vérification de mail " + statutMail });
+        } // else on ne fait rien le compte est confirmé
 
         // Retour des résultats
         const [statut, utilisateurId, reservationId] = result.split(',');
@@ -84,52 +84,52 @@ export class ReservationController {
   }
   static async setReservationStateById(req: Request, res: Response): Promise<void> {
     try {
-        // Récupération des paramètres de la requête
-        const { reservationId, stateReservation } = req.body;
+      // Récupération des paramètres de la requête
+      const { reservationId, stateReservation } = req.body;
 
-        // Vérification des entrées
-        if (!reservationId || !stateReservation) {
-            res.status(400).json({ message: `L'ID de la réservation et l'état sont requis.` });
-            return;
-        }
+      // Vérification des entrées
+      if (!reservationId || !stateReservation) {
+        res.status(400).json({ message: `L'ID de la réservation et l'état sont requis.` });
+        return;
+      }
 
-        // Vérification si stateReservation est une valeur valide de l'ENUM
-        if (!Object.values(ReservationState).includes(stateReservation as ReservationState)) {
-            res.status(400).json({ message: `Valeur de l'état non conforme: ${stateReservation}` });
-            return;
-        }
+      // Vérification si stateReservation est une valeur valide de l'ENUM
+      if (!Object.values(ReservationState).includes(stateReservation as ReservationState)) {
+        res.status(400).json({ message: `Valeur de l'état non conforme: ${stateReservation}` });
+        return;
+      }
 
-        // Appel au DAO pour mettre à jour l'état de la réservation
-        const updateSuccess = await ReservationDAO.setReservationStateById(reservationId, stateReservation);
+      // Appel au DAO pour mettre à jour l'état de la réservation
+      const updateSuccess = await ReservationDAO.setReservationStateById(reservationId, stateReservation);
 
-        // Gestion du résultat
-        if (updateSuccess) {
-            res.status(200).json({ message: `L'état de la réservation ${reservationId} a été mis à jour avec succès.` });
-            logger.info(`setReservationStateById: Réservation ${reservationId} mise à jour avec état "${stateReservation}".`);
-        } else {
-            res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}.` });
-            logger.warn(`setReservationStateById: Échec de mise à jour, réservation ${reservationId} introuvable.`);
-        }
+      // Gestion du résultat
+      if (updateSuccess) {
+        res.status(200).json({ message: `L'état de la réservation ${reservationId} a été mis à jour avec succès.` });
+        logger.info(`setReservationStateById: Réservation ${reservationId} mise à jour avec état "${stateReservation}".`);
+      } else {
+        res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}.` });
+        logger.warn(`setReservationStateById: Échec de mise à jour, réservation ${reservationId} introuvable.`);
+      }
     } catch (error: any) {
-        logger.error(`Erreur lors de la mise à jour de la réservation ${req.body.reservationId}: ${error.message}`);
-        res.status(500).json({ error: "Erreur interne du serveur." });
+      logger.error(`Erreur lors de la mise à jour de la réservation ${req.body.reservationId}: ${error.message}`);
+      res.status(500).json({ error: "Erreur interne du serveur." });
     }
-}
-static async setReservationEvaluationById(req: Request, res: Response): Promise<void> {
-  try {
+  }
+  static async setReservationEvaluationById(req: Request, res: Response): Promise<void> {
+    try {
       // Récupération des paramètres de la requête
       const { reservationId, note, evaluation, isEvaluationMustBeReview } = req.body;
 
       // Vérification des entrées
-      if (!reservationId || !note ||  !isEvaluationMustBeReview ) {
-          res.status(400).json({ message: `L'ID de la réservation et les parametres sont requis.` });
-          return;
+      if (!reservationId || !note || !isEvaluationMustBeReview) {
+        res.status(400).json({ message: `L'ID de la réservation et les parametres sont requis.` });
+        return;
       }
 
       // Vérification si la note est valide
       if (![0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5].includes(note)) {
         res.status(400).json({ message: `Valeur de la note non conforme: ${note}` });
-          return;
+        return;
       }
 
       // Appel au DAO pour mettre à jour l'état de la réservation
@@ -137,17 +137,17 @@ static async setReservationEvaluationById(req: Request, res: Response): Promise<
 
       // Gestion du résultat
       if (updateSuccess) {
-          res.status(200).json({ message: `L'evaluation de la réservation ${reservationId} a été mis à jour avec succès.` });
-          logger.info(`setReservationEvaluationById: Evaluation de réservation ${reservationId} mise à jour avec succes.`);
+        res.status(200).json({ message: `L'evaluation de la réservation ${reservationId} a été mis à jour avec succès.` });
+        logger.info(`setReservationEvaluationById: Evaluation de réservation ${reservationId} mise à jour avec succes.`);
       } else {
-          res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}.` });
-          logger.warn(`setReservationEvaluationById: Échec de mise à jour, réservation ${reservationId} introuvable.`);
+        res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}.` });
+        logger.warn(`setReservationEvaluationById: Échec de mise à jour, réservation ${reservationId} introuvable.`);
       }
-  } catch (error: any) {
+    } catch (error: any) {
       logger.error(`Erreur lors de la mise à jour de la réservation ${req.body.reservationId}: ${error.message}`);
       res.status(500).json({ error: "Erreur interne du serveur." });
+    }
   }
-}
   static async getSeatsForReservation(req: Request, res: Response): Promise<void> {
     try {
       // Recuperation de l'ID de la reservation
@@ -179,51 +179,62 @@ static async setReservationEvaluationById(req: Request, res: Response): Promise<
 
   static async confirmReservation(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
-        const { reservationId, utilisateurId, seanceId } = req.body;
-        const { user } = req ;
-        if (user ) {
-          logger.info("Compte récupéré = ", user);
+      const { reservationId, utilisateurId, seanceId } = req.body;
+      const { user } = req;
+      if (user) {
+        logger.info("Compte récupéré = ", user);
       }
 
-        // Validation des données d'entrée
-        if (!reservationId || !utilisateurId || !seanceId) {
-            if (!res.headersSent) res.status(400).json({ message: 'Données manquantes ou invalides.' });
-            return;
-        }
+      // Validation des données d'entrée
+      if (!reservationId || !utilisateurId || !seanceId) {
+        if (!res.headersSent) res.status(400).json({ message: 'Données manquantes ou invalides.' });
+        return;
+      }
 
-        // Exécution du DAO
-        const result = await ReservationDAO.confirmReserve(reservationId, utilisateurId, seanceId);
+      // Exécution du DAO
+      const result = await ReservationDAO.confirmReserve(reservationId, utilisateurId, seanceId);
 
-        logger.info("Résultat retour du DAO:", JSON.stringify(result));
+      logger.info("Résultat retour du DAO:", JSON.stringify(result));
 
-        // ✅ Vérification avant d'envoyer une réponse pour éviter "Cannot set headers after they are sent"
-        if (res.headersSent) {
-            logger.warn("Tentative d'envoi d'une réponse après que les headers ont déjà été envoyés.");
-            return;
-        }
+      // ✅ Vérification avant d'envoyer une réponse pour éviter "Cannot set headers after they are sent"
+      if (res.headersSent) {
+        logger.warn("Tentative d'envoi d'une réponse après que les headers ont déjà été envoyés.");
+        return;
+      }
 
-        // Gestion du résultat
-        if (result.startsWith('Erreur')) {
-            res.status(400).json({ message: result });
-            logger.error(`Échec de l'opération: ${result}`);
-        } else if (result === "OK") {
-            res.status(201).json({ result: "OK" });
-            logger.info("Opération réussie.");
-        } else if (result.startsWith('Warning')) {
-            res.status(201).json({ result: "Warning", message: result });
-            logger.warn(`Avertissement: ${result}`);
-        } else {
-            res.status(500).json({ message: "Réponse inattendue du serveur." });
-            logger.error(`Réponse inattendue: ${result}`);
-        }
+      // Gestion du résultat
+      if (result.startsWith('Erreur')) {
+        res.status(400).json({ message: result });
+        logger.error(`Échec de l'opération: ${result}`);
+      } else if (result === "OK") {
+
+        // On créé le QRCode
+        await createQRCode(reservationId);
+
+        res.status(201).json({ result: "OK" });
+        logger.info("Opération réussie.");
+        
+
+      } else if (result.startsWith('Warning')) {
+
+        // On créé le QRCode
+        await createQRCode(reservationId);
+        
+        res.status(201).json({ result: "Warning", message: result });
+        logger.warn(`Avertissement: ${result}`);
+        
+      } else {
+        res.status(500).json({ message: "Réponse inattendue du serveur." });
+        logger.error(`Réponse inattendue: ${result}`);
+      }
 
     } catch (error) {
-        logger.error('Erreur dans confirmReservation:', error);
+      logger.error('Erreur dans confirmReservation:', error);
 
-        // Vérifier avant d'envoyer une réponse pour éviter les erreurs HTTP
-        if (!res.headersSent) {
-            res.status(500).json({ message: 'Erreur interne du serveur.' });
-        }
+      // Vérifier avant d'envoyer une réponse pour éviter les erreurs HTTP
+      if (!res.headersSent) {
+        res.status(500).json({ message: 'Erreur interne du serveur.' });
+      }
     }
   }
 
@@ -305,7 +316,7 @@ static async setReservationEvaluationById(req: Request, res: Response): Promise<
       }
 
       res.status(200).json(reservations);
-      
+
 
     } catch (error: any) {
       logger.error(`Erreur lors de la récupération des réservations: ${error.message}`);
@@ -316,46 +327,19 @@ static async setReservationEvaluationById(req: Request, res: Response): Promise<
     }
   }
 
+  // API Rest pour tester la création de QRCode
   static async getQRCode(req: Request, res: Response): Promise<void> {
     try {
-      
+
       // Recuperation de l'ID de la reservation
       const reservationId = req.params.reservationid?.trim();
 
       if (!reservationId) {
         res.status(400).json({ message: `L'ID de la réservation est requis.` });
         return;
-
       }
+      await createQRCode(reservationId);
 
-      // Récupération des réservations
-      const reservations = await ReservationDAO.getReservationById(reservationId);
-      if (!reservations || reservations.length === 0) {
-        res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}` });
-        return;
-      }
-
-      // Récupération de la la seanceFilmSalle
-      const seanceId = reservations[0].seanceId || '';
-      logger.info("seance = " + seanceId);
-      const seances = await SeanceDAO.findById(seanceId);
-      if (!seances || seances.length === 0) {
-        res.status(404).json({ message: `Aucune seance trouvée pour ${reservationId}` });
-        return;
-      }
-      logger.info("Suite");
-      // Génération du QRCode
-      let textQRCode = reservations[0].displayname + ",";
-      textQRCode += seances[0].nameCinema + ",";
-      textQRCode += seances[0].nameSalle + ",";
-      textQRCode += reservations[0].titleFilm + ",";
-      textQRCode += formatDateLocalYYYYMMDD(reservations[0].dateJour!) + ",";
-      textQRCode += seances[0].hourBeginHHSMM + ",";
-      textQRCode += reservations[0].totalSeats + " siège(s),";
-      textQRCode += reservations[0].numberPMR + " placePMR";
-      logger.info("Génération du QRCode " + textQRCode)
-      await generateQRCode(textQRCode);
-      
     } catch (error: any) {
       logger.error(`Erreur lors de la récupération des places d'une réservation : ${error.message}`);
       res.status(500).json({ error: "Erreur interne du serveur." });
