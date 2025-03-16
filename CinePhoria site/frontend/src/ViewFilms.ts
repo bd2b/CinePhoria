@@ -7,6 +7,7 @@ import { Seance } from './shared-models/Seance.js';
 import { TarifQualite } from './shared-models/Seance.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
+import { isUUID } from './Helpers.js';
 
 // Filtre pour les cinema pris dans le dataController : dataController.filterNameCinema
 // Filtre pour les grenres pris dans le dataControllerdataController.filterGenre;
@@ -375,8 +376,11 @@ async function afficherDetailFilm(film: Film): Promise<void> {
                 alert('Veuillez sélectionner une séance dans la liste.');
             } else {
                 if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
-                    "ReserveToConfirm"].includes(dataController.reservationState)) {
-                    alert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle")
+                    "ReserveToConfirm"].includes(dataController.reservationState) && 
+                    isUUID(dataController.selectedReservationUUID || '') && 
+                    isUUID(dataController.selectedSeanceUUID  || '') )
+                          { // Autre reservation en cours
+                            alert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle")
                 } else {
                     // Afficher un message
                     const { Jour, Cinema, Horaire, Qualite, Tarifs, SeanceId } = lastSelectedSeanceData;
@@ -555,34 +559,4 @@ function initModalBandeAnnonce(linkBO: string): void {
     } else {
         console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal sont introuvables.');
     }
-}
-function initModalBandeAnnonce2(): void {
-    const modal = document.getElementById('videoModal');
-    const spanClose = modal?.querySelector('.close') as HTMLElement | null;
-    if (spanClose) {
-        spanClose.addEventListener('click', () => {
-            fermerModalBA();
-        });
-    }
-
-    const btnOpen = document.getElementById('openModal');
-    btnOpen?.addEventListener('click', () => {
-        // Juste un test: lien youtube par défaut
-        ouvrirModalBA('https://www.youtube.com/embed/XXXXXXXX');
-    });
-}
-
-function ouvrirModalBA(url: string): void {
-    const modal = document.getElementById('videoModal');
-    const iframe = document.getElementById('youtubeVideo') as HTMLIFrameElement | null;
-    if (!modal || !iframe) return;
-    iframe.src = url;
-    modal.style.display = 'block';
-}
-
-function fermerModalBA(): void {
-    const modal = document.getElementById('videoModal');
-    const iframe = document.getElementById('youtubeVideo') as HTMLIFrameElement | null;
-    if (modal) modal.style.display = 'none';
-    if (iframe) iframe.src = '';
 }

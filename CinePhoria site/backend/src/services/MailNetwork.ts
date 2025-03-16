@@ -5,7 +5,7 @@ import { mailConfig } from '../config/config';
 import nodemailer from 'nodemailer';
 import logger from '../config/configLog'
 
-const isBouchon = false;
+const isBouchon = true;
 logger.info ( isBouchon ? "ENVOI DE MAIL bouchonne" : "ENVOI DE MAIL en service");
 // Ce contrôleur effectue l'envoi de mail en s'appuyant sur la configuration
 export class MailNetwork {

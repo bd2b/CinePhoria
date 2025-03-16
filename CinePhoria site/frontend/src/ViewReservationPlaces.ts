@@ -7,9 +7,6 @@ import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmRese
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { login } from './Login.js';
 
-
-
-
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
  * @returns 
@@ -211,10 +208,12 @@ async function setReservation() {
                     // L'email correspond à un compte valide
                     if (userDataController.profil() === ProfilUtilisateur.Utilisateur) {
                         // On est logue, on peut valider la reservation directement
-                        // On memorise l'utilisateur et on charge ses données de compte
+                        // On memorise l'utilisateur et on charge ses données de compte dans le cadre ou 
                         userDataController.ident = emailInput.value.trim();
                         await userDataController.init();
                         await confirmReserve();
+                        // Au cas ou on n'est plus connecté on recalcule le profil
+                        await userDataController.init();
                         const pageToGo = userDataController.profil();
                         window.location.href = pageToGo;
 
@@ -1034,10 +1033,13 @@ export async function confirmReserve() {
             // On efface la reservation pending et on autorise de nouvelle reservation
             dataController.reservationState = ReservationState.PendingChoiceSeance;
             dataController.selectedReservationUUID = undefined;
+            dataController.selectedSeanceUUID = undefined;
+            dataController.selectedUtilisateurUUID = undefined;
             await dataController.sauverEtatGlobal();
 
         } catch (error) {
             alert("Erreur dans la confirmation de la réservation = " + error as string)
+            
         }
     }
 }

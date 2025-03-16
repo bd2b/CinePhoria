@@ -527,14 +527,14 @@ function onClickSuppressionReservation(resa, textButton) {
         annulerBtn === null || annulerBtn === void 0 ? void 0 : annulerBtn.addEventListener('click', closeModal);
         // Gérer le "Je confirme la suppression"
         if (confirmerBtn) {
-            confirmerBtn.onclick = () => {
+            confirmerBtn.onclick = () => __awaiter(this, void 0, void 0, function* () {
                 console.log('Suppression demandée');
-                action();
+                yield action();
                 // Fermer la modal
                 closeModal();
                 // On recharge.
-                onLoadMesReservations();
-            };
+                yield onLoadMesReservations();
+            });
         }
     });
 }

@@ -9,6 +9,8 @@ import { SeanceDAO } from '../dao/SeanceDAO';
 import { ReservationDAO } from '../dao/ReservationDAO';
 import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
 
+import { QRCodeDAO } from '../dao/QRCodeDAO';
+
 
 const writeFileAsync = promisify(fs.writeFile);
 
@@ -27,14 +29,11 @@ export async function generateQRCode(textQRCode: string, reservationId: string, 
   await qrCodeDoc.save();
 
   logger.info(`QR code enregistré avec l'ID : ${qrCodeDoc._id}`);
+  // Creation dans un fichier
+  // const fileName = `qrcode-${Date.now()}.png`;
+  // const filePath = path.join(__dirname, '../../public/qrcodes', fileName);
 
-
-
-
-  const fileName = `qrcode-${Date.now()}.png`;
-  const filePath = path.join(__dirname, '../../public/qrcodes', fileName);
-
-  await writeFileAsync(filePath, qrCodeBuffer);
+  // await writeFileAsync(filePath, qrCodeBuffer);
 
 }
 
@@ -51,10 +50,10 @@ export async function createQRCode(reservationId: string): Promise<void> {
     logger.info("seance = " + seanceId);
     const seances = await SeanceDAO.findById(seanceId);
     if (!seances || seances.length === 0) {
-      
+
       throw new Error(`Aucune seance trouvée pour ${reservationId}`)
     }
-    
+
     // Génération du text du QRCode
     let textQRCode = reservations[0].displayname + ",";
     textQRCode += seances[0].nameCinema + ",";
@@ -84,5 +83,14 @@ export async function createQRCode(reservationId: string): Promise<void> {
     await generateQRCode(textQRCode, reservationId, dateExpiration);
   } catch (error: any) {
     logger.error(`Erreur lors de la creation du QRCode ${error.message}`);
+  }
+}
+
+
+export async function deleteQRCode(reservationId: string): Promise<boolean | undefined> {
+  try {
+    return await new QRCodeDAO().delete(reservationId);
+  } catch (error: any) {
+    logger.error(`Erreur lors de la suppression du QRCode ${error.message}`);
   }
 }

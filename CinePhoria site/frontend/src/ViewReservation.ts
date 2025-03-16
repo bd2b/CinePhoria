@@ -32,9 +32,8 @@ export async function onLoadReservation() {
   if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
     "ReserveToConfirm"].includes(dataController.reservationState)) {
       // Si on est sur une reservation pendante, on verifie la conformité des données de reservation
-      if (  !isUUID(dataController.selectedReservationUUID || '') || 
-            !isUUID(dataController.selectedSeanceUUID  || '') || 
-            !validateEmail(dataController.selectedUtilisateurMail || '')
+      if (  !isUUID(dataController.selectedReservationUUID || '') || !isUUID(dataController.selectedSeanceUUID  || '') 
+          //  || !validateEmail(dataController.selectedUtilisateurMail || '')
           ) {
             // On revient à une selection complete
             dataController.reservationState = ReservationState.PendingChoiceSeance;
