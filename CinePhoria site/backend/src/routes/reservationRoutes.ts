@@ -36,6 +36,9 @@ router.get('/seats/id/:reservationid', ReservationController.getSeatsForReservat
 // GET /api/reservation/qrcode
 router.get('/qrcode/:reservationid', ReservationController.getQRCode)
 
+// GET /api/reservation/qrcodeimage
+router.get('/qrcodeimage/:reservationid', ReservationController.getQRCodeImage)
+
 // (Futur) GET /api/reservation/:id/seats
 // router.get('/:id/seats', ReservationController.getSeatsForTarif);
 

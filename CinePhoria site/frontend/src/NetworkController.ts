@@ -678,3 +678,25 @@ export async function sendMailApi(mail: Mail): Promise<{ statut: string }> {
     return responseJSON;
 
 }
+
+export async function getReservationQRCodeApi(reservationId: string): Promise<HTMLImageElement> {
+    const endpoint = `http://localhost:3500/api/reservation/qrcodeimage/${reservationId}`;
+
+    type QRCodeResponse = {
+        qrCodeFile: number[];
+        contentType: string;
+    };
+
+    const response = await apiRequest<QRCodeResponse>(endpoint, 'GET', undefined, false);
+
+    const byteArray = new Uint8Array(response.qrCodeFile);
+const base64String = btoa(String.fromCharCode(...byteArray));
+
+const imgElement = document.createElement('img');
+imgElement.src = `data:${response.contentType};base64,${base64String}`;
+imgElement.alt = 'QR Code';
+
+    document.body.appendChild(imgElement);
+
+    return imgElement;
+}

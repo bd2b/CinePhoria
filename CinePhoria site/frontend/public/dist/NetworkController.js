@@ -586,3 +586,16 @@ export function sendMailApi(mail) {
         return responseJSON;
     });
 }
+export function getReservationQRCodeApi(reservationId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/reservation/qrcodeimage/${reservationId}`;
+        const response = yield apiRequest(endpoint, 'GET', undefined, false);
+        const byteArray = new Uint8Array(response.qrCodeFile);
+        const base64String = btoa(String.fromCharCode(...byteArray));
+        const imgElement = document.createElement('img');
+        imgElement.src = `data:${response.contentType};base64,${base64String}`;
+        imgElement.alt = 'QR Code';
+        document.body.appendChild(imgElement);
+        return imgElement;
+    });
+}

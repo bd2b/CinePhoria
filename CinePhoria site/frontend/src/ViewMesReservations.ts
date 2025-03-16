@@ -3,7 +3,9 @@ import { dataController } from "./DataController.js";
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { ReservationForUtilisateur, ReservationState } from "./shared-models/Reservation.js";
-import { getReservationForUtilisateur, setStateReservationApi, setEvaluationReservationApi, isLogged, cancelReserveApi } from "./NetworkController.js";
+import { getReservationForUtilisateur, setStateReservationApi, 
+            setEvaluationReservationApi, isLogged, cancelReserveApi,
+            getReservationQRCodeApi } from "./NetworkController.js";
 
 import { seanceCardView } from "./ViewReservation.js";
 import { Seance } from "./shared-models/Seance.js";
@@ -278,7 +280,7 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
         tdPrice.textContent = `${price} €`;
         tr.appendChild(tdPrice);
 
-        // 8) Col suppression
+        // 8) Col suppression et affichage QRCode
         const tdSuppr = document.createElement('td');
         const btnSuppr = document.createElement('button');
         btnSuppr.classList.add("button");
@@ -291,6 +293,18 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
             textButton = "Effacer";
         }
         if (textButton !== "") {
+
+            if (statutResa === ReservationState.ReserveConfirmed) {
+                const btnQRCode = document.createElement('button');
+                btnQRCode.classList.add("button");
+                btnQRCode.textContent = "QRCode";
+                btnQRCode.style.marginRight = "5px";
+                btnQRCode.addEventListener('click', async () => {
+                    onClickDisplayQRCode(await getReservationQRCodeApi(resa.reservationId));
+                });
+                tdSuppr.appendChild(btnQRCode);
+            }
+
             // btnSuppr.textContent = '🗑️'; // icone poubelle
             btnSuppr.textContent = textButton;
             btnSuppr.addEventListener('click', () => {
@@ -298,7 +312,9 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
                 
             });
             tdSuppr.appendChild(btnSuppr);
+
             tr.appendChild(tdSuppr);
+
         }
 
         tbody.appendChild(tr);
@@ -512,7 +528,52 @@ function onClickEvaluationReservation(resa: ReservationForUtilisateur, isModif: 
     });
 }
 
+async function onClickDisplayQRCode ( qrcodeElement: HTMLImageElement) {
+    // HTML de la modale pour confirmer la suppression
+    const modalDisplayQRCodeLocalHTML = `
+    <div class="modal__content-wrapper">
+        <div class="modal__title">
+            <div class="title__DisplayQRCode title-h2">
+                <h2>QRCode à présenter lors de votre venue</h2>
+            </div>
+            <span class="close-modal" id="close-displayQRCode">×</span>
+        </div>
+        <div class="modal__content" id="content__DisplayQRCode">
+            <div id="qrcode-img">
+            </div>
+        </div>
+    </div>`;
 
+    // Injecter la modale
+    let modal = document.getElementById('modal-DisplayQRCodeLocal') as HTMLDivElement | null;
+    if (!modal)  modal = document.createElement('div');
+    modal.classList.add("modal");
+    modal.setAttribute("id","modal-DisplayQRCodeLocal" );
+    modal.innerHTML = '';
+    modal.innerHTML = modalDisplayQRCodeLocalHTML;
+    document.body.appendChild(modal);
+    
+    const qrcodeImg = document.getElementById("qrcode-img");
+    if (!qrcodeImg) return;
+    qrcodeImg.appendChild(qrcodeElement);
+
+    // Fonction pour fermer la modale
+    const closeModal = () => {
+        modal.style.display = 'none';
+    };
+
+    // Fermer la modale avec le bouton (X)
+    const closeModalBtn = document.getElementById("close-displayQRCode") as HTMLButtonElement | null;
+    closeModalBtn?.addEventListener('click', closeModal);
+
+    // Fermer la modale en cliquant en dehors
+    modal.addEventListener('click', (event: MouseEvent) => {
+        if (event.target === modal) closeModal();
+    });
+
+    modal.style.display = 'flex';
+    
+}
 
 async function onClickSuppressionReservation(resa: ReservationForUtilisateur, textButton: string) {
 
