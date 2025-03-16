@@ -15,8 +15,9 @@ export class QRCodeDAO {
         return await QRCode.findOneAndUpdate({ reservationid }, updateData, { new: true });
     }
 
-    async delete(reservationid: string): Promise<QRCodeDocument | null> {
-        return await QRCode.findOneAndDelete({ reservationid });
+    async delete(reservationid: string): Promise<boolean> {
+        const result = await QRCode.findOneAndDelete({ reservationid });
+        return result !== null;
     }
 
     async getAll(): Promise<QRCodeDocument[]> {

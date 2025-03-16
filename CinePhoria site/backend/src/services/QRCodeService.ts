@@ -15,7 +15,6 @@ export class QRCodeService {
   }
 
   public static async generateQRCode(text: string, width = 300, height = 300): Promise<Buffer> {
-    logger.info("1");
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
@@ -28,40 +27,6 @@ export class QRCodeService {
       }
     });
     logger.info("2");
-    return canvas.toBuffer();
-  }
-
-  public static async generateQRCodeWithImage2(
-    text: string,
-    imagePath = './public/camera-qr.png',
-    width = 300,
-    height = 300,
-    factor = 0.15 // Taille de l'image par rapport au QR Code
-  ): Promise<Buffer> {
-    const canvas = createCanvas(width, height);
-    const ctx = canvas.getContext('2d');
-
-    // Générer le QR Code sur le canvas
-    await QRCode.toCanvas(canvas, text, {
-      errorCorrectionLevel: 'H', // Nécessaire pour supporter une image
-      color: {
-        dark: "#daa520",
-        light: "#ffffff"
-      }
-    });
-
-    // Charger l'image à insérer au centre
-    const centerImage = await loadImage(imagePath);
-
-    // Définir la taille et la position de l'image centrale
-    const imgSize = width * factor;
-    const imgX = (width - imgSize) / 2 - imgSize / 2;
-    const imgY = (height - imgSize) / 2 - imgSize / 2;
-
-    // Dessiner l'image au centre du QR Code
-    ctx.drawImage(centerImage, imgX, imgY, imgSize, imgSize);
-
-    // Retourner le buffer de l'image finale
     return canvas.toBuffer();
   }
 

@@ -13,6 +13,7 @@ import { formatDateLocalYYYYMMDD } from './Helpers.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
+import { isUUID } from './Helpers.js';
 // Filtre pour les cinema pris dans le dataController : dataController.filterNameCinema
 // Filtre pour les grenres pris dans le dataControllerdataController.filterGenre;
 // Filtre sur le jour en local car pas utilisé dans d'autres pages
@@ -360,7 +361,9 @@ function afficherDetailFilm(film) {
                 }
                 else {
                     if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
-                        "ReserveToConfirm"].includes(dataController.reservationState)) {
+                        "ReserveToConfirm"].includes(dataController.reservationState) &&
+                        isUUID(dataController.selectedReservationUUID || '') &&
+                        isUUID(dataController.selectedSeanceUUID || '')) { // Autre reservation en cours
                         alert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle");
                     }
                     else {
@@ -519,34 +522,4 @@ function initModalBandeAnnonce(linkBO) {
     else {
         console.error('Un ou plusieurs éléments requis pour le fonctionnement de la modal sont introuvables.');
     }
-}
-function initModalBandeAnnonce2() {
-    const modal = document.getElementById('videoModal');
-    const spanClose = modal === null || modal === void 0 ? void 0 : modal.querySelector('.close');
-    if (spanClose) {
-        spanClose.addEventListener('click', () => {
-            fermerModalBA();
-        });
-    }
-    const btnOpen = document.getElementById('openModal');
-    btnOpen === null || btnOpen === void 0 ? void 0 : btnOpen.addEventListener('click', () => {
-        // Juste un test: lien youtube par défaut
-        ouvrirModalBA('https://www.youtube.com/embed/XXXXXXXX');
-    });
-}
-function ouvrirModalBA(url) {
-    const modal = document.getElementById('videoModal');
-    const iframe = document.getElementById('youtubeVideo');
-    if (!modal || !iframe)
-        return;
-    iframe.src = url;
-    modal.style.display = 'block';
-}
-function fermerModalBA() {
-    const modal = document.getElementById('videoModal');
-    const iframe = document.getElementById('youtubeVideo');
-    if (modal)
-        modal.style.display = 'none';
-    if (iframe)
-        iframe.src = '';
 }

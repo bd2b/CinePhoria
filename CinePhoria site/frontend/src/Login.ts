@@ -3,6 +3,7 @@ import { dataController } from "./DataController.js";
 import { userDataController } from "./DataControllerUser.js";
 import { loginApi, logoutApi } from "./NetworkController.js";
 import { confirmReserve } from "./ViewReservationPlaces.js";
+import { ReservationState } from "./shared-models/Reservation.js";
 
 const modalLoginLocalHTML = `
 <!-- Modale loginWithEmail -->  
@@ -166,7 +167,7 @@ export async function login(invite: string = "", enableEmail: boolean = false) {
         submitButton.addEventListener('click', async (evt: MouseEvent) => {
             evt.preventDefault();
             evt.stopPropagation();
-            if (dataController.selectedUtilisateurUUID) {
+            if (dataController.reservationState === ReservationState.ReserveToConfirm) {
                 // On est dans le workflow de reservation
                 try {
                     await loginApi(emailInput.value.trim(), passwordInput.value.trim());

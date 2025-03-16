@@ -5,7 +5,8 @@ import { ReservationState } from '../shared-models/Reservation';
 import { UtilisateurDAO } from '../dao/UtilisateurDAO';
 import { MailNetwork } from '../services/MailNetwork';
 
-import { createQRCode } from '../controllers/QRCodeController';
+import { createQRCode , deleteQRCode } from '../controllers/QRCodeController';
+
 // Étendre le type Request pour utiliser "user"
 
 interface AuthenticatedRequest extends Request {
@@ -258,9 +259,12 @@ export class ReservationController {
         res.status(400).json({ message: result });
         logger.error(`Échec de l'opération: ${result}`);
       } else if (result === "OK") {
+        // Suppression du QRCode
+        if (!(await deleteQRCode(reservationId))) logger.error("Erreur sur la suppression du QRCode");
         res.status(201).json({ result: "OK" });
         logger.info("Opération réussie.");
       } else if (result.startsWith('Warning')) {
+        if (!(await deleteQRCode(reservationId))) logger.error("Erreur sur la suppression du QRCode");
         res.status(201).json({ result: "Warning", message: result });
         logger.warn(`Avertissement: ${result}`);
       } else {

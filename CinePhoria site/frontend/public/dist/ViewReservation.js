@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID, validateEmail } from './Helpers.js';
+import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID } from './Helpers.js';
 import { dataController } from './DataController.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { updateContentPlace } from './ViewReservationPlaces.js';
@@ -31,9 +31,9 @@ export function onLoadReservation() {
         if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
             "ReserveToConfirm"].includes(dataController.reservationState)) {
             // Si on est sur une reservation pendante, on verifie la conformité des données de reservation
-            if (!isUUID(dataController.selectedReservationUUID || '') ||
-                !isUUID(dataController.selectedSeanceUUID || '') ||
-                !validateEmail(dataController.selectedUtilisateurMail || '')) {
+            if (!isUUID(dataController.selectedReservationUUID || '') || !isUUID(dataController.selectedSeanceUUID || '')
+            //  || !validateEmail(dataController.selectedUtilisateurMail || '')
+            ) {
                 // On revient à une selection complete
                 dataController.reservationState = ReservationState.PendingChoiceSeance;
             }

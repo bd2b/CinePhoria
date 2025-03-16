@@ -295,6 +295,7 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
             btnSuppr.textContent = textButton;
             btnSuppr.addEventListener('click', () => {
                 onClickSuppressionReservation(resa, textButton);
+                
             });
             tdSuppr.appendChild(btnSuppr);
             tr.appendChild(tdSuppr);
@@ -590,13 +591,13 @@ async function onClickSuppressionReservation(resa: ReservationForUtilisateur, te
 
     // Gérer le "Je confirme la suppression"
     if (confirmerBtn) {
-        confirmerBtn.onclick = () => {
+        confirmerBtn.onclick = async () => {
             console.log('Suppression demandée');
-            action();
+            await action();
             // Fermer la modal
             closeModal();
             // On recharge.
-            onLoadMesReservations();
+            await onLoadMesReservations();
         };
     }
 

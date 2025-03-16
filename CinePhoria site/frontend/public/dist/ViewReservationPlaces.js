@@ -192,10 +192,12 @@ function setReservation() {
                         // L'email correspond à un compte valide
                         if (userDataController.profil() === ProfilUtilisateur.Utilisateur) {
                             // On est logue, on peut valider la reservation directement
-                            // On memorise l'utilisateur et on charge ses données de compte
+                            // On memorise l'utilisateur et on charge ses données de compte dans le cadre ou 
                             userDataController.ident = emailInput.value.trim();
                             yield userDataController.init();
                             yield confirmReserve();
+                            // Au cas ou on n'est plus connecté on recalcule le profil
+                            yield userDataController.init();
                             const pageToGo = userDataController.profil();
                             window.location.href = pageToGo;
                             // await confirmReserve();
@@ -931,6 +933,8 @@ export function confirmReserve() {
                 // On efface la reservation pending et on autorise de nouvelle reservation
                 dataController.reservationState = ReservationState.PendingChoiceSeance;
                 dataController.selectedReservationUUID = undefined;
+                dataController.selectedSeanceUUID = undefined;
+                dataController.selectedUtilisateurUUID = undefined;
                 yield dataController.sauverEtatGlobal();
             }
             catch (error) {
