@@ -5,7 +5,7 @@ import { ReservationState } from '../shared-models/Reservation';
 import { UtilisateurDAO } from '../dao/UtilisateurDAO';
 import { MailNetwork } from '../services/MailNetwork';
 
-import { createQRCode , deleteQRCode } from '../controllers/QRCodeController';
+import { createQRCode, deleteQRCode, getQRCodeImage } from '../controllers/QRCodeController';
 
 // Étendre le type Request pour utiliser "user"
 
@@ -214,16 +214,16 @@ export class ReservationController {
 
         res.status(201).json({ result: "OK" });
         logger.info("Opération réussie.");
-        
+
 
       } else if (result.startsWith('Warning')) {
 
         // On créé le QRCode
         await createQRCode(reservationId);
-        
+
         res.status(201).json({ result: "Warning", message: result });
         logger.warn(`Avertissement: ${result}`);
-        
+
       } else {
         res.status(500).json({ message: "Réponse inattendue du serveur." });
         logger.error(`Réponse inattendue: ${result}`);
@@ -346,6 +346,39 @@ export class ReservationController {
 
     } catch (error: any) {
       logger.error(`Erreur lors de la récupération des places d'une réservation : ${error.message}`);
+      res.status(500).json({ error: "Erreur interne du serveur." });
+    }
+  }
+
+  // API Rest pour récupérer le QRCode image
+  static async getQRCodeImage(req: Request, res: Response): Promise<void> {
+    try {
+
+      // Recuperation de l'ID de la reservation
+      const reservationId = req.params.reservationid?.trim();
+
+      if (!reservationId) {
+        res.status(400).json({ message: `L'ID de la réservation est requis.` });
+        return;
+      }
+
+      const qrCodeDoc = await getQRCodeImage(reservationId);
+
+      if (qrCodeDoc) {
+        res.json({
+          reservationid: qrCodeDoc.reservationid,
+          dateExpiration: qrCodeDoc.dateExpiration,
+          qrCodeFile: qrCodeDoc.qrCodeFile.toJSON().data, // Conversion explicite ici
+          contentType: qrCodeDoc.contentType
+        });
+      } else {
+        res.status(404).json({ message: 'QR Code non trouvé' });
+      }
+      return
+
+
+    } catch (error: any) {
+      logger.error(`Erreur lors de la récupération de l'image : ${error.message}`);
       res.status(500).json({ error: "Erreur interne du serveur." });
     }
   }

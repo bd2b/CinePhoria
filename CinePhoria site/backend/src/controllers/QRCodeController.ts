@@ -14,8 +14,8 @@ import { QRCodeDAO } from '../dao/QRCodeDAO';
 
 const writeFileAsync = promisify(fs.writeFile);
 
-export async function generateQRCode(textQRCode: string, reservationId: string, dateExpiration: Date) {
-  // Utilisation de QRCodeService pour générer l'image
+async function generateQRCode(textQRCode: string, reservationId: string, dateExpiration: Date) {
+  // Stockage du QRCode dans Mongo, fonction interne au controller
 
   const qrCodeBuffer = await QRCodeService.generateQRCodeWithImage(textQRCode);
   const qrCodeData: Partial<QRCodeDocument> = {
@@ -38,6 +38,8 @@ export async function generateQRCode(textQRCode: string, reservationId: string, 
 }
 
 export async function createQRCode(reservationId: string): Promise<void> {
+  // Création du QRCode avec les informations récupérées à partir de la reservation
+  // Appel à la sauvegarde dans MongoDB
   try {
     // Récupération des réservations
     const reservations = await ReservationDAO.getReservationById(reservationId);
@@ -88,9 +90,20 @@ export async function createQRCode(reservationId: string): Promise<void> {
 
 
 export async function deleteQRCode(reservationId: string): Promise<boolean | undefined> {
+  // Suppression du document QRCode
   try {
     return await new QRCodeDAO().delete(reservationId);
   } catch (error: any) {
     logger.error(`Erreur lors de la suppression du QRCode ${error.message}`);
   }
 }
+
+export async function getQRCodeImage(reservationId: string): Promise<QRCodeDocument | undefined> {
+  // Suppression du document QRCode
+  try {
+    return await new QRCodeDAO().getById(reservationId) || undefined;
+  } catch (error: any) {
+    logger.error(`Erreur lors de la suppression du QRCode ${error.message}`);
+  }
+}
+
