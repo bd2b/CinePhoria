@@ -464,7 +464,14 @@ border-radius: 12px;
     font-size: 18px;
 }
 
-.pmr__content {
+.pmr__content  {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    gap: 10px;
+}
+
+.seats__content  {
     display: flex;
     align-items: center;
     justify-content: start;

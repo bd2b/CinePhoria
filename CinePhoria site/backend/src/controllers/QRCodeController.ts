@@ -64,6 +64,9 @@ export async function createQRCode(reservationId: string): Promise<void> {
     textQRCode += formatDateLocalYYYYMMDD(reservations[0].dateJour!) + ",";
     textQRCode += seances[0].hourBeginHHSMM + ",";
     textQRCode += reservations[0].totalSeats + " siège(s),";
+    if (reservations[0].seatsReserved && reservations[0].seatsReserved !== '') {
+      textQRCode += reservations[0].seatsReserved + ",";
+    }
     textQRCode += reservations[0].numberPMR + " placePMR";
     logger.info("Génération du QRCode " + textQRCode)
 

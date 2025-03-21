@@ -383,6 +383,13 @@ async function onClickDetailReservation(resa: ReservationForUtilisateur, seance:
             modalContent.appendChild(nombrePMR);
         }
 
+        if (resa.seatsReserved && resa.seatsReserved !== '' ) {
+            const pluriel = resa.seatsReserved.includes(",") ? "s" : "";
+            const seatsBooked = document.createElement('p');
+            seatsBooked.textContent = `Siège${pluriel} réservé${pluriel} : ${resa.seatsReserved}`;
+            modalContent.appendChild(seatsBooked);
+        }
+
         modalDetailLocal.style.display = 'flex';
 
     } else {

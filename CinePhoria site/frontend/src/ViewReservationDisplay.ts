@@ -7,6 +7,7 @@ import { TarifForSeats, ReservationForUtilisateur, ReservationState } from './sh
 import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, cancelReserveApi, getReservationApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { login } from './Login.js';
+import { DatasetController } from 'chart.js';
 
 
 export async function updateDisplayReservation() {
@@ -71,6 +72,19 @@ export async function afficherDetailsReservation(reservation: ReservationForUtil
         numremovePMR.style.display = 'none';
         const numPmr = document.getElementById('num__pmr');
         if (numPmr) numPmr.textContent = String(reservation.numberPMR);
+    }
+
+    // Si pas de siege reservé on masque l'ensemble , sinon on affiche les sieges
+    const seatsBooked = reservation.seatsReserved || dataController.selectedListSeats || '';
+    const seatsBookedDiv = document.querySelector(".commande__seats") as HTMLDivElement;
+    console.log("+++++++++++//////////")
+
+    if (seatsBooked == '') {
+        seatsBookedDiv.style.display = 'none';
+    } else {
+        const listSeatsSpan = document.getElementById("text__seats") as HTMLSpanElement;
+        listSeatsSpan.textContent = seatsBooked;
+        seatsBookedDiv.style.display = 'flex';
     }
 
     // Modification de l'invite pour le mail

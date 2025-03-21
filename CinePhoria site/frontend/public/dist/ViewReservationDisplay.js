@@ -74,6 +74,18 @@ export function afficherDetailsReservation(reservation) {
             if (numPmr)
                 numPmr.textContent = String(reservation.numberPMR);
         }
+        // Si pas de siege reservé on masque l'ensemble , sinon on affiche les sieges
+        const seatsBooked = reservation.seatsReserved || dataController.selectedListSeats || '';
+        const seatsBookedDiv = document.querySelector(".commande__seats");
+        console.log("+++++++++++//////////");
+        if (seatsBooked == '') {
+            seatsBookedDiv.style.display = 'none';
+        }
+        else {
+            const listSeatsSpan = document.getElementById("text__seats");
+            listSeatsSpan.textContent = seatsBooked;
+            seatsBookedDiv.style.display = 'flex';
+        }
         // Modification de l'invite pour le mail
         const inviteMail = document.getElementById("commande__mail-p");
         if (inviteMail) {
