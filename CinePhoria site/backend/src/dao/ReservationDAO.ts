@@ -8,18 +8,19 @@ export class ReservationDAO {
     email: string,
     seanceId: string,
     tarifSeats: Record<string, number>,
-    pmrSeats: number
+    pmrSeats: number,
+    seatsReserved: string
   ): Promise<string> {
     const connection = await mysql.createConnection(dbConfig);
     try {
       // Exécution de la procédure stockée avec @result
       const [results] = await connection.query(
-        `CALL CheckAvailabilityAndReserve(?, ?, ?, ?, @result);
+        `CALL CheckAvailabilityAndReserve(?, ?, ?, ?, ?, @result);
          SELECT @result AS result;`,
-        [email, seanceId, JSON.stringify(tarifSeats), pmrSeats]
+        [email, seanceId, JSON.stringify(tarifSeats), pmrSeats, seatsReserved]
       );
       logger.info("Execution de la procedure CheckAvailabilityAndReserve ")
-      logger.info("Parametre =", [email, seanceId, JSON.stringify(tarifSeats), pmrSeats]);
+      logger.info("Parametre =", [email, seanceId, JSON.stringify(tarifSeats), pmrSeats, seatsReserved]);
       // Forcer TypeScript à comprendre la structure des résultats
       const callResults = results as any[]; // Type générique pour le résultat brut
       const selectResult = callResults[1] as Array<{ result: string }>; // Spécifier que le résultat attendu est un tableau d'objets avec une clé "result"

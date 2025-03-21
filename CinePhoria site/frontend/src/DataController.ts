@@ -104,6 +104,7 @@ export class DataController {
 
     protected _selectedReservationUUID?: string | undefined // UUID de la reservation
     protected _selectedReservationCinema?: string | undefined // Cinema de localisation de la reservation
+    protected _selectedListSeats?: string | undefined // Liste des sièges réservés séparés par une ,
 
     protected static validiteCache: number = 1; // Apres validiteCache heure on force le rechargement des données
     protected static nomCookieDateAccess: string = 'dateAccess'; // Nom du cookie pour stocker la date de mise à jour
@@ -263,6 +264,19 @@ export class DataController {
         this._selectedReservationUUID = value;
         if (value === undefined) {
             this._selectedReservationCinema = undefined;
+        }
+    }
+
+    // Getter pour selectedListSeats
+    public get selectedListSeats(): string | undefined {
+        return this._selectedListSeats || undefined;
+    }
+
+    // Setter pour selectedListSeats
+    public set selectedListSeats(value: string | undefined) {
+        this._selectedListSeats = value;
+        if (value === undefined) {
+            this._selectedListSeats = undefined;
         }
     }
 
@@ -446,6 +460,7 @@ export class DataController {
             selectedUtilisateurMail: this._selectedUtilisateurMail,
             selectedUtilisateurDisplayName: this._selectedUtilisateurDisplayName,
             selectedReservationUUID: this._selectedReservationUUID,
+            selectedListSeats: this._selectedListSeats,
             selectedReservationCinema: this._selectedReservationCinema,
 
         };
@@ -520,6 +535,7 @@ export class DataController {
             this._selectedUtilisateurMail = parsed.selectedUtilisateurMail || undefined;
             this._selectedUtilisateurDisplayName = parsed.selectedUtilisateurDisplayName || undefined;
             this._selectedReservationUUID = parsed.selectedReservationUUID || undefined;
+            this._selectedListSeats = parsed.selectedListSeats || undefined;
             this._selectedReservationCinema = parsed.selectedReservationCinema || undefined;
 
             if (parsed.selectedSeanceDate) {

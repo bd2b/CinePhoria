@@ -16,10 +16,10 @@ interface AuthenticatedRequest extends Request {
 export class ReservationController {
   static async createReservation(req: Request, res: Response): Promise<void> {
     try {
-      const { email, seanceId, tarifSeats, pmrSeats } = req.body;
+      const { email, seanceId, tarifSeats, pmrSeats, seatsReserved } = req.body;
 
       // Validation des données d'entrée
-      if (!email || !seanceId || !tarifSeats || pmrSeats === undefined) {
+      if (!email || !seanceId || !tarifSeats || pmrSeats === undefined || seatsReserved === undefined) {
         res.status(400).json({ message: 'Données manquantes ou invalides.' });
         return;
       }
@@ -29,7 +29,8 @@ export class ReservationController {
         email,
         seanceId,
         tarifSeats,
-        pmrSeats
+        pmrSeats,
+        seatsReserved
       );
 
       // Gestion du résultat

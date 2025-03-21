@@ -145,9 +145,9 @@ export function logoutApi() {
  * @throws Erreur avec message
  */
 export function setReservationApi(email, seanceId, tarifSeats, // { tarifId: numberOfSeats, ... }
-pmrSeats) {
+pmrSeats, seatsReserved) {
     return __awaiter(this, void 0, void 0, function* () {
-        const body = { email, seanceId, tarifSeats, pmrSeats };
+        const body = { email, seanceId, tarifSeats, pmrSeats, seatsReserved };
         const endpoint = 'http://localhost:3500/api/reservation';
         const responseJSON = yield apiRequest(endpoint, 'POST', body, false // Pas d'authentification requise
         );
@@ -484,6 +484,19 @@ export function getReservationApi(reservationId) {
         return reservations;
     });
 }
+/**
+ * Récupération des places réservées pour une séance
+ * @param seanceID
+ * @returns Liste des sieges reservé constitué dans une chaine avec numero de siege separe par une ","
+ */
+export function getSeatsBookedApi(seanceId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/seances/seats/${seanceId}`;
+        const seatsBooked = yield apiRequest(endpoint, 'GET', undefined, false); // Pas d'authentification requise
+        console.log("Liste des siege = ", seatsBooked);
+        return seatsBooked;
+    });
+}
 export function getReservationApi2(reservationId) {
     return __awaiter(this, void 0, void 0, function* () {
         const response = yield fetch(`http://localhost:3500/api/reservation/id/${reservationId}`, {
@@ -589,7 +602,7 @@ export function sendMailApi(mail) {
 export function getReservationQRCodeApi(reservationId) {
     return __awaiter(this, void 0, void 0, function* () {
         const endpoint = `http://localhost:3500/api/reservation/qrcodeimage/${reservationId}`;
-        const response = yield apiRequest(endpoint, 'GET', undefined, false);
+        const response = yield apiRequest(endpoint, 'GET', undefined, true);
         const byteArray = new Uint8Array(response.qrCodeFile);
         const base64String = btoa(String.fromCharCode(...byteArray));
         const imgElement = document.createElement('img');

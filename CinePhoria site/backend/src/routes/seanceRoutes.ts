@@ -28,4 +28,11 @@ router.get('/tarif', (req, res) => {
     SeanceController.getTarifs(req, res)
 });
 
+/** 
+ * Récupération des sieges reservés pour une séance
+ */
+router.get('/seats/:seanceid', (req, res) => { 
+    SeanceController.getSeatsBooked(req, res)
+});
+
 export default router;
