@@ -342,6 +342,12 @@ function onClickDetailReservation(resa, seance) {
                 nombrePMR.textContent = resa.numberPMR + " place" + (resa.numberPMR > 1 ? "s P.M.R." : " P.M.R.");
                 modalContent.appendChild(nombrePMR);
             }
+            if (resa.seatsReserved && resa.seatsReserved !== '') {
+                const pluriel = resa.seatsReserved.includes(",") ? "s" : "";
+                const seatsBooked = document.createElement('p');
+                seatsBooked.textContent = `Siège${pluriel} réservé${pluriel} : ${resa.seatsReserved}`;
+                modalContent.appendChild(seatsBooked);
+            }
             modalDetailLocal.style.display = 'flex';
         }
         else {

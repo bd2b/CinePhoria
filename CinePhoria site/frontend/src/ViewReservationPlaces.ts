@@ -53,6 +53,26 @@ export async function updateContentPlace() {
  * @returns 
  */
 async function setReservation() {
+    // Fonction d'affichage des sieges reserve appeler soit à la construction soit après le choix de sieges
+    function displaySeatsBooked() {
+        
+        const seatsBooked = dataController.selectedListSeats || '';
+        const seatsBookedDiv = document.querySelector(".commande__seats") as HTMLDivElement;
+        seatsBookedDiv.style.display = 'flex';
+        
+        const listSeatsLibelle = document.getElementById("libelle__seats")
+        const listSeatsSpan = document.getElementById("text__seats") as HTMLSpanElement;
+        if (!listSeatsLibelle || !listSeatsSpan) return;
+
+        if (seatsBooked === '') {
+            listSeatsLibelle.textContent = "Pas de sieges précisés";
+            listSeatsSpan.textContent = "";
+        } else {
+            const pluriel = seatsBooked.includes(",") ? "s" : "";
+            listSeatsLibelle.textContent = `Siège${pluriel} réservé${pluriel} : `;
+            listSeatsSpan.textContent = seatsBooked;
+        }
+    }
 
 
     console.log("Affichage de la reservation de place");
@@ -136,6 +156,8 @@ async function setReservation() {
     // Recuperer le nombre total de place
     const totalPlaces = document.getElementById('content-totalprice');
     if (!totalPlaces) return
+
+
     /**
     * Valide l'ensemble du formulaire et active/désactive le bouton de reservation de places.
     */
@@ -165,6 +187,8 @@ async function setReservation() {
             btnReserve.classList.remove("inactif");
             btnReserve.disabled = false;
         }
+
+       
     }
 
     // Ajout d'écouteurs d'événements pour la validation en temps réel
@@ -178,6 +202,9 @@ async function setReservation() {
         // on dévalide le choix des sièges des qu'on change quelque chose
         const btnFauteuils = document.querySelector('.panel__choisirSeats-button') as HTMLButtonElement;
         btnFauteuils.textContent = "Choisir les fauteuils";
+        dataController.selectedListSeats = "";
+        displaySeatsBooked();
+
 
     });
     // Configurer l'observation pour surveiller les modifications de contenu
@@ -225,12 +252,16 @@ async function setReservation() {
         ).then((listPlaces) => {
             if (listPlaces.length > 0) {
                 dataController.selectedListSeats = listPlaces.join(",");
+                // On met à jour le libelle du bouton
                 const btnFauteuils = document.querySelector('.panel__choisirSeats-button') as HTMLButtonElement;
                 if (btnFauteuils) {
                     let pluriel = "";
                     if (listPlaces.length > 1) pluriel = "s";
                     btnFauteuils.textContent = `${listPlaces.length} siège${pluriel} choisi${pluriel}`
                 }
+                // On met à jour l'affichage des sieges
+                displaySeatsBooked();
+
                 console.log("Liste des places = ", listPlaces);
             }
         }).catch(error => {
@@ -671,8 +702,87 @@ function updateInputPMR(): HTMLDivElement {
 
 };
 
+/**
+* Génere le div d'affichage des places
+*/
+function displaySeats(): HTMLDivElement {
+
+    // const btnAddPMR = document.querySelector('.num__add-pmr') as HTMLButtonElement;
+    // const btnRemovePMR = document.querySelector('.num__remove-pmr') as HTMLButtonElement;
+    // const spanPMR = document.getElementById('num__pmr');
+
+    // 1) Créer l'élément PMR et sa structure de base
+    const pmrContent = document.createElement('div');
+    pmrContent.classList.add('pmr__content');
+
+    //     pmrContent.innerHTML = `
+    //     <p class="content__libelle-p">Personne à mobilité réduite :</p>
+    //     <div class="content__num-pmr">
+    //         <button class="num__add-button num__add-pmr">+</button>
+    //         <span class="num__num-span num__numpmr-span" id="num__pmr">0</span>
+    //         <button class="num__remove-button num__remove-pmr">-</button>
+    //     </div>
+    //   `;
+    const contentLibelle = document.createElement('p');
+    contentLibelle.classList.add('content__libelle-p');
+    contentLibelle.textContent = 'Personne à mobilité réduite :';
 
 
+    const contentNumPMR = document.createElement('div');
+    contentNumPMR.classList.add('content__num-pmr');
+
+    const btnAddPMR = document.createElement('button');
+    btnAddPMR.classList.add('num__add-button', 'num__add-pmr');
+    btnAddPMR.textContent = '+';
+
+    const spanPMR = document.createElement('span');
+    spanPMR.classList.add('num__num-span', 'num__numpmr-span');
+    spanPMR.id = 'num__pmr';
+    spanPMR.textContent = '0';
+
+    const btnRemovePMR = document.createElement('button');
+    btnRemovePMR.classList.add('num__remove-button', 'num__remove-pmr');
+    btnRemovePMR.textContent = '-';
+
+    if (!btnAddPMR || !btnRemovePMR || !spanPMR) throw new Error('Erreur updateInputPMR');;
+    btnAddPMR.removeEventListener('click', (event: MouseEvent) => { });
+    btnRemovePMR.removeEventListener('click', (event: MouseEvent) => { });
+    spanPMR.textContent = '0';
+
+    // Incrémente la quantité (max 4)
+
+
+    btnAddPMR.addEventListener('click', (event: MouseEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+        let currentVal = parseInt(spanPMR.textContent ?? '0', 10) || 0;
+        if (currentVal < 4) {
+            currentVal++;
+            spanPMR.textContent = String(currentVal);
+        }
+    });
+
+    // Décrémente la quantité (min 0)
+    btnRemovePMR.addEventListener('click', (event: MouseEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+        let currentVal = parseInt(spanPMR.textContent ?? '0', 10) || 0;
+        if (currentVal > 0) {
+            currentVal--;
+            spanPMR.textContent = String(currentVal);
+        }
+    });
+
+    contentNumPMR.appendChild(btnAddPMR);
+    contentNumPMR.appendChild(spanPMR);
+    contentNumPMR.appendChild(btnRemovePMR);
+
+    pmrContent.appendChild(contentLibelle);
+    pmrContent.appendChild(contentNumPMR);
+
+    return pmrContent;
+
+};
 
 /**
  * Quand on reçoit "Compte Provisoire" => on exécute confirmUtilisateur
@@ -1113,6 +1223,7 @@ export async function confirmReserve() {
             dataController.selectedReservationUUID = undefined;
             dataController.selectedSeanceUUID = undefined;
             dataController.selectedUtilisateurUUID = undefined;
+            dataController.selectedListSeats = undefined;
             await dataController.sauverEtatGlobal();
 
         } catch (error) {
