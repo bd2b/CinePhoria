@@ -11,6 +11,7 @@ export class Reservation {
   numberSeatsRestingBeforPromoFriandise?: number;
   imageQRCode?: string;
   timeStampCreate?: Date;
+  seatsReserved?: string;
   constructor(data: Partial<Reservation>) {
     Object.assign(this, data);
   }
@@ -55,6 +56,7 @@ export class ReservationForUtilisateur {
   reservationId!:string;
   statereservation?:string;
   timestampcreate?:Date;
+  seatsReserved?:string;
   displayname?:string;
   dateJour?:Date;
   titleFilm?:string;

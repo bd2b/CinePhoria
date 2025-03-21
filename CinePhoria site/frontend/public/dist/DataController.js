@@ -223,6 +223,17 @@ export class DataController {
             this._selectedReservationCinema = undefined;
         }
     }
+    // Getter pour selectedListSeats
+    get selectedListSeats() {
+        return this._selectedListSeats || undefined;
+    }
+    // Setter pour selectedListSeats
+    set selectedListSeats(value) {
+        this._selectedListSeats = value;
+        if (value === undefined) {
+            this._selectedListSeats = undefined;
+        }
+    }
     // Getter pour selectedReservationUUID
     get selectedReservationCinema() {
         return this._selectedReservationCinema || undefined;
@@ -366,6 +377,7 @@ export class DataController {
                 selectedUtilisateurMail: this._selectedUtilisateurMail,
                 selectedUtilisateurDisplayName: this._selectedUtilisateurDisplayName,
                 selectedReservationUUID: this._selectedReservationUUID,
+                selectedListSeats: this._selectedListSeats,
                 selectedReservationCinema: this._selectedReservationCinema,
             };
             const strGlobal = JSON.stringify(snapshotGlobal);
@@ -443,6 +455,7 @@ export class DataController {
                 this._selectedUtilisateurMail = parsed.selectedUtilisateurMail || undefined;
                 this._selectedUtilisateurDisplayName = parsed.selectedUtilisateurDisplayName || undefined;
                 this._selectedReservationUUID = parsed.selectedReservationUUID || undefined;
+                this._selectedListSeats = parsed.selectedListSeats || undefined;
                 this._selectedReservationCinema = parsed.selectedReservationCinema || undefined;
                 if (parsed.selectedSeanceDate) {
                     this._selectedSeanceDate = new Date(parsed.selectedSeanceDate);

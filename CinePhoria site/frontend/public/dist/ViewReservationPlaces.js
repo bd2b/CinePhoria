@@ -11,7 +11,7 @@ import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewRes
 import { dataController } from './DataController.js';
 import { validateEmail } from './Helpers.js';
 import { ReservationState } from './shared-models/Reservation.js';
-import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi } from './NetworkController.js';
+import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { login } from './Login.js';
 /**
@@ -115,6 +115,14 @@ function setReservation() {
                 }
             });
         }
+        // Gestion du bouton de choix des fauteuils
+        const btnFauteuils = document.querySelector('.panel__choisirSeats-button');
+        // Le bouton est initialement desactivé
+        btnFauteuils.classList.add("inactif");
+        btnFauteuils.disabled = true;
+        if (!btnFauteuils)
+            return;
+        dataController.selectedListSeats = undefined;
         // Gestion du bouton de reservation
         const btnReserve = document.querySelector('.panel__jereserve-button');
         // Le bouton est initialement desactivé
@@ -133,8 +141,17 @@ function setReservation() {
         function validateForm() {
             // Verification que l'email est conforme
             const emailValid = validateEmail(emailInput.value);
-            // Verification que l'on commande au moins une pkace
+            // Verification que l'on commande au moins une place
             const commandeMinValid = parseInt((totalPlaces === null || totalPlaces === void 0 ? void 0 : totalPlaces.textContent) || '0', 10) > 0;
+            // Activation/désactivation du bouton de choix des sièges
+            if (commandeMinValid) {
+                btnFauteuils.classList.remove("inactif");
+                btnFauteuils.disabled = false;
+            }
+            else {
+                btnFauteuils.classList.add("inactif");
+                btnFauteuils.disabled = true;
+            }
             // Activation/désactivation du bouton de soumission
             if (!(emailValid && commandeMinValid &&
                 ["PendingChoiceSeance", "PendingChoiceSeats", "ReserveConfirmed"].includes(dataController.reservationState))) {
@@ -150,13 +167,54 @@ function setReservation() {
         // Sur l'email
         emailInput.addEventListener('input', validateForm);
         // Sur le nombre total de place est faite par programme, l'écouteur est basé sur un changement du DOM
-        const observer = new MutationObserver(() => { console.log("Changement...."); validateForm(); });
+        const observer = new MutationObserver(() => {
+            console.log("Changement....");
+            validateForm();
+            // on dévalide le choix des sièges des qu'on change quelque chose
+            const btnFauteuils = document.querySelector('.panel__choisirSeats-button');
+            btnFauteuils.textContent = "Choisir les fauteuils";
+        });
         // Configurer l'observation pour surveiller les modifications de contenu
         observer.observe(totalPlaces, {
             characterData: true, // Surveille les modifications du texte
             childList: true, // Surveille les modifications des enfants (ajout/suppression)
             subtree: true // Surveille aussi dans les sous-éléments
         });
+        // Gestion du choix des sieges
+        btnFauteuils.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
+        btnFauteuils.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+            evt.preventDefault();
+            evt.stopPropagation();
+            console.log("Choix des sièges");
+            const { totalPlaces, tarifSeatsMap } = collectTarifSeatsAndTotal('.tabtarif__commande-table');
+            const pmrSeats = collectPMR('.commande__pmr');
+            console.log(`Nombre de PMR = ${pmrSeats}`);
+            // On recupere les sieges absents sur la séance
+            const listSeatsAbsents = dataController.seanceSelected().seatsAbsents;
+            const listSeatsAbsentsArray = listSeatsAbsents.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+            // On recupere les sièges déjà réservé sur la séance
+            const { siegesReserves } = yield getSeatsBookedApi(dataController.seanceSelected().seanceId);
+            console.log("Liste des sieges 1 = ", siegesReserves);
+            const listSeatsBookedArray = siegesReserves
+                ? siegesReserves.split(',').map(s => s.trim().replace(/^"|"$/g, ''))
+                : [];
+            console.log("Liste des sièges réservés en tableau =", listSeatsBookedArray);
+            onClickdisplayAndSeatsReserve(totalPlaces, pmrSeats, listSeatsBookedArray, listSeatsAbsentsArray, parseInt(dataController.seanceSelected().rMax, 10), parseInt(dataController.seanceSelected().fMax, 10), parseInt(dataController.seanceSelected().numPMR, 10)).then((listPlaces) => {
+                if (listPlaces.length > 0) {
+                    dataController.selectedListSeats = listPlaces.join(",");
+                    const btnFauteuils = document.querySelector('.panel__choisirSeats-button');
+                    if (btnFauteuils) {
+                        let pluriel = "";
+                        if (listPlaces.length > 1)
+                            pluriel = "s";
+                        btnFauteuils.textContent = `${listPlaces.length} siège${pluriel} choisi${pluriel}`;
+                    }
+                    console.log("Liste des places = ", listPlaces);
+                }
+            }).catch(error => {
+                console.error("Erreur lors de la sélection des places :", error);
+            });
+        }));
         // Gestion de la reservation
         // La validation des saisies est faites par la fonction de validation validateForm
         btnReserve.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
@@ -176,7 +234,8 @@ function setReservation() {
             // d) Appel à l’API /api/reservation et traitement des résultats
             try {
                 const seanceId = dataController.seanceSelected().seanceId;
-                const { statut, utilisateurId, reservationId } = yield setReservationApi(email, seanceId, tarifSeatsMap, pmrSeats);
+                const listSeats = dataController.selectedListSeats || '';
+                const { statut, utilisateurId, reservationId } = yield setReservationApi(email, seanceId, tarifSeatsMap, pmrSeats, listSeats);
                 dataController.selectedUtilisateurUUID = utilisateurId;
                 dataController.selectedReservationUUID = reservationId;
                 dataController.selectedUtilisateurMail = email;
@@ -941,5 +1000,189 @@ export function confirmReserve() {
                 alert("Erreur dans la confirmation de la réservation = " + error);
             }
         }
+    });
+}
+// Exemple d'imports si nécessaire
+// import { validateEmail } from '../Helpers'; // Par exemple
+/**
+ * Sélection de places via une modale.
+ * @param nSeats Nombre de places "classiques" à réserver
+ * @param nPMR Nombre de places PMR à réserver
+ * @param placesReserves Liste des places déjà réservées (ex: ["R0F0", "R1F3", ...])
+ * @param seatsAbsents Liste des emplacements sans sieges (ex: ["R13F0", "R13F1", ...])
+ * @param rMax Nombre de rangées totales (0..rMax-1)
+ * @param fMax Nombre de fauteuils par rang (0..fMax-1)
+ * @param maxPMR Nombre total de places PMR existantes sur la rangée 0
+ * @returns Un tableau de places sélectionnées (ex: ["R2F1", "R2F2", ...])
+ */
+export function onClickdisplayAndSeatsReserve(nSeats_1, nPMR_1, placesReserves_1) {
+    return __awaiter(this, arguments, void 0, function* (nSeats, nPMR, placesReserves, seatsAbsents = [], rMax = 20, fMax = 10, maxPMR = 2) {
+        return new Promise((resolve) => {
+            console.log("Nombre seats = " + nSeats);
+            const modalHTML = `
+      <div class="modal__content-wrapper">
+        <div class="modal__title">
+          <div class="title__displayAndSeatsReserve title-h2">
+            <h2>Sélectionner les places</h2>
+          </div>
+          <span class="close-modal" id="close-displayAndSeatsReserve">×</span>
+        </div>
+        <div class="modal__content" id="content__displayAndSeatsReserve"></div>
+        <div class="modal__footer" style="margin-top: 10px; display:flex; gap:10px; justify-content: end;">
+          <button id="btnAnnulerSeats" class="button">Annuler</button>
+          <button id="btnValiderSeats" class="button inactif" disabled>Valider</button>
+        </div>
+      </div>`;
+            let modal = document.getElementById('modal-displayAndSeatsReserve');
+            if (!modal) {
+                modal = document.createElement('div');
+                modal.id = 'modal-displayAndSeatsReserve';
+                modal.classList.add('modal');
+                document.body.appendChild(modal);
+            }
+            modal.innerHTML = modalHTML;
+            modal.style.display = 'flex';
+            const closeModalBtn = document.getElementById('close-displayAndSeatsReserve');
+            const contentDiv = document.getElementById('content__displayAndSeatsReserve');
+            const annulerBtn = document.getElementById('btnAnnulerSeats');
+            const validerBtn = document.getElementById('btnValiderSeats');
+            // Places sélectionnées
+            const chosenSeats = [];
+            // Fermer la modale
+            const closeModal = (resolveValue) => {
+                modal.style.display = 'none';
+                resolve(resolveValue);
+            };
+            // Fermetures
+            closeModalBtn === null || closeModalBtn === void 0 ? void 0 : closeModalBtn.addEventListener('click', () => closeModal([]));
+            modal.addEventListener('click', (evt) => {
+                if (evt.target === modal)
+                    closeModal([]);
+            });
+            annulerBtn === null || annulerBtn === void 0 ? void 0 : annulerBtn.addEventListener('click', () => closeModal([]));
+            // Bouton Valider => renvoie chosenSeats
+            validerBtn === null || validerBtn === void 0 ? void 0 : validerBtn.removeEventListener('click', () => { });
+            validerBtn === null || validerBtn === void 0 ? void 0 : validerBtn.addEventListener('click', () => {
+                closeModal([...chosenSeats]);
+            });
+            // Met à jour l’état du bouton “Valider”
+            function updateValiderButton() {
+                // Compter le nombre de PMR sélectionnées
+                const chosenPMR = chosenSeats.filter(s => s.startsWith("R0F"))
+                    .filter(seat => {
+                    const colIndex = parseInt(seat.split("F")[1], 10);
+                    return colIndex < maxPMR;
+                }).length;
+                const chosenClassic = chosenSeats.length - chosenPMR;
+                if (chosenPMR === nPMR && chosenClassic + nPMR === nSeats) {
+                    validerBtn === null || validerBtn === void 0 ? void 0 : validerBtn.classList.remove('inactif');
+                    if (validerBtn)
+                        validerBtn.disabled = false;
+                }
+                else {
+                    validerBtn === null || validerBtn === void 0 ? void 0 : validerBtn.classList.add('inactif');
+                    if (validerBtn)
+                        validerBtn.disabled = true;
+                }
+            }
+            // Construction du plan de salle
+            if (contentDiv) {
+                for (let r = 0; r < rMax; r++) {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.style.display = 'flex';
+                    rowDiv.style.flexDirection = 'row';
+                    rowDiv.style.margin = '2px 0';
+                    // Label “R X”
+                    const rowLabel = document.createElement('span');
+                    rowLabel.textContent = `R${r} `;
+                    rowLabel.style.width = '40px';
+                    rowLabel.style.textAlign = 'right';
+                    rowDiv.appendChild(rowLabel);
+                    for (let f = 0; f < fMax; f++) {
+                        const seatId = `R${r}F${f}`;
+                        // Vérifier si c’est un emplacement sans siège
+                        if (seatsAbsents && seatsAbsents.includes(seatId)) {
+                            // On crée un div "vide" pour conserver l’alignement
+                            const emptyDiv = document.createElement('div');
+                            emptyDiv.style.width = '30px';
+                            emptyDiv.style.height = '30px';
+                            emptyDiv.style.marginRight = '4px';
+                            emptyDiv.style.border = '1px solid transparent'; // pour conserver la place
+                            emptyDiv.style.cursor = 'default';
+                            rowDiv.appendChild(emptyDiv);
+                            continue; // Passer au fauteuil suivant
+                        }
+                        const seatBtn = document.createElement('div');
+                        seatBtn.style.width = '30px';
+                        seatBtn.style.height = '30px';
+                        seatBtn.style.marginRight = '4px';
+                        seatBtn.style.display = 'flex';
+                        seatBtn.style.alignItems = 'center';
+                        seatBtn.style.justifyContent = 'center';
+                        seatBtn.style.cursor = 'pointer';
+                        seatBtn.style.fontSize = '0.7em';
+                        seatBtn.style.borderRadius = '4px';
+                        // PMR => si r=0 && f < maxPMR
+                        if (r === 0 && f < maxPMR) {
+                            seatBtn.textContent = 'PMR';
+                        }
+                        // Si la place est déjà réservée
+                        if (placesReserves && placesReserves.includes(seatId)) {
+                            seatBtn.style.backgroundColor = 'red';
+                            seatBtn.style.cursor = 'not-allowed';
+                        }
+                        else {
+                            seatBtn.style.backgroundColor = 'lightgray';
+                            // Toggle + Vérif du quota PMR / classique
+                            seatBtn.addEventListener('click', () => {
+                                const isPMRSeat = (r === 0 && f < maxPMR);
+                                // Désélection ?
+                                if (chosenSeats.includes(seatId)) {
+                                    chosenSeats.splice(chosenSeats.indexOf(seatId), 1);
+                                    seatBtn.style.backgroundColor = 'lightgray';
+                                }
+                                else {
+                                    // 1) Vérifier la limite totale
+                                    if (chosenSeats.length >= (nSeats + nPMR)) {
+                                        alert(`Vous ne pouvez pas dépasser un total de ${nSeats + nPMR} places.`);
+                                        return;
+                                    }
+                                    // 2) Compter combien de PMR déjà sélectionnées
+                                    const chosenPMR = chosenSeats.filter(s => s.startsWith("R0F"))
+                                        .filter(seat => {
+                                        const colIndex = parseInt(seat.split("F")[1], 10);
+                                        return colIndex < maxPMR;
+                                    }).length;
+                                    // 3) En déduire le nombre de classiques
+                                    const chosenClassic = chosenSeats.length - chosenPMR;
+                                    // 4) Si c’est un siège PMR
+                                    if (isPMRSeat) {
+                                        if (chosenPMR >= nPMR) {
+                                            alert(`Vous ne pouvez sélectionner que ${nPMR} place(s) PMR maximum.`);
+                                            return;
+                                        }
+                                    }
+                                    else {
+                                        // 5) Sinon c’est un siège classique
+                                        if (chosenClassic >= nSeats - nPMR) {
+                                            alert(`Vous ne pouvez sélectionner que ${nSeats} place(s) classiques maximum.`);
+                                            return;
+                                        }
+                                    }
+                                    // 6) Ajout effectif de la place
+                                    chosenSeats.push(seatId);
+                                    seatBtn.style.backgroundColor = 'green';
+                                }
+                                updateValiderButton();
+                            });
+                        }
+                        rowDiv.appendChild(seatBtn);
+                    }
+                    contentDiv.appendChild(rowDiv);
+                }
+            }
+            // Initial
+            updateValiderButton();
+        });
     });
 }

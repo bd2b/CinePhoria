@@ -76,6 +76,7 @@ CREATE TABLE Reservation (
   numberSeatsRestingBeforPromoFriandise int(3) DEFAULT 1000 NOT NULL, 
   imageQRCode                           varchar(100), 
   timeStampCreate                       timestamp NULL, 
+  seatsReserved varchar(250),
   CONSTRAINT id 
     PRIMARY KEY (id));
 CREATE TABLE Salle (
@@ -84,6 +85,10 @@ CREATE TABLE Salle (
   nameSalle  varchar(100) NOT NULL, 
   capacity   int(7) NOT NULL, 
   numPMR     int(7) NOT NULL, 
+  rMax int(7) DEFAULT 20,
+  fMax int(7) DEFAULT 10,
+  seatsAbsents VARCHAR(250) DEFAULT '',
+ 
   PRIMARY KEY (id));
 CREATE TABLE Seance (
   id                varchar(100) NOT NULL, 
@@ -121,6 +126,13 @@ CREATE TABLE Utilisateur (
   displayName     varchar(100) NOT NULL, 
   timeStampCreate timestamp NULL, 
   PRIMARY KEY (id));
+  
+  CREATE TABLE Contact (
+  email           varchar(100), 
+  titre     varchar(256) NOT NULL, 
+  detail varchar(256) NOT NULL
+ );
+
 CREATE VIEW ViewComptePersonne AS
 
 SELECT 
@@ -198,6 +210,9 @@ SELECT
   Salle.nameCinema, 
   Salle.capacity, 
   Salle.numPMR,
+  Salle.rMax,
+  Salle.fMax,
+  Salle.seatsAbsents,
   Cinema.adresse, 
   Cinema.ville, 
   Cinema.postalcode, 
@@ -281,6 +296,7 @@ SELECT
     reservation.id AS reservationId,
     reservation.statereservation AS statereservation,
     reservation.timestampcreate AS timestampcreate,
+    reservation.seatsReserved AS seatsReserved,
     utilisateur.displayname AS displayname,
     seance.dateJour AS dateJour,
     film.titleFilm AS titleFilm,

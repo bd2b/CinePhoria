@@ -5,10 +5,8 @@ import logger from '../config/configLog';
 export class SeanceController {
   static async getAllSeances(req: Request, res: Response) {
     try {
-     
       const seances = await SeanceDAO.findAll();
       res.json(seances);
-      
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -35,14 +33,31 @@ export class SeanceController {
 
   static async getTarifs(req: Request, res: Response) {
     try {
-     
       const tarifs = await SeanceDAO.findTarifs();
       res.json(tarifs);
-      
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   };
 
-  
+  static async getSeatsBooked(req: Request, res: Response): Promise<void> {
+    try {
+      // Recuperation de l'ID de la seance
+      const seanceId = req.params.seanceid?.trim();
+
+      if (!seanceId) {
+        res.status(400).json({ message: `L'ID de la séance est requis.` });
+        return;
+      }
+      // Récupération des places
+      const siegesReserves = await SeanceDAO.getSeatsBooked(seanceId);
+      const response = siegesReserves ?  siegesReserves  : { siegesReserves: "" };
+
+      logger.info("Sièges déjà réservés : " + JSON.stringify(response));
+      res.status(200).json(response);
+    } catch (error: any) {
+      logger.error(`Erreur lors de la récupération des sièges d'une séance : ${error.message}`);
+      res.status(500).json({ error: "Erreur interne du serveur." });
+    }
+  }
 }

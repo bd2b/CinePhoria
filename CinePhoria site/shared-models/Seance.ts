@@ -28,6 +28,9 @@ export class Seance {
   nameCinema?: string; 
   capacity?: string; 
   numPMR?: string;
+  rMax?: string;
+  fMax?: string;
+  seatsAbsents?: string;
   adresse?: string; 
   ville?: string; 
   postalcode?: string; 

@@ -60,4 +60,21 @@ export class SeanceDAO {
     return (rows as any[]).map((row) => new TarifQualite(row));
 
   }
+
+  static async getSeatsBooked(p_seanceId: string): Promise<string> {
+    const connection = await mysql.createConnection(dbConfig);
+    // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation
+    const [rows] = await connection.execute(
+      `SELECT siegesReserves
+     FROM viewseancesiegesreserves 
+     WHERE seanceId = ? LIMIT 1`,
+      [p_seanceId]
+    );
+    logger.info(`SELECT siegesReserves FROM viewseancesiegesreserves WHERE seanceId = ${p_seanceId}`);
+    await connection.end();
+
+    // Map des lignes pour les convertir en instances de Seance
+    return (rows as any[]).map((row) => row as string)[0];
+
+  }
 }

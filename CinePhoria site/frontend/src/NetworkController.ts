@@ -4,7 +4,7 @@ import { ComptePersonne } from './shared-models/Utilisateur.js';
 import { ReservationForUtilisateur, SeatsForReservation } from './shared-models/Reservation.js';
 import { userDataController } from './DataControllerUser.js';
 import { handleApiError } from './Global.js';
-import { CinephoriaErrorCode , CinephoriaError } from"./shared-models/Error.js";
+import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { Mail } from './shared-models/Mail.js';
 
 
@@ -46,7 +46,7 @@ async function apiRequest<T>(
             console.warn("🔄 Token expiré, tentative de refresh...");
 
             try {
-                await refreshAccessToken(); 
+                await refreshAccessToken();
                 token = localStorage.getItem('jwtAccessToken');
 
                 if (!token) {
@@ -163,9 +163,10 @@ export async function setReservationApi(
     email: string,
     seanceId: string,
     tarifSeats: TarifForSeats, // { tarifId: numberOfSeats, ... }
-    pmrSeats: number
+    pmrSeats: number,
+    seatsReserved: string
 ): Promise<{ statut: string; utilisateurId: string; reservationId: string }> {
-    const body = { email, seanceId, tarifSeats, pmrSeats };
+    const body = { email, seanceId, tarifSeats, pmrSeats , seatsReserved };
     const endpoint = 'http://localhost:3500/api/reservation';
 
     const responseJSON = await apiRequest<{ statut: string; utilisateurId: string; reservationId: string }>(
@@ -562,6 +563,20 @@ export async function getReservationApi(reservationId: string): Promise<Reservat
     return reservations;
 }
 
+/**
+ * Récupération des places réservées pour une séance
+ * @param seanceID 
+ * @returns Liste des sieges reservé constitué dans une chaine avec numero de siege separe par une ","
+ */
+export async function getSeatsBookedApi(seanceId: string): Promise<{ siegesReserves: string}> {
+    const endpoint = `http://localhost:3500/api/seances/seats/${seanceId}`;
+
+    const seatsBooked = await apiRequest<{ siegesReserves: string} >(endpoint, 'GET', undefined, false); // Pas d'authentification requise
+    console.log("Liste des siege = ", seatsBooked);
+
+    return seatsBooked;
+}
+
 export async function getReservationApi2(reservationId: string): Promise<ReservationForUtilisateur[]> {
 
     const response = await fetch(`http://localhost:3500/api/reservation/id/${reservationId}`, {
@@ -687,14 +702,14 @@ export async function getReservationQRCodeApi(reservationId: string): Promise<HT
         contentType: string;
     };
 
-    const response = await apiRequest<QRCodeResponse>(endpoint, 'GET', undefined, false);
+    const response = await apiRequest<QRCodeResponse>(endpoint, 'GET', undefined, true);
 
     const byteArray = new Uint8Array(response.qrCodeFile);
-const base64String = btoa(String.fromCharCode(...byteArray));
+    const base64String = btoa(String.fromCharCode(...byteArray));
 
-const imgElement = document.createElement('img');
-imgElement.src = `data:${response.contentType};base64,${base64String}`;
-imgElement.alt = 'QR Code';
+    const imgElement = document.createElement('img');
+    imgElement.src = `data:${response.contentType};base64,${base64String}`;
+    imgElement.alt = 'QR Code';
 
     document.body.appendChild(imgElement);
 
