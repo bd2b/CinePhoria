@@ -371,7 +371,7 @@ async function onClickDetailReservation(resa: ReservationForUtilisateur, seance:
             if (event.target === modalDetailLocal) closeModal();
         });
 
-        const selectedSeance = seanceCardView(seance, new Date(resa.dateJour || ''));
+        const selectedSeance = seanceCardView(seance, new Date(resa.dateJour || ''), "" , false);
         modalContent.appendChild(selectedSeance);
 
         const tableauPlaces = await updateTableContent(seance.qualite || '', true, resa.reservationId);

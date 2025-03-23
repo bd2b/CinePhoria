@@ -510,48 +510,51 @@ function afficherSeancesDuJour(dateSelectionnee) {
         // Générer les cartes de séances
         console.log("Film = ", seancesFilmDuJour[0].titleFilm, " / nombre de seances = ", seancesFilmDuJour.length, " / date = ", formatDateLocalYYYYMMDD(dateSelectionnee));
         seancesFilmDuJour.forEach(seance => {
-            // Générer la card
-            const card = seanceCardView(seance, dateSelectionnee);
-            card.classList.remove("seances__cardseance-selected");
-            // Au clic sur la séance => exemple : basculer sur panel__reserve
-            card.removeEventListener('click', () => { });
-            card.addEventListener('click', () => {
-                console.log(`Séance cliquée : ${seance.seanceId}`);
-                // Suppression de la selection dans les séances
-                const panelSeances = document.querySelector('.panel__seances');
-                if (panelSeances) {
-                    const seances = panelSeances.querySelectorAll(".seances__cardseance-selected");
-                    seances.forEach(seanceItem => {
-                        console.log(`Suppression la class selected `);
-                        seanceItem.classList.remove("seances__cardseance-selected");
-                    });
-                }
-                // Ajout de la selection sur la seancecourante
-                card.classList.add('seances__cardseance-selected');
-                // Memorisation de la seance
-                dataController.selectedSeanceUUID = seance.seanceId;
-                console.log("SeanceId selectionnee = " + dataController.selectedSeanceUUID + ", seance = " + dataController.seanceSelected().dateJour + ","
-                    + dataController.seanceSelected().hourBeginHHSMM);
-                // Changement du libelle du bouton 
-                const buttonPanel = document.getElementById("panel__choixseance-button");
-                if (buttonPanel) {
-                    // Remplacer l'élément par une copie de lui-même (supprime les écouteurs existants)
-                    const newButtonPanel = buttonPanel.cloneNode(true);
-                    newButtonPanel.classList.remove("inactif");
-                    newButtonPanel.textContent = "Je réserve pour cette séance !";
-                    buttonPanel.replaceWith(newButtonPanel);
-                    // Configuration du passage à l'étape de choix des places
-                    newButtonPanel.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
-                        if (buttonPanel) {
-                            basculerPanelReserve();
-                            dataController.reservationState = ReservationState.PendingChoiceSeats;
-                            updateContentPlace();
-                            yield dataController.sauverEtatGlobal();
-                        }
-                    }));
-                }
-            });
-            panelChoix.appendChild(card);
+            var _a;
+            if (parseInt((_a = seance.numFreeSeats) !== null && _a !== void 0 ? _a : "10", 10) > 0) {
+                // Générer la card
+                const card = seanceCardView(seance, dateSelectionnee);
+                card.classList.remove("seances__cardseance-selected");
+                // Au clic sur la séance => exemple : basculer sur panel__reserve
+                card.removeEventListener('click', () => { });
+                card.addEventListener('click', () => {
+                    console.log(`Séance cliquée : ${seance.seanceId}`);
+                    // Suppression de la selection dans les séances
+                    const panelSeances = document.querySelector('.panel__seances');
+                    if (panelSeances) {
+                        const seances = panelSeances.querySelectorAll(".seances__cardseance-selected");
+                        seances.forEach(seanceItem => {
+                            console.log(`Suppression la class selected `);
+                            seanceItem.classList.remove("seances__cardseance-selected");
+                        });
+                    }
+                    // Ajout de la selection sur la seancecourante
+                    card.classList.add('seances__cardseance-selected');
+                    // Memorisation de la seance
+                    dataController.selectedSeanceUUID = seance.seanceId;
+                    console.log("SeanceId selectionnee = " + dataController.selectedSeanceUUID + ", seance = " + dataController.seanceSelected().dateJour + ","
+                        + dataController.seanceSelected().hourBeginHHSMM);
+                    // Changement du libelle du bouton 
+                    const buttonPanel = document.getElementById("panel__choixseance-button");
+                    if (buttonPanel) {
+                        // Remplacer l'élément par une copie de lui-même (supprime les écouteurs existants)
+                        const newButtonPanel = buttonPanel.cloneNode(true);
+                        newButtonPanel.classList.remove("inactif");
+                        newButtonPanel.textContent = "Je réserve pour cette séance !";
+                        buttonPanel.replaceWith(newButtonPanel);
+                        // Configuration du passage à l'étape de choix des places
+                        newButtonPanel.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+                            if (buttonPanel) {
+                                basculerPanelReserve();
+                                dataController.reservationState = ReservationState.PendingChoiceSeats;
+                                updateContentPlace();
+                                yield dataController.sauverEtatGlobal();
+                            }
+                        }));
+                    }
+                });
+                panelChoix.appendChild(card);
+            }
         });
     });
 }
@@ -560,8 +563,8 @@ function afficherSeancesDuJour(dateSelectionnee) {
  * @param seance
  * @returns HTMLDivElement reprenant toute la présentation de la séance
  */
-export function seanceCardView(seance, dateSelectionne, id = "") {
-    var _a, _b;
+export function seanceCardView(seance, dateSelectionne, id = "", isAlertShowing = true) {
+    var _a, _b, _c;
     const card = document.createElement('div');
     card.classList.add('seances__cardseance');
     card.classList.add('seances__cardseance-selected');
@@ -591,11 +594,19 @@ export function seanceCardView(seance, dateSelectionne, id = "") {
     const pDay = document.createElement('p');
     pDay.classList.add('date__day-p');
     pDay.textContent = String(dateSelectionne.getDate());
+    // === Bandeau "Plus que X disponibles" ===
+    const numFreeSeats = parseInt((_a = seance.numFreeSeats) !== null && _a !== void 0 ? _a : "10", 10);
+    if (isAlertShowing && numFreeSeats < 100) {
+        const bandeau = document.createElement('div');
+        bandeau.classList.add('cardseance__bandeau');
+        bandeau.textContent = numFreeSeats === 48 ? `______COMPLET_____` : `Plus que ${seance.numFreeSeats} places disponibles`;
+        card.appendChild(bandeau);
+    }
     dateInnerDiv.appendChild(pMonth);
     dateInnerDiv.appendChild(pDay);
     const salleP = document.createElement('p');
     salleP.classList.add('datesalle__salle-p');
-    salleP.textContent = (_a = seance.nameSalle) !== null && _a !== void 0 ? _a : 'Salle ?';
+    salleP.textContent = (_b = seance.nameSalle) !== null && _b !== void 0 ? _b : 'Salle ?';
     dateSalleDiv.appendChild(dateInnerDiv);
     dateSalleDiv.appendChild(salleP);
     // === Qualité/VO/VF ===
@@ -606,7 +617,7 @@ export function seanceCardView(seance, dateSelectionne, id = "") {
     imgQualite.src = `assets/${seance.qualite}.png`;
     const pBo = document.createElement('p');
     pBo.classList.add('qualitebo-bo-p');
-    pBo.textContent = (_b = seance.bo) !== null && _b !== void 0 ? _b : 'VF';
+    pBo.textContent = (_c = seance.bo) !== null && _c !== void 0 ? _c : 'VF';
     qualiteDiv.appendChild(imgQualite);
     qualiteDiv.appendChild(pBo);
     // === Assemblage final de la carte ===

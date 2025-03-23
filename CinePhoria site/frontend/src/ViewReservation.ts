@@ -1,6 +1,6 @@
 import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 
-import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID , validateEmail } from './Helpers.js';
+import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID, validateEmail } from './Helpers.js';
 import { DataController, dataController } from './DataController.js';
 
 
@@ -16,12 +16,12 @@ import { chargerCinemaSites } from './ViewFooter.js';
 export async function onLoadReservation() {
 
   // On initialise le dataController si il est vide
-  if (dataController.allSeances.length === 0 ) await dataController.init()
+  if (dataController.allSeances.length === 0) await dataController.init()
 
-    // On charge menu et footer
-    await chargerMenu(); // Header
-    await chargerCinemaSites() // Footer
-  
+  // On charge menu et footer
+  await chargerMenu(); // Header
+  await chargerCinemaSites() // Footer
+
   // On se positionne sur le dernier cinema selectionne au cas ou on lance la fenetre avec all
   if (dataController.filterNameCinema === 'all') dataController.filterNameCinema = dataController.selectedNameCinema;
 
@@ -31,15 +31,15 @@ export async function onLoadReservation() {
   // On recupere les cas où on est dans un état instable dans la mémorisation de la reservation pendante.
   if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
     "ReserveToConfirm"].includes(dataController.reservationState)) {
-      // Si on est sur une reservation pendante, on verifie la conformité des données de reservation
-      if (  !isUUID(dataController.selectedReservationUUID || '') || !isUUID(dataController.selectedSeanceUUID  || '') 
-          //  || !validateEmail(dataController.selectedUtilisateurMail || '')
-          ) {
-            // On revient à une selection complete
-            dataController.reservationState = ReservationState.PendingChoiceSeance;
-      }
+    // Si on est sur une reservation pendante, on verifie la conformité des données de reservation
+    if (!isUUID(dataController.selectedReservationUUID || '') || !isUUID(dataController.selectedSeanceUUID || '')
+      //  || !validateEmail(dataController.selectedUtilisateurMail || '')
+    ) {
+      // On revient à une selection complete
+      dataController.reservationState = ReservationState.PendingChoiceSeance;
     }
-  
+  }
+
 
   if (["PendingChoiceSeance", "PendingChoiceSeats", "ReserveConfirmed"].includes(dataController.reservationState)) {
     // On est sans reservation pendante
@@ -133,7 +133,7 @@ export async function updateCinema() {
         const cinema = link.textContent?.trim();
         if (cinema) {
           console.log("1 - Nouvelle valeur de cinema = ", cinema);
-          
+
           // Mettre à jour l'affichage du bouton
           updateDropdownDisplay(cinema);
           // Mettre à jour le titre droit
@@ -449,9 +449,9 @@ function afficherSemaines(dateDebut: Date = new Date(), isInitial = true): void 
   // Calcul de la date de fin : 
   //   - Soit jusqu'au mardi suivant (cas initial)
   //   - Soit +6 jours (7 jours) dans les autres cas
-  
+
   const finAffichage = isInitial ? dateProchainMardi(dateDebut) : ajouterJours(dDebut, 6);
-  
+
   // Si on n'a pas de seance pour le film dans la semaine, on ne fait rien.
   if (dataController.seancesFilmDureeJour(filmId, dDebut, 6).length === 0) return;
 
@@ -469,10 +469,10 @@ function afficherSemaines(dateDebut: Date = new Date(), isInitial = true): void 
       // On se positionne sur le premier jour de la semaine
       if (dateAvant.getTime() <= dPremierJour.getTime()) {
         afficherSemaines(dPremierJour, true);
-        afficherSeancesDuJour( dPremierJour);
+        afficherSeancesDuJour(dPremierJour);
       } else {
         afficherSemaines(dateAvant, false);
-        afficherSeancesDuJour( dateAvant);
+        afficherSeancesDuJour(dateAvant);
       }
 
     });
@@ -521,8 +521,8 @@ function afficherSemaines(dateDebut: Date = new Date(), isInitial = true): void 
       const dateApres = ajouterJours(finAffichage, 1);
       console.log("Apres = ", dateApres)
       dataController.selectedSeanceDate = dateApres;
-      afficherSemaines( dateApres, false);
-      afficherSeancesDuJour( dateApres);
+      afficherSemaines(dateApres, false);
+      afficherSeancesDuJour(dateApres);
     });
     panelTabs.appendChild(apres);
   }
@@ -595,55 +595,57 @@ async function afficherSeancesDuJour(dateSelectionnee: Date): Promise<void> {
   console.log("Film = ", seancesFilmDuJour[0].titleFilm, " / nombre de seances = ", seancesFilmDuJour.length, " / date = ", formatDateLocalYYYYMMDD(dateSelectionnee));
 
   seancesFilmDuJour.forEach(seance => {
-    // Générer la card
-    const card = seanceCardView(seance, dateSelectionnee);
-    card.classList.remove("seances__cardseance-selected");
+    if (parseInt(seance.numFreeSeats ?? "10", 10) > 0) {
+      // Générer la card
+      const card = seanceCardView(seance, dateSelectionnee);
+      card.classList.remove("seances__cardseance-selected");
 
-    // Au clic sur la séance => exemple : basculer sur panel__reserve
-    card.removeEventListener('click', () => { });
-    card.addEventListener('click', () => {
-      console.log(`Séance cliquée : ${seance.seanceId}`);
-      // Suppression de la selection dans les séances
-      const panelSeances = document.querySelector('.panel__seances');
-      if (panelSeances) {
-        const seances = panelSeances.querySelectorAll(".seances__cardseance-selected");
-        seances.forEach(seanceItem => {
-          console.log(`Suppression la class selected `);
-          seanceItem.classList.remove("seances__cardseance-selected");
-        });
-      }
-      // Ajout de la selection sur la seancecourante
-      card.classList.add('seances__cardseance-selected');
+      // Au clic sur la séance => exemple : basculer sur panel__reserve
+      card.removeEventListener('click', () => { });
+      card.addEventListener('click', () => {
+        console.log(`Séance cliquée : ${seance.seanceId}`);
+        // Suppression de la selection dans les séances
+        const panelSeances = document.querySelector('.panel__seances');
+        if (panelSeances) {
+          const seances = panelSeances.querySelectorAll(".seances__cardseance-selected");
+          seances.forEach(seanceItem => {
+            console.log(`Suppression la class selected `);
+            seanceItem.classList.remove("seances__cardseance-selected");
+          });
+        }
+        // Ajout de la selection sur la seancecourante
+        card.classList.add('seances__cardseance-selected');
 
-      // Memorisation de la seance
-      dataController.selectedSeanceUUID = seance.seanceId;
-      console.log("SeanceId selectionnee = " + dataController.selectedSeanceUUID + ", seance = " + dataController.seanceSelected().dateJour + ","
-        + dataController.seanceSelected().hourBeginHHSMM);
+        // Memorisation de la seance
+        dataController.selectedSeanceUUID = seance.seanceId;
+        console.log("SeanceId selectionnee = " + dataController.selectedSeanceUUID + ", seance = " + dataController.seanceSelected().dateJour + ","
+          + dataController.seanceSelected().hourBeginHHSMM);
 
 
-      // Changement du libelle du bouton 
-      const buttonPanel = document.getElementById("panel__choixseance-button");
-      if (buttonPanel) {
-        // Remplacer l'élément par une copie de lui-même (supprime les écouteurs existants)
-        const newButtonPanel = buttonPanel.cloneNode(true) as HTMLElement;
-        newButtonPanel.classList.remove("inactif");
-        newButtonPanel.textContent = "Je réserve pour cette séance !";
-        buttonPanel.replaceWith(newButtonPanel);
-        // Configuration du passage à l'étape de choix des places
+        // Changement du libelle du bouton 
+        const buttonPanel = document.getElementById("panel__choixseance-button");
+        if (buttonPanel) {
+          // Remplacer l'élément par une copie de lui-même (supprime les écouteurs existants)
+          const newButtonPanel = buttonPanel.cloneNode(true) as HTMLElement;
+          newButtonPanel.classList.remove("inactif");
+          newButtonPanel.textContent = "Je réserve pour cette séance !";
+          buttonPanel.replaceWith(newButtonPanel);
+          // Configuration du passage à l'étape de choix des places
 
-        newButtonPanel.addEventListener('click', async () => {
-          if (buttonPanel) {
-            basculerPanelReserve();
-            dataController.reservationState = ReservationState.PendingChoiceSeats
+          newButtonPanel.addEventListener('click', async () => {
+            if (buttonPanel) {
+              basculerPanelReserve();
+              dataController.reservationState = ReservationState.PendingChoiceSeats
 
-            updateContentPlace();
-            await dataController.sauverEtatGlobal();
-          }
-        })
-      }
-    });
+              updateContentPlace();
+              await dataController.sauverEtatGlobal();
+            }
+          })
+        }
+      });
 
-    panelChoix.appendChild(card);
+      panelChoix.appendChild(card);
+    }
   });
 }
 
@@ -652,7 +654,7 @@ async function afficherSeancesDuJour(dateSelectionnee: Date): Promise<void> {
  * @param seance  
  * @returns HTMLDivElement reprenant toute la présentation de la séance
  */
-export function seanceCardView(seance: Seance, dateSelectionne: Date, id: string = ""): HTMLDivElement {
+export function seanceCardView(seance: Seance, dateSelectionne: Date, id: string = "", isAlertShowing = true): HTMLDivElement {
   const card = document.createElement('div') as HTMLDivElement;
   card.classList.add('seances__cardseance');
   card.classList.add('seances__cardseance-selected');
@@ -686,6 +688,15 @@ export function seanceCardView(seance: Seance, dateSelectionne: Date, id: string
   const pDay = document.createElement('p');
   pDay.classList.add('date__day-p');
   pDay.textContent = String(dateSelectionne.getDate());
+
+  // === Bandeau "Plus que X disponibles" ===
+  const numFreeSeats = parseInt(seance.numFreeSeats ?? "10", 10);
+  if (isAlertShowing && numFreeSeats < 100) {
+    const bandeau = document.createElement('div');
+    bandeau.classList.add('cardseance__bandeau');
+    bandeau.textContent = numFreeSeats === 48 ? `______COMPLET_____` : `Plus que ${seance.numFreeSeats} places disponibles`;
+    card.appendChild(bandeau);
+  }
 
 
   dateInnerDiv.appendChild(pMonth);
