@@ -333,7 +333,7 @@ function onClickDetailReservation(resa, seance) {
                 if (event.target === modalDetailLocal)
                     closeModal();
             });
-            const selectedSeance = seanceCardView(seance, new Date(resa.dateJour || ''));
+            const selectedSeance = seanceCardView(seance, new Date(resa.dateJour || ''), "", false);
             modalContent.appendChild(selectedSeance);
             const tableauPlaces = yield updateTableContent(seance.qualite || '', true, resa.reservationId);
             modalContent.appendChild(tableauPlaces);

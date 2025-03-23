@@ -109,6 +109,7 @@ display: block;
     background: linear-gradient(180deg, #FFFFFF 0%, #E4E2E2 100%);
     border: 2px solid rgb(var(--primary-color) , 0.2);
     border-radius: 20px;
+    position: relative;
 }
 
 .seances__cardseance:hover {
@@ -123,6 +124,20 @@ display: block;
 background: linear-gradient(180deg, #E4E2E2 0%, #FFFFFF 100%);
 border: 3px solid #2C3E50;
 }
+
+.cardseance__bandeau {
+    position: absolute;
+    top: 80px;
+    left: 10px;
+    transform: rotate(-45deg);
+    background-color: rgba(255, 0, 0, 0.5); /* red with transparency */
+    color: white;
+    font-weight: bold;
+    padding: 5px 20px;
+    font-size: 12px;
+    z-index: 10;
+    pointer-events: none;
+  }
 
 .seances__cardseance-selected:hover {
     /* Auto layout */

@@ -32,6 +32,8 @@ export async function updateContentPlace() {
                     evt.preventDefault();
                     evt.stopPropagation();
                     dataController.reservationState = ReservationState.PendingChoiceSeance;
+                    dataController.selectedSeanceUUID = undefined;
+
                     await dataController.sauverEtatGlobal();
                     basculerPanelChoix();
                     // On reconstruit la page pour se caler sur les dates du calendrier pour ce film
@@ -55,11 +57,11 @@ export async function updateContentPlace() {
 async function setReservation() {
     // Fonction d'affichage des sieges reserve appeler soit à la construction soit après le choix de sieges
     function displaySeatsBooked() {
-        
+
         const seatsBooked = dataController.selectedListSeats || '';
         const seatsBookedDiv = document.querySelector(".commande__seats") as HTMLDivElement;
         seatsBookedDiv.style.display = 'flex';
-        
+
         const listSeatsLibelle = document.getElementById("libelle__seats")
         const listSeatsSpan = document.getElementById("text__seats") as HTMLSpanElement;
         if (!listSeatsLibelle || !listSeatsSpan) return;
@@ -78,6 +80,9 @@ async function setReservation() {
     console.log("Affichage de la reservation de place");
     dataController.reservationState = ReservationState.PendingChoiceSeats;
     const qualiteFilm = dataController.seanceSelected().qualite;
+    const numMaxSeats = Math.min(parseInt(dataController.seanceSelected().capacity ?? "10", 10), 8);
+    const numMaxPMR = Math.min(parseInt(dataController.seanceSelected().numPMR ?? "0", 10), 8);
+    
 
     // Afficher le tableau de tarifs selon la qualite
     const containerTable = document.querySelector('.commande__tabtarif');
@@ -85,13 +90,13 @@ async function setReservation() {
     containerTable.innerHTML = '';
 
     if (qualiteFilm) {
-        const nodeTable = await updateTableContent(qualiteFilm) as HTMLTableElement;
+        const nodeTable = await updateTableContent(qualiteFilm, undefined , undefined, numMaxSeats ) as HTMLTableElement;
         containerTable.appendChild(nodeTable as Node);
     }
 
     // Afficher le champ de renseignement du nombre de place PMR et gestion des boutons + et -
     const containerPMR = document.querySelector('.commande__pmr')
-    const contentPMR = updateInputPMR();
+    const contentPMR = updateInputPMR(numMaxPMR);
 
     if (!containerPMR) throw new Error("updateInputPMT");
     containerPMR.innerHTML = '';
@@ -188,7 +193,7 @@ async function setReservation() {
             btnReserve.disabled = false;
         }
 
-       
+
     }
 
     // Ajout d'écouteurs d'événements pour la validation en temps réel
@@ -241,6 +246,8 @@ async function setReservation() {
 
 
         console.log("Liste des sièges réservés en tableau =", listSeatsBookedArray);
+        console.log("MaxPMR = ", parseInt(dataController.seanceSelected().numPMR!, 10))
+        console.log("Seance = ",JSON.stringify(dataController.seanceSelected()))
         onClickdisplayAndSeatsReserve(
             totalPlaces,
             pmrSeats,
@@ -407,7 +414,7 @@ function collectEmail(selector: string): string {
 * @param isReadOnly indique si la table est afficher en lecture seule
 * @returns Un élément <table> 
 */
-export async function updateTableContent(qualite: string, isReadOnly: boolean = false, reservationId: string = ""): Promise<HTMLTableElement> {
+export async function updateTableContent(qualite: string, isReadOnly: boolean = false, reservationId: string = "" , numMaxSeats: number = 8): Promise<HTMLTableElement> {
 
     // 1) Créer l'élément <table> et sa structure de base
     const table = document.createElement('table');
@@ -573,15 +580,25 @@ export async function updateTableContent(qualite: string, isReadOnly: boolean = 
                 updateTableTotal();
             }
 
-            // Incrémente la quantité (max 4)
+            // Incrémente la quantité (max 4) ou le nombre de places disponibles
             btnAdd.addEventListener('click', (event: MouseEvent) => {
                 event.preventDefault();
                 event.stopPropagation();
                 let currentVal = parseInt(spanPlaces.textContent ?? '0', 10) || 0;
-                if (currentVal < 4) {
+                // Calcul du total actuel de places sélectionnées
+                let totalPlaces = 0;
+                tbody.querySelectorAll('span#num__place').forEach((span) => {
+                    const val = parseInt(span.textContent ?? '0', 10) || 0;
+                    totalPlaces += val;
+                });
+
+                // Limite globale à 8 places
+                if (totalPlaces < numMaxSeats) {
                     currentVal++;
                     spanPlaces.textContent = String(currentVal);
                     updateRowTotal();
+                } else {
+                    alert(`Vous ne pouvez pas réserver plus de ${numMaxSeats} places au total.`);
                 }
             });
 
@@ -623,7 +640,7 @@ export async function updateTableContent(qualite: string, isReadOnly: boolean = 
 /**
 * Génere les controls associés au nombre de place PMR
 */
-function updateInputPMR(): HTMLDivElement {
+function updateInputPMR(numMaxPMR: number): HTMLDivElement {
 
     // const btnAddPMR = document.querySelector('.num__add-pmr') as HTMLButtonElement;
     // const btnRemovePMR = document.querySelector('.num__remove-pmr') as HTMLButtonElement;
@@ -632,6 +649,7 @@ function updateInputPMR(): HTMLDivElement {
     // 1) Créer l'élément PMR et sa structure de base
     const pmrContent = document.createElement('div');
     pmrContent.classList.add('pmr__content');
+    if (numMaxPMR === 0) return pmrContent;
 
     //     pmrContent.innerHTML = `
     //     <p class="content__libelle-p">Personne à mobilité réduite :</p>
@@ -674,9 +692,11 @@ function updateInputPMR(): HTMLDivElement {
         event.preventDefault();
         event.stopPropagation();
         let currentVal = parseInt(spanPMR.textContent ?? '0', 10) || 0;
-        if (currentVal < 4) {
+        if (currentVal < numMaxPMR) {
             currentVal++;
             spanPMR.textContent = String(currentVal);
+        } else {
+            alert(`Vous ne pouvez pas réservez plus de ${numMaxPMR} places PMR`)
         }
     });
 
@@ -702,87 +722,6 @@ function updateInputPMR(): HTMLDivElement {
 
 };
 
-/**
-* Génere le div d'affichage des places
-*/
-function displaySeats(): HTMLDivElement {
-
-    // const btnAddPMR = document.querySelector('.num__add-pmr') as HTMLButtonElement;
-    // const btnRemovePMR = document.querySelector('.num__remove-pmr') as HTMLButtonElement;
-    // const spanPMR = document.getElementById('num__pmr');
-
-    // 1) Créer l'élément PMR et sa structure de base
-    const pmrContent = document.createElement('div');
-    pmrContent.classList.add('pmr__content');
-
-    //     pmrContent.innerHTML = `
-    //     <p class="content__libelle-p">Personne à mobilité réduite :</p>
-    //     <div class="content__num-pmr">
-    //         <button class="num__add-button num__add-pmr">+</button>
-    //         <span class="num__num-span num__numpmr-span" id="num__pmr">0</span>
-    //         <button class="num__remove-button num__remove-pmr">-</button>
-    //     </div>
-    //   `;
-    const contentLibelle = document.createElement('p');
-    contentLibelle.classList.add('content__libelle-p');
-    contentLibelle.textContent = 'Personne à mobilité réduite :';
-
-
-    const contentNumPMR = document.createElement('div');
-    contentNumPMR.classList.add('content__num-pmr');
-
-    const btnAddPMR = document.createElement('button');
-    btnAddPMR.classList.add('num__add-button', 'num__add-pmr');
-    btnAddPMR.textContent = '+';
-
-    const spanPMR = document.createElement('span');
-    spanPMR.classList.add('num__num-span', 'num__numpmr-span');
-    spanPMR.id = 'num__pmr';
-    spanPMR.textContent = '0';
-
-    const btnRemovePMR = document.createElement('button');
-    btnRemovePMR.classList.add('num__remove-button', 'num__remove-pmr');
-    btnRemovePMR.textContent = '-';
-
-    if (!btnAddPMR || !btnRemovePMR || !spanPMR) throw new Error('Erreur updateInputPMR');;
-    btnAddPMR.removeEventListener('click', (event: MouseEvent) => { });
-    btnRemovePMR.removeEventListener('click', (event: MouseEvent) => { });
-    spanPMR.textContent = '0';
-
-    // Incrémente la quantité (max 4)
-
-
-    btnAddPMR.addEventListener('click', (event: MouseEvent) => {
-        event.preventDefault();
-        event.stopPropagation();
-        let currentVal = parseInt(spanPMR.textContent ?? '0', 10) || 0;
-        if (currentVal < 4) {
-            currentVal++;
-            spanPMR.textContent = String(currentVal);
-        }
-    });
-
-    // Décrémente la quantité (min 0)
-    btnRemovePMR.addEventListener('click', (event: MouseEvent) => {
-        event.preventDefault();
-        event.stopPropagation();
-        let currentVal = parseInt(spanPMR.textContent ?? '0', 10) || 0;
-        if (currentVal > 0) {
-            currentVal--;
-            spanPMR.textContent = String(currentVal);
-        }
-    });
-
-    contentNumPMR.appendChild(btnAddPMR);
-    contentNumPMR.appendChild(spanPMR);
-    contentNumPMR.appendChild(btnRemovePMR);
-
-    pmrContent.appendChild(contentLibelle);
-    pmrContent.appendChild(contentNumPMR);
-
-    return pmrContent;
-
-};
 
 /**
  * Quand on reçoit "Compte Provisoire" => on exécute confirmUtilisateur
@@ -1257,7 +1196,7 @@ export async function onClickdisplayAndSeatsReserve(
     maxPMR: number = 2
 ): Promise<string[]> {
     return new Promise<string[]>((resolve) => {
-        console.log("Nombre seats = " + nSeats);
+        console.log("Nombre total de siege = " + nSeats + " dont nombre de PMR = " + nPMR);
         const modalHTML = `
       <div class="modal__content-wrapper">
         <div class="modal__title">
@@ -1383,6 +1322,7 @@ export async function onClickdisplayAndSeatsReserve(
                     } else {
                         seatBtn.style.backgroundColor = 'lightgray';
                         // Toggle + Vérif du quota PMR / classique
+                        seatBtn.removeEventListener( 'click', () => {});
                         seatBtn.addEventListener('click', () => {
                             const isPMRSeat = (r === 0 && f < maxPMR);
 
@@ -1393,10 +1333,11 @@ export async function onClickdisplayAndSeatsReserve(
 
                             } else {
                                 // 1) Vérifier la limite totale
-                                if (chosenSeats.length >= (nSeats + nPMR)) {
-                                    alert(`Vous ne pouvez pas dépasser un total de ${nSeats + nPMR} places.`);
+                                if (chosenSeats.length >= (nSeats)) {
+                                    alert(`Vous ne pouvez pas dépasser un total de ${nSeats} places.`);
                                     return;
                                 }
+
 
                                 // 2) Compter combien de PMR déjà sélectionnées
                                 const chosenPMR = chosenSeats.filter(s => s.startsWith("R0F"))
@@ -1404,21 +1345,21 @@ export async function onClickdisplayAndSeatsReserve(
                                         const colIndex = parseInt(seat.split("F")[1], 10);
                                         return colIndex < maxPMR;
                                     }).length;
-                                // 3) En déduire le nombre de classiques
+                                // 3) Combien de siege non PMR déjà sélectionnés
                                 const chosenClassic = chosenSeats.length - chosenPMR;
 
                                 // 4) Si c’est un siège PMR
                                 if (isPMRSeat) {
                                     if (chosenPMR >= nPMR) {
-                                        alert(`Vous ne pouvez sélectionner que ${nPMR} place(s) PMR maximum.`);
+                                        alert(`Vous ne devez sélectionner que ${nPMR} place(s) PMR maximum.`);
                                         return;
                                     }
                                 } else {
-                                    // 5) Sinon c’est un siège classique
-                                    if (chosenClassic >= nSeats - nPMR) {
-                                        alert(`Vous ne pouvez sélectionner que ${nSeats} place(s) classiques maximum.`);
+                                    if (chosenClassic >= (nSeats - nPMR)) {
+                                        alert(`Vous ne pouvez sélectionner que ${nSeats - nPMR} place(s) classiques maximum.`);
                                         return;
                                     }
+                                    
                                 }
 
                                 // 6) Ajout effectif de la place
