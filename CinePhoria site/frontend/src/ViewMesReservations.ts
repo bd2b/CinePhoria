@@ -335,7 +335,11 @@ function formatDateDDMMYYYY(date?: Date): string {
 
 // ---------- Fonctions d'action isolées ---------- //
 
-async function onClickDetailReservation(resa: ReservationForUtilisateur, seance: Seance) {
+async function onClickDetailReservation(resa: ReservationForUtilisateur, p_seance: Seance) {
+    let seance = p_seance;
+    // On met a jour la seance dans le cache
+    await dataController.updateSeances([seance.seanceId]);
+    seance = dataController.seanceById(p_seance.seanceId);
     const modalDetailLocalHTML = `
     
         <div class="modal__content-wrapper">
@@ -371,6 +375,7 @@ async function onClickDetailReservation(resa: ReservationForUtilisateur, seance:
             if (event.target === modalDetailLocal) closeModal();
         });
 
+        
         const selectedSeance = seanceCardView(seance, new Date(resa.dateJour || ''), "" , false);
         modalContent.appendChild(selectedSeance);
 

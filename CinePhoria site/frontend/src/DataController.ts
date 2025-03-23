@@ -22,6 +22,7 @@ import { ReservationState } from './shared-models/Reservation.js';
 import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { Cinema } from './shared-models/Cinema.js';
+import { getSeancesByIdApi } from './NetworkController.js';
 
 
 export class DataController {
@@ -434,12 +435,18 @@ export class DataController {
         )[0];
     }
 
-    
+    public seanceById(seanceId: string): Seance {
+        return this._allSeances.filter((s) =>
+            s.seanceId === seanceId
+        )[0];
+    }
 
-/* ---------------------------------------
--- Gestion de la persistence des dpnnées dans le storage 
--- La limitation de taille à 5Mo nécessite de fractionner les données en plusieurs storage
------------------------------------------*/
+
+
+    /* ---------------------------------------
+    -- Gestion de la persistence des dpnnées dans le storage 
+    -- La limitation de taille à 5Mo nécessite de fractionner les données en plusieurs storage
+    -----------------------------------------*/
 
     protected static KEY_GLOBAL = 'myAppState';             // Pour l’état global (reservationState, selectedFilm, etc.)
     protected static KEY_TARIFS = 'myAppTarifs';            // Pour le tarifQualite
@@ -487,7 +494,7 @@ export class DataController {
         console.log(`DataC: Sauvegarde des Cinemas => taille = ${str.length}`);
         localStorage.setItem(DataController.KEY_CINEMAS, str);
     }
-    public async sauverSeancesParCinema(): Promise<void> {
+    public async sauverSeancesParCinema(cinema? :string): Promise<void> {
         // On suppose que this._allSeances contient toutes les séances de tous les cinémas
         if (!this._allSeances) return;
 
@@ -502,13 +509,26 @@ export class DataController {
             mapCinemaToSeances.get(cName)?.push(s);
         });
 
-        // Pour chaque cinéma, on sauvegarde
-        mapCinemaToSeances.forEach((seances, cName) => {
-            const str = JSON.stringify(seances);
-            const key = `${DataController.KEY_SEANCES}_${cName}`;
-            console.log(`DataC: Sauvegarde seances pour '${cName}' => taille ${str.length} chars`);
-            localStorage.setItem(key, str);
-        });
+        if (cinema) {
+            // Sauvegarder uniquement le cinéma spécifié
+            const seancesCinema = mapCinemaToSeances.get(cinema);
+            if (seancesCinema) {
+                const str = JSON.stringify(seancesCinema);
+                const key = `${DataController.KEY_SEANCES}_${cinema}`;
+                console.log(`DataC: Sauvegarde séances pour '${cinema}' => taille ${str.length} chars`);
+                localStorage.setItem(key, str);
+            } else {
+                console.warn(`Aucune séance trouvée pour le cinéma '${cinema}'.`);
+            }
+        } else {
+            // Sauvegarder tous les cinémas comme précédemment
+            mapCinemaToSeances.forEach((seances, cName) => {
+                const str = JSON.stringify(seances);
+                const key = `${DataController.KEY_SEANCES}_${cName}`;
+                console.log(`DataC: Sauvegarde séances pour '${cName}' => taille ${str.length} chars`);
+                localStorage.setItem(key, str);
+            });
+        }
     }
 
     public async sauverComplet(): Promise<void> {
@@ -656,6 +676,60 @@ export class DataController {
         }
     }
 
+    
+    // Rafraichissement du cache pour une liste quelconque de séances
+    public async updateSeances(seancesUUID: string[]): Promise<void> {
+        console.log("Update séances UUID =", seancesUUID);
+        try {
+            const seancesAjour = await getSeancesByIdApi(seancesUUID);
+            
+            // Structure pour regrouper les séances par cinéma
+            const seancesParCinema = new Map<string, Seance[]>();
+
+            // 1. Mise à jour du DataController et regroupement par cinéma
+            seancesAjour.forEach(seanceVar => {
+                const indexCible = this._allSeances.findIndex(seance => seance.seanceId === seanceVar.seanceId);
+                if (indexCible !== -1) {
+                    this._allSeances[indexCible] = seanceVar;
+                } else {
+                    console.error("Séance non trouvée : ", seanceVar.seanceId);
+                }
+
+                const cinemaName = seanceVar.nameCinema || 'unknown';
+                if (!seancesParCinema.has(cinemaName)) {
+                    seancesParCinema.set(cinemaName, []);
+                }
+                seancesParCinema.get(cinemaName)?.push(seanceVar);
+            });
+
+            // 2. Mise à jour du cache par cinéma
+            for (const [cinema, seancesModifiees] of seancesParCinema.entries()) {
+                const storageKey = `${DataController.KEY_SEANCES}_${cinema}`;
+                const existingSeancesStr = localStorage.getItem(storageKey);
+                let existingSeances: Seance[] = [];
+
+                if (existingSeancesStr) {
+                    existingSeances = JSON.parse(existingSeancesStr);
+                }
+
+                // Mises à jour ciblées des séances modifiées
+                seancesModifiees.forEach(updatedSeance => {
+                    const index = existingSeances.findIndex(s => s.seanceId === updatedSeance.seanceId);
+                    if (index !== -1) {
+                        existingSeances[index] = updatedSeance;
+                    } else {
+                        existingSeances.push(updatedSeance);  // ajoute si inexistant
+                    }
+                });
+
+                localStorage.setItem(storageKey, JSON.stringify(existingSeances));
+                console.log(`DataC: Cache mis à jour pour cinéma '${cinema}', ${seancesModifiees.length} séances modifiées.`);
+            }
+
+        } catch (error) {
+            console.error("Erreur dans mise à jour des séances : " + error);
+        }
+    }
 }
 
 /* ---------------------------------------

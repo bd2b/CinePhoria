@@ -35,4 +35,12 @@ router.get('/seats/:seanceid', (req, res) => {
     SeanceController.getSeatsBooked(req, res)
 });
 
+
+/** 
+ * Récupération d'un tableau de seance
+ */
+router.get('/seances', (req, res) => { 
+    SeanceController.getSeancesById(req, res)
+});
+
 export default router;

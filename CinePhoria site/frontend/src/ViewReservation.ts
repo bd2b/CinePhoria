@@ -11,6 +11,7 @@ import { updateContentPlace } from './ViewReservationPlaces.js';
 import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReservationDisplay.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
+import { getSeatsBookedApi } from './NetworkController.js';
 
 
 export async function onLoadReservation() {
@@ -576,7 +577,7 @@ async function afficherSeancesDuJour(dateSelectionnee: Date): Promise<void> {
   // Filtrer les séances du film sélectionné pour la date choisie
   if (!dataController.selectedFilmUUID) return;
   const filmId = dataController.selectedFilmUUID;
-  const seancesFilmDuJour = dataController.seancesFilmJour(dataController.selectedFilmUUID, dateSelectionnee);
+  let seancesFilmDuJour = dataController.seancesFilmJour(dataController.selectedFilmUUID, dateSelectionnee);
 
   // Si aucune séance n'est trouvée, afficher le message d'absence
   if (seancesFilmDuJour.length === 0) {
@@ -593,10 +594,16 @@ async function afficherSeancesDuJour(dateSelectionnee: Date): Promise<void> {
 
   // Générer les cartes de séances
   console.log("Film = ", seancesFilmDuJour[0].titleFilm, " / nombre de seances = ", seancesFilmDuJour.length, " / date = ", formatDateLocalYYYYMMDD(dateSelectionnee));
+  // On met à jour les séances que l'on va afficher
+  const uuids = seancesFilmDuJour.map(seance => seance.seanceId);
+  await dataController.updateSeances(uuids);
+  // On reconstruit les séance du jour
+  seancesFilmDuJour = dataController.seancesFilmJour(dataController.selectedFilmUUID, dateSelectionnee);
 
   seancesFilmDuJour.forEach(seance => {
     if (parseInt(seance.numFreeSeats ?? "10", 10) > 0) {
       // Générer la card
+      
       const card = seanceCardView(seance, dateSelectionnee);
       card.classList.remove("seances__cardseance-selected");
 
@@ -690,13 +697,20 @@ export function seanceCardView(seance: Seance, dateSelectionne: Date, id: string
   pDay.textContent = String(dateSelectionne.getDate());
 
   // === Bandeau "Plus que X disponibles" ===
+  
   const numFreeSeats = parseInt(seance.numFreeSeats ?? "10", 10);
-  if (isAlertShowing && numFreeSeats < 100) {
+  if (isAlertShowing) {
     const bandeau = document.createElement('div');
     bandeau.classList.add('cardseance__bandeau');
-    bandeau.textContent = numFreeSeats === 48 ? `______COMPLET_____` : `Plus que ${seance.numFreeSeats} places disponibles`;
-    card.appendChild(bandeau);
+    if (numFreeSeats === 0) {
+      bandeau.textContent = `______COMPLET_____`
+      card.appendChild(bandeau);
+    } else if (numFreeSeats <= 10) {
+      bandeau.textContent = `Plus que ${seance.numFreeSeats} places disponibles`;
+      card.appendChild(bandeau);
+    }
   }
+
 
 
   dateInnerDiv.appendChild(pMonth);

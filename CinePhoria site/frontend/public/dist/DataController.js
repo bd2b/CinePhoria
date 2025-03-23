@@ -31,6 +31,7 @@ import { ReservationState } from './shared-models/Reservation.js';
 import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
 import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { Cinema } from './shared-models/Cinema.js';
+import { getSeancesByIdApi } from './NetworkController.js';
 export class DataController {
     constructor() {
         this._reservationState = ReservationState.PendingChoiceSeance;
@@ -363,6 +364,9 @@ export class DataController {
     seanceSelected() {
         return this.seances.filter((s) => s.seanceId === this._selectedSeanceUUID)[0];
     }
+    seanceById(seanceId) {
+        return this._allSeances.filter((s) => s.seanceId === seanceId)[0];
+    }
     sauverEtatGlobal() {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
@@ -405,7 +409,7 @@ export class DataController {
             localStorage.setItem(DataController.KEY_CINEMAS, str);
         });
     }
-    sauverSeancesParCinema() {
+    sauverSeancesParCinema(cinema) {
         return __awaiter(this, void 0, void 0, function* () {
             // On suppose que this._allSeances contient toutes les séances de tous les cinémas
             if (!this._allSeances)
@@ -420,13 +424,28 @@ export class DataController {
                 }
                 (_b = mapCinemaToSeances.get(cName)) === null || _b === void 0 ? void 0 : _b.push(s);
             });
-            // Pour chaque cinéma, on sauvegarde
-            mapCinemaToSeances.forEach((seances, cName) => {
-                const str = JSON.stringify(seances);
-                const key = `${DataController.KEY_SEANCES}_${cName}`;
-                console.log(`DataC: Sauvegarde seances pour '${cName}' => taille ${str.length} chars`);
-                localStorage.setItem(key, str);
-            });
+            if (cinema) {
+                // Sauvegarder uniquement le cinéma spécifié
+                const seancesCinema = mapCinemaToSeances.get(cinema);
+                if (seancesCinema) {
+                    const str = JSON.stringify(seancesCinema);
+                    const key = `${DataController.KEY_SEANCES}_${cinema}`;
+                    console.log(`DataC: Sauvegarde séances pour '${cinema}' => taille ${str.length} chars`);
+                    localStorage.setItem(key, str);
+                }
+                else {
+                    console.warn(`Aucune séance trouvée pour le cinéma '${cinema}'.`);
+                }
+            }
+            else {
+                // Sauvegarder tous les cinémas comme précédemment
+                mapCinemaToSeances.forEach((seances, cName) => {
+                    const str = JSON.stringify(seances);
+                    const key = `${DataController.KEY_SEANCES}_${cName}`;
+                    console.log(`DataC: Sauvegarde séances pour '${cName}' => taille ${str.length} chars`);
+                    localStorage.setItem(key, str);
+                });
+            }
         });
     }
     sauverComplet() {
@@ -577,6 +596,57 @@ export class DataController {
             }
             else {
                 console.log('[init] Données restaurées depuis localStorage');
+            }
+        });
+    }
+    // Rafraichissement du cache pour une liste quelconque de séances
+    updateSeances(seancesUUID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("Update séances UUID =", seancesUUID);
+            try {
+                const seancesAjour = yield getSeancesByIdApi(seancesUUID);
+                // Structure pour regrouper les séances par cinéma
+                const seancesParCinema = new Map();
+                // 1. Mise à jour du DataController et regroupement par cinéma
+                seancesAjour.forEach(seanceVar => {
+                    var _a;
+                    const indexCible = this._allSeances.findIndex(seance => seance.seanceId === seanceVar.seanceId);
+                    if (indexCible !== -1) {
+                        this._allSeances[indexCible] = seanceVar;
+                    }
+                    else {
+                        console.error("Séance non trouvée : ", seanceVar.seanceId);
+                    }
+                    const cinemaName = seanceVar.nameCinema || 'unknown';
+                    if (!seancesParCinema.has(cinemaName)) {
+                        seancesParCinema.set(cinemaName, []);
+                    }
+                    (_a = seancesParCinema.get(cinemaName)) === null || _a === void 0 ? void 0 : _a.push(seanceVar);
+                });
+                // 2. Mise à jour du cache par cinéma
+                for (const [cinema, seancesModifiees] of seancesParCinema.entries()) {
+                    const storageKey = `${DataController.KEY_SEANCES}_${cinema}`;
+                    const existingSeancesStr = localStorage.getItem(storageKey);
+                    let existingSeances = [];
+                    if (existingSeancesStr) {
+                        existingSeances = JSON.parse(existingSeancesStr);
+                    }
+                    // Mises à jour ciblées des séances modifiées
+                    seancesModifiees.forEach(updatedSeance => {
+                        const index = existingSeances.findIndex(s => s.seanceId === updatedSeance.seanceId);
+                        if (index !== -1) {
+                            existingSeances[index] = updatedSeance;
+                        }
+                        else {
+                            existingSeances.push(updatedSeance); // ajoute si inexistant
+                        }
+                    });
+                    localStorage.setItem(storageKey, JSON.stringify(existingSeances));
+                    console.log(`DataC: Cache mis à jour pour cinéma '${cinema}', ${seancesModifiees.length} séances modifiées.`);
+                }
+            }
+            catch (error) {
+                console.error("Erreur dans mise à jour des séances : " + error);
             }
         });
     }

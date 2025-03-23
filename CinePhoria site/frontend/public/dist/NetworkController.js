@@ -493,8 +493,21 @@ export function getSeatsBookedApi(seanceId) {
     return __awaiter(this, void 0, void 0, function* () {
         const endpoint = `http://localhost:3500/api/seances/seats/${seanceId}`;
         const seatsBooked = yield apiRequest(endpoint, 'GET', undefined, false); // Pas d'authentification requise
-        console.log("Liste des siege = ", seatsBooked);
+        console.log("Liste des sieges = ", seatsBooked);
         return seatsBooked;
+    });
+}
+/**
+ * Récupération d'une seance
+ * @param seanceID
+ * @returns unn tableau de seances avec une seule séance
+ */
+export function getSeancesByIdApi(uuids) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/seances/seances?ids=${uuids}`;
+        const seances = yield apiRequest(endpoint, 'GET', undefined, false); // Pas d'authentification requise
+        console.log("Liste des séances = ", seances);
+        return seances;
     });
 }
 export function getReservationApi2(reservationId) {

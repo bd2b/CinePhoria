@@ -6,6 +6,7 @@ import { userDataController } from './DataControllerUser.js';
 import { handleApiError } from './Global.js';
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { Mail } from './shared-models/Mail.js';
+import { Seance } from './shared-models/Seance';
 
 
 /**
@@ -572,9 +573,25 @@ export async function getSeatsBookedApi(seanceId: string): Promise<{ siegesReser
     const endpoint = `http://localhost:3500/api/seances/seats/${seanceId}`;
 
     const seatsBooked = await apiRequest<{ siegesReserves: string} >(endpoint, 'GET', undefined, false); // Pas d'authentification requise
-    console.log("Liste des siege = ", seatsBooked);
+    console.log("Liste des sieges = ", seatsBooked);
 
     return seatsBooked;
+}
+
+/**
+ * Récupération d'une seance
+ * @param seanceID 
+ * @returns unn tableau de seances avec une seule séance
+ */
+
+export async function getSeancesByIdApi(uuids: string[]): Promise<Seance[]> {
+
+    const endpoint = `http://localhost:3500/api/seances/seances?ids=${uuids}`;
+
+    const seances = await apiRequest<Seance[] >(endpoint, 'GET', undefined, false); // Pas d'authentification requise
+    console.log("Liste des séances = ", seances);
+
+    return seances;
 }
 
 export async function getReservationApi2(reservationId: string): Promise<ReservationForUtilisateur[]> {

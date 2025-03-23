@@ -12,6 +12,27 @@ export class SeanceController {
     }
   };
 
+
+  static async getSeancesById(req: Request, res: Response) {
+    try {
+      // Recuperation des ids de seance
+      const idsParam = req.query.ids as string | undefined;
+      if (!idsParam || typeof idsParam !== 'string') {
+        res.status(400).json({ message: 'Le paramètre "ids" est requis et doit être une chaîne.' });
+        return;
+      }
+      const idsArray = idsParam.split(',').map(id => id.trim());
+    
+      // Transformer en chaîne de caractères avec des guillemets doubles
+      const idsFormatted = idsArray.map(id => `"${id}"`).join(',');
+      const seances = await SeanceDAO.findByIds(idsFormatted);
+      
+      res.json(seances);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
   static async getSeanceByCinemas(req: Request, res: Response) {
     try {
       // Vérification et conversion de cinemasList en string

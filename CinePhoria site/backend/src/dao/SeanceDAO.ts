@@ -18,11 +18,12 @@ export class SeanceDAO {
 
   }
 
-  static async findById(seanceid: string): Promise<Seance[]> {
+
+  static async findByIds(seanceids: string): Promise<Seance[]> {
 
     const connection = await mysql.createConnection(dbConfig);
-    logger.info(`Exécution de la requête : SELECT * FROM ViewFilmsSeancesSalle where seanceId = "${seanceid}"`);
-    const [rows] = await connection.execute(`SELECT * FROM ViewFilmsSeancesSalle where seanceId = "${seanceid}"`);
+    logger.info(`Exécution de la requête : SELECT * FROM ViewFilmsSeancesSalle where seanceId in (${seanceids})`);
+    const [rows] = await connection.execute(`SELECT * FROM ViewFilmsSeancesSalle where seanceId in (${seanceids})`);
     await connection.end();
 
     // On convertit chaque record en Seance et on renvoie le premier et seul élément
