@@ -28,7 +28,7 @@ export async function updateDisplayReservation() {
                 console.log("Pas de carte selectionnée")
                 return;
             }
-
+            await dataController.updateSeances([dataController.selectedSeanceUUID!]);
             const selectedSeance = seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate, "seances__cardseance-selected")
             containerSelectedSeance.replaceWith(selectedSeance);
 

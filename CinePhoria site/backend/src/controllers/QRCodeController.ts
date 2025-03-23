@@ -50,7 +50,7 @@ export async function createQRCode(reservationId: string): Promise<void> {
     // Récupération de la la seanceFilmSalle
     const seanceId = reservations[0].seanceId || '';
     logger.info("seance = " + seanceId);
-    const seances = await SeanceDAO.findById(seanceId);
+    const seances = await SeanceDAO.findByIds(seanceId);
     if (!seances || seances.length === 0) {
 
       throw new Error(`Aucune seance trouvée pour ${reservationId}`)

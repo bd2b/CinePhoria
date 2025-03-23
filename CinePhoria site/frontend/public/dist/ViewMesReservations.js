@@ -299,8 +299,12 @@ function formatDateDDMMYYYY(date) {
     return `${d}/${m}/${y}`;
 }
 // ---------- Fonctions d'action isolées ---------- //
-function onClickDetailReservation(resa, seance) {
+function onClickDetailReservation(resa, p_seance) {
     return __awaiter(this, void 0, void 0, function* () {
+        let seance = p_seance;
+        // On met a jour la seance dans le cache
+        yield dataController.updateSeances([seance.seanceId]);
+        seance = dataController.seanceById(p_seance.seanceId);
         const modalDetailLocalHTML = `
     
         <div class="modal__content-wrapper">

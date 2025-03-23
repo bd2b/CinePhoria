@@ -495,7 +495,7 @@ function afficherSeancesDuJour(dateSelectionnee) {
         if (!dataController.selectedFilmUUID)
             return;
         const filmId = dataController.selectedFilmUUID;
-        const seancesFilmDuJour = dataController.seancesFilmJour(dataController.selectedFilmUUID, dateSelectionnee);
+        let seancesFilmDuJour = dataController.seancesFilmJour(dataController.selectedFilmUUID, dateSelectionnee);
         // Si aucune séance n'est trouvée, afficher le message d'absence
         if (seancesFilmDuJour.length === 0) {
             // Récupérer au moins une séance du film pour accéder au titre / nom du cinéma (sinon valeur par défaut)
@@ -509,6 +509,11 @@ function afficherSeancesDuJour(dateSelectionnee) {
         }
         // Générer les cartes de séances
         console.log("Film = ", seancesFilmDuJour[0].titleFilm, " / nombre de seances = ", seancesFilmDuJour.length, " / date = ", formatDateLocalYYYYMMDD(dateSelectionnee));
+        // On met à jour les séances que l'on va afficher
+        const uuids = seancesFilmDuJour.map(seance => seance.seanceId);
+        yield dataController.updateSeances(uuids);
+        // On reconstruit les séance du jour
+        seancesFilmDuJour = dataController.seancesFilmJour(dataController.selectedFilmUUID, dateSelectionnee);
         seancesFilmDuJour.forEach(seance => {
             var _a;
             if (parseInt((_a = seance.numFreeSeats) !== null && _a !== void 0 ? _a : "10", 10) > 0) {
@@ -596,11 +601,17 @@ export function seanceCardView(seance, dateSelectionne, id = "", isAlertShowing 
     pDay.textContent = String(dateSelectionne.getDate());
     // === Bandeau "Plus que X disponibles" ===
     const numFreeSeats = parseInt((_a = seance.numFreeSeats) !== null && _a !== void 0 ? _a : "10", 10);
-    if (isAlertShowing && numFreeSeats < 100) {
+    if (isAlertShowing) {
         const bandeau = document.createElement('div');
         bandeau.classList.add('cardseance__bandeau');
-        bandeau.textContent = numFreeSeats === 48 ? `______COMPLET_____` : `Plus que ${seance.numFreeSeats} places disponibles`;
-        card.appendChild(bandeau);
+        if (numFreeSeats === 0) {
+            bandeau.textContent = `______COMPLET_____`;
+            card.appendChild(bandeau);
+        }
+        else if (numFreeSeats <= 10) {
+            bandeau.textContent = `Plus que ${seance.numFreeSeats} places disponibles`;
+            card.appendChild(bandeau);
+        }
     }
     dateInnerDiv.appendChild(pMonth);
     dateInnerDiv.appendChild(pDay);

@@ -30,6 +30,7 @@ export function updateDisplayReservation() {
                     console.log("Pas de carte selectionnée");
                     return;
                 }
+                yield dataController.updateSeances([dataController.selectedSeanceUUID]);
                 const selectedSeance = seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate, "seances__cardseance-selected");
                 containerSelectedSeance.replaceWith(selectedSeance);
                 // 2) On masque la liste des films

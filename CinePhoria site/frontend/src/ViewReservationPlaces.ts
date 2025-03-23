@@ -19,6 +19,8 @@ export async function updateContentPlace() {
             console.log("Pas de carte selectionnée")
             return;
         }
+        // On rafraichit la séance selectionne
+        await dataController.updateSeances([dataController.selectedSeanceUUID!]);
         const selectedSeance = seanceCardView(dataController.seanceSelected(), dataController.selectedSeanceDate!, "seances__cardseance-selected")
         containerSelectedSeance.replaceWith(selectedSeance);
         if (dataController.reservationState === ReservationState.PendingChoiceSeance ||
