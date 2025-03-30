@@ -732,3 +732,32 @@ export async function getReservationQRCodeApi(reservationId: string): Promise<HT
 
     return imgElement;
 }
+
+
+export async function askResetPwdApi(email: string): Promise<void> {
+    const endpoint = `http://localhost:3500/api/utilisateur/askresetpwd`;
+    const body = JSON.stringify({ email: email });
+    console.log(body);
+    const responseJSON = await apiRequest<void>(
+        endpoint,
+        'POST',
+        body,
+        false // Pas d'authentification requise
+    );
+    console.log("Message retour", responseJSON);
+    return responseJSON;
+}
+
+export async function resetPwdApi(email: string, codeConfirm: string, newPassword: string): Promise<void> {
+    const endpoint = `http://localhost:3500/api/utilisateur/resetpwd`;
+    const body = JSON.stringify({ email: email , codeConfirm: codeConfirm, newPassword: newPassword});
+    console.log(body);
+    const responseJSON = await apiRequest<void>(
+        endpoint,
+        'POST',
+        body,
+        false // Pas d'authentification requise
+    );
+    console.log("Message retour", responseJSON);
+    return responseJSON;
+}

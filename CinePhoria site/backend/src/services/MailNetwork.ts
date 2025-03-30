@@ -78,7 +78,7 @@ export class MailNetwork {
         text: `
         Bonjour,
 
-        Voici le code de vérification à renseigner dans le formulaire CinePhoria
+        Voici le code de vérification à renseigner sur le site CinePhoria
 
         ${codeConfirm}
         
