@@ -44,7 +44,8 @@ export class ReservationController {
         };
         const codesConfirm: CodeConf[] = await UtilisateurDAO.getCodeConfirm(email,'create');
         if (codesConfirm.length === 0) {
-          logger.error("Erreur dans la récupération de code");
+          logger.error("Erreur dans la récupération de code"); 
+        } else {
           // Envoie du mail
           const statutMail = await MailNetwork.sendMailCodeConfirm(email, codesConfirm[0].codeConfirm);
           if (!statutMail.startsWith('OK')) res.status(500).json({ message: "Erreur sur l'envoi du code de vérification de mail " + statutMail });
