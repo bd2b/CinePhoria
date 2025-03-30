@@ -80,8 +80,34 @@ export class UtilisateurDAO {
     }
   };
 
+  static async changePWD(email: string, newPWD: string): Promise<void> {
+    const connection = await mysql.createConnection(dbConfig);
+    const passwordHashed = await hashPassword(newPWD);
+    try {
+      const result = connection.query(
+        `UPDATE COMPTE 
+          SET passwordText = ?,
+              datePassword = NOW(),
+              oldPasswordsArray = CONCAT(oldPasswordsArray,',',passwordText)
+          WHERE email = ?`, [passwordHashed, email]
+      );
+      logger.info("Execution de la procedure changePWD ")
+      logger.info("Paramètres :", { email }, "et mot de passe hashé");
+      logger.info("Result :",JSON.stringify(result));
+
+    } catch (error) {
+      logger.error('Erreur dans CreateUtilisateur', error);
+      throw new Error('Erreur lors de l’exécution de la procédure stockée.');
+    } finally {
+      await connection.end();
+    }
+
+  }
+
+
+
   static async getCodeConfirm(
-    email: string , typeConfirm: string
+    email: string, typeConfirm: string
   ): Promise<{ codeConfirm: string, numTry: number, dateCreateCode: Date }[]> {
     const connection = await mysql.createConnection(dbConfig);
     try {
@@ -90,10 +116,10 @@ export class UtilisateurDAO {
             FROM CodesConfirm
             WHERE email  = ? AND typeConfirm = ?
 			      `,
-        [email , typeConfirm]);
-        logger.info("Execution de la requete " + `SELECT codeConfirm , numTry, dateCreateCode FROM CodesConfirm WHERE email  = ${email} AND typeConfirm = ${typeConfirm})`);
-        return (rows as any[]);
-      
+        [email, typeConfirm]);
+      logger.info("Execution de la requete " + `SELECT codeConfirm , numTry, dateCreateCode FROM CodesConfirm WHERE email  = ${email} AND typeConfirm = ${typeConfirm})`);
+      return (rows as any[]);
+
       // // Forcer TypeScript à comprendre la structure des résultats
       // const callResults = results as any[][];  // Correction du typage
       // const selectResult = callResults[0][1] as Array<{ codeStocke: string }>;
@@ -113,11 +139,86 @@ export class UtilisateurDAO {
       throw new Error('Erreur dans select getCodeConfirm.');
     } finally {
       await connection.end();
+    };
+  }
+
+  static async createCodeConfirm(
+    email: string, typeConfirm: string
+  ): Promise<string> {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+      // Exécution de la procédure stockée avec @result
+      const results = await connection.query(
+        `CALL CreateCodeConfirm(?, ?, @result);
+         SELECT @result AS result;`,
+        [email, typeConfirm]
+      );
+      logger.info("Execution de la procedure CreateCodeConfirm ")
+      logger.info("Paramètres :", { email, typeConfirm });
+
+      // Forcer TypeScript à comprendre la structure des résultats
+      const callResults = results as any[][];  // Correction du typage
+      const selectResult = callResults[0][1] as Array<{ result: string }>;
+
+      // Vérification et extraction du résultat
+      if (selectResult && selectResult.length > 0 && selectResult[0].result) {
+        const codeConfirm = selectResult[0].result;
+        logger.info("Résultat = " + codeConfirm);
+
+        // Retourner uniquement la chaîne utilisateurId
+        return codeConfirm;
+      } else {
+        logger.error("Erreur : Résultat non disponible.");
+        throw new Error('Erreur : Résultat non disponible.');
+      }
+    } catch (error) {
+      logger.error('Erreur dans createCodeConfirm', error);
+      throw new Error('Erreur dans createCodeConfirm.');
     }
+    finally {
+      await connection.end();
+    };
 
   }
 
+  static async verifyCodeConfirm(
+    email: string, typeConfirm: string, codeConfirm: string
+  ): Promise<string> {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+      // Exécution de la procédure stockée avec @result
+      const results = await connection.query(
+        `CALL VerifyCodeConfirm(?, ?, ?, @result);
+         SELECT @result AS result;`,
+        [email, typeConfirm, codeConfirm]
+      );
+      logger.info("Execution de la procedure VerifyCodeConfirm ")
+      logger.info("Paramètres :", { email, typeConfirm, codeConfirm });
 
+      // Forcer TypeScript à comprendre la structure des résultats
+      const callResults = results as any[][];  // Correction du typage
+      const selectResult = callResults[0][1] as Array<{ result: string }>;
+
+      // Vérification et extraction du résultat
+      if (selectResult && selectResult.length > 0 && selectResult[0].result) {
+        const resultVerify = selectResult[0].result;
+        logger.info("Résultat = " + resultVerify);
+
+        // Retourner uniquement la chaîne utilisateurId
+        return resultVerify;
+      } else {
+        logger.error("Erreur : Résultat non disponible.");
+        throw new Error('Erreur : Résultat non disponible.');
+      }
+    } catch (error) {
+      logger.error('Erreur dans verifyCodeConfirm', error);
+      throw new Error('Erreur dans verifyCodeConfirm.');
+    }
+    finally {
+      await connection.end();
+    };
+
+  }
 
   static async confirmUtilisateur(
     utilisateurId: string,

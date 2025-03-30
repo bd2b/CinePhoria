@@ -74,7 +74,7 @@ export class SeanceDAO {
     logger.info(`SELECT siegesReserves FROM viewseancesiegesreserves WHERE seanceId = ${p_seanceId}`);
     await connection.end();
 
-    // Map des lignes pour les convertir en instances de Seance
+    // Map des lignes pour les convertir en instances de string
     return (rows as any[]).map((row) => row as string)[0];
 
   }

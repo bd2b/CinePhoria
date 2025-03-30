@@ -42,15 +42,17 @@ export async function createQRCode(reservationId: string): Promise<void> {
   // Appel à la sauvegarde dans MongoDB
   try {
     // Récupération des réservations
+    
     const reservations = await ReservationDAO.getReservationById(reservationId);
     if (!reservations || reservations.length === 0) {
       throw new Error(`Aucune réservation trouvée pour ${reservationId}`)
     }
-
+    
     // Récupération de la la seanceFilmSalle
     const seanceId = reservations[0].seanceId || '';
     logger.info("seance = " + seanceId);
-    const seances = await SeanceDAO.findByIds(seanceId);
+    const seances = await SeanceDAO.findByIds('"'+seanceId+'"');
+    
     if (!seances || seances.length === 0) {
 
       throw new Error(`Aucune seance trouvée pour ${reservationId}`)
@@ -85,6 +87,7 @@ export async function createQRCode(reservationId: string): Promise<void> {
     logger.info("Date Expiration = " + dateExpiration);
 
     // Génération du QRCode
+    logger.info("QRCode = " + textQRCode + reservationId + dateExpiration)
     await generateQRCode(textQRCode, reservationId, dateExpiration);
   } catch (error: any) {
     logger.error(`Erreur lors de la creation du QRCode ${error.message}`);

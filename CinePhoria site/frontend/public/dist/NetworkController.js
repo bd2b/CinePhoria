@@ -625,3 +625,25 @@ export function getReservationQRCodeApi(reservationId) {
         return imgElement;
     });
 }
+export function askResetPwdApi(email) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/utilisateur/askresetpwd`;
+        const body = JSON.stringify({ email: email });
+        console.log(body);
+        const responseJSON = yield apiRequest(endpoint, 'POST', body, false // Pas d'authentification requise
+        );
+        console.log("Message retour", responseJSON);
+        return responseJSON;
+    });
+}
+export function resetPwdApi(email, codeConfirm, newPassword) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/utilisateur/resetpwd`;
+        const body = JSON.stringify({ email: email, codeConfirm: codeConfirm, newPassword: newPassword });
+        console.log(body);
+        const responseJSON = yield apiRequest(endpoint, 'POST', body, false // Pas d'authentification requise
+        );
+        console.log("Message retour", responseJSON);
+        return responseJSON;
+    });
+}

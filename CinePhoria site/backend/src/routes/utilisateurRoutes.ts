@@ -11,6 +11,8 @@ logger.info('Declaration route /api/utilisateur/');
 router.post('/create', UtilisateurController.createUtilisateur);
 router.post('/confirmUtilisateur', UtilisateurController.confirmUtilisateur);
 router.post('/confirmCompte', UtilisateurController.confirmCompte);
+router.post('/askresetpwd', UtilisateurController.sendCodeReset);
+router.post('/resetpwd', UtilisateurController.validateChangePwd);
 
 // (Futur) GET /api/reservation/:id
 // router.get('/:id', authenticateJWT, UtilisateurController.getUtilisateurById);

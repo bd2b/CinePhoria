@@ -13,7 +13,7 @@ CREATE TABLE Compte (
   isValidated             int(1) DEFAULT 0 NOT NULL, 
   passwordText            varchar(100), 
   datePassword            datetime NULL comment 'Date de dernier changement du mot de passe', 
-  oldpasswordsArray       longtext comment 'Liste des mots de passe deja utilise', 
+  oldpasswordsArray       longtext DEFAULT '' comment 'Liste des mots de passe deja utilise' , 
   dateDerniereConnexion   datetime NULL, 
   numTentativeConnexionKO int(10) DEFAULT 0 NOT NULL, 
   PRIMARY KEY (email), 
@@ -716,6 +716,9 @@ block_label: BEGIN
         
 	-- Début de la transaction
     START TRANSACTION;
+    
+     -- Suppression des éventuels ancien code
+    DELETE FROM CodesConfirm WHERE (email = p_email AND typeConfirm = p_motif);
     
     INSERT INTO CodesConfirm
 		(email, codeConfirm, typeConfirm, dateCreateCode, numTry) 
