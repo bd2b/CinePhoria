@@ -23,6 +23,14 @@ CREATE TABLE Connexions (
   dateConnexion datetime NOT NULL, 
   email         varchar(100) NOT NULL, 
   PRIMARY KEY (ID));
+  CREATE TABLE CodesConfirm (
+  ID            int(10) NOT NULL AUTO_INCREMENT,
+  codeConfirm varchar(100) NOT NULL,
+  typeConfirm varchar (100) NOT NULL, -- "forgot" pour oubli de mot de passe, "reset" pour reinitialisation
+  numTry INT(10), -- nombre d'essai
+  dateCreateCode datetime NOT NULL, 
+  email         varchar(100) NOT NULL, 
+  PRIMARY KEY (ID));
 CREATE TABLE Employe (
   matricule        int(10) NOT NULL AUTO_INCREMENT, 
   email            varchar(100) NOT NULL, 
@@ -320,6 +328,16 @@ JOIN Salle ON Salle.id = Seance.Salleid
 JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
 -- WHERE Utilisateur.email = "claire@mail.fr"
 GROUP BY Reservation.id, seance.dateJour, film.titleFilm, cinema.nameCinema, reservation.note, reservation.evaluation;
+-- Vue des sieges occupés par séance
+CREATE VIEW ViewSeanceSiegesReserves AS
+SELECT 
+    Seance.id AS seanceId,
+    GROUP_CONCAT(Reservation.seatsReserved ORDER BY Reservation.timeStampCreate SEPARATOR ',') AS siegesReserves
+FROM Seance
+LEFT JOIN Reservation ON Seance.id = Reservation.Seanceid
+WHERE Reservation.seatsReserved IS NOT NULL
+GROUP BY Seance.id;
+
 ALTER TABLE Seance ADD CONSTRAINT FKSeance628062 FOREIGN KEY (Salleid) REFERENCES Salle (id);
 ALTER TABLE SeatsForTarif ADD CONSTRAINT comprend FOREIGN KEY (ReservationId) REFERENCES Reservation (id);
 ALTER TABLE Incident ADD CONSTRAINT concerne FOREIGN KEY (Salleid) REFERENCES Salle (id);
@@ -333,6 +351,7 @@ ALTER TABLE Utilisateur ADD CONSTRAINT `est relatif  a` FOREIGN KEY (email) REFE
 ALTER TABLE Salle ADD CONSTRAINT possede FOREIGN KEY (nameCinema) REFERENCES Cinema (nameCinema);
 ALTER TABLE Reservation ADD CONSTRAINT prend FOREIGN KEY (Utilisateurid) REFERENCES Utilisateur (id);
 ALTER TABLE Connexions ADD CONSTRAINT `se connecte` FOREIGN KEY (email) REFERENCES Compte (email);
+ALTER TABLE CodesConfirm ADD CONSTRAINT `utilise` FOREIGN KEY (email) REFERENCES Compte (email);
 ALTER TABLE Employe_Cinema ADD CONSTRAINT `travail au` FOREIGN KEY (matricule) REFERENCES Employe (matricule);
 DROP PROCEDURE IF EXISTS CheckAvailabilityAndReserve;
 DELIMITER $$
@@ -628,16 +647,13 @@ block_label: BEGIN
 		LEAVE block_label;
 	END IF;
     
-    -- Generation du code de confirmation du mail qu'on va stocker dans oldpasswordarray
-    SET v_codeConfirmMail = LPAD(FLOOR(RAND() * 1000000), 6, '0');
-        
 	-- Début de la transaction
     START TRANSACTION;
     
     INSERT INTO Compte
-		(email,  isValidated, passwordText, datePassword, oldpasswordsArray) 
+		(email,  isValidated, passwordText, datePassword) 
 	VALUES 
-		(p_email, 0, p_passwordText, NOW(), v_codeConfirmMail)
+		(p_email, 0, p_passwordText, NOW())
 	;
         
 	set v_utilisateurId = UUID();
@@ -646,6 +662,10 @@ block_label: BEGIN
 	VALUES 
 		(v_utilisateurId, p_email , p_displayName, CURRENT_TIMESTAMP)
 	;
+    
+     -- Generation du code de confirmation du mail qu'on va stocker dans la table CodesConfirm
+    call CreateCodeConfirm( p_email, 'create', @v_codeConfirmMail);
+    
 	-- Tout s'est bien passé, on valide la transaction
 	COMMIT;
             
@@ -653,6 +673,165 @@ block_label: BEGIN
 	SET p_Result = v_utilisateurId;
 
 END block_label;
+END $$
+DELIMITER ;
+select 1;
+DROP PROCEDURE IF EXISTS CreateCodeConfirm;
+DELIMITER $$
+CREATE PROCEDURE CreateCodeConfirm(
+    IN p_email VARCHAR(100),
+    IN p_motif VARCHAR(100),
+    OUT p_Result VARCHAR(255) 
+)
+-- Création d'un code de confirmation pour un motif donné 
+-- Retour le code ou "Erreur : erreur interne procedure." ou "Erreur : email existant."
+BEGIN
+    DECLARE v_compte_exist INT;
+    DECLARE v_codeConfirmMail VARCHAR(100);
+
+ -- Gestion des erreurs
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- En cas d'erreur SQL, effectuer un rollback
+       ROLLBACK;
+	   SET p_Result =  "Erreur : erreur interne procedure.";
+	END;
+    
+block_label: BEGIN
+    
+    -- Recherche du compte pour test existence
+	SET v_compte_exist = (
+		SELECT COUNT(*)
+		FROM Compte
+		WHERE Compte.email = p_email
+	);
+
+	IF v_compte_exist = 0 THEN
+		SET p_Result = "Erreur : email inexistant";
+		LEAVE block_label;
+	END IF;
+    
+    -- Generation du code de confirmation du mail qu'on va stocker dans oldpasswordarray
+    SET v_codeConfirmMail = LPAD(FLOOR(RAND() * 1000000), 6, '0');
+        
+	-- Début de la transaction
+    START TRANSACTION;
+    
+    INSERT INTO CodesConfirm
+		(email, codeConfirm, typeConfirm, dateCreateCode, numTry) 
+	VALUES 
+		(p_email, v_codeConfirmMail, p_motif, NOW(), 0)
+	;
+        
+	-- Tout s'est bien passé, on valide la transaction
+	COMMIT;
+            
+	-- Retourne l'id de l'utilisateur
+	SET p_Result = v_codeConfirmMail;
+
+END block_label;
+END $$
+DELIMITER ;
+select 1;
+DROP PROCEDURE IF EXISTS VerifyCodeConfirm;
+DELIMITER $$
+CREATE PROCEDURE VerifyCodeConfirm(
+    IN p_email VARCHAR(100),
+    IN p_motif VARCHAR(100),
+    IN p_code VARCHAR(100),
+    OUT p_Result VARCHAR(255) 
+)
+-- Vérification d'un code confirmation pour un email et un motif donné
+-- Retour "OK" -> le code correspond et le contexte d'appel est valide :
+-- Le code a été généré il y a moins de 15 minute
+-- Il y a moins de 3 tentatives en échec
+-- Dans ce cas le code est supprimé de la table CodesConfirm
+-- Les erreurs sont  :
+-- "Erreur : l'email ne corresponda pas un compte existant"
+-- "Erreur : pas de code pour cet email et ce motif."
+-- "Erreur : le code fourni n'est pas exact, essayez une nouvelle fois."
+-- "Erreur : le code fourni n'est pas exact et le nombre maximal de tentative est dépassé."
+-- 	"Erreur : le code créé est trop ancien, refaite une demande."
+-- "Erreur : erreur interne procedure." 
+BEGIN
+    DECLARE v_compte_exist INT;
+    DECLARE v_ID INT;
+    DECLARE v_codeConfirmMail VARCHAR(100);
+    DECLARE v_numTry INT;
+    DECLARE v_dateCreateCode DATETIME;
+    DECLARE v_codeConfirm VARCHAR(100);
+
+ -- Gestion des erreurs
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- En cas d'erreur SQL, effectuer un rollback
+       ROLLBACK;
+	   SET p_Result =  "Erreur : erreur interne procedure.";
+	END;
+    
+block_label: BEGIN
+    
+	-- Recherche du compte pour test existence
+	SET v_compte_exist = (
+		SELECT COUNT(*)
+		FROM Compte
+		WHERE Compte.email = p_email
+	);
+
+	IF v_compte_exist = 0 THEN
+		SET p_Result = "Erreur : l'email ne correspond pas un compte existant";
+		LEAVE block_label;
+	END IF;
+    
+	-- Recherche du code 
+	set v_codeConfirm = "NON TROUVE";
+	SELECT ID, numTry, dateCreateCode , codeConfirm
+	INTO v_ID , v_numTry, v_dateCreateCode, v_codeConfirm
+	FROM CodesConfirm
+	WHERE email = p_email AND typeConfirm = p_motif
+	ORDER BY dateCreateCode DESC
+	LIMIT 1;
+    
+    IF v_codeConfirm = "NON TROUVE" THEN
+		SET p_Result = "Erreur : pas de code pour cet email et ce motif.";
+        LEAVE block_label;
+    END IF;
+    
+    -- Début de la transaction, l'email est valide, et on a un codeConfirm
+    START TRANSACTION;
+    
+    IF v_dateCreateCode < DATE_SUB(NOW(), INTERVAL 15 MINUTE) THEN
+		-- Le code a plus que 15mn, on supprime le code
+        SET p_Result = 	"Erreur : le code créé est trop ancien, refaite une demande.";
+        DELETE FROM CodesConfirm WHERE (ID = v_ID);
+
+	ELSE 
+		IF v_codeConfirm <> p_code THEN
+			-- Le code n'a pas la bonne valeur
+			SET v_numTRY = v_numTRY + 1;
+			IF v_numTRY > 3 THEN
+					-- On atteint le nombre max d'essai on supprime le code
+					SET p_Result = "Erreur : le code fourni n'est pas exact et le nombre maximal de tentative est dépassé, recommencez.";
+					DELETE FROM CodesConfirm WHERE (ID = v_ID);
+
+			ELSE 
+					-- On ajoute une erreur tracee
+					UPDATE CodesConfirm SET numTry = numTry + 1 WHERE (ID = v_ID);
+					SET p_Result = "Erreur : le code fourni n'est pas exact, essayez une nouvelle fois.";
+
+			END IF;
+		ELSE 
+			-- Le code est bon on renvoie OK et on le supprime
+			SET p_Result = "OK";
+			DELETE FROM CodesConfirm WHERE (ID = v_ID);
+
+		END IF;
+    END IF;
+    
+	-- on valide la transaction
+	COMMIT;
+END block_label;
+
 END $$
 DELIMITER ;
 select 1;
@@ -732,17 +911,14 @@ CREATE PROCEDURE ConfirmCompte(
      OUT p_Result VARCHAR(255)
      )
      -- L'utilisateur demande la confirmation de son mail en saisissant un code qu'il reçoit par email
-     -- La valeut de ce code est stockée dans oldpasswordarray
-     -- La confirmation verifie que le code fournit est egal à la valeur stockée pour le compte de l'email
-     -- En cas d'echec on memorise le nombre de tentative dans oldpasswordarray en rajoutant un digit de 1 à 9 apres une ',' 
-     -- Si on atteint 9, on bloque en retournant systematiquement l'erreur "nombre maximal de tentative atteint" 
+     -- La vérification utilise VerifiCodeConf avec le motif 'create'
      -- Retour "OK" ou "Erreur : xxxxxxxxx" 
 	 -- xxx = "email inconnu." , "code non valide" , "nombre maximal de tentative atteint" , "compte deja valide"
      
      
      BEGIN
      
-     DECLARE v_codeConfirmMailStocke VARCHAR(100);
+     DECLARE v_ResultatVerifCode VARCHAR(100);
      DECLARE v_codeStocke VARCHAR(100);
      DECLARE v_nombreTentative INT;
      DECLARE v_isValidated INT;
@@ -760,57 +936,17 @@ CREATE PROCEDURE ConfirmCompte(
      -- Début d'un bloc labellisé
     block_label: BEGIN
     
-     -- Recherche du code stocke
-       
-            SELECT oldpasswordsArray, isValidated
-            FROM Compte
-            WHERE Compte.email  = p_email
-			INTO v_codeStocke, v_isValidated
-        ;
-
-		IF v_isValidated = 1 THEN
-            SET p_Result = CONCAT("Erreur : compte deja valide -> ", p_email);
-            ROLLBACK;
-			LEAVE block_label;
-        END IF;
-        
-        IF v_codeStocke is null THEN
-            SET p_Result = CONCAT("Erreur : email inconnu -> ", p_email);
-            ROLLBACK;
-			LEAVE block_label;
-        END IF;
-        
-        -- Extraire les 6 premiers caractères
-		SET v_codeConfirmMailStocke = LEFT(v_codeStocke, 6);
-        
-        -- Extraire la deuxième partie après la virgule si elle existe, sinon assigner 0
-		SET v_nombreTentative = IF(LOCATE(',', v_codeStocke) > 0, 
-                         CAST(SUBSTRING_INDEX(v_codeStocke, ',', -1) AS UNSIGNED), 
-                         0);
-        
-        IF v_nombreTentative = 9 THEN
-			SET p_Result = "Erreur : nombre maximal de tentative atteint";
-            ROLLBACK;
-            LEAVE block_label;
-        END IF;
-        
-        
-        IF v_codeConfirmMailStocke <> p_codeConfirmMail THEN
-			-- Code fourni errone
-			SET v_nombreTentative = v_nombreTentative + 1;
-			SET p_Result = CONCAT("Erreur : code non valide -> ", p_codeConfirmMail, " nombre tentative = ", v_nombreTentative);
-            
-            -- On met a jour la valkeur stockée
-            UPDATE Compte
-            SET oldpasswordsArray = CONCAT(v_codeConfirmMailStocke,",",v_nombreTentative)
-            WHERE email = p_email;
-            commit;
-            LEAVE block_label;
-        END IF;
+     -- On vérifie la validité du code de confirmation
+     call VerifyCodeConfirm(p_email, 'create',p_codeConfirmMail, v_ResultatVerifCode);
+     
+     IF v_ResultatVerifCode <> "OK" THEN
+		SET p_Result = v_ResultatVerifCode;
+        leave block_label;
+	END IF;
+     
      -- Le code est valide, on confirme le mail
      UPDATE Compte
-     SET 	isValidated = 1,
-				oldpasswordsArray = ""
+     SET 	isValidated = 1
      WHERE email = p_email;
      
      Commit;

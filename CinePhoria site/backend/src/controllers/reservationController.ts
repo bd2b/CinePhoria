@@ -39,11 +39,14 @@ export class ReservationController {
       } else {
 
         // Récupération du code de verification d'email
-        const codeConfirmMail = await UtilisateurDAO.getCodeConfirm(email);
-        if (codeConfirmMail !== "Compte sans code") {
-          logger.info("Code de confirmation du mail = " + codeConfirmMail);
+        type CodeConf = {
+          codeConfirm: string, numTry: number, dateCreateCode: Date
+        };
+        const codesConfirm: CodeConf[] = await UtilisateurDAO.getCodeConfirm(email,'create');
+        if (codesConfirm.length === 0) {
+          logger.error("Erreur dans la récupération de code");
           // Envoie du mail
-          const statutMail = await MailNetwork.sendMailCodeConfirm(email, codeConfirmMail);
+          const statutMail = await MailNetwork.sendMailCodeConfirm(email, codesConfirm[0].codeConfirm);
           if (!statutMail.startsWith('OK')) res.status(500).json({ message: "Erreur sur l'envoi du code de vérification de mail " + statutMail });
         } // else on ne fait rien le compte est confirmé
 
