@@ -13,7 +13,7 @@ export class ReservationDAO {
   ): Promise<string> {
     const connection = await mysql.createConnection(dbConfig);
     try {
-      // Exécution de la procédure stockée avec @result
+      //    Exécution de la procédure stockée avec @result
       const [results] = await connection.query(
         `CALL CheckAvailabilityAndReserve(?, ?, ?, ?, ?, @result);
          SELECT @result AS result;`,

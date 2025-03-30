@@ -81,31 +81,33 @@ export class UtilisateurDAO {
   };
 
   static async getCodeConfirm(
-    email: string
-  ): Promise<string> {
+    email: string , typeConfirm: string
+  ): Promise<{ codeConfirm: string, numTry: number, dateCreateCode: Date }[]> {
     const connection = await mysql.createConnection(dbConfig);
     try {
-      const results = await connection.query(
-        `SELECT oldpasswordsArray, isValidated
-            FROM Compte
-            WHERE Compte.email  = ?
-			      INTO @v_codeStocke, @v_isValidated;
-            select @v_codeStocke as codeStocke`,
-        [email]);
-      // Forcer TypeScript à comprendre la structure des résultats
-      const callResults = results as any[][];  // Correction du typage
-      const selectResult = callResults[0][1] as Array<{ codeStocke: string }>;
+      const [rows] = await connection.query(
+        `SELECT codeConfirm , numTry, dateCreateCode
+            FROM CodesConfirm
+            WHERE email  = ? AND typeConfirm = ?
+			      `,
+        [email , typeConfirm]);
+        logger.info("Execution de la requete " + `SELECT codeConfirm , numTry, dateCreateCode FROM CodesConfirm WHERE email  = ${email} AND typeConfirm = ${typeConfirm})`);
+        return (rows as any[]);
+      
+      // // Forcer TypeScript à comprendre la structure des résultats
+      // const callResults = results as any[][];  // Correction du typage
+      // const selectResult = callResults[0][1] as Array<{ codeStocke: string }>;
 
-      // Vérification et extraction du résultat
-      if (selectResult && selectResult.length > 0 && selectResult[0].codeStocke) {
-        const codeConfMail = selectResult[0].codeStocke;
-        logger.info("Code trouve = " + codeConfMail);
+      // // Vérification et extraction du résultat
+      // if (selectResult && selectResult.length > 0 && selectResult[0].codeStocke) {
+      //   const codeConfMail = selectResult[0].codeStocke;
+      //   logger.info("Code trouve = " + codeConfMail);
 
-        // Retourner uniquement la chaîne utilisateurId
-        return codeConfMail;
-      } else {
-        return "Compte sans code";
-      }
+      //   // Retourner uniquement la chaîne utilisateurId
+      //   return codeConfMail;
+      // } else {
+      //   return "Compte sans code";
+      // }
     } catch (error) {
       logger.error('Erreur dans select getCodeConfirm', error);
       throw new Error('Erreur dans select getCodeConfirm.');
