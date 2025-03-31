@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { FilmDAO } from '../dao/FilmDAO';
 import logger from '../config/configLog';
+import { Film } from "../shared-models/Film";
 
 export class FilmController {
   static async getAllFilms(req: Request, res: Response) {
@@ -36,4 +37,63 @@ export class FilmController {
       res.status(500).json({ error: error.message });
     }
   };
+
+  // POST => create a Film
+  static async createFilm(req: Request, res: Response) {
+    try {
+      // On récupère les données dans req.body
+      // ex: {titleFilm, filmPitch, genreArray, ...}
+      const data = req.body; 
+      logger.info("Creation d'un film avec data = ", data);
+
+      // On construit un Film
+      const filmToCreate = new Film(data);
+      // Appel du DAO
+      const newId = await FilmDAO.createFilm(filmToCreate);
+
+      // On renvoie l’ID ou un message
+      res.status(201).json({ message: 'Film créé avec succès', id: newId });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // PUT => update a Film
+  static async updateFilm(req: Request, res: Response) {
+    try {
+      const filmId = req.params.id;
+      const data = req.body;
+      logger.info(`Mise à jour du film ${filmId} avec data=`, data);
+
+      const filmToUpdate = new Film(data);
+      const result = await FilmDAO.updateFilm(filmId, filmToUpdate);
+
+      if (result) {
+        res.json({ message: 'Film mis à jour avec succès' });
+      } else {
+        res.status(404).json({ message: 'Film non trouvé ou non mis à jour' });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  // DELETE => remove a Film
+  static async deleteFilm(req: Request, res: Response) {
+    try {
+      const filmId = req.params.id;
+      logger.info(`Suppression du film ${filmId}`);
+
+      const success = await FilmDAO.deleteFilm(filmId);
+
+      if (success) {
+        res.json({ message: 'Film supprimé avec succès' });
+      } else {
+        res.status(404).json({ message: 'Film non trouvé ou déjà supprimé' });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
 }

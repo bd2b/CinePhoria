@@ -106,9 +106,6 @@ function setReservation() {
             throw new Error("updateInputPMT");
         containerPMR.innerHTML = '';
         containerPMR.appendChild(contentPMR);
-        if (userDataController.profil() === ProfilUtilisateur.Utilisateur) {
-            // Il faut utiliser l'email de l'utilisateur et desactiver le changement.
-        }
         // Gere la complétude de l'email avec un message d'erreur associé
         const emailInput = document.getElementById('commande__mail-input');
         const emailError = document.getElementById('commande__mail-error');

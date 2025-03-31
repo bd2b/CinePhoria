@@ -13,11 +13,13 @@ import { onLoadMesReservations } from "./ViewMesReservations.js";
 import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
 import { userDataController } from "./DataControllerUser.js";
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
+import { onLoadManageFilms } from "./ViewManageFilms.js";
 const pageHandlers = {
     "visiteur.html": onLoadVisiteur,
     "reservation.html": onLoadReservation,
     "mesreservations.html": onLoadMesReservations,
-    "films.html": onLoadFilms
+    "films.html": onLoadFilms,
+    "manageFilms.html": onLoadManageFilms
 };
 const pagesPublic = ["visiteur.html", "reservation.html", "films.html"];
 /**

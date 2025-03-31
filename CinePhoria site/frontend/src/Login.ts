@@ -91,8 +91,7 @@ export async function login(invite: string = "Veuillez vous connecter...", enabl
             evt.preventDefault();
             evt.stopPropagation();
 
-            alert("Créer votre compte - En cours de développement");
-            // plus tard => un flow de création
+            alert("La création de compte sera réalisée lors de votre première réservation.");
         });
     }
 
@@ -171,7 +170,7 @@ export async function login(invite: string = "Veuillez vous connecter...", enabl
     }
 
     // Ajout de la valeur d'email saisi dans le formulaire de réservation
-    emailInput.value = dataController.selectedUtilisateurMail || '';  // Définir une valeur par défaut
+    if (!enableEmail) emailInput.value = dataController.selectedUtilisateurMail || '';  // Définir une valeur par défaut
 
     // Le bouton de validation est inactif au chargement
     submitButton!.classList.add("inactif");
