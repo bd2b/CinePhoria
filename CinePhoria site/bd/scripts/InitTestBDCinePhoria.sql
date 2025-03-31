@@ -190,7 +190,11 @@ VALUES
 	("Liege", 202515),
 	("Charleroi", 202515),
 	("Paris", 202513),
-    ("Toulouse", 202514)
+    ("Toulouse", 202514),
+    ("Liege", 202512),
+	("Charleroi", 202512),
+    ("Toulouse", 202512),
+    ("Paris", 202512)
   ;
 
 INSERT INTO Utilisateur

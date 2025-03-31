@@ -242,6 +242,7 @@ function buildIntranetMenuAdmin() {
     const subMenu = document.createElement('div');
     subMenu.style.display = 'none'; // masqué par défaut
     subMenu.style.position = 'absolute';
+    subMenu.style.zIndex = '1000'; // Assure que le sous-menu passe au-dessus des autres éléments
     subMenu.style.top = '100%';
     subMenu.style.left = '0';
     subMenu.style.backgroundColor = '#F8F8FF';
@@ -281,6 +282,7 @@ function buildIntranetMenuEmploye() {
     const subMenu = document.createElement('div');
     subMenu.style.display = 'none';
     subMenu.style.position = 'absolute';
+    subMenu.style.zIndex = '1000'; // Assure que le sous-menu passe au-dessus des autres éléments
     subMenu.style.top = '100%';
     subMenu.style.left = '0';
     subMenu.style.backgroundColor = '#F8F8FF';
@@ -329,6 +331,8 @@ function getUserInitials() {
     if (initials.length === 0) {
         initials = displayName.slice(0, 2).toUpperCase();
     }
+    if (initials === '?')
+        initials = "Déconnexion";
     return initials;
 }
 /**
