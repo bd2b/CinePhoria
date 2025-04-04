@@ -6,7 +6,8 @@ import { userDataController } from './DataControllerUser.js';
 import { handleApiError } from './Global.js';
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { Mail } from './shared-models/Mail.js';
-import { Seance } from './shared-models/Seance';
+import { Seance } from './shared-models/Seance.js';
+import { Film } from './shared-models/Film.js';
 
 
 /**
@@ -28,9 +29,12 @@ async function apiRequest<T>(
             throw new CinephoriaError(CinephoriaErrorCode.AUTH_REQUIRED, "Authentification requise et pas de token.");
         }
 
-        const headers: HeadersInit = {
-            'Content-Type': 'application/json'
-        };
+        const headers: HeadersInit = {};
+
+        // Si le corps n'est pas un FormData, fixer Content-Type à application/json
+        if (!(body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json';
+        }
 
         if (requiresAuth) {
             headers['Authorization'] = `Bearer ${token}`;
@@ -167,7 +171,7 @@ export async function setReservationApi(
     pmrSeats: number,
     seatsReserved: string
 ): Promise<{ statut: string; utilisateurId: string; reservationId: string }> {
-    const body = { email, seanceId, tarifSeats, pmrSeats , seatsReserved };
+    const body = { email, seanceId, tarifSeats, pmrSeats, seatsReserved };
     const endpoint = 'http://localhost:3500/api/reservation';
 
     const responseJSON = await apiRequest<{ statut: string; utilisateurId: string; reservationId: string }>(
@@ -569,10 +573,10 @@ export async function getReservationApi(reservationId: string): Promise<Reservat
  * @param seanceID 
  * @returns Liste des sieges reservé constitué dans une chaine avec numero de siege separe par une ","
  */
-export async function getSeatsBookedApi(seanceId: string): Promise<{ siegesReserves: string}> {
+export async function getSeatsBookedApi(seanceId: string): Promise<{ siegesReserves: string }> {
     const endpoint = `http://localhost:3500/api/seances/seats/${seanceId}`;
 
-    const seatsBooked = await apiRequest<{ siegesReserves: string} >(endpoint, 'GET', undefined, false); // Pas d'authentification requise
+    const seatsBooked = await apiRequest<{ siegesReserves: string }>(endpoint, 'GET', undefined, false); // Pas d'authentification requise
     console.log("Liste des sieges = ", seatsBooked);
 
     return seatsBooked;
@@ -588,7 +592,7 @@ export async function getSeancesByIdApi(uuids: string[]): Promise<Seance[]> {
 
     const endpoint = `http://localhost:3500/api/seances/seances?ids=${uuids}`;
 
-    const seances = await apiRequest<Seance[] >(endpoint, 'GET', undefined, false); // Pas d'authentification requise
+    const seances = await apiRequest<Seance[]>(endpoint, 'GET', undefined, false); // Pas d'authentification requise
     console.log("Liste des séances = ", seances);
 
     return seances;
@@ -750,7 +754,7 @@ export async function askResetPwdApi(email: string): Promise<void> {
 
 export async function resetPwdApi(email: string, codeConfirm: string, newPassword: string): Promise<void> {
     const endpoint = `http://localhost:3500/api/utilisateur/resetpwd`;
-    const body = JSON.stringify({ email: email , codeConfirm: codeConfirm, newPassword: newPassword});
+    const body = JSON.stringify({ email: email, codeConfirm: codeConfirm, newPassword: newPassword });
     console.log(body);
     const responseJSON = await apiRequest<void>(
         endpoint,
@@ -760,4 +764,167 @@ export async function resetPwdApi(email: string, codeConfirm: string, newPasswor
     );
     console.log("Message retour", responseJSON);
     return responseJSON;
+}
+
+/**
+ * Création d’un nouveau film (POST /api/films)
+ * @param film Les informations du film à créer
+ * @returns { message, id } où 'id' est l'identifiant du film créé
+ */
+export async function filmsCreateApi(film: Film): Promise<{ message: string; id: string }> {
+    const endpoint = 'http://localhost:3500/api/films';
+    // Requête authentifiée
+    const responseJSON = await apiRequest<{ message: string; id: string }>(
+        endpoint,
+        'POST',
+        film,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Récupération d’un film par son ID (GET /api/films/:id)
+ * @param filmId L'identifiant du film
+ * @returns L’objet Film correspondant
+ */
+export async function filmsSelectApi(filmId: string): Promise<Film> {
+    const endpoint = `http://localhost:3500/api/films/${filmId}`;
+    const responseJSON = await apiRequest<Film>(
+        endpoint,
+        'GET',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Mise à jour d’un film (PUT /api/films/:id)
+ * @param filmId L'identifiant du film à mettre à jour
+ * @param film Les nouvelles informations du film
+ * @returns { message } si la mise à jour est réussie
+ */
+export async function filmsUpdateApi(filmId: string, film: Film): Promise<{ message: string }> {
+    const endpoint = `http://localhost:3500/api/films/${filmId}`;
+    const responseJSON = await apiRequest<{ message: string }>(
+        endpoint,
+        'PUT',
+        film,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Suppression d’un film (DELETE /api/films/:id)
+ * @param filmId L'identifiant du film à supprimer
+ * @returns { message } si la suppression est réussie
+ */
+export async function filmsDeleteApi(filmId: string): Promise<{ message: string }> {
+    const endpoint = `http://localhost:3500/api/films/${filmId}`;
+    const responseJSON = await apiRequest<{ message: string }>(
+        endpoint,
+        'DELETE',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+* Récupération de tous les films (GET /api/films)
+* @returns Un tableau de Film
+*/
+export async function filmsSelectAllApi(): Promise<Film[]> {
+    const endpoint = 'http://localhost:3500/api/films';
+    // Requête authentifiée
+    const responseJSON = await apiRequest<Film[]>(
+        endpoint,
+        'GET',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Création d'une affiche (CREATE)
+ */
+export async function createAfficheApi(
+    filmId: string,
+    imageFile: File,
+    resolution: number,
+    contentType: string
+) {
+    const formData = new FormData();
+    formData.append('filmId', filmId);
+    formData.append('imageFile', imageFile);
+    formData.append('resolution', resolution.toString());
+    formData.append('contentType', contentType);
+
+    return apiRequest(
+        'http://localhost:3500/api/films/affiche',
+        'POST',
+        formData,
+        false // Pas d'authentification requise
+    );
+}
+
+/**
+ * Récupération d'une affiche par filmId (READ)
+ */
+export async function getAfficheApi(filmId: string) {
+    return apiRequest(
+        `http://localhost:3500/api/films/affiche/${filmId}`,
+        'GET',
+        undefined,
+        false // Pas d'authentification requise
+    );
+}
+
+/**
+ * Récupération de toutes les affiches (READ)
+ */
+export async function getAllAffichesApi() {
+    return apiRequest(
+        'http://localhost:3500/api/films/affiche',
+        'GET',
+        undefined,
+        false // Pas d'authentification requise
+    );
+}
+
+/**
+ * Mise à jour d'une affiche (UPDATE)
+ */
+export async function updateAfficheApi(
+    filmId: string,
+    imageFile?: File,
+    resolution?: number,
+    contentType?: string
+) {
+    const formData = new FormData();
+    if (imageFile) formData.append('imageFile', imageFile);
+    if (resolution) formData.append('resolution', resolution.toString());
+    if (contentType) formData.append('contentType', contentType);
+
+    return apiRequest(
+        `http://localhost:3500/api/films/affiche/${filmId}`,
+        'PUT',
+        formData,
+        false // Pas d'authentification requise
+    );
+}
+
+/**
+ * Suppression d'une affiche (DELETE)
+ */
+export async function deleteAfficheApi(filmId: string) {
+    return apiRequest(
+        `http://localhost:3500/api/films/affiche/${filmId}`,
+        'DELETE',
+        undefined,
+        false // Pas d'authentification requise
+    );
 }
