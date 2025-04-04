@@ -21,10 +21,7 @@
                     <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
             </div>
             <div class="nav__actions">
-                <button class="nav__actions-button nav__actions-button--link">Réservation</button>
-                <button class="nav__actions-button nav__actions-button--link">Films</button>
-                <button class="nav__actions-button nav__actions-button--link">Contact</button>
-                <button class="nav__actions-button nav__actions-button--signin">Connexion</button>
+                
             </div>
             <div class="nav__mobile-menu" id="navMobileMenu">
                 <img src="assets/menu.svg" alt="Menu">
@@ -33,10 +30,7 @@
             <div class="mobile-menu" id="mobileMenu">
                 <button class="mobile-menu__close" id="mobileMenuClose">&times;</button>
                 <nav class="mobile-menu__nav">
-                    <button class="nav__actions-button nav__actions-button--link">Réservation</button>
-                    <button class="nav__actions-button nav__actions-button--link">Films</button>
-                    <button class="nav__actions-button nav__actions-button--link">Contact</button>
-                    <button class="nav__actions-button nav__actions-button--signin">Connexion</button>
+                    
                 </nav>
             </div>
         </nav>
@@ -46,37 +40,8 @@
             <div class="title__left">
                 <h1 class="title__left-h1" id="titleLeft">Gérer les films</h1>
             </div>
-            <div class="title__filters title__filters-films">
-                <!-- Genre -->
-                <div class="title__filter-dropdown titre__filter-dropdown-genre">
-                    <button class="title__filter-dropdown-button" id="title__filter-dropdown-button-genre">Tous les genres <span class="chevron">▼</span></button>
-                    <div class="title__filter-button-drowdown-content">
-                        <a href="#">Film d'action</a>
-                        <a href="#">Thriller</a>
-                        <!-- On dynamisera si besoin depuis JS -->
-                    </div>
-                </div>
-                <!-- Cinéma -->
-                <div class="title__filter-dropdown titre__filter-dropdown-cinema">
-                    <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">
-                        Tous les complexes <span class="chevron">▼</span>
-                    </button>
-                    <div class="title__filter-button-drowdown-content">
-                        <a href="#" data-cinema="Tous les complexes">Tous les complexes</a>
-                        <a href="#" data-cinema="Paris">Paris</a>
-                        <a href="#" data-cinema="Bordeaux">Bordeaux</a>
-                        <a href="#" data-cinema="Nantes">Nantes</a>
-                        <a href="#" data-cinema="Lille">Lille</a>
-                        <a href="#" data-cinema="Toulouse">Toulouse</a>
-                        <a href="#" data-cinema="Charleroi" >Charleroi</a>
-                        <a href="#" data-cinema="Liège" >Liège</a>
-                    </div>
-                </div>
-                <!-- Jour 
-                <div class="title__filter-jour">
-                    <label for="filter-jour-input">Date :</label>
-                    <input type="date" id="filter-jour-input">
-                </div> -->
+            <div class="title__right">
+                <button class="title__right-button" id="title__right-button-Ajouter">Ajouter un film <span class="plus">+</span></button>
             </div>
         </div>
 
@@ -88,27 +53,18 @@
                 <!-- Détails du film sélectionné -->
                 <div class="detailFilm__twocolumns">
                     <div class="twocolumns__left">
-                        <img src="assets/static/1-1024.jpg" alt="Affiche" class="twocolumns__left-img">
-                        <button class="twocolumns__left-button-bo" id="openModal">Bande Annonce</button>
+                        <img src="assets/static/1-1024.jpg" alt="Affiche 1024" class="twocolumns__left-img">
+                        <span>Affiche 1024</span>
+                        <img src="assets/static/1-128.jpg" alt="Affiche 128" class="twocolumns__left-img">
+                        <span>Affiche 128</span>
                     </div>
                     <div class="twocolumns__right">
-                        <div class="right__film">
-                            <p class="right__title-p">Mourir peut attendre</p>
-                            <div class="right__caractFilm">
-                                <p class="caractFilm__genre-p">Action, Espionnage, Thriller</p>
-                                <p class="caractFilm__duree-p">1h53</p>
-                                <p class="caractFilm__public-p">TP</p>
-                            </div>
-                            <p class="right__description-p">...</p>
-                            <p class="right__author-p">De Cary Joji Fukunaga</p>
-                            <p class="right__distribution">Avec Daniel Craig, Léa Seydoux, Rami Malek</p>
-                        </div>
-                        <button class="right__jereserve-button" disabled >Je réserve</button>
+                        <!-- Items à saisir  -->
                     </div>
                 </div>
-                <!-- Conteneur supplémentaire pour afficher les séances du film -->
-                <div class="detailFilm__seancesListe">
-                    <!-- On insérera dynamiquement la liste des séances -->
+                <!-- Conteneur supplémentaire pour afficher categorie, coup de coeur et la saisie BO-->
+                <div class="detailFilm__categorie-coupcoeur-linkBO">
+                    <!-- On insérera dynamiquement les deux éléments -->
                 </div>
             </div>
         </div>

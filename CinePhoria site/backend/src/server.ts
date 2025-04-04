@@ -2,12 +2,10 @@ import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
 
 import express from 'express';
-
-
 import cors from 'cors';
 import logger  from './config/configLog';
-
-import sanitizeQueryMiddleware from './middlewares/sanitiseQueryMiddleware'
+import sanitizeQueryMiddleware from './middlewares/sanitiseQueryMiddleware';
+import fileUpload from 'express-fileupload';
 
 // Connexion à la base MongoDB
 import { connectDBMongo } from './config/config';
@@ -33,6 +31,13 @@ app.use(cors({
 //   console.log("Requête depuis :", req.headers.origin);
 //   next();
 // });
+
+// ✅ Middleware pour gérer l'upload de fichiers
+app.use(fileUpload({
+  // Options facultatives
+  createParentPath: true,
+  limits: { fileSize: 1 * 1024 * 1024 }, // Limite à 1MB
+}));
 
 // ✅ Middleware JSON (Obligatoire pour Express)
 app.use(express.json());

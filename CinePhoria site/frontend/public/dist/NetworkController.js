@@ -647,3 +647,65 @@ export function resetPwdApi(email, codeConfirm, newPassword) {
         return responseJSON;
     });
 }
+/**
+ * Création d’un nouveau film (POST /api/films)
+ * @param film Les informations du film à créer
+ * @returns { message, id } où 'id' est l'identifiant du film créé
+ */
+export function filmsCreateApi(film) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = 'http://localhost:3500/api/films';
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'POST', film, true);
+        return responseJSON;
+    });
+}
+/**
+ * Récupération d’un film par son ID (GET /api/films/:id)
+ * @param filmId L'identifiant du film
+ * @returns L’objet Film correspondant
+ */
+export function filmsSelectApi(filmId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/films/${filmId}`;
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}
+/**
+ * Mise à jour d’un film (PUT /api/films/:id)
+ * @param filmId L'identifiant du film à mettre à jour
+ * @param film Les nouvelles informations du film
+ * @returns { message } si la mise à jour est réussie
+ */
+export function filmsUpdateApi(filmId, film) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/films/${filmId}`;
+        const responseJSON = yield apiRequest(endpoint, 'PUT', film, true);
+        return responseJSON;
+    });
+}
+/**
+ * Suppression d’un film (DELETE /api/films/:id)
+ * @param filmId L'identifiant du film à supprimer
+ * @returns { message } si la suppression est réussie
+ */
+export function filmsDeleteApi(filmId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/films/${filmId}`;
+        const responseJSON = yield apiRequest(endpoint, 'DELETE', undefined, true);
+        return responseJSON;
+    });
+}
+/**
+* Récupération de tous les films (GET /api/films)
+* @returns Un tableau de Film
+*/
+export function filmsSelectAllApi() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = 'http://localhost:3500/api/films';
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}
