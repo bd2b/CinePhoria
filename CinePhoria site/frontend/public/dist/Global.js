@@ -21,7 +21,7 @@ const pageHandlers = {
     "films.html": onLoadFilms,
     "manageFilms.html": onLoadManageFilms
 };
-const pagesPublic = ["visiteur.html", "reservation.html", "films.html"];
+const pagesPublic = ["visiteur.html", "reservation.html", "films.html", "manageFilms.html"];
 /**
  * Gestion centralisée des erreurs API
  */

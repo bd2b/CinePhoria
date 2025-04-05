@@ -1,0 +1,297 @@
+.container__films {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    height: calc(100vh - 200px);
+    /* Espace restant après le header */
+    width: 100%;
+    gap: 10px;
+}
+
+/* --------------------- COLONNE 1 Liste des films */
+.films__listFilms {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+    width: 25%;
+    gap: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+
+
+}
+
+.listFilms__simpleCard {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 0px;
+
+    width: 100%;
+    height: 200px;
+
+    gap: 10px;
+    background: rgb(var(--secondary-color));
+    border: 1px solid rgb(var(--primary-color), 0.3);
+    border-radius: 12px;
+
+    cursor: pointer;
+}
+
+.listFilms__simpleCard:hover {
+    background: rgb(var(--ternary-color), 0.5);
+}
+
+.listFilms__simpleCard:selected {
+    background: rgb(var(--ternary-color));
+    border: 3px solid rgb(var(--primary-color), 0.6);
+}
+
+.simpleCard__affiche-img {
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+
+
+
+    height: 200px;
+    width: 175px;
+    object-fit: cover;
+
+    border: 10px, border, rgb(var(--primary-color));
+}
+
+.simpleCard__detail {
+    flex-shrink: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    box-sizing: border-box;
+
+    order: 1;
+    width: 75%;
+    height: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.simpleCard__detail-titre-p {
+    flex: none;
+    width: 100%;
+
+    font-size: var(--subheadline-font-size);
+}
+
+.simpleCard__detail-pitch-p {
+    flex: none;
+    width: 100%;
+
+    font-size: var(--body-font-size);
+}
+
+.simpleCard__evaluation {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    gap: 5px;
+    width: 100%;
+}
+
+.evaluation__coupdecoeur {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    gap: 5px;
+    background: rgb(var(--background-color));
+    border-radius: 8px;
+    height: 30px;
+    font-size: var(--caption2-font-size);
+}
+
+.evaluation__coupdecoeur-img {
+    width: 24px;
+    height: 24px;
+}
+
+.evaluation__note {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    gap: 2px;
+    background: rgb(var(--background-color));
+    border-radius: 8px;
+    height: 30px;
+    font-size: var(--caption2-font-size);
+}
+
+.films__detailFilm {
+    flex: 2;
+
+    display: flex;
+    flex-direction: column;
+    /* flex-wrap: nowrap;
+    overflow-y: auto; */
+    align-items: center;
+    gap: 10px;
+
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    width: 75%;
+    height: 95%;
+    background: rgb(var(--ternary-color), 0.5);
+    /* Gray/300 */
+    border: 1px solid #DEE2E6;
+    border-radius: 12px;
+}
+
+.form-detailfilm {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    /* background: white; */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.film-images {
+    display: flex;
+    gap: 20px;
+}
+
+.affiche-container {
+    height: 444px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.affiche-small {
+    width: 128px;
+    height: 80px;
+    object-fit: scale-down;
+}
+
+.affiche-large {
+    width: 256px;
+    height: 256px;
+    object-fit: scale-down;
+}
+
+.label-affiche {
+    color: black;
+    font-size: 15px;
+    font-family: Actor;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.25px;
+}
+
+.film-details {
+    flex: 1;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.field-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.label {
+    color: rgba(23, 23, 23, 0.70);
+    font-size: 15px;
+    font-family: Actor;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.25px;
+}
+
+.field-value {
+    padding: 12px;
+    background: white;
+    border-radius: 12px;
+    outline: 2px rgba(23, 23, 23, 0.10) solid;
+    outline-offset: -2px;
+    color: #212529;
+    font-size: 14px;
+    font-family: Actor;
+}
+
+.btn-genres {
+    max-width: 200px;
+    padding: 8px 16px;
+    background: #2C3E50;
+    border-radius: 4px;
+    color: white;
+    font-size: 20px;
+    font-family: Actor;
+    cursor: pointer;
+    border: none;
+    outline: 1px black solid;
+    outline-offset: -1px;
+}
+
+.bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.categorie-public .label {
+    color: rgba(23, 23, 23, 0.70);
+    font-size: 15px;
+    font-family: Manrope;
+    font-weight: 600;
+}
+
+.btn-select-public {
+    padding: 8px 16px;
+    background: #2C3E50;
+    border-radius: 4px;
+    color: rgba(23, 23, 23, 0.20);
+    font-size: 15px;
+    font-family: Manrope;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    outline: 1px black solid;
+    outline-offset: -1px;
+}
+
+.coup-de-coeur {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coup-de-coeur label {
+    color: rgba(23, 23, 23, 0.90);
+    font-size: 15px;
+    font-family: Actor;
+    line-height: 24px;
+}

@@ -25,9 +25,11 @@ function apiRequest(endpoint_1, method_1, body_1) {
                 console.warn("⛔ Aucun token disponible, redirection immédiate.");
                 throw new CinephoriaError(CinephoriaErrorCode.AUTH_REQUIRED, "Authentification requise et pas de token.");
             }
-            const headers = {
-                'Content-Type': 'application/json'
-            };
+            const headers = {};
+            // Si le corps n'est pas un FormData, fixer Content-Type à application/json
+            if (!(body instanceof FormData)) {
+                headers['Content-Type'] = 'application/json';
+            }
             if (requiresAuth) {
                 headers['Authorization'] = `Bearer ${token}`;
             }
@@ -707,5 +709,62 @@ export function filmsSelectAllApi() {
         // Requête authentifiée
         const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
         return responseJSON;
+    });
+}
+/**
+ * Création d'une affiche (CREATE)
+ */
+export function createAfficheApi(filmId, imageFile, resolution, contentType) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const formData = new FormData();
+        formData.append('filmId', filmId);
+        formData.append('imageFile', imageFile);
+        formData.append('resolution', resolution.toString());
+        formData.append('contentType', contentType);
+        return apiRequest('http://localhost:3500/api/films/affiche', 'POST', formData, false // Pas d'authentification requise
+        );
+    });
+}
+/**
+ * Récupération d'une affiche par filmId (READ)
+ */
+export function getAfficheApi(filmId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return apiRequest(`http://localhost:3500/api/films/affiche/${filmId}`, 'GET', undefined, false // Pas d'authentification requise
+        );
+    });
+}
+/**
+ * Récupération de toutes les affiches (READ)
+ */
+export function getAllAffichesApi() {
+    return __awaiter(this, void 0, void 0, function* () {
+        return apiRequest('http://localhost:3500/api/films/affiche', 'GET', undefined, false // Pas d'authentification requise
+        );
+    });
+}
+/**
+ * Mise à jour d'une affiche (UPDATE)
+ */
+export function updateAfficheApi(filmId, imageFile, resolution, contentType) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const formData = new FormData();
+        if (imageFile)
+            formData.append('imageFile', imageFile);
+        if (resolution)
+            formData.append('resolution', resolution.toString());
+        if (contentType)
+            formData.append('contentType', contentType);
+        return apiRequest(`http://localhost:3500/api/films/affiche/${filmId}`, 'PUT', formData, false // Pas d'authentification requise
+        );
+    });
+}
+/**
+ * Suppression d'une affiche (DELETE)
+ */
+export function deleteAfficheApi(filmId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return apiRequest(`http://localhost:3500/api/films/affiche/${filmId}`, 'DELETE', undefined, false // Pas d'authentification requise
+        );
     });
 }
