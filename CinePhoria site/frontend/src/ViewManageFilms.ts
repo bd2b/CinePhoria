@@ -8,7 +8,7 @@ import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { isUUID } from './Helpers.js';
 import { filmsCreateApi , filmsDeleteApi, filmsSelectAllApi, filmsSelectApi, filmsUpdateApi } from './NetworkController.js';
-
+import { createAfficheApi, deleteAfficheApi, getAllAffichesApi, getAfficheApi, updateAfficheApi } from './NetworkController.js';
 
 
 export async function onLoadManageFilms() {
@@ -60,6 +60,9 @@ async function rafraichirListeFilms(): Promise<void> {
     }
 }
 
+/* -------------------------------------------
+   Affichage de la card d'un film
+------------------------------------------- */
 function buildFilmCard(film: Film): HTMLDivElement {
     const divCard = document.createElement('div');
     divCard.classList.add('listFilms__simpleCard');
@@ -125,9 +128,50 @@ async function afficherDetailFilm(film: Film): Promise<void> {
     const containerDetail = document.querySelector('.films__detailFilm');
     if (!containerDetail) return;
 
-    // A compléter
+    // Mise à jour des affiches
+    const afficheSmall = document.getElementById('affiche-small') as HTMLImageElement;
+    afficheSmall.src = `assets/static/${film.imageFilm128}`;
 
-    
+    const afficheLarge = document.getElementById('affiche-large') as HTMLImageElement;
+    afficheLarge.src = `assets/static/${film.imageFilm1024}`;
+
+    // Nom du film
+    const nomFilm = document.getElementById('titleFilm');
+    if (nomFilm) nomFilm.textContent = film.titleFilm ?? '';
+
+    // Genres
+    const genreFilm = document.getElementById('genreArray');
+    if (genreFilm) genreFilm.textContent = film.genreArray ?? '';
+
+    // Réalisateur
+    const realisateurFilm = document.getElementById('filmAuthor');
+    if (realisateurFilm) realisateurFilm.textContent = film.filmAuthor ?? '';
+
+    // Durée
+    const dureeFilm = document.getElementById('duration');
+    if (dureeFilm) dureeFilm.textContent = film.duration ?? ''
+
+    // Pitch
+    const pitchFilm = document.getElementById('filmPitch');
+    if (pitchFilm) pitchFilm.textContent = film.filmPitch ?? '';
+
+    // Distribution
+    const distributionFilm = document.getElementById('filmDistribution');
+    if (distributionFilm) distributionFilm.textContent = film.filmDistribution ?? '';
+
+    // Catégorie de public
+    const categoriePublic = containerDetail.querySelector('#title__filter-dropdown-button-genre');
+    if (categoriePublic) categoriePublic.innerHTML = `${film.categorySeeing}<span class="chevron">▼</span>`;
+
+    // Coup de cœur
+    const coupDeCoeurCheckbox = containerDetail.querySelector('#coupCoeur') as HTMLInputElement;
+    if (coupDeCoeurCheckbox) coupDeCoeurCheckbox.checked = film.isCoupDeCoeur ?? false;
+
+    // Description
+    const descriptionFilm = document.getElementById('filmDescription');
+    if (descriptionFilm) descriptionFilm.textContent = film.filmDescription ?? '';
+
+    console.log("Détail affiché pour " + film.titleFilm);
 }
 
 /* -------------------------------------------

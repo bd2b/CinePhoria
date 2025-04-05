@@ -248,7 +248,7 @@ function buildIntranetMenuAdmin() {
     subMenu.style.backgroundColor = '#F8F8FF';
     subMenu.style.border = '1px solid #999';
     // Ajout des items
-    const item1 = createLevel2Item('Gérer les films', 'manageFilm.html');
+    const item1 = createLevel2Item('Gérer les films', 'manageFilms.html');
     const item2 = createLevel2Item('Gérer les salles', 'manageSalle.html');
     const item3 = createLevel2Item('Gérer les comptes employés', 'manageEmploye.html');
     subMenu.append(item1, item2, item3);
@@ -287,7 +287,7 @@ function buildIntranetMenuEmploye() {
     subMenu.style.left = '0';
     subMenu.style.backgroundColor = '#F8F8FF';
     subMenu.style.border = '1px solid #999';
-    const item1 = createLevel2Item('Gérer les films', 'manageFilm.html');
+    const item1 = createLevel2Item('Gérer les films', 'manageFilms.html');
     const item2 = createLevel2Item('Gérer les salles', 'manageSalle.html');
     const item3 = createLevel2Item('Modérer les avis', 'moderer.html');
     subMenu.append(item1, item2, item3);
