@@ -161,6 +161,7 @@ export class DataController {
         if (!isUUID(value)) {
             throw new Error("L'id du film n'est pas conforme.");
         }
+        console.log("Set selectedFilmUUID");
         this._selectedFilmUUID = value;
     }
     // Getter pour selectedFilm

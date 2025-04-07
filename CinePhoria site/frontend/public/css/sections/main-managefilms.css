@@ -54,9 +54,6 @@
     flex: none;
     order: 0;
     flex-grow: 0;
-
-
-
     height: 200px;
     width: 175px;
     object-fit: cover;
@@ -131,9 +128,9 @@
     font-size: var(--caption2-font-size);
 }
 
+/* --------------------- COLONNE 2 détail du film */
 .films__detailFilm {
     flex: 2;
-
     display: flex;
     flex-direction: column;
     /* flex-wrap: nowrap;

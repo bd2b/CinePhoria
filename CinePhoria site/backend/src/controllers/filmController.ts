@@ -52,7 +52,7 @@ export class FilmController {
       const newId = await FilmDAO.createFilm(filmToCreate);
 
       // On renvoie l’ID ou un message
-      res.status(201).json({ message: 'Film créé avec succès', id: newId });
+      res.status(201).json({ message: 'OK', id: newId });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
@@ -69,9 +69,9 @@ export class FilmController {
       const result = await FilmDAO.updateFilm(filmId, filmToUpdate);
 
       if (result) {
-        res.json({ message: 'Film mis à jour avec succès' });
+        res.json({ message: 'OK' });
       } else {
-        res.status(404).json({ message: 'Film non trouvé ou non mis à jour' });
+        res.status(404).json({ message: 'Erreur: Film non trouvé ou non mis à jour' });
       }
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -87,9 +87,9 @@ export class FilmController {
       const success = await FilmDAO.deleteFilm(filmId);
 
       if (success) {
-        res.json({ message: 'Film supprimé avec succès' });
+        res.json({ message: 'OK' });
       } else {
-        res.status(404).json({ message: 'Film non trouvé ou déjà supprimé' });
+        res.status(404).json({ message: 'Erreur: Film non trouvé ou déjà supprimé' });
       }
     } catch (error: any) {
       res.status(500).json({ error: error.message });
