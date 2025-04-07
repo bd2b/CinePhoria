@@ -4,6 +4,8 @@ import { Film } from "../shared-models/Film";
 import { dbConfig } from "../config/config";
 import logger from '../config/configLog';
 
+import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
+
 
 export class FilmDAO {
   static async findAll(): Promise<Film[]> {
@@ -83,6 +85,8 @@ export class FilmDAO {
 
   // Update
   static async updateFilm(id: string, film: Film): Promise<boolean> {
+    // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
+    const dateSortie = formatDateLocalYYYYMMDD(new Date(film.dateSortieCinePhoria || ''));
     const connection = await mysql.createConnection(dbConfig);
     try {
       logger.info(`Mise à jour du film ${id}`);
@@ -109,7 +113,7 @@ export class FilmDAO {
           film.genreArray || null,
           film.duration || null,
           film.linkBO || null,
-          film.dateSortieCinePhoria || null,
+          dateSortie || null,
           film.categorySeeing || null,
           film.note || 0,
           film.isCoupDeCoeur ? 1 : 0,
