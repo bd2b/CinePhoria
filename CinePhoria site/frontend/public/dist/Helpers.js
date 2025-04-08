@@ -65,6 +65,18 @@ export function datePrecedentMercredi(date = new Date()) {
     return previousDate;
 }
 /**
+ * Date du prochain mercredi
+ * @param date Par défaut la date du jour
+ * @returns La date du prochain mercredi
+ */
+export function dateProchainMercredi(date = new Date()) {
+    const nextDate = new Date(date); // Copie de la date donnée
+    const dayOfWeek = nextDate.getDay(); // 0 = Dimanche, 1 = Lundi, ..., 3 = Mercredi
+    const daysToAdd = (dayOfWeek <= 3) ? (3 - dayOfWeek) : (7 - dayOfWeek + 3);
+    nextDate.setDate(nextDate.getDate() + daysToAdd);
+    return nextDate;
+}
+/**
  * Formate la date (locale) au format jj/mm (ex : 09/01)
  */
 export function formatDateJJMM(date) {
@@ -119,3 +131,17 @@ export function validateEmail(email) {
     return emailRegex.test(email);
 }
 ;
+/**
+ * Fonction de calcul de l'url d'une image de film en fonction de la valeur du champ imageFilm128 ou imageFilm1024
+ * Cela doit permettre de récupérer l'url selon les cas :
+ * Si la valeur est un uuid suivi de la résolution, on redonne http://localhost:3500/api/films/affichefile/valeur
+ * Sinon on donne http://127.0.0.1:3000/frontend/public/assets/static/
+ *
+ * 813d32eb-7df7-4338-9976-bb4471a966d81024
+ */
+export function imageFilm(value) {
+    const prefixAPI = 'http://localhost:3500/api/films/affichefile/';
+    const prefixDist = 'http://127.0.0.1:3000/frontend/public/assets/static/';
+    const uuidPossible = value.slice(0, 36);
+    return (isUUID(uuidPossible) ? prefixAPI : prefixDist) + value;
+}
