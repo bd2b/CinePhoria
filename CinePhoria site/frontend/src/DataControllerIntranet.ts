@@ -48,6 +48,8 @@ export class DataControllerIntranet {
             return false;
         }
     }
+
+
     constructor() {
         console.log("DataCIntranet : Initialisation");
     }

@@ -26,8 +26,27 @@ function apiRequest(endpoint_1, method_1, body_1) {
                 throw new CinephoriaError(CinephoriaErrorCode.AUTH_REQUIRED, "Authentification requise et pas de token.");
             }
             const headers = {};
-            // Si le corps n'est pas un FormData, fixer Content-Type à application/json
-            if (!(body instanceof FormData)) {
+            /** Probleme pour l'envoie de fichier
+             * Le problème vient du fait que le serveur ne reçoit pas tes données en form-data
+             * (du coup req.body.resolution et req.files sont vides).
+             * Avec express-fileupload, si on envoie bien du multipart/form-data,
+             * on devrait retrouver quelque chose dans req.files.imageFile et
+             * req.body.resolution.
+             *
+             * La cause la plus fréquente :
+             * tu forces Content-Type: application/json quelque part ou
+             * tu n’envoies pas correctement le formData.
+             * Assure-toi que dans ta fonction apiRequest (ou équivalent),
+             * tu n’ajoutes pas de header Content-Type quand tu envoies un FormData.
+             * Il faut laisser le navigateur définir tout seul le boundary du multipart.
+             */
+            let finalBody;
+            if (body instanceof FormData) {
+                finalBody = body;
+                // pas de headers['Content-Type']
+            }
+            else {
+                finalBody = body ? JSON.stringify(body) : undefined;
                 headers['Content-Type'] = 'application/json';
             }
             if (requiresAuth) {
@@ -36,7 +55,7 @@ function apiRequest(endpoint_1, method_1, body_1) {
             let response = yield fetch(endpoint, {
                 method,
                 headers,
-                body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
+                body: finalBody,
                 credentials: requiresAuth ? 'include' : 'same-origin'
             });
             if (requiresAuth && (response.status === 401 || response.status === 403)) {
@@ -52,7 +71,7 @@ function apiRequest(endpoint_1, method_1, body_1) {
                     response = yield fetch(endpoint, {
                         method,
                         headers: Object.assign(Object.assign({}, headers), { 'Authorization': `Bearer ${token}` }),
-                        body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
+                        body: finalBody,
                         credentials: 'include'
                     });
                 }

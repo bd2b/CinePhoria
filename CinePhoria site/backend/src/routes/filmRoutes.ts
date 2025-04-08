@@ -21,6 +21,9 @@ router.get('/affiche', AfficheController.getAll);
 logger.info('Declaration route GET /api/films/affiche/:filmId');
 router.get('/affiche/:filmId', AfficheController.getById);
 
+logger.info('Declaration route GET /api/films/affichefile/:filmId');
+router.get('/affichefile/:filmId', AfficheController.getImageById);
+
 logger.info('Declaration route PUT /api/films/affiche/:filmId');
 router.put('/affiche/:filmId', AfficheController.update);
 

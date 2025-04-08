@@ -35,6 +35,8 @@ app.use(cors({
 // ✅ Middleware pour gérer l'upload de fichiers
 app.use(fileUpload({
   // Options facultatives
+  parseNested: true,
+  useTempFiles: false,
   createParentPath: true,
   limits: { fileSize: 1 * 1024 * 1024 }, // Limite à 1MB
 }));

@@ -107,7 +107,12 @@ export class AfficheController {
      */
     static async update(req: Request, res: Response): Promise<void> {
         try {
+
+            // logger.info('BODY:', req.body);
+            // logger.info('FILES:', req.files);
+
             const { filmId } = req.params;
+
             if (!filmId) {
                 res.status(400).json({ message: 'Paramètre filmId requis.' });
                 return;
@@ -173,4 +178,21 @@ export class AfficheController {
             res.status(500).json({ message: 'Erreur interne du serveur.' });
         }
     }
+
+    static async getImageById(req: Request, res: Response): Promise<void> {
+        try {
+          const { filmId } = req.params;
+          const affiche = await new AfficheDAO().getById(filmId);
+          if (!affiche) {
+            res.status(404).send('Affiche non trouvée');
+            return;
+          }
+      
+          res.setHeader('Content-Type', affiche.contentType);
+          res.send(affiche.imageFile);
+        } catch (error) {
+          console.error("Erreur récupération affiche :", error);
+          res.status(500).send("Erreur serveur");
+        }
+      }
 }

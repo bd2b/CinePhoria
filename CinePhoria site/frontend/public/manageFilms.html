@@ -62,19 +62,21 @@
                     <div class="film-images">
                         <div class="affiche-container">
                             <img class="affiche-small" id="affiche-small" src="https://placehold.co/128x80" />
-                            <div class="label-affiche">Affiche 128</div>
+                            <input type="file" id="upload128" hidden>
+                            <div class="label-affiche"><span style="color:red">*</span> Affiche 128</div>
                             <img class="affiche-large" id="affiche-large" src="https://placehold.co/256x256" />
-                            <div class="label-affiche">Affiche 1024</div>
+                            <input type="file" id="upload1024" hidden>
+                            <div class="label-affiche"><span style="color:red">*</span> Affiche 1024</div>
                         </div>
                         <div class="film-details">
                             <div class="detail-row">
                                 <div class="field-group">
-                                    <div class="label">Nom du Film</div>
+                                    <div class="label"><span style="color:red">*</span> Nom du Film</div>
                                     <div class="field-value" id="titleFilm">Bons Baisers de Russie</div>
 
                                 </div>
                                 <div class="field-group">
-                                    <div class="label">Genre</div>
+                                    <div class="label">Genre<span style="color:red">*</span> </div>
                                     <div class="field-value" id="genreArray">Action, Policier, Espionnage, Thriller
                                     </div>
                                 </div>
@@ -82,11 +84,11 @@
 
                             <div class="detail-row">
                                 <div class="field-group">
-                                    <div class="label">Réalisateur</div>
+                                    <div class="label"><span style="color:red">*</span> Réalisateur</div>
                                     <div class="field-value" id="filmAuthor">Réalisation : Ian Flemming</div>
                                 </div>
                                 <div class="field-group">
-                                    <div class="label">Durée du film</div>
+                                    <div class="label"><span style="color:red">*</span> Durée du film</div>
                                     <div class="field-value" id="duration">1h54</div>
                                 </div>
                             </div>
@@ -96,13 +98,13 @@
                             </div>
 
                             <div class="field-group">
-                                <div class="label">Distribution</div>
+                                <div class="label"><span style="color:red">*</span> Distribution</div>
                                 <div class="field-value" id="filmDistribution">Acteurs: Sean Connery, Daniela Bianchi,
                                     Nathalie Nerval, Pedro
                                     Armendáriz, Lotte Lenya</div>
                             </div>
                             <div class="field-group">
-                                <div class="label">Lien vers la BO</div>
+                                <div class="label"><span style="color:red">*</span> Lien vers la BO</div>
                                 <div class="field-value" id="linkBO">https://www.youtube.com/embed/Q0EiAfDmqx0</div>
                             </div>
 
@@ -113,10 +115,10 @@
                                             id="title__filter-dropdown-button-genre">Catégorie public<span
                                                 class="chevron">▼</span></button>
                                         <div class="title__filter-button-drowdown-content">
-                                            <a href="#">TP</a>
-                                            <a href="#">-18</a>
-                                            <a href="#">-16</a>
-                                            <a href="#">-12</a>
+                                            <a class="categorie-item" href="#">TP</a>
+                                            <a class="categorie-item" href="#">-18</a>
+                                            <a class="categorie-item" href="#">-16</a>
+                                            <a class="categorie-item" href="#">-12</a>
                                         </div>
                                     </div>
                                 </div>
@@ -131,7 +133,7 @@
                         </div>
                     </div>
                     <div class="field-group ">
-                        <div class="label">Description</div>
+                        <div class="label"><span style="color:red">*</span> Description</div>
                         <div class="field-value" id="filmDescription">
                             En pleine guerre froide, le dernier joyau technologique soviétique, le Lektor, est convoité
                             par le SPECTRE, la redoutable organisation criminelle dont faisait partie le Dr Julius No et

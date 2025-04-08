@@ -292,3 +292,32 @@
     font-family: Actor;
     line-height: 24px;
 }
+
+.title__filter-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .title__filter-button-drowdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 120px;
+    border: 1px solid rgba(0,0,0,0.2);
+    z-index: 1000;
+  }
+  
+  .title__filter-button-drowdown-content a {
+    padding: 10px;
+    display: block;
+    text-decoration: none;
+    color: black;
+  }
+  
+  .title__filter-button-drowdown-content a:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .title__filter-button-drowdown-content.show {
+    display: block;
+  }

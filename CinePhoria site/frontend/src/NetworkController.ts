@@ -30,9 +30,27 @@ async function apiRequest<T>(
         }
 
         const headers: HeadersInit = {};
+/** Probleme pour l'envoie de fichier
+ * Le problème vient du fait que le serveur ne reçoit pas tes données en form-data 
+ * (du coup req.body.resolution et req.files sont vides). 
+ * Avec express-fileupload, si on envoie bien du multipart/form-data, 
+ * on devrait retrouver quelque chose dans req.files.imageFile et 
+ * req.body.resolution.
+ * 
+ * La cause la plus fréquente : 
+ * tu forces Content-Type: application/json quelque part ou 
+ * tu n’envoies pas correctement le formData. 
+ * Assure-toi que dans ta fonction apiRequest (ou équivalent), 
+ * tu n’ajoutes pas de header Content-Type quand tu envoies un FormData. 
+ * Il faut laisser le navigateur définir tout seul le boundary du multipart.
+ */ 
 
-        // Si le corps n'est pas un FormData, fixer Content-Type à application/json
-        if (!(body instanceof FormData)) {
+        let finalBody: BodyInit | undefined;
+        if (body instanceof FormData) {
+            finalBody = body;
+            // pas de headers['Content-Type']
+        } else {
+            finalBody = body ? JSON.stringify(body) : undefined;
             headers['Content-Type'] = 'application/json';
         }
 
@@ -43,7 +61,7 @@ async function apiRequest<T>(
         let response = await fetch(endpoint, {
             method,
             headers,
-            body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
+            body: finalBody,
             credentials: requiresAuth ? 'include' : 'same-origin'
         });
 
@@ -66,7 +84,7 @@ async function apiRequest<T>(
                         ...headers,
                         'Authorization': `Bearer ${token}`
                     },
-                    body: body ? (typeof body === 'string' ? body : JSON.stringify(body)) : undefined,
+                    body: finalBody,
                     credentials: 'include'
                 });
 

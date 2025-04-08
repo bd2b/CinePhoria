@@ -1,5 +1,7 @@
 // import * as bcrypt from 'bcrypt';
 
+import { Url } from "url";
+
 // /**
 //  * Fonction de hachage d'un mot de passe avec bcrypt et une valeur de salage
 //  * @param password 
