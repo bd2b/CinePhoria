@@ -47,6 +47,9 @@ export async function onLoadManageFilms() {
 
     // Init les 3 boutons (Ajouter, Modifier, Annuler)
     initButtons();
+
+    // Initialiser les inputs de fichier
+    initInputFile();
 }
 
 /* ---------------------------------------------------
@@ -75,6 +78,14 @@ async function rafraichirListeFilms(): Promise<void> {
     } else {
         // plus de film => effacer detail
         effacerDetailFilm();
+    }
+    if (filmSelectedList) {
+        const selectedCard = [...container.querySelectorAll('.listFilms__simpleCard')]
+            .find((card) => card.textContent?.includes(filmSelectedList?.titleFilm ?? ''));
+
+        if (selectedCard) {
+            selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
     }
 }
 
@@ -144,100 +155,150 @@ function buildFilmCard(film: Film): HTMLDivElement {
 /* ---------------------------------------------------
    Affichage du détail d'un film dans la partie droite
 --------------------------------------------------- */
-async function afficherDetailFilm(film: Film) {
-    const containerDetail = document.querySelector('.films__detailFilm');
-    if (!containerDetail) return;
+// async function afficherDetailFilm(film: Film) {
+//     const containerDetail = document.querySelector('.films__detailFilm');
+//     if (!containerDetail) return;
 
-    // Affiches
-    const afficheSmall = document.getElementById('affiche-small') as HTMLImageElement | null;
-    if (afficheSmall) {
-        afficheSmall.src = film.imageFilm128 ? imageFilm(film.imageFilm128) : 'https://dummyimage.com/128x128/DAA520/000'
-        //  afficheSmall.src = `assets/static/${film.imageFilm128 || 'placeholder128.jpg'}`;
-    }
+//     // Affiches
+//     const afficheSmall = document.getElementById('affiche-small') as HTMLImageElement | null;
+//     if (afficheSmall) {
+//         afficheSmall.src = film.imageFilm128 ? imageFilm(film.imageFilm128) : 'https://dummyimage.com/128x128/DAA520/000'
+//         //  afficheSmall.src = `assets/static/${film.imageFilm128 || 'placeholder128.jpg'}`;
+//     }
 
-    const afficheLarge = document.getElementById('affiche-large') as HTMLImageElement | null;
-    if (afficheLarge) {
-        afficheLarge.src = film.imageFilm1024 ? imageFilm(film.imageFilm1024) : 'https://dummyimage.com/1024x1024/DAA520/000'
-    }
+//     const afficheLarge = document.getElementById('affiche-large') as HTMLImageElement | null;
+//     if (afficheLarge) {
+//         afficheLarge.src = film.imageFilm1024 ? imageFilm(film.imageFilm1024) : 'https://dummyimage.com/1024x1024/DAA520/000'
+//     }
 
-    // Titre
-    const nomFilm = document.getElementById('titleFilm');
-    if (nomFilm) nomFilm.textContent = film.titleFilm ?? '';
+//     // Titre
+//     const nomFilm = document.getElementById('titleFilm');
+//     if (nomFilm) nomFilm.textContent = film.titleFilm ?? '';
 
-    // Genres
-    const genreFilm = document.getElementById('genreArray');
-    if (genreFilm) genreFilm.textContent = film.genreArray ?? '';
+//     // Genres
+//     const genreFilm = document.getElementById('genreArray');
+//     if (genreFilm) genreFilm.textContent = film.genreArray ?? '';
 
-    // Réalisateur
-    const realisateurFilm = document.getElementById('filmAuthor');
-    if (realisateurFilm) realisateurFilm.textContent = film.filmAuthor ?? '';
+//     // Réalisateur
+//     const realisateurFilm = document.getElementById('filmAuthor');
+//     if (realisateurFilm) realisateurFilm.textContent = film.filmAuthor ?? '';
 
-    // Durée
-    const dureeFilm = document.getElementById('duration');
-    if (dureeFilm) dureeFilm.textContent = film.duration ?? '';
+//     // Durée
+//     const dureeFilm = document.getElementById('duration');
+//     if (dureeFilm) dureeFilm.textContent = film.duration ?? '';
 
-    // Pitch
-    const pitchFilm = document.getElementById('filmPitch');
-    if (pitchFilm) pitchFilm.textContent = film.filmPitch ?? '';
+//     // Pitch
+//     const pitchFilm = document.getElementById('filmPitch');
+//     if (pitchFilm) pitchFilm.textContent = film.filmPitch ?? '';
 
-    // Distribution
-    const distributionFilm = document.getElementById('filmDistribution');
-    if (distributionFilm) distributionFilm.textContent = film.filmDistribution ?? '';
+//     // Distribution
+//     const distributionFilm = document.getElementById('filmDistribution');
+//     if (distributionFilm) distributionFilm.textContent = film.filmDistribution ?? '';
 
-    // Lien BO
-    const linkBOFilm = document.getElementById('linkBO');
-    if (linkBOFilm) linkBOFilm.textContent = film.linkBO ?? '';
+//     // Lien BO
+//     const linkBOFilm = document.getElementById('linkBO');
+//     if (linkBOFilm) linkBOFilm.textContent = film.linkBO ?? '';
 
-    // Catégorie
-    const categoriePublic = containerDetail.querySelector('#title__filter-dropdown-button-genre');
-    if (categoriePublic) {
-        categoriePublic.innerHTML = `${film.categorySeeing ?? 'TP'}<span class="chevron">▼</span>`;
-    }
+//     // Catégorie
+//     const categoriePublic = containerDetail.querySelector('#title__filter-dropdown-button-genre');
+//     if (categoriePublic) {
+//         categoriePublic.innerHTML = `${film.categorySeeing ?? 'TP'}<span class="chevron">▼</span>`;
+//     }
 
-    // Gestion ouverture/fermeture du dropdown
-    const catBtn = document.getElementById('title__filter-dropdown-button-genre');
-    const dropdownContent = document.querySelector('.title__filter-button-drowdown-content');
+//     // Gestion ouverture/fermeture du dropdown
+//     const catBtn = document.getElementById('title__filter-dropdown-button-genre');
+//     const dropdownContent = document.querySelector('.title__filter-button-drowdown-content');
 
-    if (catBtn && dropdownContent) {
-        catBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            dropdownContent.classList.toggle('show');
-        });
+//     if (catBtn && dropdownContent) {
+//         catBtn.addEventListener('click', (e) => {
+//             e.stopPropagation();
+//             dropdownContent.classList.toggle('show');
+//         });
 
-        // Fermeture quand on clique ailleurs sur la page
-        document.addEventListener('click', () => {
-            dropdownContent.classList.remove('show');
-        });
+//         // Fermeture quand on clique ailleurs sur la page
+//         document.addEventListener('click', () => {
+//             dropdownContent.classList.remove('show');
+//         });
 
-        // Sélection d’un élément
-        dropdownContent.querySelectorAll('a').forEach((item) => {
-            item.addEventListener('click', (event) => {
-                event.preventDefault();
-                const selection = (event.target as HTMLElement).textContent || 'TP';
-                catBtn.innerHTML = `${selection}<span class="chevron">▼</span>`;
-                dropdownContent.classList.remove('show');
-            });
-        });
-    }
+//         // Sélection d’un élément
+//         dropdownContent.querySelectorAll('a').forEach((item) => {
+//             item.addEventListener('click', (event) => {
+//                 event.preventDefault();
+//                 const selection = (event.target as HTMLElement).textContent || 'TP';
+//                 catBtn.innerHTML = `${selection}<span class="chevron">▼</span>`;
+//                 dropdownContent.classList.remove('show');
+//             });
+//         });
+//     }
 
-    // Coup de coeur
-    const coupDeCoeurCheckbox = containerDetail.querySelector('#coupCoeur') as HTMLInputElement | null;
-    if (coupDeCoeurCheckbox) {
-        coupDeCoeurCheckbox.checked = film.isCoupDeCoeur ?? false;
-    }
+//     // Coup de coeur
+//     const coupDeCoeurCheckbox = containerDetail.querySelector('#coupCoeur') as HTMLInputElement | null;
+//     if (coupDeCoeurCheckbox) {
+//         coupDeCoeurCheckbox.checked = film.isCoupDeCoeur ?? false;
+//     }
 
-    // Description
-    const descriptionFilm = document.getElementById('filmDescription');
-    if (descriptionFilm) descriptionFilm.textContent = film.filmDescription ?? '';
+//     // Description
+//     const descriptionFilm = document.getElementById('filmDescription');
+//     if (descriptionFilm) descriptionFilm.textContent = film.filmDescription ?? '';
 
-    console.log("Détail affiché pour " + (film.titleFilm ?? ''));
-}
+//     console.log("Détail affiché pour " + (film.titleFilm ?? ''));
+// }
 
 function effacerDetailFilm() {
     const containerDetail = document.querySelector('.films__detailFilm');
     if (!containerDetail) return;
     // ex. vider le contenu
     // ...
+}
+
+/* ---------------------------------------------------
+   initialisation des controles de gestion des images d'affiche
+--------------------------------------------------- */
+function initInputFile() {
+    // Gestions d’images => on aura deux inputs <input type="file" id="upload128"> etc.
+    const file128Input = document.getElementById('upload128') as HTMLInputElement | null;
+    if (file128Input) file128Input.value = '';
+    file128Input?.removeEventListener('change', async (evt) => { });
+    file128Input?.addEventListener('change', async (evt) => {
+        const file = file128Input.files?.[0];
+        if (!file!.type.startsWith('image/jpeg') && !file!.type.startsWith('image/png')) {
+            alert('Seuls les fichiers JPEG ou PNG sont autorisés.');
+            return;
+        }
+        if (file) {
+            selectedFile128 = file;
+            // We enter editing mode if not already
+            // if (!isEditingMode) await onClickEditOrSave();
+
+            // Affiches
+            const afficheSmall = document.getElementById('affiche-small') as HTMLImageElement | null;
+            if (afficheSmall) {
+                afficheSmall.src = URL.createObjectURL(file);
+            }
+        }
+
+    });
+
+    const file1024Input = document.getElementById('upload1024') as HTMLInputElement | null;
+    if (file1024Input) file1024Input.value = '';
+    file1024Input?.removeEventListener('change', async (evt) => { });
+    file1024Input?.addEventListener('change', async (evt) => {
+        const file = file1024Input.files?.[0];
+        if (!file!.type.startsWith('image/jpeg') && !file!.type.startsWith('image/png')) {
+            alert('Seuls les fichiers JPEG ou PNG sont autorisés.');
+            return;
+        }
+        if (file) {
+            selectedFile1024 = file;
+            console.log("Selected file 1024 =>", file.name);
+            // if (!isEditingMode) await onClickEditOrSave();
+
+            const afficheLarge = document.getElementById('affiche-large') as HTMLImageElement | null;
+            if (afficheLarge) {
+                afficheLarge.src = URL.createObjectURL(file);;
+            }
+        }
+    });
 }
 
 /* ---------------------------------------------------
@@ -257,8 +318,13 @@ function initButtons() {
     btnEdit.style.display = "inline-block";
     btnCancel.style.display = "none";
 
+    btnAdd.removeEventListener('click', () => { });
     btnAdd.addEventListener('click', enterCreateMode);
+
+    btnEdit.removeEventListener('click', async () => { });
     btnEdit.addEventListener('click', async () => await onClickEditOrSave());
+
+    btnCancel.removeEventListener('click', () => { });
     btnCancel.addEventListener('click', onClickCancelEdit);
 }
 
@@ -335,7 +401,6 @@ async function onClickEditOrSave() {
 
 
         }
-
         await onSaveFilm();
     }
 }
@@ -368,12 +433,13 @@ function onClickCancelEdit() {
 }
 
 /**
- * Fonction de vérification des champs
+ * Fonction de vérification des champs du formulaire
+ * Si Ok on rend actif l'enregistrement
  */
 function checkFormValidity() {
     // const requiredNamedField = ['titleFilm', 'genreArray', 'duration', 'linkBO', 'note',
     //    'filmDescription', 'filmAuthor', 'filmDistribution'];
-     const requiredNamedField = ['titleFilm'];
+    const requiredNamedField = ['titleFilm'];
     const requiredFields = requiredNamedField.map(id =>
         (document.getElementById(id) as HTMLInputElement | null)?.textContent?.trim() || ''
     );
@@ -396,7 +462,7 @@ function checkFormValidity() {
 }
 
 /**
- * Fonction d'écouteur
+ * Fonction d'écouteur sur les champs de saisie
  */
 function initListen(init: boolean) {
     const requiredNamedField = ['titleFilm', 'genreArray', 'duration', 'linkBO', 'note',
@@ -417,6 +483,10 @@ function initListen(init: boolean) {
 
 /**
  * Enregistrement du film (création ou mise à jour)
+ * Appelle la construction d'un film à partir du formulaire
+ * Fait les modifications/création des affiches
+ * Fait la modification/création du film
+ * Finally réinitialise la page
  */
 async function onSaveFilm() {
     const film = buildFilmFromForm();
@@ -428,10 +498,10 @@ async function onSaveFilm() {
             console.log("Film created => id=", film.id);
 
             if (selectedFile128) {
-                await createAfficheApi(film.id + "128", selectedFile128, 128, selectedFile128.type);
+                await createAfficheApi(film.imageFilm128!, selectedFile128, 128, selectedFile128.type);
             }
             if (selectedFile1024) {
-                await createAfficheApi(film.id + "1024", selectedFile1024, 1024, selectedFile1024.type);
+                await createAfficheApi(film.imageFilm1024!, selectedFile1024, 1024, selectedFile1024.type);
             }
             alert("Film créé avec succès");
 
@@ -440,10 +510,10 @@ async function onSaveFilm() {
             console.log("Film updated => id=", film.id);
 
             if (selectedFile128) {
-                await updateAfficheApi(film.id + "128", selectedFile128, 128, selectedFile128.type);
+                await updateAfficheApi(film.imageFilm128!, selectedFile128, 128, selectedFile128.type);
             }
             if (selectedFile1024) {
-                await updateAfficheApi(film.id + "1024", selectedFile1024, 1024, selectedFile1024.type);
+                await updateAfficheApi(film.imageFilm1024!, selectedFile1024, 1024, selectedFile1024.type);
             }
             alert("Film mis à jour avec succès");
         }
@@ -465,6 +535,18 @@ async function onSaveFilm() {
         showButtonsForEdit(false);
         // On repasse en lecture seule
         setFormEditable(false);
+        // On réinitialise le contenu en se positionnant sur le film qu'on vient de gérer
+        filmSelectedList = film;
+
+        // Rafraîchir la liste de tous les films
+        await rafraichirListeFilms();
+
+        // Initialiser les inputs de fichier
+        initInputFile();
+
+        // Afficher le film créé ou modifié en mémorisant qu'il est selectionné
+        // fillFormWithFilm(film);
+        
     }
 }
 
@@ -516,7 +598,7 @@ function buildFilmFromForm(): Film | undefined {
 }
 
 /**
- * Remplit la div form-detailfilm avec les propriétés d’un Film
+ * Affiche un film dans le formulaire
  */
 function fillFormWithFilm(film: Film) {
 
@@ -595,50 +677,9 @@ function fillFormWithFilm(film: Film) {
     }
 }
 
-// Gestions d’images => on aura deux inputs <input type="file" id="upload128"> etc.
-const file128Input = document.getElementById('upload128') as HTMLInputElement | null;
-if (file128Input) file128Input.value = '';
-file128Input?.addEventListener('change', async (evt) => {
-    const file = file128Input.files?.[0];
-    if (!file!.type.startsWith('image/jpeg') && !file!.type.startsWith('image/png')) {
-        alert('Seuls les fichiers JPEG ou PNG sont autorisés.');
-        return;
-    }
-    if (file) {
-        selectedFile128 = file;
-        console.log("Selected file 128 =>", file.name);
-        // We enter editing mode if not already
-        if (!isEditingMode) await onClickEditOrSave();
-
-        // Affiches
-        const afficheSmall = document.getElementById('affiche-small') as HTMLImageElement | null;
-        if (afficheSmall) {
-            afficheSmall.src = URL.createObjectURL(file);
-        }
-    }
-
-});
-
-const file1024Input = document.getElementById('upload1024') as HTMLInputElement | null;
-if (file1024Input) file1024Input.value = '';
-file1024Input?.addEventListener('change', async (evt) => {
-    const file = file1024Input.files?.[0];
-    if (!file!.type.startsWith('image/jpeg') && !file!.type.startsWith('image/png')) {
-        alert('Seuls les fichiers JPEG ou PNG sont autorisés.');
-        return;
-    }
-    if (file) {
-        selectedFile1024 = file;
-        console.log("Selected file 1024 =>", file.name);
-        if (!isEditingMode) await onClickEditOrSave();
-
-        const afficheLarge = document.getElementById('affiche-large') as HTMLImageElement | null;
-        if (afficheLarge) {
-            afficheLarge.src = URL.createObjectURL(file);;
-        }
-    }
-});
-
+/**
+ * Rend éditable formulaire
+ */
 function setFormEditable(editable: boolean) {
     const fieldIds = [
         'titleFilm',
@@ -657,7 +698,6 @@ function setFormEditable(editable: boolean) {
 
             el.style.border = editable ? "1px solid #000" : "none";
             el.style.background = editable ? "rgba(255, 215, 0, 0.1)" : "#FFF";
-            // etc.
         }
     });
 

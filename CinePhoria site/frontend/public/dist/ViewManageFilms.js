@@ -35,6 +35,8 @@ export function onLoadManageFilms() {
         yield rafraichirListeFilms();
         // Init les 3 boutons (Ajouter, Modifier, Annuler)
         initButtons();
+        // Initialiser les inputs de fichier
+        initInputFile();
     });
 }
 /* ---------------------------------------------------
@@ -62,6 +64,13 @@ function rafraichirListeFilms() {
         else {
             // plus de film => effacer detail
             effacerDetailFilm();
+        }
+        if (filmSelectedList) {
+            const selectedCard = [...container.querySelectorAll('.listFilms__simpleCard')]
+                .find((card) => { var _a, _b; return (_a = card.textContent) === null || _a === void 0 ? void 0 : _a.includes((_b = filmSelectedList === null || filmSelectedList === void 0 ? void 0 : filmSelectedList.titleFilm) !== null && _b !== void 0 ? _b : ''); });
+            if (selectedCard) {
+                selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
         }
     });
 }
@@ -123,95 +132,133 @@ function buildFilmCard(film) {
 /* ---------------------------------------------------
    Affichage du détail d'un film dans la partie droite
 --------------------------------------------------- */
-function afficherDetailFilm(film) {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
-        const containerDetail = document.querySelector('.films__detailFilm');
-        if (!containerDetail)
-            return;
-        // Affiches
-        const afficheSmall = document.getElementById('affiche-small');
-        if (afficheSmall) {
-            afficheSmall.src = film.imageFilm128 ? imageFilm(film.imageFilm128) : 'https://dummyimage.com/128x128/DAA520/000';
-            //  afficheSmall.src = `assets/static/${film.imageFilm128 || 'placeholder128.jpg'}`;
-        }
-        const afficheLarge = document.getElementById('affiche-large');
-        if (afficheLarge) {
-            afficheLarge.src = film.imageFilm1024 ? imageFilm(film.imageFilm1024) : 'https://dummyimage.com/1024x1024/DAA520/000';
-        }
-        // Titre
-        const nomFilm = document.getElementById('titleFilm');
-        if (nomFilm)
-            nomFilm.textContent = (_a = film.titleFilm) !== null && _a !== void 0 ? _a : '';
-        // Genres
-        const genreFilm = document.getElementById('genreArray');
-        if (genreFilm)
-            genreFilm.textContent = (_b = film.genreArray) !== null && _b !== void 0 ? _b : '';
-        // Réalisateur
-        const realisateurFilm = document.getElementById('filmAuthor');
-        if (realisateurFilm)
-            realisateurFilm.textContent = (_c = film.filmAuthor) !== null && _c !== void 0 ? _c : '';
-        // Durée
-        const dureeFilm = document.getElementById('duration');
-        if (dureeFilm)
-            dureeFilm.textContent = (_d = film.duration) !== null && _d !== void 0 ? _d : '';
-        // Pitch
-        const pitchFilm = document.getElementById('filmPitch');
-        if (pitchFilm)
-            pitchFilm.textContent = (_e = film.filmPitch) !== null && _e !== void 0 ? _e : '';
-        // Distribution
-        const distributionFilm = document.getElementById('filmDistribution');
-        if (distributionFilm)
-            distributionFilm.textContent = (_f = film.filmDistribution) !== null && _f !== void 0 ? _f : '';
-        // Lien BO
-        const linkBOFilm = document.getElementById('linkBO');
-        if (linkBOFilm)
-            linkBOFilm.textContent = (_g = film.linkBO) !== null && _g !== void 0 ? _g : '';
-        // Catégorie
-        const categoriePublic = containerDetail.querySelector('#title__filter-dropdown-button-genre');
-        if (categoriePublic) {
-            categoriePublic.innerHTML = `${(_h = film.categorySeeing) !== null && _h !== void 0 ? _h : 'TP'}<span class="chevron">▼</span>`;
-        }
-        // Gestion ouverture/fermeture du dropdown
-        const catBtn = document.getElementById('title__filter-dropdown-button-genre');
-        const dropdownContent = document.querySelector('.title__filter-button-drowdown-content');
-        if (catBtn && dropdownContent) {
-            catBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                dropdownContent.classList.toggle('show');
-            });
-            // Fermeture quand on clique ailleurs sur la page
-            document.addEventListener('click', () => {
-                dropdownContent.classList.remove('show');
-            });
-            // Sélection d’un élément
-            dropdownContent.querySelectorAll('a').forEach((item) => {
-                item.addEventListener('click', (event) => {
-                    event.preventDefault();
-                    const selection = event.target.textContent || 'TP';
-                    catBtn.innerHTML = `${selection}<span class="chevron">▼</span>`;
-                    dropdownContent.classList.remove('show');
-                });
-            });
-        }
-        // Coup de coeur
-        const coupDeCoeurCheckbox = containerDetail.querySelector('#coupCoeur');
-        if (coupDeCoeurCheckbox) {
-            coupDeCoeurCheckbox.checked = (_j = film.isCoupDeCoeur) !== null && _j !== void 0 ? _j : false;
-        }
-        // Description
-        const descriptionFilm = document.getElementById('filmDescription');
-        if (descriptionFilm)
-            descriptionFilm.textContent = (_k = film.filmDescription) !== null && _k !== void 0 ? _k : '';
-        console.log("Détail affiché pour " + ((_l = film.titleFilm) !== null && _l !== void 0 ? _l : ''));
-    });
-}
+// async function afficherDetailFilm(film: Film) {
+//     const containerDetail = document.querySelector('.films__detailFilm');
+//     if (!containerDetail) return;
+//     // Affiches
+//     const afficheSmall = document.getElementById('affiche-small') as HTMLImageElement | null;
+//     if (afficheSmall) {
+//         afficheSmall.src = film.imageFilm128 ? imageFilm(film.imageFilm128) : 'https://dummyimage.com/128x128/DAA520/000'
+//         //  afficheSmall.src = `assets/static/${film.imageFilm128 || 'placeholder128.jpg'}`;
+//     }
+//     const afficheLarge = document.getElementById('affiche-large') as HTMLImageElement | null;
+//     if (afficheLarge) {
+//         afficheLarge.src = film.imageFilm1024 ? imageFilm(film.imageFilm1024) : 'https://dummyimage.com/1024x1024/DAA520/000'
+//     }
+//     // Titre
+//     const nomFilm = document.getElementById('titleFilm');
+//     if (nomFilm) nomFilm.textContent = film.titleFilm ?? '';
+//     // Genres
+//     const genreFilm = document.getElementById('genreArray');
+//     if (genreFilm) genreFilm.textContent = film.genreArray ?? '';
+//     // Réalisateur
+//     const realisateurFilm = document.getElementById('filmAuthor');
+//     if (realisateurFilm) realisateurFilm.textContent = film.filmAuthor ?? '';
+//     // Durée
+//     const dureeFilm = document.getElementById('duration');
+//     if (dureeFilm) dureeFilm.textContent = film.duration ?? '';
+//     // Pitch
+//     const pitchFilm = document.getElementById('filmPitch');
+//     if (pitchFilm) pitchFilm.textContent = film.filmPitch ?? '';
+//     // Distribution
+//     const distributionFilm = document.getElementById('filmDistribution');
+//     if (distributionFilm) distributionFilm.textContent = film.filmDistribution ?? '';
+//     // Lien BO
+//     const linkBOFilm = document.getElementById('linkBO');
+//     if (linkBOFilm) linkBOFilm.textContent = film.linkBO ?? '';
+//     // Catégorie
+//     const categoriePublic = containerDetail.querySelector('#title__filter-dropdown-button-genre');
+//     if (categoriePublic) {
+//         categoriePublic.innerHTML = `${film.categorySeeing ?? 'TP'}<span class="chevron">▼</span>`;
+//     }
+//     // Gestion ouverture/fermeture du dropdown
+//     const catBtn = document.getElementById('title__filter-dropdown-button-genre');
+//     const dropdownContent = document.querySelector('.title__filter-button-drowdown-content');
+//     if (catBtn && dropdownContent) {
+//         catBtn.addEventListener('click', (e) => {
+//             e.stopPropagation();
+//             dropdownContent.classList.toggle('show');
+//         });
+//         // Fermeture quand on clique ailleurs sur la page
+//         document.addEventListener('click', () => {
+//             dropdownContent.classList.remove('show');
+//         });
+//         // Sélection d’un élément
+//         dropdownContent.querySelectorAll('a').forEach((item) => {
+//             item.addEventListener('click', (event) => {
+//                 event.preventDefault();
+//                 const selection = (event.target as HTMLElement).textContent || 'TP';
+//                 catBtn.innerHTML = `${selection}<span class="chevron">▼</span>`;
+//                 dropdownContent.classList.remove('show');
+//             });
+//         });
+//     }
+//     // Coup de coeur
+//     const coupDeCoeurCheckbox = containerDetail.querySelector('#coupCoeur') as HTMLInputElement | null;
+//     if (coupDeCoeurCheckbox) {
+//         coupDeCoeurCheckbox.checked = film.isCoupDeCoeur ?? false;
+//     }
+//     // Description
+//     const descriptionFilm = document.getElementById('filmDescription');
+//     if (descriptionFilm) descriptionFilm.textContent = film.filmDescription ?? '';
+//     console.log("Détail affiché pour " + (film.titleFilm ?? ''));
+// }
 function effacerDetailFilm() {
     const containerDetail = document.querySelector('.films__detailFilm');
     if (!containerDetail)
         return;
     // ex. vider le contenu
     // ...
+}
+/* ---------------------------------------------------
+   initialisation des controles de gestion des images d'affiche
+--------------------------------------------------- */
+function initInputFile() {
+    // Gestions d’images => on aura deux inputs <input type="file" id="upload128"> etc.
+    const file128Input = document.getElementById('upload128');
+    if (file128Input)
+        file128Input.value = '';
+    file128Input === null || file128Input === void 0 ? void 0 : file128Input.removeEventListener('change', (evt) => __awaiter(this, void 0, void 0, function* () { }));
+    file128Input === null || file128Input === void 0 ? void 0 : file128Input.addEventListener('change', (evt) => __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const file = (_a = file128Input.files) === null || _a === void 0 ? void 0 : _a[0];
+        if (!file.type.startsWith('image/jpeg') && !file.type.startsWith('image/png')) {
+            alert('Seuls les fichiers JPEG ou PNG sont autorisés.');
+            return;
+        }
+        if (file) {
+            selectedFile128 = file;
+            // We enter editing mode if not already
+            // if (!isEditingMode) await onClickEditOrSave();
+            // Affiches
+            const afficheSmall = document.getElementById('affiche-small');
+            if (afficheSmall) {
+                afficheSmall.src = URL.createObjectURL(file);
+            }
+        }
+    }));
+    const file1024Input = document.getElementById('upload1024');
+    if (file1024Input)
+        file1024Input.value = '';
+    file1024Input === null || file1024Input === void 0 ? void 0 : file1024Input.removeEventListener('change', (evt) => __awaiter(this, void 0, void 0, function* () { }));
+    file1024Input === null || file1024Input === void 0 ? void 0 : file1024Input.addEventListener('change', (evt) => __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const file = (_a = file1024Input.files) === null || _a === void 0 ? void 0 : _a[0];
+        if (!file.type.startsWith('image/jpeg') && !file.type.startsWith('image/png')) {
+            alert('Seuls les fichiers JPEG ou PNG sont autorisés.');
+            return;
+        }
+        if (file) {
+            selectedFile1024 = file;
+            console.log("Selected file 1024 =>", file.name);
+            // if (!isEditingMode) await onClickEditOrSave();
+            const afficheLarge = document.getElementById('affiche-large');
+            if (afficheLarge) {
+                afficheLarge.src = URL.createObjectURL(file);
+                ;
+            }
+        }
+    }));
 }
 /* ---------------------------------------------------
    Gestion des boutons (Ajouter, Modifier, Annuler)
@@ -228,8 +275,11 @@ function initButtons() {
     btnAdd.style.display = "inline-block";
     btnEdit.style.display = "inline-block";
     btnCancel.style.display = "none";
+    btnAdd.removeEventListener('click', () => { });
     btnAdd.addEventListener('click', enterCreateMode);
+    btnEdit.removeEventListener('click', () => __awaiter(this, void 0, void 0, function* () { }));
     btnEdit.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () { return yield onClickEditOrSave(); }));
+    btnCancel.removeEventListener('click', () => { });
     btnCancel.addEventListener('click', onClickCancelEdit);
 }
 /**
@@ -330,7 +380,8 @@ function onClickCancelEdit() {
     }
 }
 /**
- * Fonction de vérification des champs
+ * Fonction de vérification des champs du formulaire
+ * Si Ok on rend actif l'enregistrement
  */
 function checkFormValidity() {
     var _a;
@@ -354,7 +405,7 @@ function checkFormValidity() {
     }
 }
 /**
- * Fonction d'écouteur
+ * Fonction d'écouteur sur les champs de saisie
  */
 function initListen(init) {
     const requiredNamedField = ['titleFilm', 'genreArray', 'duration', 'linkBO', 'note',
@@ -375,6 +426,10 @@ function initListen(init) {
 }
 /**
  * Enregistrement du film (création ou mise à jour)
+ * Appelle la construction d'un film à partir du formulaire
+ * Fait les modifications/création des affiches
+ * Fait la modification/création du film
+ * Finally réinitialise la page
  */
 function onSaveFilm() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -386,10 +441,10 @@ function onSaveFilm() {
                 // Creation
                 console.log("Film created => id=", film.id);
                 if (selectedFile128) {
-                    yield createAfficheApi(film.id + "128", selectedFile128, 128, selectedFile128.type);
+                    yield createAfficheApi(film.imageFilm128, selectedFile128, 128, selectedFile128.type);
                 }
                 if (selectedFile1024) {
-                    yield createAfficheApi(film.id + "1024", selectedFile1024, 1024, selectedFile1024.type);
+                    yield createAfficheApi(film.imageFilm1024, selectedFile1024, 1024, selectedFile1024.type);
                 }
                 alert("Film créé avec succès");
             }
@@ -397,10 +452,10 @@ function onSaveFilm() {
                 // Modification
                 console.log("Film updated => id=", film.id);
                 if (selectedFile128) {
-                    yield updateAfficheApi(film.id + "128", selectedFile128, 128, selectedFile128.type);
+                    yield updateAfficheApi(film.imageFilm128, selectedFile128, 128, selectedFile128.type);
                 }
                 if (selectedFile1024) {
-                    yield updateAfficheApi(film.id + "1024", selectedFile1024, 1024, selectedFile1024.type);
+                    yield updateAfficheApi(film.imageFilm1024, selectedFile1024, 1024, selectedFile1024.type);
                 }
                 alert("Film mis à jour avec succès");
             }
@@ -422,6 +477,14 @@ function onSaveFilm() {
             showButtonsForEdit(false);
             // On repasse en lecture seule
             setFormEditable(false);
+            // On réinitialise le contenu en se positionnant sur le film qu'on vient de gérer
+            filmSelectedList = film;
+            // Rafraîchir la liste de tous les films
+            yield rafraichirListeFilms();
+            // Initialiser les inputs de fichier
+            initInputFile();
+            // Afficher le film créé ou modifié en mémorisant qu'il est selectionné
+            // fillFormWithFilm(film);
         }
     });
 }
@@ -470,7 +533,7 @@ function buildFilmFromForm() {
     return film;
 }
 /**
- * Remplit la div form-detailfilm avec les propriétés d’un Film
+ * Affiche un film dans le formulaire
  */
 function fillFormWithFilm(film) {
     var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
@@ -542,52 +605,9 @@ function fillFormWithFilm(film) {
         console.error("Pas de dropdown");
     }
 }
-// Gestions d’images => on aura deux inputs <input type="file" id="upload128"> etc.
-const file128Input = document.getElementById('upload128');
-if (file128Input)
-    file128Input.value = '';
-file128Input === null || file128Input === void 0 ? void 0 : file128Input.addEventListener('change', (evt) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const file = (_a = file128Input.files) === null || _a === void 0 ? void 0 : _a[0];
-    if (!file.type.startsWith('image/jpeg') && !file.type.startsWith('image/png')) {
-        alert('Seuls les fichiers JPEG ou PNG sont autorisés.');
-        return;
-    }
-    if (file) {
-        selectedFile128 = file;
-        console.log("Selected file 128 =>", file.name);
-        // We enter editing mode if not already
-        if (!isEditingMode)
-            yield onClickEditOrSave();
-        // Affiches
-        const afficheSmall = document.getElementById('affiche-small');
-        if (afficheSmall) {
-            afficheSmall.src = URL.createObjectURL(file);
-        }
-    }
-}));
-const file1024Input = document.getElementById('upload1024');
-if (file1024Input)
-    file1024Input.value = '';
-file1024Input === null || file1024Input === void 0 ? void 0 : file1024Input.addEventListener('change', (evt) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    const file = (_a = file1024Input.files) === null || _a === void 0 ? void 0 : _a[0];
-    if (!file.type.startsWith('image/jpeg') && !file.type.startsWith('image/png')) {
-        alert('Seuls les fichiers JPEG ou PNG sont autorisés.');
-        return;
-    }
-    if (file) {
-        selectedFile1024 = file;
-        console.log("Selected file 1024 =>", file.name);
-        if (!isEditingMode)
-            yield onClickEditOrSave();
-        const afficheLarge = document.getElementById('affiche-large');
-        if (afficheLarge) {
-            afficheLarge.src = URL.createObjectURL(file);
-            ;
-        }
-    }
-}));
+/**
+ * Rend éditable formulaire
+ */
 function setFormEditable(editable) {
     const fieldIds = [
         'titleFilm',
@@ -605,7 +625,6 @@ function setFormEditable(editable) {
             el.contentEditable = editable ? "true" : "false";
             el.style.border = editable ? "1px solid #000" : "none";
             el.style.background = editable ? "rgba(255, 215, 0, 0.1)" : "#FFF";
-            // etc.
         }
     });
     document.getElementById('upload128').hidden = !editable; // masquer = editable;
