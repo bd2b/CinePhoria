@@ -105,7 +105,7 @@ export async function afficherDetailsReservation(reservation: ReservationForUtil
     const btnChanger = document.querySelector('.panel__changer-button') as HTMLButtonElement;
     if (btnChanger) {
         btnChanger.textContent = "Annuler la reservation";
-        btnChanger.removeEventListener('click', async () => { });
+        btnChanger.removeEventListener('click', async (evt: MouseEvent) => { });
         btnChanger.addEventListener('click', async (evt: MouseEvent) => {
             evt.preventDefault();
             evt.stopPropagation();
