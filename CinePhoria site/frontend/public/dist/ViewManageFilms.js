@@ -279,8 +279,8 @@ function initButtons() {
     btnAdd.addEventListener('click', enterCreateMode);
     btnEdit.removeEventListener('click', () => __awaiter(this, void 0, void 0, function* () { }));
     btnEdit.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () { return yield onClickEditOrSave(); }));
-    btnCancel.removeEventListener('click', () => { });
-    btnCancel.addEventListener('click', onClickCancelEdit);
+    btnCancel.removeEventListener('click', () => __awaiter(this, void 0, void 0, function* () { }));
+    btnCancel.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () { return yield onClickCancelEdit(); }));
 }
 /**
  * On clique sur "Ajouter un film"
@@ -358,26 +358,28 @@ function onClickEditOrSave() {
  * On clique sur "Annuler"
  */
 function onClickCancelEdit() {
-    if (!isEditingMode)
-        return;
-    isEditingMode = false;
-    isCreatingMode = false;
-    selectedFile128 = null;
-    selectedFile1024 = null;
-    showButtonsForEdit(false);
-    // Revenir en lecture seule
-    setFormEditable(false);
-    // revert
-    const filmId = dataController.selectedFilmUUID;
-    if (filmId) {
-        filmsSelectApi(filmId)
-            .then((f) => fillFormWithFilm(f))
-            .catch((err) => console.error(err));
-    }
-    else {
-        // rien
-        effacerDetailFilm();
-    }
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!isEditingMode)
+            return;
+        isEditingMode = false;
+        isCreatingMode = false;
+        selectedFile128 = null;
+        selectedFile1024 = null;
+        showButtonsForEdit(false);
+        // Revenir en lecture seule
+        setFormEditable(false);
+        // revert
+        const filmId = dataController.selectedFilmUUID;
+        if (filmId) {
+            yield filmsSelectApi(filmId)
+                .then((f) => fillFormWithFilm(f))
+                .catch((err) => console.error(err));
+        }
+        else {
+            // rien
+            effacerDetailFilm();
+        }
+    });
 }
 /**
  * Fonction de vérification des champs du formulaire

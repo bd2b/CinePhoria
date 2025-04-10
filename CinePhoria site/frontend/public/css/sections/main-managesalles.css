@@ -1,0 +1,270 @@
+/* ------------------------------------------------
+   TABLE "Mes réservations"
+   ------------------------------------------------ */
+
+/* Le conteneur global éventuel, si vous souhaitez styliser */
+.container__mesreservations {
+  /* Ajustez selon vos préférences */
+  padding: 20px;
+  margin: 0 auto;
+}
+
+/* Table du listing */
+.tab__salles-liste {
+  max-height: 700px;
+  /* Hauteur maximale du tableau */
+  overflow-y: auto;
+  /* Activation du scroll vertical */
+  border: 1px solid #dee2e6;
+  /* Bordure autour du tableau */
+  width: 100%;
+  margin-top: 10px;
+  font-size: 16px;
+  color: rgb(var(--primary-color));
+  /* Supposez qu’une variable CSS –primary-color existe */
+}
+
+/* Table réelle */
+.tab__salles-liste-table {
+  width: 100%;
+  border-collapse: collapse;
+  /* Éviter les doubles bordures */
+  background-color: #fff;
+  /* Fond blanc */
+  table-layout: fixed;
+  /* Permet un bon alignement des colonnes */
+}
+
+/* En-tête fixé */
+.tab__salles-liste-table thead {
+  display: table;
+  width: 100%;
+  position: sticky;
+  top: 0;
+  background-color: rgba(var(--ternary-color), 0.5);
+  /* Fond du header */
+
+  z-index: 2;
+  /* Priorité pour éviter qu'il ne soit recouvert */
+}
+
+/* Contenu défilant */
+.tab__salles-liste-table tbody {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  max-height: 500px;
+  /* Définit la hauteur maximale du contenu scrollable */
+}
+
+/* Assurer que les colonnes restent alignées */
+.tab__salles-liste-table th,
+.tab__salles-liste-table td {
+  width: 12.5%;
+  /* Répartition équitable des colonnes */
+  text-align: center;
+  padding: 10px 15px;
+
+  white-space: nowrap;
+  /* Empêche le retour à la ligne */
+}
+
+.tab__salles-liste-table th {
+  font-weight: bold;
+}
+
+
+/* Appliquer une bordure pour séparer les colonnes */
+.tab__salles-liste-table td {
+  border: 1px solid #dee2e6;
+}
+
+/* Ajout d'un effet au survol */
+.tab__salles-liste-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* Colonne ID (si vous voulez la styliser en particulier) */
+.tab__salles-liste-table .content-id-td {
+  font-weight: bold;
+  text-align: left;
+}
+
+/* Colonne texte "classique" */
+.tab__salles-liste-table .content-mesreservations-td {
+  text-align: left;
+  /* Alignement à gauche pour certains textes */
+}
+
+/* Colonne prix */
+.tab__salles-liste-table .content-price-td {
+  font-weight: bold;
+  color: #000;
+}
+
+/* Survol possible (hover) si vous le souhaitez */
+.tab__salles-liste-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+
+/* Exemple de style "commentaire jaune" pour "Vous pourrez apporter une note..." */
+.commentaire-jaune {
+  background-color: #fff7dc;
+  /* Léger jaune */
+  color: #333;
+}
+
+/* Exemple de style pour un bouton "Donnez nous votre avis" */
+.btn-avis {
+  background-color: #2C3E50;
+  color: #fff;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-avis:hover {
+  background-color: #1f2a33;
+}
+
+/* Grisée si isEvaluationMustBeReview = true */
+.commentaire-grise {
+  background-color: #f0f0f0;
+  color: #777;
+  position: relative;
+}
+
+/* Info-bulle éventuelle au survol */
+.commentaire-grise:hover::after {
+  content: "Votre commentaire sera publié après relecture";
+  position: absolute;
+  top: -25px;
+  /* Ajustez la position */
+  left: 0;
+  background-color: #333;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* Bouton poubelle */
+.btn-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #666;
+  padding: 0;
+}
+
+.btn-delete:hover {
+  color: #c00;
+}
+
+/* Eventuel style "tfoot" si vous en avez un (total par ex.) */
+.tab__salles-liste-table tfoot td {
+  padding: 10px 15px;
+  font-weight: bold;
+  font-size: var(--subheadline-font-size);
+  color: #000;
+  text-align: right;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.tab__salles-liste-table tfoot td:last-child {
+  color: rgb(var(--primary-color));
+  font-size: 18px;
+}
+
+/* Nombre stylisé (facultatif) */
+.num__num-span {
+  font-size: 16px;
+  font-weight: bold;
+  margin: 5px 10px;
+  font-family: Arial, sans-serif;
+}
+
+/* ------------------------------------------------
+     MODALES
+     ------------------------------------------------ */
+
+.modal {
+  display: none;
+  /* caché par défaut */
+  position: fixed;
+  z-index: 9999;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Fond semi-transparent */
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  display: flex;
+  background-color: #fff;
+  position: relative;
+  margin: 100px auto;
+  padding: 20px;
+  width: 400px;
+  /* Ajustez la largeur souhaitée */
+  max-width: 90%;
+  /* Pour s’adapter sur mobile */
+  border-radius: 8px;
+}
+
+/* Bouton de fermeture (X) */
+.modal-content .close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Boutons d'actions */
+.modal-content-btns {
+  display: flex;
+  justify-content: right;
+  align-items: center;
+  margin: 5px;
+  padding: 5px;
+  gap: 5px;
+
+}
+
+/* Par défaut, on peut faire un .modal.show { display: flex; } en JS pour l’ouvrir */
+
+/* ------------------------------------------------
+     MODALES - éléments spécifiques
+     ------------------------------------------------ */
+#content__DetailReservation {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+#content__EvaluationReservation {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  gap: 15px;
+}
+
+#content__SuppressionReservation {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: start;
+  gap: 15px;
+}

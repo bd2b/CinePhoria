@@ -1,24 +1,12 @@
 import { dataController } from './DataController.js';
 import { DataControllerIntranet } from './DataControllerIntranet.js';
 
-import { formatDateLocalYYYYMMDD, setCookie, isUUID, imageFilm, dateProchainMercredi } from './Helpers.js';
+import { formatDateLocalYYYYMMDD, imageFilm, dateProchainMercredi } from './Helpers.js';
 import { Film } from './shared-models/Film.js';
-import { ReservationState } from './shared-models/Reservation.js';
-import { Seance, TarifQualite } from './shared-models/Seance.js';
+
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
-import {
-    filmsCreateApi,
-    filmsDeleteApi,
-    filmsSelectAllApi,
-    filmsSelectApi,
-    filmsUpdateApi,
-    createAfficheApi,
-    deleteAfficheApi,
-    getAllAffichesApi,
-    getAfficheApi,
-    updateAfficheApi
-} from './NetworkController.js';
+import { filmsSelectApi, createAfficheApi, updateAfficheApi } from './NetworkController.js';
 
 
 // State flags
@@ -324,8 +312,8 @@ function initButtons() {
     btnEdit.removeEventListener('click', async () => { });
     btnEdit.addEventListener('click', async () => await onClickEditOrSave());
 
-    btnCancel.removeEventListener('click', () => { });
-    btnCancel.addEventListener('click', onClickCancelEdit);
+    btnCancel.removeEventListener('click', async () => { });
+    btnCancel.addEventListener('click', async () => await onClickCancelEdit());
 }
 
 /**
@@ -408,7 +396,7 @@ async function onClickEditOrSave() {
 /**
  * On clique sur "Annuler"
  */
-function onClickCancelEdit() {
+async function onClickCancelEdit() {
     if (!isEditingMode) return;
     isEditingMode = false;
     isCreatingMode = false;
@@ -423,7 +411,7 @@ function onClickCancelEdit() {
     // revert
     const filmId = dataController.selectedFilmUUID;
     if (filmId) {
-        filmsSelectApi(filmId)
+        await filmsSelectApi(filmId)
             .then((f) => fillFormWithFilm(f))
             .catch((err) => console.error(err));
     } else {

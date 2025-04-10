@@ -787,3 +787,65 @@ export function deleteAfficheApi(filmId) {
         );
     });
 }
+/**
+ * Création d’un nouveau salle (POST /api/salles)
+ * @param salle Les informations du salle à créer
+ * @returns { message, id } où 'id' est l'identifiant du salle créé
+ */
+export function sallesCreateApi(salle) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = 'http://localhost:3500/api/salles';
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'POST', salle, true);
+        return responseJSON;
+    });
+}
+/**
+ * Récupération d’un salle par son ID (GET /api/salles/:id)
+ * @param salleId L'identifiant du salle
+ * @returns L’objet Salle correspondant
+ */
+export function sallesSelectApi(salleId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/salles/${salleId}`;
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}
+/**
+ * Mise à jour d’un salle (PUT /api/salles/:id)
+ * @param salleId L'identifiant du salle à mettre à jour
+ * @param salle Les nouvelles informations du salle
+ * @returns { message } si la mise à jour est réussie
+ */
+export function sallesUpdateApi(salleId, salle) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/salles/${salleId}`;
+        const responseJSON = yield apiRequest(endpoint, 'PUT', salle, true);
+        return responseJSON;
+    });
+}
+/**
+ * Suppression d’un salle (DELETE /api/salles/:id)
+ * @param salleId L'identifiant du salle à supprimer
+ * @returns { message } si la suppression est réussie
+ */
+export function sallesDeleteApi(salleId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/salles/${salleId}`;
+        const responseJSON = yield apiRequest(endpoint, 'DELETE', undefined, true);
+        return responseJSON;
+    });
+}
+/**
+* Récupération de tous les salles (GET /api/salles)
+* @returns Un tableau de Salle
+*/
+export function sallesSelectAllApi() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = 'http://localhost:3500/api/salles';
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}

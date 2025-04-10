@@ -8,6 +8,7 @@ import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { Mail } from './shared-models/Mail.js';
 import { Seance } from './shared-models/Seance.js';
 import { Film } from './shared-models/Film.js';
+import { Salle } from './shared-models/Salle.js';
 
 
 /**
@@ -945,4 +946,88 @@ export async function deleteAfficheApi(filmId: string) {
         undefined,
         false // Pas d'authentification requise
     );
+}
+
+
+
+/**
+ * Création d’un nouveau salle (POST /api/salles)
+ * @param salle Les informations du salle à créer
+ * @returns { message, id } où 'id' est l'identifiant du salle créé
+ */
+export async function sallesCreateApi(salle: Salle): Promise<{ message: string; id: string }> {
+    const endpoint = 'http://localhost:3500/api/salles';
+    // Requête authentifiée
+    const responseJSON = await apiRequest<{ message: string; id: string }>(
+        endpoint,
+        'POST',
+        salle,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Récupération d’un salle par son ID (GET /api/salles/:id)
+ * @param salleId L'identifiant du salle
+ * @returns L’objet Salle correspondant
+ */
+export async function sallesSelectApi(salleId: string): Promise<Salle> {
+    const endpoint = `http://localhost:3500/api/salles/${salleId}`;
+    const responseJSON = await apiRequest<Salle>(
+        endpoint,
+        'GET',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Mise à jour d’un salle (PUT /api/salles/:id)
+ * @param salleId L'identifiant du salle à mettre à jour
+ * @param salle Les nouvelles informations du salle
+ * @returns { message } si la mise à jour est réussie
+ */
+export async function sallesUpdateApi(salleId: string, salle: Salle): Promise<{ message: string }> {
+    const endpoint = `http://localhost:3500/api/salles/${salleId}`;
+    const responseJSON = await apiRequest<{ message: string }>(
+        endpoint,
+        'PUT',
+        salle,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Suppression d’un salle (DELETE /api/salles/:id)
+ * @param salleId L'identifiant du salle à supprimer
+ * @returns { message } si la suppression est réussie
+ */
+export async function sallesDeleteApi(salleId: string): Promise<{ message: string }> {
+    const endpoint = `http://localhost:3500/api/salles/${salleId}`;
+    const responseJSON = await apiRequest<{ message: string }>(
+        endpoint,
+        'DELETE',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+* Récupération de tous les salles (GET /api/salles)
+* @returns Un tableau de Salle
+*/
+export async function sallesSelectAllApi(): Promise<Salle[]> {
+    const endpoint = 'http://localhost:3500/api/salles';
+    // Requête authentifiée
+    const responseJSON = await apiRequest<Salle[]>(
+        endpoint,
+        'GET',
+        undefined,
+        true
+    );
+    return responseJSON;
 }
