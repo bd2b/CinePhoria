@@ -5,6 +5,7 @@ import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
 import { userDataController, ProfilUtilisateur } from "./DataControllerUser.js";
 import { CinephoriaErrorCode , CinephoriaError } from"./shared-models/Error.js";
 import { onLoadManageFilms } from "./ViewManageFilms.js";
+import { onLoadManageSalles } from "./ViewManageSalles.js";
 
 
 
@@ -13,10 +14,11 @@ const pageHandlers: Record<string, () => void> = {
     "reservation.html": onLoadReservation,
     "mesreservations.html": onLoadMesReservations,
     "films.html": onLoadFilms,
-    "manageFilms.html" : onLoadManageFilms
+    "manageFilms.html" : onLoadManageFilms,
+    "manageSalles.html" : onLoadManageSalles,
 };
 
-const pagesPublic = [ "visiteur.html", "reservation.html", "films.html" , "manageFilms.html"];
+const pagesPublic = [ "visiteur.html", "reservation.html", "films.html" , "manageFilms.html", "manageSalles.html"];
 
 /**
  * Gestion centralisée des erreurs API
@@ -86,7 +88,7 @@ console.log("DOM Chargement de Global");
     }
     // 1) Identifier le profil qui a pu changer si lle jwt a expiré
     const profil = userDataController.profil();
-    console.log("Profil charge = ", profil);
+    console.log("Profil charge = xxxx", profil);
 
     // if (profil === ProfilUtilisateur.Visiteur) {
     //     // Chargement de la page d'accueil
@@ -104,9 +106,11 @@ console.log("DOM Chargement de Global");
     // } else {
         // On charge la page
         const page = window.location.pathname.split("/").pop(); // Récupère le nom de la page actuelle
-        console.log("Chargement dynamique de ", page, " ",)
+        console.log("Chargement dynamique de xxxx", page, " ",)
+        
 
         if (page && pageHandlers[page]) {
+            console.log("Chargement de la fonction ", pageHandlers[page], " ",)
             pageHandlers[page](); // Exécute la fonction associée à la page
 
         } else {

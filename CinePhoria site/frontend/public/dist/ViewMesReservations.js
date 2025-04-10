@@ -21,12 +21,6 @@ export function onLoadMesReservations() {
         console.log("=====> chargement onLoadMesReservations");
         // On verifie que l'on est connecté sinon on retourne sur la page visiteur
         try {
-            // const ident = await isLogged();
-            // if (ident.trim() !== userDataController.ident?.trim()) throw new Error("Jeton non confirme");
-            // } catch {
-            //     // On provoque un logout
-            //     logout();
-            // }
             // On initialise le dataController si il est vide
             if (dataController.allSeances.length === 0)
                 yield dataController.init();

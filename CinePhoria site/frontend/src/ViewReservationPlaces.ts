@@ -242,7 +242,6 @@ async function setReservation() {
             ? siegesReserves.split(',').map(s => s.trim().replace(/^"|"$/g, ''))
             : [];
 
-
         console.log("Liste des sièges réservés en tableau =", listSeatsBookedArray);
         console.log("MaxPMR = ", parseInt(dataController.seanceSelected().numPMR!, 10))
         console.log("Seance = ",JSON.stringify(dataController.seanceSelected()))

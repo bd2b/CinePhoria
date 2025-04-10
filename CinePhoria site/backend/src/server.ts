@@ -46,6 +46,7 @@ app.use(express.json());
 
 import filmRoutes from './routes/filmRoutes';
 import cinemaRoutes from './routes/cinemaRoutes';
+import salleRoutes from'./routes/salleRoute';
 import seanceRoutes from './routes/seanceRoutes';
 import reservationRoutes from './routes/reservationRoutes';
 import utilisateurRoutes from'./routes/utilisateurRoutes';
@@ -55,6 +56,7 @@ import loginRoutes from './routes/publicLoginRoutes';
 
 app.use('/api/films', filmRoutes);
 app.use('/api/cinemas', cinemaRoutes);
+app.use('/api/salles', salleRoutes);
 app.use('/api/seances', seanceRoutes);
 app.use('/api/reservation', reservationRoutes);
 app.use('/api/utilisateur', utilisateurRoutes);

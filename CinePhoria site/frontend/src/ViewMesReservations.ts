@@ -4,26 +4,18 @@ import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { ReservationForUtilisateur, ReservationState } from "./shared-models/Reservation.js";
 import { getReservationForUtilisateur, setStateReservationApi, 
-            setEvaluationReservationApi, isLogged, cancelReserveApi,
+            setEvaluationReservationApi, cancelReserveApi,
             getReservationQRCodeApi } from "./NetworkController.js";
 
 import { seanceCardView } from "./ViewReservation.js";
 import { Seance } from "./shared-models/Seance.js";
 import { updateTableContent } from "./ViewReservationPlaces.js";
-import { logout } from "./Login.js";
-import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 
 export async function onLoadMesReservations() {
     console.log("=====> chargement onLoadMesReservations")
 
     // On verifie que l'on est connecté sinon on retourne sur la page visiteur
     try {
-        // const ident = await isLogged();
-        // if (ident.trim() !== userDataController.ident?.trim()) throw new Error("Jeton non confirme");
-        // } catch {
-        //     // On provoque un logout
-        //     logout();
-        // }
 
         // On initialise le dataController si il est vide
         if (dataController.allSeances.length === 0) await dataController.init()
