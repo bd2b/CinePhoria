@@ -11,8 +11,8 @@ import { DataControllerIntranet } from './DataControllerIntranet.js';
 import { Salle } from './shared-models/Salle.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
-import { sallesUpdateApi, sallesCreateApi } from './NetworkController.js';
-let seatsAbsentsInput = "";
+import { sallesUpdateApi, sallesCreateApi, sallesDeleteApi } from './NetworkController.js';
+let isDefinePlan = false;
 /**
  * Entrée principale du module
  */
@@ -40,10 +40,20 @@ function rafraichirTableauSalles() {
         container.innerHTML = '';
         // Charger les films
         const salles = yield DataControllerIntranet.allSalles();
+        // Construction de la page
         const tableSalles = yield updateTableSalles(salles);
         container.appendChild(tableSalles);
+        // Mise à jour dynamique des largeurs de colonnes
+        syncTableColumnWidths(tableSalles);
+        // Initialisation le code de validation du formulaire d'ajout en ligne 1, les écouteurs et le bouton de définition du plan
+        // Le formulaire est identique à celui de modification d'une ligne existante dans la modal
+        initFormulaireSalles('create');
     });
 }
+/* ---------------------------------------------------
+   Fonction de création de la table
+   composée de en-tête, ligne d'ajout et lignes des salles existantes
+--------------------------------------------------- */
 export function updateTableSalles(salles) {
     return __awaiter(this, void 0, void 0, function* () {
         // Container global
@@ -55,7 +65,7 @@ export function updateTableSalles(salles) {
         // THEAD
         const thead = document.createElement('thead');
         const trHead = document.createElement('tr');
-        const cols = ['Complexe', 'Salle', 'Capacité totale', '# places PMR', '# rangés', '# fauteuils', 'Plan salle', ''];
+        const cols = ['Complexe', 'Salle', 'Capacité', '# places PMR', '# rangés', '# fauteuils', 'Plan salle', ''];
         cols.forEach((col) => {
             const th = document.createElement('th');
             th.textContent = col;
@@ -67,32 +77,12 @@ export function updateTableSalles(salles) {
         const tbody = document.createElement('tbody');
         tbody.classList.add('liste-table__body');
         table.appendChild(tbody);
-        // Ligne du masque d'édition
-        //const tr = document.createElement('tr');
-        const trInput = fillFormWithSalle('tr', 'td', 'create');
-        table.appendChild(trInput);
-        // 7) Liste des sièges absents : bouton pour afficher la modalle de salle et choisir les sieges absents
-        const tdSiegeAbsentInput = document.createElement('td');
-        const siegeAbsentInputBtn = document.createElement('button');
-        siegeAbsentInputBtn.classList.add('tab__salles-liste-button');
-        siegeAbsentInputBtn.textContent = 'Définir...';
-        siegeAbsentInputBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
-            // On affiche la carte de la salle en masquant les sieges absent
-            const nPlacesPMR = parseInt(document.getElementById('nPlacesPMRInputcreate').value, 10);
-            const nrMax = parseInt(document.getElementById('nrMaxInputcreate').value, 10);
-            const nfMax = parseInt(document.getElementById('nfMaxInputcreate').value, 10);
-            if (Number.isNaN(nrMax) || Number.isNaN(nfMax)) {
-                alert("Définissez d'abord le rectangle de la salle.");
-            }
-            else {
-                const result = yield onClickDisplaySiegeAbsent(nrMax, nfMax, seatsAbsentsInput, nPlacesPMR);
-                if (result)
-                    seatsAbsentsInput = result;
-            }
-        }));
-        tdSiegeAbsentInput.appendChild(siegeAbsentInputBtn);
-        trInput.appendChild(tdSiegeAbsentInput);
-        // 8) Boutons d'actions sur la salle
+        // Ligne du formulaire d'ajout
+        const trInput = yield fillFormWithSalle('tr', 'td', 'create');
+        trInput.classList.add('sticky-row');
+        // table.appendChild(trInput);
+        tbody.appendChild(trInput);
+        // Boutons d'ajout de la salle dans le formulaire de tete
         const tdActionsInput = document.createElement('td');
         const saveBtnInput = document.createElement('button');
         saveBtnInput.textContent = 'Ajouter une salle';
@@ -100,13 +90,8 @@ export function updateTableSalles(salles) {
         saveBtnInput.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
             // Collecte des valeurs sur un nouvel id
             const newSalle = yield buildSalleFromForm(crypto.randomUUID(), 'create');
-            // On récupère les siège absents qui on pu être défini puis on remet à ''
-            newSalle.seatsAbsents = seatsAbsentsInput;
-            seatsAbsentsInput = "";
             // Mise à jour distant
             yield sallesCreateApi(newSalle);
-            // Fermeture de la modal
-            // closeModal();
             // Recharge de la page.
             onLoadManageSalles();
         }));
@@ -115,10 +100,9 @@ export function updateTableSalles(salles) {
         trInput.appendChild(tdActionsInput);
         // On ajoute la premiere ligne
         tbody.appendChild(trInput);
-        // Pour chaque salle
+        // Pour chaque salle, on affiche une ligne de restitution des champ et un bouton éditer.
         salles.forEach((salle) => {
             var _a, _b, _c, _d;
-            const salleId = salle.id;
             const tr = document.createElement('tr');
             // 1) Complexe
             const tdComplexe = document.createElement('td');
@@ -144,34 +128,29 @@ export function updateTableSalles(salles) {
             const tdfMax = document.createElement('td');
             tdfMax.textContent = ((_d = salle.fMax) === null || _d === void 0 ? void 0 : _d.toString(10)) || '';
             tr.appendChild(tdfMax);
-            // 7) Liste des sièges absents : bouton pour afficher la modalle de salle et choisir les sieges absents
+            // 7) Sièges absents : on affiche le nombre de sieges absents
             const tdSiegeAbsent = document.createElement('td');
-            const siegeAbsentBtn = document.createElement('button');
-            siegeAbsentBtn.classList.add('tab__salles-liste-button');
-            siegeAbsentBtn.textContent = 'Modifier';
-            siegeAbsentBtn.addEventListener('click', () => {
-                // On affiche la carte de la salle en masquant les sieges absent 
-                onClickDisplaySiegeAbsent(salle.rMax || 0, salle.fMax || 0, salle.seatsAbsents || '', salle.numPMR || 0);
-            });
-            tdSiegeAbsent.appendChild(siegeAbsentBtn);
+            const nbSeatsAbsent = nbSiege((salle === null || salle === void 0 ? void 0 : salle.seatsAbsents) || '');
+            tdSiegeAbsent.textContent = nbSeatsAbsent === 0 ? "Plan rectangulaire" : `${nbSeatsAbsent} desactivé(s)`;
             tr.appendChild(tdSiegeAbsent);
             // 8) Boutons d'actions sur la salle
             const tdActions = document.createElement('td');
             const divButton = document.createElement('div');
+            divButton.classList.add('modal-content-btns');
             const editBtn = document.createElement('button');
             editBtn.classList.add('tab__salles-liste-button');
             editBtn.textContent = "Editer";
-            editBtn.addEventListener('click', () => {
+            editBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
                 // Lancement de la modale 
-                onClickEditSalle(salle, 'table');
-            });
+                yield onClickEditSalle(salle);
+            }));
             divButton.appendChild(editBtn);
             const deleteBtn = document.createElement('button');
             deleteBtn.classList.add('tab__salles-liste-button');
-            deleteBtn.textContent = 'Desactiver';
+            deleteBtn.textContent = 'Supprimer';
             deleteBtn.addEventListener('click', () => {
                 // On supprime la salle 
-                onClickDeleteSalle();
+                onClickDeleteSalle(salle.id);
             });
             divButton.appendChild(deleteBtn);
             tdActions.appendChild(divButton);
@@ -181,6 +160,67 @@ export function updateTableSalles(salles) {
         container.appendChild(table);
         return container;
     });
+}
+/**
+* Installe le formulaire de validation et le bouton de plan
+*/
+export function initFormulaireSalles(suffId) {
+    function validateFormCreate() {
+        const inputSeatsAbsent = document.getElementById('seatsAbsentInput' + suffId);
+        const nbSeatsAbsentLabel = document.getElementById('nbSeatsAbsentLabel' + suffId);
+        const divtnPlaces = document.getElementById('divtnPlaces' + suffId);
+        const nrMax = parseInt(inputnrMax.value, 10);
+        const nfMax = parseInt(inputnfMax.value, 10);
+        const str = inputSeatsAbsent.value;
+        let nbSeatsAbsent = 0;
+        if (!Number.isNaN(nrMax) && !Number.isNaN(nfMax)) {
+            // On peut mettre à jour le champ capacité et le display des sièges
+            if (str) {
+                // const match = str.match((/^(\d+)\s+desactivé\(s\)$/));
+                nbSeatsAbsent = nbSiege(str);
+            }
+            divtnPlaces.textContent = (nrMax * nfMax - nbSeatsAbsent).toString(10);
+            if (nbSeatsAbsentLabel)
+                nbSeatsAbsentLabel.textContent = nbSeatsAbsent === 0 ? "Plan rectangulaire" : `${nbSeatsAbsent} desactivé(s)`;
+        }
+        else {
+            divtnPlaces.textContent = "";
+        }
+    }
+    const inputnrMax = document.getElementById('nrMaxInput' + suffId);
+    const inputnfMax = document.getElementById('nfMaxInput' + suffId);
+    inputnrMax.addEventListener('input', validateFormCreate);
+    inputnfMax.addEventListener('input', validateFormCreate);
+    // Action d'appel de la définition du plan
+    const planBtn = document.getElementById('planBtn' + suffId);
+    planBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+        isDefinePlan = true;
+        // On affiche la carte de la salle en masquant les sieges absent
+        const nPlacesPMR = parseInt(document.getElementById('nPlacesPMRInput' + suffId).value, 10);
+        const nrMax = parseInt(document.getElementById('nrMaxInput' + suffId).value, 10);
+        const nfMax = parseInt(document.getElementById('nfMaxInput' + suffId).value, 10);
+        const inputSeatsAbsent = document.getElementById('seatsAbsentInput' + suffId);
+        const seatsAbsent = inputSeatsAbsent.value;
+        if (Number.isNaN(nrMax) || Number.isNaN(nfMax)) {
+            alert("Définissez d'abord le rectangle de la salle.");
+        }
+        else {
+            const result = yield onClickDisplaySiegeAbsent(nrMax, nfMax, seatsAbsent, nPlacesPMR);
+            // On met à jour le text du bouton
+            const planBtn = document.getElementById('planBtn' + suffId);
+            const nbSeatsAbsent = nbSiege(result);
+            planBtn.textContent = nbSeatsAbsent === 0 ? "Plan rectangulaire" : `${nbSeatsAbsent} desactivé(s)`;
+            // On stocke le résultat dans le champ masqué
+            if (result) {
+                inputSeatsAbsent.value = result;
+            }
+            // J'applique la modification sur le formulaire pour actualiser le contenu
+            validateFormCreate();
+        }
+    }));
+    const inputSeatsAbsent = document.getElementById('seatsAbsentInput' + suffId);
+    const seatsAbsent = nbSiege(inputSeatsAbsent.value);
+    planBtn.textContent = seatsAbsent === 0 ? "Plan rectangulaire" : `${seatsAbsent} desactivé(s)`;
 }
 export function createCinemaDropdown(nameCinema, suffId) {
     const container = document.createElement('div');
@@ -232,17 +272,23 @@ export function createCinemaDropdown(nameCinema, suffId) {
  * @return null en readonly et la liste des seats Absents sinon
  */
 /**
- * Passage en édition de ligne
+ * Edition d'une ligne sélectionnée dans le tableau
  */
-function onClickEditSalle(salle, suffId) {
-    // Sélectionner la modale
-    const modal = document.getElementById('modal-editSalle');
-    // Paramétrage des éléments
-    let titreModel = `${salle.nameSalle} à ${salle.nameCinema}`;
-    if (!modal)
-        return;
-    // HTML de la modale 
-    const modaleditSalleLocalHTML = `
+function onClickEditSalle(salle) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Sélectionner la modale
+        let modal = document.getElementById('modal-editSalle');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'modal-editSalle';
+            modal.classList.add('modal');
+            document.body.appendChild(modal);
+            modal.innerHTML = '';
+        }
+        // Paramétrage des éléments
+        let titreModel = `${salle.nameSalle} à ${salle.nameCinema}`;
+        // HTML de la modale 
+        const modaleditSalleLocalHTML = `
     <div class="modal__content-wrapper">
         <div class="modal__title">
             <div class="title__editSalle title-h2">
@@ -250,147 +296,209 @@ function onClickEditSalle(salle, suffId) {
             </div>
             <span class="close-modal" id="close-editSalle">×</span>
         </div>
-        <div class="modal__content" id="content__editSalle">
+        <div class="modal__content form__group" id="content__editSalle" flex-direction>
         </div>
     </div>`;
-    // Injecter la modale
-    modal.innerHTML = modaleditSalleLocalHTML;
-    document.body.appendChild(modal);
-    modal.style.display = 'flex';
-    // Bouton de fermeture de la modale
-    const closeModalBtn = document.getElementById("close-editSalle");
-    // Fonction pour fermer la modale
-    const closeModal = () => {
-        modal.style.display = 'none';
-    };
-    // Fermer la modale avec le bouton (X)
-    closeModalBtn === null || closeModalBtn === void 0 ? void 0 : closeModalBtn.addEventListener('click', closeModal);
-    // Fermer la modale en cliquant en dehors
-    modal.addEventListener('click', (event) => {
-        if (event.target === modal)
+        // Injecter la modale
+        modal.innerHTML = modaleditSalleLocalHTML;
+        modal.style.zIndex = '1000';
+        document.body.appendChild(modal);
+        modal.style.display = 'flex';
+        // Bouton de fermeture de la modale
+        const closeModalBtn = document.getElementById("close-editSalle");
+        // Fonction pour fermer la modale
+        const closeModal = () => {
+            modal.style.display = 'none';
+            modal.remove;
+        };
+        // Fermer la modale avec le bouton (X)
+        closeModalBtn === null || closeModalBtn === void 0 ? void 0 : closeModalBtn.addEventListener('click', closeModal);
+        // Fermer la modale en cliquant en dehors
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal)
+                closeModal();
+        });
+        const container = document.getElementById('content__editSalle');
+        // Injecter le formulaire de recueil
+        const inputSalle = yield fillFormWithSalle('div', 'div', 'table', salle);
+        container.appendChild(inputSalle);
+        // Initialisation le code de validation du formulaire modal, les écouteurs et le bouton de définition du plan
+        initFormulaireSalles('table');
+        // Injecter les boutons
+        const containerButtons = document.createElement('div');
+        containerButtons.classList.add('modal-content-btns');
+        const annButton = document.createElement('button');
+        annButton.classList.add('button');
+        annButton.id = "annBtn";
+        annButton.textContent = "Annuler";
+        containerButtons.appendChild(annButton);
+        annButton === null || annButton === void 0 ? void 0 : annButton.addEventListener('click', closeModal);
+        const saveButton = document.createElement('button');
+        saveButton.classList.add('button');
+        saveButton.id = "saveButton";
+        containerButtons.appendChild(saveButton);
+        saveButton.textContent = 'Enregistrer';
+        containerButtons.appendChild(saveButton);
+        // Gestion du bouton "Enregistrer"
+        saveButton.removeEventListener('click', () => __awaiter(this, void 0, void 0, function* () { }));
+        saveButton.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+            // Collecte des valeurs
+            const newSalle = yield buildSalleFromForm(salle.id, 'table');
+            // Recopie des seatsAbsents qui ne sont pas saisis dans le formulaire
+            // newSalle.seatsAbsents = salle.seatsAbsents;
+            // Mise à jour distant
+            yield sallesUpdateApi(salle.id, newSalle);
+            // Fermeture de la modal
             closeModal();
+            // Recharge de la page.
+            onLoadManageSalles();
+        }));
+        container.appendChild(containerButtons);
     });
-    const container = document.getElementById('content__editSalle');
-    // Injecter le formulaire de recueil
-    const inputSalle = fillFormWithSalle('div', 'div', 'table', salle);
-    container.appendChild(inputSalle);
-    // Injecter les boutons
-    const containerButtons = document.createElement('div');
-    containerButtons.classList.add('modal-content-btns');
-    const annButton = document.createElement('button');
-    annButton.classList.add('button');
-    annButton.id = "annBtn";
-    annButton.textContent = "Annuler";
-    containerButtons.appendChild(annButton);
-    annButton === null || annButton === void 0 ? void 0 : annButton.addEventListener('click', closeModal);
-    const saveButton = document.createElement('button');
-    saveButton.classList.add('button');
-    saveButton.id = "saveButton";
-    containerButtons.appendChild(saveButton);
-    saveButton.textContent = 'Enregistrer';
-    containerButtons.appendChild(saveButton);
-    // Gestion du bouton "Enregistrer"
-    saveButton.removeEventListener('click', () => __awaiter(this, void 0, void 0, function* () { }));
-    saveButton.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
-        // Collecte des valeurs
-        const newSalle = yield buildSalleFromForm(salle.id, 'table');
-        // Recopie des seatsAbsents qui ne sont pas saisis dans le formulaire
-        newSalle.seatsAbsents = salle.seatsAbsents;
-        // Mise à jour distant
-        yield sallesUpdateApi(salle.id, newSalle);
-        // Fermeture de la modal
-        closeModal();
-        // Recharge de la page.
-        onLoadManageSalles();
-    }));
-    container.appendChild(containerButtons);
 }
 ;
 /**
  * Suppression ou desactivation de ligne
  */
-function onClickDeleteSalle() {
+function onClickDeleteSalle(salleId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            yield sallesDeleteApi(salleId);
+            // Recharge de la page.
+            onLoadManageSalles();
+        }
+        catch (error) {
+            alert('Suppression impossible ' + error);
+        }
+    });
 }
-function fillFormWithSalle(typeEltParentHTML, typeEltChildHTML, suffId = "", salle) {
-    var _a;
-    // Ligne du masque d'édition
-    const eltHTML = document.createElement(typeEltParentHTML);
-    // 1) Complexe
-    const tdComplexe = document.createElement(typeEltChildHTML);
-    // Dropdown avec la liste des cinemas
-    tdComplexe.appendChild(createCinemaDropdown((salle === null || salle === void 0 ? void 0 : salle.nameCinema) || 'Paris', suffId));
-    eltHTML.appendChild(tdComplexe);
-    // 2) Salle
-    const tdSalleInput = document.createElement(typeEltChildHTML);
-    const inputSalle = document.createElement('input');
-    inputSalle.type = 'text';
-    inputSalle.id = 'nameSalleInput' + suffId;
-    inputSalle.placeholder = 'Nom de la salle';
-    if (salle === null || salle === void 0 ? void 0 : salle.nameSalle) {
-        inputSalle.value = salle.nameSalle;
-    }
-    inputSalle.required = true;
-    tdSalleInput.appendChild(inputSalle);
-    eltHTML.appendChild(tdSalleInput);
-    // 3) Nb Place
-    // const tdnPlacesInput = document.createElement(typeEltChildHTML);
-    // const inputnPlaces = document.createElement('input');
-    // inputnPlaces.type = 'numeric';
-    // inputnPlaces.id = 'nPlacesInput' + suffId;
-    // inputnPlaces.placeholder = 'Capacité totale';
-    // inputnPlaces.required = true;
-    // inputnPlaces.step = "1";
-    // inputnPlaces.max = "2000";
-    // inputnPlaces.min = "100";
-    // salle?.capacity ? inputnPlaces.value = (salle.capacity.toString(10)) : 0;
-    // tdnPlacesInput.appendChild(inputnPlaces);
-    // eltHTML.appendChild(tdnPlacesInput)
-    // On affiche la capacity calculee
-    const tdnPlacesInput = document.createElement(typeEltChildHTML);
-    const divtnPlaces = document.createElement('div');
-    divtnPlaces.textContent = (((salle === null || salle === void 0 ? void 0 : salle.fMax) || 0) * ((salle === null || salle === void 0 ? void 0 : salle.rMax) || 0) - (((_a = salle === null || salle === void 0 ? void 0 : salle.seatsAbsents) === null || _a === void 0 ? void 0 : _a.match(/,/g)) || []).length).toString(10);
-    tdnPlacesInput.appendChild(divtnPlaces);
-    eltHTML.appendChild(tdnPlacesInput);
-    // 4) Nb Place PMR
-    const tdnPlacesPMRInput = document.createElement(typeEltChildHTML);
-    const inputnPlacesPMR = document.createElement('input');
-    inputnPlacesPMR.type = 'numeric';
-    inputnPlacesPMR.id = 'nPlacesPMRInput' + suffId;
-    inputnPlacesPMR.placeholder = 'Places PMR';
-    inputnPlacesPMR.required = true;
-    inputnPlacesPMR.step = "1";
-    inputnPlacesPMR.max = "20";
-    inputnPlacesPMR.min = "0";
-    (salle === null || salle === void 0 ? void 0 : salle.numPMR) ? inputnPlacesPMR.value = (salle.numPMR.toString(10)) : 0;
-    tdnPlacesPMRInput.appendChild(inputnPlacesPMR);
-    eltHTML.appendChild(tdnPlacesPMRInput);
-    // 5) Nb rangées
-    const tdnrMaxInput = document.createElement(typeEltChildHTML);
-    const inputnrMax = document.createElement('input');
-    inputnrMax.type = 'numeric';
-    inputnrMax.id = 'nrMaxInput' + suffId;
-    inputnrMax.placeholder = 'Nombre rangées';
-    inputnrMax.required = true;
-    inputnrMax.step = "1";
-    inputnrMax.max = "50";
-    inputnrMax.min = "5";
-    (salle === null || salle === void 0 ? void 0 : salle.rMax) ? inputnrMax.value = (salle.rMax.toString(10)) : 0;
-    tdnrMaxInput.appendChild(inputnrMax);
-    eltHTML.appendChild(tdnrMaxInput);
-    // 6) Nb fauteuils
-    const tdnfMaxInput = document.createElement(typeEltChildHTML);
-    const inputnfMax = document.createElement('input');
-    inputnfMax.type = 'numeric';
-    inputnfMax.id = 'nfMaxInput' + suffId;
-    inputnfMax.placeholder = 'Nombre fauteuils par rangée';
-    inputnfMax.required = true;
-    inputnfMax.step = "1";
-    inputnfMax.max = "50";
-    inputnfMax.min = "5";
-    (salle === null || salle === void 0 ? void 0 : salle.fMax) ? inputnfMax.value = (salle.fMax.toString(10)) : 0;
-    tdnfMaxInput.appendChild(inputnfMax);
-    eltHTML.appendChild(tdnfMaxInput);
-    return eltHTML;
+function fillFormWithSalle(typeEltParentHTML, typeEltChildHTML, suffId, salle) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Ligne du masque d'édition
+        const eltHTML = document.createElement(typeEltParentHTML);
+        // 1) Complexe
+        const tdComplexe = document.createElement(typeEltChildHTML);
+        // Dropdown avec la liste des cinemas
+        tdComplexe.appendChild(createCinemaDropdown((salle === null || salle === void 0 ? void 0 : salle.nameCinema) || 'Paris', suffId));
+        if (suffId === 'table') {
+            tdComplexe.classList.add('form__group');
+        }
+        eltHTML.appendChild(tdComplexe);
+        // 2) Salle
+        const tdSalleInput = document.createElement(typeEltChildHTML);
+        const inputSalle = document.createElement('input');
+        inputSalle.type = 'text';
+        inputSalle.id = 'nameSalleInput' + suffId;
+        inputSalle.placeholder = 'Nom de la salle';
+        if (salle === null || salle === void 0 ? void 0 : salle.nameSalle) {
+            inputSalle.value = salle.nameSalle;
+        }
+        inputSalle.required = true;
+        if (suffId === 'table') {
+            tdSalleInput.classList.add('form__group');
+            const label = document.createElement('label');
+            label.htmlFor = 'nameSalleInput' + suffId;
+            label.textContent = 'Nom de la salle :';
+            tdSalleInput.appendChild(label);
+        }
+        tdSalleInput.appendChild(inputSalle);
+        eltHTML.appendChild(tdSalleInput);
+        // 3) Nb Place
+        // On affiche la capacity calculee
+        const tdnPlacesInput = document.createElement(typeEltChildHTML);
+        const divtnPlaces = document.createElement('label');
+        divtnPlaces.id = "divtnPlaces" + suffId;
+        divtnPlaces.textContent = (((salle === null || salle === void 0 ? void 0 : salle.fMax) || 0) * ((salle === null || salle === void 0 ? void 0 : salle.rMax) || 0) - nbSiege((salle === null || salle === void 0 ? void 0 : salle.seatsAbsents) || '')).toString(10);
+        if (suffId === 'table') {
+            tdSalleInput.classList.add('form__group');
+            divtnPlaces.textContent = "Capacité : " + divtnPlaces.textContent;
+        }
+        tdnPlacesInput.appendChild(divtnPlaces);
+        eltHTML.appendChild(tdnPlacesInput);
+        // 4) Nb Place PMR
+        const tdnPlacesPMRInput = document.createElement(typeEltChildHTML);
+        const inputnPlacesPMR = document.createElement('input');
+        inputnPlacesPMR.type = 'numeric';
+        inputnPlacesPMR.id = 'nPlacesPMRInput' + suffId;
+        inputnPlacesPMR.placeholder = 'Places PMR';
+        inputnPlacesPMR.required = true;
+        inputnPlacesPMR.step = "1";
+        inputnPlacesPMR.max = "20";
+        inputnPlacesPMR.min = "0";
+        (salle === null || salle === void 0 ? void 0 : salle.numPMR) ? inputnPlacesPMR.value = (salle.numPMR.toString(10)) : 0;
+        if (suffId === 'table') {
+            tdnPlacesPMRInput.classList.add('form__group');
+            const label = document.createElement('label');
+            label.htmlFor = 'nPlacesPMRInput' + suffId;
+            label.textContent = 'Nombre de places PMR :';
+            tdnPlacesPMRInput.appendChild(label);
+        }
+        tdnPlacesPMRInput.appendChild(inputnPlacesPMR);
+        eltHTML.appendChild(tdnPlacesPMRInput);
+        // 5) Nb rangées
+        const tdnrMaxInput = document.createElement(typeEltChildHTML);
+        const inputnrMax = document.createElement('input');
+        inputnrMax.type = 'numeric';
+        inputnrMax.id = 'nrMaxInput' + suffId;
+        inputnrMax.placeholder = 'Nombre rangées';
+        inputnrMax.required = true;
+        inputnrMax.step = "1";
+        inputnrMax.max = "50";
+        inputnrMax.min = "5";
+        (salle === null || salle === void 0 ? void 0 : salle.rMax) ? inputnrMax.value = (salle.rMax.toString(10)) : 0;
+        if (suffId === 'table') {
+            tdnrMaxInput.classList.add('form__group');
+            const label = document.createElement('label');
+            label.htmlFor = 'nrMaxInput' + suffId;
+            label.textContent = 'Nombre de rangées :';
+            tdnrMaxInput.appendChild(label);
+        }
+        tdnrMaxInput.appendChild(inputnrMax);
+        eltHTML.appendChild(tdnrMaxInput);
+        // 6) Nb fauteuils
+        const tdnfMaxInput = document.createElement(typeEltChildHTML);
+        const inputnfMax = document.createElement('input');
+        inputnfMax.type = 'numeric';
+        inputnfMax.id = 'nfMaxInput' + suffId;
+        inputnfMax.placeholder = 'Nombre fauteuils par rangée';
+        inputnfMax.required = true;
+        inputnfMax.step = "1";
+        inputnfMax.max = "50";
+        inputnfMax.min = "5";
+        if (suffId === 'table') {
+            tdnfMaxInput.classList.add('form__group');
+            const label = document.createElement('label');
+            label.htmlFor = 'nfMaxInput' + suffId;
+            label.textContent = 'Nombre de fauteuils par rangées :';
+            tdnfMaxInput.appendChild(label);
+        }
+        (salle === null || salle === void 0 ? void 0 : salle.fMax) ? inputnfMax.value = (salle.fMax.toString(10)) : 0;
+        tdnfMaxInput.appendChild(inputnfMax);
+        // 7) Sieges absents, deux champs sont utilisés, 
+        // un caché pour la saisie par programme que l'on colle à fMax
+        // un affiché pour restituer la valeur du nombre de sieges supprimé uniquement pour table
+        // On le met dans un div pour éviter d'avoir deux composants (dans la table ou dans la modale)
+        const tdSeatsAbsent = document.createElement(typeEltChildHTML);
+        // Saisie
+        const inputSeatsAbsent = document.createElement('input');
+        inputSeatsAbsent.type = 'hidden';
+        inputSeatsAbsent.id = 'seatsAbsentInput' + suffId;
+        (salle === null || salle === void 0 ? void 0 : salle.seatsAbsents) ? inputSeatsAbsent.value = salle.seatsAbsents : "";
+        tdnfMaxInput.appendChild(inputSeatsAbsent);
+        eltHTML.appendChild(tdnfMaxInput);
+        // 9) Liste des sièges absents : bouton pour afficher la modal de plan et choisir les sieges absents
+        // Uniquement pour le formulaire de création (pour les autres, la modal de plan est appelée depuis la modal de salle)
+        // if (suffId === 'create') {
+        const tdSiegeAbsentInput = document.createElement('td');
+        const planBtn = document.createElement('button');
+        planBtn.classList.add('tab__salles-liste-button');
+        planBtn.textContent = 'Définir...';
+        planBtn.id = 'planBtn' + suffId;
+        tdSiegeAbsentInput.appendChild(planBtn);
+        eltHTML.appendChild(tdSiegeAbsentInput);
+        //}
+        return eltHTML;
+    });
 }
 function buildSalleFromForm(salleId, suffId) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -412,20 +520,15 @@ function buildSalleFromForm(salleId, suffId) {
         const inputnfMax = document.getElementById('nfMaxInput' + suffId);
         if (inputnfMax)
             newSalle.fMax = parseInt(((_e = inputnfMax.value) === null || _e === void 0 ? void 0 : _e.trim()) || "0", 10) || 0;
+        const inputSeatsAbsent = document.getElementById('seatsAbsentInput' + suffId);
+        if (inputSeatsAbsent)
+            newSalle.seatsAbsents = ((_f = inputSeatsAbsent.value) === null || _f === void 0 ? void 0 : _f.trim()) || "";
         // On calcule le nombre de place
-        newSalle.capacity = ((newSalle === null || newSalle === void 0 ? void 0 : newSalle.fMax) || 0) * ((newSalle === null || newSalle === void 0 ? void 0 : newSalle.rMax) || 0) - (((_f = newSalle === null || newSalle === void 0 ? void 0 : newSalle.seatsAbsents) === null || _f === void 0 ? void 0 : _f.match(/,/g)) || []).length;
+        newSalle.capacity = ((newSalle === null || newSalle === void 0 ? void 0 : newSalle.fMax) || 0) * ((newSalle === null || newSalle === void 0 ? void 0 : newSalle.rMax) || 0) - nbSiege((newSalle === null || newSalle === void 0 ? void 0 : newSalle.seatsAbsents) || '');
         console.log("Salle du formulaire", JSON.stringify(newSalle));
         return newSalle;
     });
 }
-// function onClickDisplaySiegeAbsent(
-//     rMax: number, 
-//     fMax: number, 
-//     seatsAbsents: string, 
-//     numPMR: number, 
-//     readOnly: boolean = true): string | null {
-//     return "";
-// }
 /**
  * Sélection des places manquantes via une modale.
  * @param seatsAbsents Liste des emplacements sans sieges (ex: ["R13F0", "R13F1", ...])
@@ -436,10 +539,10 @@ function buildSalleFromForm(salleId, suffId) {
  */
 export function onClickDisplaySiegeAbsent(rMax, fMax, pseatsAbsents, maxPMR) {
     return __awaiter(this, void 0, void 0, function* () {
-        const seatsAbsents = pseatsAbsents.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+        const seatsAbsents = pseatsAbsents.length > 0 ? pseatsAbsents.split(',').map(s => s.trim().replace(/^"|"$/g, '')) : [];
         return new Promise((resolve) => {
             const modalHTML = `
-      <div class="modal__content-wrapper">
+      <div class="modal__content-wrapper" id="modal-displayAndSeatsSuppr">
         <div class="modal__title">
           <div class="title__displayAndSeatsSuppr title-h2">
             <h2>Sélectionner les places absentes</h2>
@@ -457,7 +560,9 @@ export function onClickDisplaySiegeAbsent(rMax, fMax, pseatsAbsents, maxPMR) {
                 modal = document.createElement('div');
                 modal.id = 'modal-displayAndSeatsSuppr';
                 modal.classList.add('modal');
+                modal.style.zIndex = '2000';
                 document.body.appendChild(modal);
+                modal.innerHTML = '';
             }
             modal.innerHTML = modalHTML;
             modal.style.display = 'flex';
@@ -466,22 +571,45 @@ export function onClickDisplaySiegeAbsent(rMax, fMax, pseatsAbsents, maxPMR) {
             const annulerBtn = document.getElementById('btnAnnulerSeats');
             const validerBtn = document.getElementById('btnValiderSeats');
             // Places à supprimer
-            const supprSeats = [];
+            const supprSeats = seatsAbsents;
             // Fermer la modale
             const closeModal = (resolveValue) => {
                 modal.style.display = 'none';
-                resolve(resolveValue.join(","));
+                // Réaffiche la modale 1 si elle existe et si on n'est pas dans la définition pour une nouvelle salle
+                if (!isDefinePlan) {
+                    const modalEdit = document.getElementById('modal-editSalle');
+                    if (modalEdit && modalEdit.style.display === 'none')
+                        modalEdit.style.display = 'flex';
+                }
+                else {
+                    isDefinePlan = false;
+                }
+                modal.remove;
+                if (resolveValue.length === 0) {
+                    resolve("");
+                }
+                else {
+                    resolve(resolveValue.join(","));
+                }
             };
             // Fermetures
-            closeModalBtn === null || closeModalBtn === void 0 ? void 0 : closeModalBtn.addEventListener('click', () => closeModal([]));
+            closeModalBtn === null || closeModalBtn === void 0 ? void 0 : closeModalBtn.addEventListener('click', (evt) => {
+                evt.stopPropagation();
+                closeModal([]);
+            });
             modal.addEventListener('click', (evt) => {
+                evt.stopPropagation();
                 if (evt.target === modal)
                     closeModal([]);
             });
-            annulerBtn === null || annulerBtn === void 0 ? void 0 : annulerBtn.addEventListener('click', () => closeModal([]));
+            annulerBtn === null || annulerBtn === void 0 ? void 0 : annulerBtn.addEventListener('click', (evt) => {
+                evt.stopPropagation();
+                closeModal([]);
+            });
             // Bouton Valider => renvoie supprSeats
             validerBtn === null || validerBtn === void 0 ? void 0 : validerBtn.removeEventListener('click', () => { });
-            validerBtn === null || validerBtn === void 0 ? void 0 : validerBtn.addEventListener('click', () => {
+            validerBtn === null || validerBtn === void 0 ? void 0 : validerBtn.addEventListener('click', (evt) => {
+                evt.stopPropagation();
                 closeModal([...supprSeats]);
             });
             // Construction du plan de salle
@@ -540,5 +668,26 @@ export function onClickDisplaySiegeAbsent(rMax, fMax, pseatsAbsents, maxPMR) {
                 }
             }
         });
+    });
+}
+function nbSiege(seatsAbsents) {
+    if (seatsAbsents.length > 0) {
+        return (seatsAbsents.match(/,/g) || []).length + 1;
+    }
+    else {
+        return 0;
+    }
+}
+export function syncTableColumnWidths(table) {
+    const theadCols = table.querySelectorAll('thead tr th');
+    const tbodyRow = table.querySelector('tbody tr');
+    if (!theadCols.length || !tbodyRow)
+        return;
+    const tbodyCols = tbodyRow.querySelectorAll('td');
+    if (theadCols.length !== tbodyCols.length)
+        return;
+    tbodyCols.forEach((td, i) => {
+        const width = td.getBoundingClientRect().width;
+        theadCols[i].style.width = `${width}px`;
     });
 }

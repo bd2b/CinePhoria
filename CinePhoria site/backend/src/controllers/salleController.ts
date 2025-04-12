@@ -34,7 +34,7 @@ export class SalleController {
       // On récupère les données dans req.body
       
       const data = req.body; 
-      logger.info("Creation d'un film avec data = ", data);
+      logger.info("Creation d'une salle film avec data = ", data);
 
       // On construit un Salle
       const filmToCreate = new Salle(data);
@@ -71,10 +71,10 @@ export class SalleController {
   // DELETE => remove a Salle
   static async deleteSalle(req: Request, res: Response) {
     try {
-      const filmId = req.params.id;
-      logger.info(`Suppression du film ${filmId}`);
+      const salleId = req.params.id;
+      logger.info(`Suppression de la salle ${salleId}`);
 
-      const success = await SalleDAO.deleteSalle(filmId);
+      const success = await SalleDAO.deleteSalle(salleId);
 
       if (success) {
         res.json({ message: 'OK' });
