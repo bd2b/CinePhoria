@@ -104,7 +104,7 @@ export class SalleDAO {
         } catch (err) {
             await connection.end();
             logger.error('Erreur delete salle:', err);
-            throw err;
+            throw Error('Impossible de supprimer la salle');
         }
     }
 
