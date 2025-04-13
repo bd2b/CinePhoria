@@ -145,3 +145,21 @@ export function imageFilm(value) {
     const uuidPossible = value.slice(0, 36);
     return (isUUID(uuidPossible) ? prefixAPI : prefixDist) + value;
 }
+export function syncTableColumnWidths(table) {
+    const theadCols = table.querySelectorAll('thead tr th');
+    const tbodyRow = table.querySelector('tbody tr');
+    if (!theadCols.length || !tbodyRow)
+        return;
+    const tbodyCols = tbodyRow.querySelectorAll('td');
+    if (theadCols.length !== tbodyCols.length) {
+        console.error("Nombre de colonnes de l'entete et du tableau différent");
+        return;
+    }
+    else {
+        console.log("Calcul de la largeur des colonnes");
+    }
+    tbodyCols.forEach((td, i) => {
+        const width = td.getBoundingClientRect().width;
+        theadCols[i].style.width = `${width}px`;
+    });
+}

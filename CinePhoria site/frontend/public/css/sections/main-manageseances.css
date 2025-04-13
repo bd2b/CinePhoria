@@ -1,27 +1,68 @@
 /* ------------------------------------------------
-   TABLE "Mes salles"
+   TABLE "Mes seances"
+   ------------------------------------------------ */
+
+.title__filter-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .title__filter-dropdown-button {
+    padding: 10px 20px;
+    min-width: 200px;
+    
+}
+  
+  .title__filter-button-drowdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 120px;
+    border: 1px solid rgba(0,0,0,0.2);
+    z-index: 1000;
+  }
+  
+  .title__filter-button-drowdown-content a {
+    padding: 10px;
+    display: block;
+    text-decoration: none;
+    color: black;
+  }
+  
+  .title__filter-button-drowdown-content a:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .title__filter-button-drowdown-content.show {
+    display: block;
+  }
+
+  
+
+/* ------------------------------------------------
+   TABLE "Mes seances"
    ------------------------------------------------ */
 
 /* Le conteneur global éventuel, si vous souhaitez styliser */
 .container__mesreservations {
     /* Ajustez selon vos préférences */
-    padding: 20px;
+    padding: 10px;
     margin: 0 auto;
   }
   
   /* Table du listing */
-  .tab__salles-liste {
+  .tab__seances-liste {
     max-height: 700px; /* Hauteur maximale du tableau */
     overflow-y: auto; /* Activation du scroll vertical */
     border: 1px solid #dee2e6; /* Bordure autour du tableau */
     width: 100%;
-    margin-top: 10px;
+    margin-top: 5px;
     font-size: 16px;
     color: rgb(var(--primary-color)); /* Supposez qu’une variable CSS –primary-color existe */
   }
   
   /* Table réelle */
-  .tab__salles-liste-table {
+  .tab__seances-liste-table {
     width: 100%;
     border-collapse: collapse; /* Éviter les doubles bordures */
     background-color: #fff;    /* Fond blanc */
@@ -29,7 +70,7 @@
   }
   
   /* En-tête fixé */
-.tab__salles-liste-table thead {
+.tab__seances-liste-table thead {
   display: table;
   width: 100%;
   position: sticky;
@@ -40,7 +81,7 @@
 }
 
 /* Pour figer la première ligne de données juste sous le header */
-.tab__salles-liste-table .sticky-row {
+.tab__seances-liste-table .sticky-row {
   position: sticky;
   top: 0px; /* ajusté pour coller juste sous l'en-tête */
   background-color:rgba(var(--accent-color), 0.9);
@@ -48,7 +89,7 @@
 }
 
 /* Contenu défilant */
-.tab__salles-liste-table tbody {
+.tab__seances-liste-table tbody {
   display: block;
   width: 100%;
   height: 100%;
@@ -57,49 +98,58 @@
 }
 
 /* Assurer que les colonnes restent alignées */
-.tab__salles-liste-table th, 
-.tab__salles-liste-table td {
-  width: 12.5%; /* Répartition équitable des colonnes */
+.tab__seances-liste-table th, 
+.tab__seances-liste-table td {
+  width: 8%; /* Répartition équitable des colonnes */
   text-align: center;
-  padding: 10px 15px;
-  
+  padding: 10px 0px;
   white-space: nowrap; /* Empêche le retour à la ligne */
 }
 
-.tab__salles-liste-table th {
+.tab__seances-liste-table th {
 font-weight: bold;
 }
 
 
 /* Appliquer une bordure pour séparer les colonnes */
-.tab__salles-liste-table td {
+.tab__seances-liste-table td {
   border: 1px solid #dee2e6;
 }
 
 /* Ajout d'un effet au survol */
-.tab__salles-liste-table tbody tr:hover {
+.tab__seances-liste-table tbody tr:hover {
   background-color: #f9f9f9;
 }
   
   /* Colonne ID (si vous voulez la styliser en particulier) */
-  .tab__salles-liste-table .content-id-td {
+  .tab__seances-liste-table .content-id-td {
     font-weight: bold;
     text-align: left;
   }
   
+  .tab__seances-liste-table .content-img-td {
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+    height: 50px;
+    width: 40px;
+    object-fit: cover;
+
+    border: 5px, border, rgb(var(--primary-color));
+}
   /* Colonne texte "classique" */
-  .tab__salles-liste-table .content-mesreservations-td {
+  .tab__seances-liste-table .content-mesreservations-td {
     text-align: left; /* Alignement à gauche pour certains textes */
   }
   
   /* Colonne prix */
-  .tab__salles-liste-table .content-price-td {
+  .tab__seances-liste-table .content-price-td {
     font-weight: bold;
     color: #000;
   }
   
   /* Survol possible (hover) si vous le souhaitez */
-  .tab__salles-liste-table tbody tr:hover {
+  .tab__seances-liste-table tbody tr:hover {
     background-color: #f9f9f9;
   }
 
@@ -158,7 +208,7 @@ font-weight: bold;
   }
   
   /* Eventuel style "tfoot" si vous en avez un (total par ex.) */
-  .tab__salles-liste-table tfoot td {
+  .tab__seances-liste-table tfoot td {
     padding: 10px 15px;
     font-weight: bold;
     font-size: var(--subheadline-font-size);
@@ -166,7 +216,7 @@ font-weight: bold;
     text-align: right;
     border-bottom: 1px solid #dee2e6;
   }
-  .tab__salles-liste-table tfoot td:last-child {
+  .tab__seances-liste-table tfoot td:last-child {
     color: rgb(var(--primary-color));
     font-size: 18px;
   }

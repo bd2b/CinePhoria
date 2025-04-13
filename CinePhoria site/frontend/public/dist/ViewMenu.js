@@ -202,8 +202,9 @@ function buildMenuAdministrateur() {
 /**
  * Menu de l'Employé :
  *  - Intranet (sous-menu)
- *    -> Gérer les films (manageFilm.html)
- *    -> Gérer les salles (manageSalle.html)
+ *    -> Gérer les films (manageFilms.html)
+ *    -> Gérer les salles (manageSalles.html)
+ *    -> Gérer les séances (manageSeances.html)
  *    -> Modérer les avis (moderer.html)
  *  - Deconnexion
  */
@@ -289,8 +290,9 @@ function buildIntranetMenuEmploye() {
     subMenu.style.border = '1px solid #999';
     const item1 = createLevel2Item('Gérer les films', 'manageFilms.html');
     const item2 = createLevel2Item('Gérer les salles', 'manageSalles.html');
-    const item3 = createLevel2Item('Modérer les avis', 'moderer.html');
-    subMenu.append(item1, item2, item3);
+    const item3 = createLevel2Item('Gérer les séances', 'manageSeances.html');
+    const item4 = createLevel2Item('Modérer les avis', 'moderer.html');
+    subMenu.append(item1, item2, item3, item4);
     mainBtn.addEventListener('mouseover', () => {
         subMenu.style.display = 'block';
     });

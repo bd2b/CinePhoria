@@ -164,4 +164,24 @@ export function imageFilm (value: string): string {
     return (isUUID(uuidPossible) ? prefixAPI : prefixDist) + value;
 }
 
+export function syncTableColumnWidths(table: HTMLTableElement): void {
+    const theadCols = table.querySelectorAll('thead tr th');
+    const tbodyRow = table.querySelector('tbody tr');
+
+    if (!theadCols.length || !tbodyRow) return;
+
+    const tbodyCols = tbodyRow.querySelectorAll('td');
+    if (theadCols.length !== tbodyCols.length) 
+    {   console.error("Nombre de colonnes de l'entete et du tableau différent")
+        return;
+    } else {
+        console.log("Calcul de la largeur des colonnes");
+    }
+    tbodyCols.forEach((td, i) => {
+        const width = td.getBoundingClientRect().width;
+        (theadCols[i] as HTMLElement).style.width = `${width}px`;
+    });
+}
+
+
 

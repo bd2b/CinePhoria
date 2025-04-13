@@ -15,6 +15,7 @@ import { userDataController } from "./DataControllerUser.js";
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { onLoadManageFilms } from "./ViewManageFilms.js";
 import { onLoadManageSalles } from "./ViewManageSalles.js";
+import { onLoadManageSeances } from "./ViewManageSeances.js";
 const pageHandlers = {
     "visiteur.html": onLoadVisiteur,
     "reservation.html": onLoadReservation,
@@ -22,8 +23,10 @@ const pageHandlers = {
     "films.html": onLoadFilms,
     "manageFilms.html": onLoadManageFilms,
     "manageSalles.html": onLoadManageSalles,
+    "manageSeances.html": onLoadManageSeances
 };
-const pagesPublic = ["visiteur.html", "reservation.html", "films.html", "manageFilms.html", "manageSalles.html"];
+const pagesPublic = ["visiteur.html", "reservation.html", "films.html",
+    "manageFilms.html", "manageSalles.html", "manageSeances.html"]; // TODO manageXXXXX à supprimer
 /**
  * Gestion centralisée des erreurs API
  */
