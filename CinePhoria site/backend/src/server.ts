@@ -48,6 +48,7 @@ import filmRoutes from './routes/filmRoutes';
 import cinemaRoutes from './routes/cinemaRoutes';
 import salleRoutes from'./routes/salleRoute';
 import seanceRoutes from './routes/seanceRoutes';
+import seanceseuleRoutes from './routes/seanceseuleRoutes'
 import reservationRoutes from './routes/reservationRoutes';
 import utilisateurRoutes from'./routes/utilisateurRoutes';
 
@@ -58,6 +59,7 @@ app.use('/api/films', filmRoutes);
 app.use('/api/cinemas', cinemaRoutes);
 app.use('/api/salles', salleRoutes);
 app.use('/api/seances', seanceRoutes);
+app.use('/api/seancesseules', seanceseuleRoutes);
 app.use('/api/reservation', reservationRoutes);
 app.use('/api/utilisateur', utilisateurRoutes);
 

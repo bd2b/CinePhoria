@@ -12,6 +12,14 @@ export class SeanceController {
     }
   };
 
+  static async getAllSeancesDisplay(req: Request, res: Response) {
+    try {
+      const seancesDisplay = await SeanceDAO.findAllForDisplay();
+      res.json(seancesDisplay);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  };
 
   static async getSeancesById(req: Request, res: Response) {
     try {
@@ -44,6 +52,25 @@ export class SeanceController {
       const seances = await SeanceDAO.findByCinemas(cinemasList);
       if (seances.length === 0) {
         return res.status(404).json({ message: `Seances non trouvées pour ${cinemasList}` });
+      }
+  
+      res.json(seances);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  static async getSeanceDisplayByCinemas(req: Request, res: Response) {
+    try {
+      // Vérification et conversion de cinemasList en string
+      const cinemasList = req.query.cinemasList;
+      if (!cinemasList || typeof cinemasList !== 'string') {
+        return res.status(400).json({ message: `cinemasList doit être une chaîne de caractères : ${cinemasList}` });
+      }
+  
+      const seances = await SeanceDAO.findDisplayByCinemas(cinemasList);
+      if (seances.length === 0) {
+        return res.status(404).json({ message: `Seances Display non trouvées pour ${cinemasList}` });
       }
   
       res.json(seances);

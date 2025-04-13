@@ -1,5 +1,5 @@
 import mysql from 'mysql2/promise';
-import { Seance, TarifQualite } from "../shared-models/Seance";
+import { Seance, SeanceDisplay, TarifQualite } from "../shared-models/Seance";
 import logger from '../config/configLog';
 
 import { dbConfig } from "../config/config"
@@ -15,6 +15,26 @@ export class SeanceDAO {
 
     // On convertit chaque record en Seance
     return (rows as any[]).map(row => new Seance(row));
+
+  }
+
+  static async findAllForDisplay(): Promise<SeanceDisplay[]> {
+
+    const connection = await mysql.createConnection(dbConfig);
+    const requeteSelect = `
+    SELECT 
+      seanceId, titleFilm, nameSalle, nameCinema, 
+      capacity,
+      dateJour, hourBeginHHSMM, hourEndHHSMM, 
+      bo, duration, qualite, imageFilm128
+    FROM ViewFilmsSeancesSalle
+    `
+    logger.info(`Exécution de la requête : ${requeteSelect}`);
+    const [rows] = await connection.execute(requeteSelect);
+    await connection.end();
+
+    // On convertit chaque record en Seance
+    return (rows as any[]).map(row => new SeanceDisplay(row));
 
   }
 
@@ -47,6 +67,36 @@ export class SeanceDAO {
 
     // Map des lignes pour les convertir en instances de Seance
     return (rows as any[]).map((row) => new Seance(row));
+  }
+
+  static async findDisplayByCinemas(nameCinemaList: string): Promise<SeanceDisplay[]> {
+    const connection = await mysql.createConnection(dbConfig);
+    let requete: string = '';
+    logger.info("Selecteur de cinema = " + nameCinemaList);
+    if (nameCinemaList === '"all"') {
+      requete = `
+      SELECT 
+        seanceId, titleFilm, nameSalle, nameCinema, 
+        capacity,
+        dateJour, hourBeginHHSMM, hourEndHHSMM, 
+        bo, duration, qualite, imageFilm128
+      FROM ViewFilmsSeancesSalle`;
+    } else {
+      requete = `SELECT 
+        seanceId, titleFilm, nameSalle, nameCinema, 
+        capacity,
+        dateJour, hourBeginHHSMM, hourEndHHSMM, 
+        bo, duration, qualite, imageFilm128
+      FROM ViewFilmsSeancesSalle
+      WHERE nameCinema in (${nameCinemaList})`;
+    }
+    logger.info(`Exécution de la requête : ${requete}`);
+
+    const [rows] = await connection.execute(requete);
+    await connection.end();
+
+    // Map des lignes pour les convertir en instances de Seance
+    return (rows as any[]).map((row) => new SeanceDisplay(row));
   }
 
   static async findTarifs(): Promise<TarifQualite[]> {
