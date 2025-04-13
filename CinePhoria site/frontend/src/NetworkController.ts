@@ -6,9 +6,10 @@ import { userDataController } from './DataControllerUser.js';
 import { handleApiError } from './Global.js';
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { Mail } from './shared-models/Mail.js';
-import { Seance } from './shared-models/Seance.js';
+import { Seance , SeanceDisplay } from './shared-models/Seance.js';
 import { Film } from './shared-models/Film.js';
 import { Salle } from './shared-models/Salle.js';
+import { SeanceSeule } from './shared-models/SeanceSeule.js';
 
 
 /**
@@ -1028,6 +1029,107 @@ export async function sallesSelectAllApi(): Promise<Salle[]> {
         'GET',
         undefined,
         true
+    );
+    return responseJSON;
+}
+
+/**
+ * Création d’un nouveau seanceseule (POST /api/seancesseules)
+ * @param seanceseule Les informations du seanceseule à créer
+ * @returns { message, id } où 'id' est l'identifiant du seanceseule créé
+ */
+export async function seancesseulesCreateApi(seanceseule: SeanceSeule): Promise<{ message: string; id: string }> {
+    const endpoint = 'http://localhost:3500/api/seancesseules';
+    // Requête authentifiée
+    const responseJSON = await apiRequest<{ message: string; id: string }>(
+        endpoint,
+        'POST',
+        seanceseule,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Récupération d’un seanceseule par son ID (GET /api/seancesseules/:id)
+ * @param seanceseuleId L'identifiant du seanceseule
+ * @returns L’objet SeanceSeule correspondant
+ */
+export async function seancesseulesSelectApi(seanceseuleId: string): Promise<SeanceSeule> {
+    const endpoint = `http://localhost:3500/api/seancesseules/${seanceseuleId}`;
+    const responseJSON = await apiRequest<SeanceSeule>(
+        endpoint,
+        'GET',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Mise à jour d’un seanceseule (PUT /api/seancesseules/:id)
+ * @param seanceseuleId L'identifiant du seanceseule à mettre à jour
+ * @param seanceseule Les nouvelles informations du seanceseule
+ * @returns { message } si la mise à jour est réussie
+ */
+export async function seancesseulesUpdateApi(seanceseuleId: string, seanceseule: SeanceSeule): Promise<{ message: string }> {
+    const endpoint = `http://localhost:3500/api/seancesseules/${seanceseuleId}`;
+    const responseJSON = await apiRequest<{ message: string }>(
+        endpoint,
+        'PUT',
+        seanceseule,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Suppression d’un seanceseule (DELETE /api/seancesseules/:id)
+ * @param seanceseuleId L'identifiant du seanceseule à supprimer
+ * @returns { message } si la suppression est réussie
+ */
+export async function seancesseulesDeleteApi(seanceseuleId: string): Promise<{ message: string }> {
+    const endpoint = `http://localhost:3500/api/seancesseules/${seanceseuleId}`;
+    const responseJSON = await apiRequest<{ message: string }>(
+        endpoint,
+        'DELETE',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+* Récupération de tous les seancesseules (GET /api/seancesseules)
+* @returns Un tableau de SeanceSeule
+*/
+export async function seancesseulesSelectAllApi(): Promise<SeanceSeule[]> {
+    const endpoint = 'http://localhost:3500/api/seancesseules';
+    // Requête authentifiée
+    const responseJSON = await apiRequest<SeanceSeule[]>(
+        endpoint,
+        'GET',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+* Récupération de tous les seancesdisplay en fonction d'une liste de cinema 
+* (GET /api/seances/display/filter?)
+* http://localhost:3500/api/seances/display/filter?cinemasList="Paris"
+* @returns Un tableau de SeanceSeule
+*/
+export async function seancesDisplayByCinemaApi(cinemas: string[]): Promise<SeanceDisplay[]> {
+    const filter = cinemas.map(s => `"${s}"`).join(',');
+    const endpoint = `http://localhost:3500/api/seances/display/filter?cinemasList=${filter}`;
+    // Requête authentifiée
+    const responseJSON = await apiRequest<SeanceDisplay[]>(
+        endpoint,
+        'GET',
+        undefined,
+        false
     );
     return responseJSON;
 }

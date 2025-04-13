@@ -89,3 +89,25 @@ export interface SeanceInterface {
  cinemaemailCinema?: string; 
  cinematelCinema?: string;
 }
+
+export class SeanceDisplay {
+  seanceId!: string; 
+  titleFilm?: string;
+  nameSalle?: string; 
+  nameCinema?: string; 
+
+  capacity?: number;
+  
+  dateJour?: string; 
+  hourBeginHHSMM?: string; 
+  hourEndHHSMM?: string; 
+
+  bo?: string;
+  duration?: string;
+  qualite?: string;
+  imageFilm128?: string;
+
+ constructor(data: Partial<SeanceDisplay>) {
+    Object.assign(this, data);
+  }
+};

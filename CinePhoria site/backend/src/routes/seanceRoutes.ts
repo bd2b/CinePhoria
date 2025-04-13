@@ -13,6 +13,13 @@ logger.info('Declaration route /api/seances/');
  */
 router.get('/', SeanceController.getAllSeances);
 
+
+/**
+ * Route pour récupérer toutes les séances futures de tous les cinemas
+ * en format Display pour l'Intranet
+ */
+router.get('/display', SeanceController.getAllSeancesDisplay);
+
 /** 
  * Filtre pour selectionner les séances future d'un ou plusieurs cinemas
  * http://localhost:3000/api/seances/filter?cinemasList="Liege","Toulouse"
@@ -20,6 +27,16 @@ router.get('/', SeanceController.getAllSeances);
 router.get('/filter', (req, res) => { 
     SeanceController.getSeanceByCinemas(req, res)
 });
+
+/** 
+ * Filtre pour selectionner les séances futures au format Display
+ * d'un ou plusieurs cinemas
+ * http://localhost:3000/api/seances/display/filter?cinemasList="Liege","Toulouse"
+ */
+router.get('/display/filter', (req, res) => { 
+    SeanceController.getSeanceDisplayByCinemas(req, res)
+});
+
 
 /** 
  * Récupération des tarifs

@@ -849,3 +849,80 @@ export function sallesSelectAllApi() {
         return responseJSON;
     });
 }
+/**
+ * Création d’un nouveau seanceseule (POST /api/seancesseules)
+ * @param seanceseule Les informations du seanceseule à créer
+ * @returns { message, id } où 'id' est l'identifiant du seanceseule créé
+ */
+export function seancesseulesCreateApi(seanceseule) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = 'http://localhost:3500/api/seancesseules';
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'POST', seanceseule, true);
+        return responseJSON;
+    });
+}
+/**
+ * Récupération d’un seanceseule par son ID (GET /api/seancesseules/:id)
+ * @param seanceseuleId L'identifiant du seanceseule
+ * @returns L’objet SeanceSeule correspondant
+ */
+export function seancesseulesSelectApi(seanceseuleId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/seancesseules/${seanceseuleId}`;
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}
+/**
+ * Mise à jour d’un seanceseule (PUT /api/seancesseules/:id)
+ * @param seanceseuleId L'identifiant du seanceseule à mettre à jour
+ * @param seanceseule Les nouvelles informations du seanceseule
+ * @returns { message } si la mise à jour est réussie
+ */
+export function seancesseulesUpdateApi(seanceseuleId, seanceseule) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/seancesseules/${seanceseuleId}`;
+        const responseJSON = yield apiRequest(endpoint, 'PUT', seanceseule, true);
+        return responseJSON;
+    });
+}
+/**
+ * Suppression d’un seanceseule (DELETE /api/seancesseules/:id)
+ * @param seanceseuleId L'identifiant du seanceseule à supprimer
+ * @returns { message } si la suppression est réussie
+ */
+export function seancesseulesDeleteApi(seanceseuleId) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/seancesseules/${seanceseuleId}`;
+        const responseJSON = yield apiRequest(endpoint, 'DELETE', undefined, true);
+        return responseJSON;
+    });
+}
+/**
+* Récupération de tous les seancesseules (GET /api/seancesseules)
+* @returns Un tableau de SeanceSeule
+*/
+export function seancesseulesSelectAllApi() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = 'http://localhost:3500/api/seancesseules';
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}
+/**
+* Récupération de tous les seancesdisplay en fonction d'une liste de cinema
+* (GET /api/seances/display/filter?)
+* http://localhost:3500/api/seances/display/filter?cinemasList="Paris"
+* @returns Un tableau de SeanceSeule
+*/
+export function seancesDisplayByCinemaApi(cinemas) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const filter = cinemas.map(s => `"${s}"`).join(',');
+        const endpoint = `http://localhost:3500/api/seances/display/filter?cinemasList=${filter}`;
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, false);
+        return responseJSON;
+    });
+}

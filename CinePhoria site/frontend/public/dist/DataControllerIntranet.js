@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi } from './NetworkController.js';
-import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi } from './NetworkController.js';
+import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi } from './NetworkController.js';
 export class DataControllerIntranet {
     static allFilms() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -77,6 +77,7 @@ export class DataControllerIntranet {
             return 0;
         });
     }
+    // Gestion des séances pour manageSalle
     static allSalles() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
@@ -121,6 +122,62 @@ export class DataControllerIntranet {
             }
             catch (error) {
                 console.error(error);
+                return false;
+            }
+        });
+    }
+    // Gestion des séances pour manageSeance
+    // Les requetes sont en temps reel sans cache local, néanmoins pour éviter de surcharger le réseau
+    // On met en place le filtrage par cinema pour l'affichage et la mise à jour de la seule entité seance
+    // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
+    static getSeancesDisplayByCinema(cinemas) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield seancesDisplayByCinemaApi(cinemas);
+            }
+            catch (error) {
+                console.error(`Erreur dans recherche des seanceDisplay : ${error}`);
+                return [];
+            }
+        });
+    }
+    // Création ou mise à jour. Optimisation possible au niveau des API rest 
+    // mais le temps tourne et je veux rester standard....
+    static createOrUpdateSeance(seanceSeule) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = { message: "" };
+            try {
+                // On cree ou met a jour selon que l'on trouve la seance sur le serveur
+                try {
+                    const seanceSeuleUpdate = seancesseulesSelectApi(seanceSeule.id);
+                    result.message = "update";
+                }
+                catch (error) {
+                    result.message = "create";
+                }
+                if (result.message = "create") {
+                    yield seancesseulesCreateApi(seanceSeule);
+                }
+                else {
+                    yield seancesseulesUpdateApi(seanceSeule.id, seanceSeule);
+                }
+                return true;
+            }
+            catch (error) {
+                switch (result.message) {
+                    case "":
+                        console.error(`Erreur dans la recherche de seance : ${error} , id = ${seanceSeule.id}`);
+                        break;
+                    case "update":
+                        console.error(`Erreur dans l'update de seance : ${error}, seance = ${JSON.stringify(seanceSeule)}`);
+                        break;
+                    case "create":
+                        console.error(`Erreur dans le create de seance : ${error}, seance = ${JSON.stringify(seanceSeule)}`);
+                        break;
+                    default:
+                        console.error(`Erreur inconue dans le create/update de seance : ${error}, seance = ${JSON.stringify(seanceSeule)}`);
+                        break;
+                }
                 return false;
             }
         });

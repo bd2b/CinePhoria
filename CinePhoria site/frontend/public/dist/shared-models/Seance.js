@@ -10,3 +10,9 @@ export class TarifQualite {
     }
 }
 ;
+export class SeanceDisplay {
+    constructor(data) {
+        Object.assign(this, data);
+    }
+}
+;
