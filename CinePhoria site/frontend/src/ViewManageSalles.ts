@@ -4,6 +4,7 @@ import { Salle } from './shared-models/Salle.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { sallesUpdateApi, sallesCreateApi, sallesDeleteApi } from './NetworkController.js';
+import { syncTableColumnWidths } from './Helpers.js';
 
 
 let isDefinePlan = false;
@@ -23,8 +24,7 @@ export async function onLoadManageSalles() {
 }
 
 /* ---------------------------------------------------
-   Rafraîchit la liste de tous les films, 
-   et affiche le premier ou le film sélectionné
+   Rafraîchit la liste de toutes les salles
 --------------------------------------------------- */
 async function rafraichirTableauSalles(): Promise<void> {
     const container = document.getElementById('salles-table-container');
@@ -65,7 +65,7 @@ export async function updateTableSalles(salles: Salle[]): Promise<HTMLDivElement
     // THEAD
     const thead = document.createElement('thead');
     const trHead = document.createElement('tr');
-    const cols = ['Complexe', 'Salle', 'Capacité', '# places PMR', '# rangés', '# fauteuils', 'Plan salle', ''];
+    const cols = ['Complexe', 'Salle', 'Capacité', '# places PMR', '# rangés', '# fauteuils', 'Plan salle', 'Actions'];
     cols.forEach((col) => {
         const th = document.createElement('th');
         th.textContent = col;
@@ -773,18 +773,4 @@ function nbSiege(seatsAbsents: string): number {
     }
 }
 
-export function syncTableColumnWidths(table: HTMLTableElement): void {
-    const theadCols = table.querySelectorAll('thead tr th');
-    const tbodyRow = table.querySelector('tbody tr');
-
-    if (!theadCols.length || !tbodyRow) return;
-
-    const tbodyCols = tbodyRow.querySelectorAll('td');
-    if (theadCols.length !== tbodyCols.length) return;
-
-    tbodyCols.forEach((td, i) => {
-        const width = td.getBoundingClientRect().width;
-        (theadCols[i] as HTMLElement).style.width = `${width}px`;
-    });
-}
 

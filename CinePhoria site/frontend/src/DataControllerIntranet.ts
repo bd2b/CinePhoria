@@ -125,6 +125,32 @@ export class DataControllerIntranet {
     // Les requetes sont en temps reel sans cache local, néanmoins pour éviter de surcharger le réseau
     // On met en place le filtrage par cinema pour l'affichage et la mise à jour de la seule entité seance
 
+    protected static _filterNameCinema?: string // Filtre de cinema
+
+    // Getter pour filterNameCinema
+    public static get filterNameCinema(): string {
+        return DataControllerIntranet._filterNameCinema || "all";
+    }
+
+    // Setter pour filterNameCinema
+    public static set filterNameCinema(value: string) {
+        if (value.trim() === '') {
+            throw new Error('Le nom du cinéma ne peut pas être vide.');
+        }
+        DataControllerIntranet._filterNameCinema = value.trim();
+
+    }
+
+    // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
+    public static async getSeancesDisplayFilter(): Promise<SeanceDisplay[]> {
+        try {
+            return await seancesDisplayByCinemaApi([DataControllerIntranet._filterNameCinema || 'all'])
+        } catch (error) {
+            console.error(`Erreur dans recherche des seanceDisplay : ${error}`)
+            return [];
+        }
+    }
+
     // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
     public static async getSeancesDisplayByCinema(cinemas: string[]): Promise<SeanceDisplay[]> {
         try {
@@ -141,7 +167,7 @@ export class DataControllerIntranet {
         try {
             // On cree ou met a jour selon que l'on trouve la seance sur le serveur
             try {
-                const seanceSeuleUpdate = seancesseulesSelectApi(seanceSeule.id);
+                const seanceSeuleUpdate = await seancesseulesSelectApi(seanceSeule.id);
                 result.message = "update";
             } catch (error) {
                 result.message = "create"
@@ -153,25 +179,25 @@ export class DataControllerIntranet {
             }
             return true;
         }
-        catch (error) {   
+        catch (error) {
             switch (result.message) {
                 case "":
-                  console.error(`Erreur dans la recherche de seance : ${error} , id = ${seanceSeule.id}`);
-                  break;  
+                    console.error(`Erreur dans la recherche de seance : ${error} , id = ${seanceSeule.id}`);
+                    break;
                 case "update":
                     console.error(`Erreur dans l'update de seance : ${error}, seance = ${JSON.stringify(seanceSeule)}`);
-                    break;      
+                    break;
                 case "create":
                     console.error(`Erreur dans le create de seance : ${error}, seance = ${JSON.stringify(seanceSeule)}`);
                     break;
                 default:
                     console.error(`Erreur inconue dans le create/update de seance : ${error}, seance = ${JSON.stringify(seanceSeule)}`);
-                  break;
-              }
-              return false;
+                    break;
+            }
+            return false;
         }
-}
-constructor() {
-    console.log("DataCIntranet : Initialisation");
-}
+    }
+    constructor() {
+        console.log("DataCIntranet : Initialisation");
+    }
 }

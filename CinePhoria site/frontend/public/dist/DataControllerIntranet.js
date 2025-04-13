@@ -126,9 +126,29 @@ export class DataControllerIntranet {
             }
         });
     }
-    // Gestion des séances pour manageSeance
-    // Les requetes sont en temps reel sans cache local, néanmoins pour éviter de surcharger le réseau
-    // On met en place le filtrage par cinema pour l'affichage et la mise à jour de la seule entité seance
+    // Getter pour filterNameCinema
+    static get filterNameCinema() {
+        return DataControllerIntranet._filterNameCinema || "all";
+    }
+    // Setter pour filterNameCinema
+    static set filterNameCinema(value) {
+        if (value.trim() === '') {
+            throw new Error('Le nom du cinéma ne peut pas être vide.');
+        }
+        DataControllerIntranet._filterNameCinema = value.trim();
+    }
+    // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
+    static getSeancesDisplayFilter() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return yield seancesDisplayByCinemaApi([DataControllerIntranet._filterNameCinema || 'all']);
+            }
+            catch (error) {
+                console.error(`Erreur dans recherche des seanceDisplay : ${error}`);
+                return [];
+            }
+        });
+    }
     // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
     static getSeancesDisplayByCinema(cinemas) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -149,7 +169,7 @@ export class DataControllerIntranet {
             try {
                 // On cree ou met a jour selon que l'on trouve la seance sur le serveur
                 try {
-                    const seanceSeuleUpdate = seancesseulesSelectApi(seanceSeule.id);
+                    const seanceSeuleUpdate = yield seancesseulesSelectApi(seanceSeule.id);
                     result.message = "update";
                 }
                 catch (error) {
