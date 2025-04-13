@@ -197,32 +197,7 @@ export function updateTableSeances(seancesDisplay) {
             tr.appendChild(tdQualite);
             // 11) Boutons d'actions sur la salle
             const tdActions = document.createElement('td');
-            const divButton = document.createElement('div');
-            divButton.classList.add('modal-content-btns');
-            const editBtn = document.createElement('button');
-            editBtn.classList.add('tab__salles-liste-button');
-            editBtn.textContent = "Editer";
-            editBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
-                // Lancement de la modale 
-                // await onClickEditSalle(salle);
-            }));
-            divButton.appendChild(editBtn);
-            const dupBtn = document.createElement('button');
-            dupBtn.classList.add('tab__salles-liste-button');
-            dupBtn.textContent = 'Dupliquer';
-            dupBtn.addEventListener('click', () => {
-                // On supprime la salle 
-                // onClickDeleteSalle(salle.id);
-            });
-            divButton.appendChild(dupBtn);
-            const deleteBtn = document.createElement('button');
-            deleteBtn.classList.add('tab__salles-liste-button');
-            deleteBtn.textContent = 'Supprimer';
-            deleteBtn.addEventListener('click', () => {
-                // On supprime la salle 
-                // onClickDeleteSalle(salle.id);
-            });
-            divButton.appendChild(deleteBtn);
+            const divButton = actionsButtons('edit', tr, seanceDisplay);
             tdActions.appendChild(divButton);
             tr.appendChild(tdActions);
             tbody.appendChild(tr);
@@ -232,5 +207,270 @@ export function updateTableSeances(seancesDisplay) {
     });
 }
 /* -------------------------------------------
-   Initialisation
-------------------------------------------- */ 
+   Fonction pour construire les boutons d'action
+------------------------------------------- */
+function actionsButtons(mode, tr, seanceDisplay) {
+    const divButton = document.createElement('div');
+    if (mode === 'edit') {
+        divButton.classList.add('table-content-btns');
+        const editBtn = document.createElement('button');
+        editBtn.classList.add('tab__salles-liste-button');
+        editBtn.textContent = "Editer";
+        editBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+            // Figer les tailles des colonnes de la ligne éditée
+            const cells = tr.querySelectorAll('td');
+            const tdWidths = [];
+            cells.forEach((cell) => {
+                tdWidths.push(cell.offsetWidth - 30);
+            });
+            activerEditionLigne(tr, seanceDisplay, tdWidths);
+        }));
+        divButton.appendChild(editBtn);
+        const dupBtn = document.createElement('button');
+        dupBtn.classList.add('tab__salles-liste-button');
+        dupBtn.textContent = 'Dupliquer';
+        dupBtn.addEventListener('click', () => {
+            // On supprime la salle 
+            // onClickDeleteSalle(salle.id);
+        });
+        divButton.appendChild(dupBtn);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList.add('tab__salles-liste-button');
+        deleteBtn.textContent = 'Supprimer';
+        deleteBtn.addEventListener('click', () => {
+            // On supprime la salle 
+            // onClickDeleteSalle(salle.id);
+        });
+        divButton.appendChild(deleteBtn);
+    }
+    if (mode === 'save') {
+        divButton.classList.add('table-content-btns');
+        // Bouton "Annuler"
+        const cancelBtn = document.createElement('button');
+        cancelBtn.classList.add('tab__salles-liste-button');
+        cancelBtn.textContent = 'Annuler';
+        cancelBtn.addEventListener('click', () => {
+            annulerEditionLigne(tr, seanceDisplay);
+        });
+        // Bouton "Enregistrer"
+        const saveBtn = document.createElement('button');
+        saveBtn.classList.add('tab__salles-liste-button');
+        saveBtn.textContent = 'Enregistrer';
+        saveBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+            yield sauvegarderEditionLigne(tr, seanceDisplay);
+        }));
+        divButton.appendChild(saveBtn);
+        divButton.appendChild(cancelBtn);
+    }
+    return divButton;
+}
+/* -------------------------------------------
+   Fonction pour activer l'édition d'une ligne
+------------------------------------------- */
+// Activer le mode édition sur une ligne spécifique
+function activerEditionLigne(tr, seanceDisplay, tdWidths) {
+    // Exemple statique pour listFilms
+    const listFilms = [
+        { affiche: "1-128.jpg", titre: "Film A", duration: "1h30" },
+        { affiche: "2-128.jpg", titre: "Film B", duration: "2h10" },
+        { affiche: "3-128.jpg", titre: "Film C", duration: "1h45" }
+    ];
+    // Exemple statique pour listSalles
+    const listSalles = [
+        { nomSalle: "Salle Alpha", capacite: 100 },
+        { nomSalle: "Salle Beta", capacite: 150 },
+        { nomSalle: "Salle Gamma", capacite: 200 }
+    ];
+    const cells = tr.querySelectorAll('td');
+    // 2) Titre (et indirectement Affiche et Durée)
+    const tdTitre = cells[1];
+    const selectTitre = document.createElement('select');
+    listFilms.forEach(film => {
+        const option = document.createElement('option');
+        option.value = film.titre;
+        option.textContent = film.titre;
+        if (film.titre === seanceDisplay.titleFilm)
+            option.selected = true;
+        selectTitre.appendChild(option);
+    });
+    selectTitre.style.width = `${tdWidths[1]}px`;
+    selectTitre.style.boxSizing = 'border-box';
+    selectTitre.style.textAlign = 'center';
+    const tdAffiche = cells[0];
+    tdAffiche.style.width = `${tdWidths[0]}px`;
+    tdAffiche.style.boxSizing = 'border-box';
+    const tdDuration = cells[2];
+    tdDuration.style.width = `${tdWidths[2]}px`;
+    tdDuration.style.boxSizing = 'border-box';
+    selectTitre.addEventListener('change', () => {
+        const selectedFilm = listFilms.find(f => f.titre === selectTitre.value);
+        if (selectedFilm) {
+            cells[0].querySelector('img').src = imageFilm(selectedFilm.affiche);
+            cells[2].textContent = selectedFilm.duration;
+        }
+    });
+    tdTitre.textContent = '';
+    tdTitre.appendChild(selectTitre);
+    // 4) Salle (et indirectement Capacité)
+    const tdSalle = cells[3];
+    const selectSalle = document.createElement('select');
+    listSalles.forEach(salle => {
+        const option = document.createElement('option');
+        option.value = salle.nomSalle;
+        option.textContent = salle.nomSalle;
+        if (salle.nomSalle === seanceDisplay.nameSalle)
+            option.selected = true;
+        selectSalle.appendChild(option);
+    });
+    selectSalle.style.width = `${tdWidths[3]}px`;
+    selectSalle.style.boxSizing = 'border-box';
+    selectSalle.style.textAlign = 'center';
+    selectSalle.addEventListener('change', () => {
+        const selectedSalle = listSalles.find(s => s.nomSalle === selectSalle.value);
+        if (selectedSalle) {
+            cells[4].textContent = selectedSalle.capacite.toString();
+        }
+    });
+    tdSalle.textContent = '';
+    tdSalle.appendChild(selectSalle);
+    const tdCapacite = cells[4];
+    tdCapacite.style.width = `${tdWidths[4]}px`;
+    tdCapacite.style.boxSizing = 'border-box';
+    // 6) Date
+    const tdDate = cells[5];
+    const inputDate = document.createElement('input');
+    inputDate.type = 'date';
+    inputDate.valueAsDate = new Date(seanceDisplay.dateJour || '');
+    inputDate.style.width = `${tdWidths[5]}px`;
+    inputDate.style.boxSizing = 'border-box';
+    inputDate.style.textAlign = 'center';
+    tdDate.textContent = '';
+    tdDate.appendChild(inputDate);
+    // Helper pour générer les options toutes les 5 minutes
+    function generateTimeOptions(startHour, endHour) {
+        const options = [];
+        let totalMinutes = startHour * 60;
+        const endMinutes = endHour * 60;
+        while (totalMinutes <= endMinutes) {
+            const h = Math.floor(totalMinutes / 60) % 24;
+            const m = totalMinutes % 60;
+            const label = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+            options.push(label);
+            totalMinutes += 5;
+        }
+        return options;
+    }
+    // 7) Heure Début (10:00 → 00:00)
+    const tdHeureDebut = cells[6];
+    const selectHeureDebut = document.createElement('select');
+    generateTimeOptions(10, 24).forEach(time => {
+        const option = document.createElement('option');
+        option.value = time;
+        option.textContent = time;
+        if (time === seanceDisplay.hourBeginHHSMM)
+            option.selected = true;
+        selectHeureDebut.appendChild(option);
+    });
+    selectHeureDebut.style.width = `${tdWidths[6]}px`;
+    selectHeureDebut.style.boxSizing = 'border-box';
+    selectHeureDebut.style.textAlign = 'center';
+    tdHeureDebut.textContent = '';
+    tdHeureDebut.appendChild(selectHeureDebut);
+    // 8) Heure Fin (11:00 → 02:00)
+    const tdHeureFin = cells[7];
+    const selectHeureFin = document.createElement('select');
+    generateTimeOptions(11, 26).forEach(time => {
+        const option = document.createElement('option');
+        option.value = time;
+        option.textContent = time;
+        if (time === seanceDisplay.hourEndHHSMM)
+            option.selected = true;
+        selectHeureFin.appendChild(option);
+    });
+    selectHeureFin.style.width = `${tdWidths[7]}px`;
+    selectHeureFin.style.boxSizing = 'border-box';
+    selectHeureFin.style.textAlign = 'center';
+    tdHeureFin.textContent = '';
+    tdHeureFin.appendChild(selectHeureFin);
+    // 9) BO
+    const tdBO = cells[8];
+    const selectBO = document.createElement('select');
+    ['VF', 'VOST'].forEach(bo => {
+        const option = document.createElement('option');
+        option.value = bo;
+        option.textContent = bo;
+        if (bo === seanceDisplay.bo)
+            option.selected = true;
+        selectBO.appendChild(option);
+    });
+    selectBO.style.width = `${tdWidths[8]}px`;
+    selectBO.style.boxSizing = 'border-box';
+    selectBO.style.textAlign = 'center';
+    tdBO.textContent = '';
+    tdBO.appendChild(selectBO);
+    // 10) Qualité
+    const tdQualite = cells[9];
+    const selectQualite = document.createElement('select');
+    ['4DX', '3D', '4K'].forEach(qualite => {
+        const option = document.createElement('option');
+        option.value = qualite;
+        option.textContent = qualite;
+        if (qualite === seanceDisplay.qualite)
+            option.selected = true;
+        selectQualite.appendChild(option);
+    });
+    selectQualite.style.width = `${tdWidths[9]}px`;
+    selectQualite.style.boxSizing = 'border-box';
+    selectQualite.style.textAlign = 'center';
+    tdQualite.textContent = '';
+    tdQualite.appendChild(selectQualite);
+    // Remplacement des boutons d'action par Annuler et Enregistrer
+    const tdActions = cells[10]; // La cellule Actions
+    tdActions.textContent = ''; // Nettoyage des boutons existants
+    const divButton = actionsButtons('save', tr, seanceDisplay);
+    tdActions.appendChild(divButton);
+    tr.appendChild(tdActions);
+    // Ajustement après rendu DOM
+    // requestAnimationFrame(() => {
+    //     const cells = tr.querySelectorAll('td');
+    //     cells.forEach((cell) => {
+    //         const width = cell.offsetWidth;
+    //         const inner = cell.firstElementChild as HTMLElement | null;
+    //         if (inner) {
+    //             inner.style.width = `${width}px`;
+    //             inner.style.boxSizing = 'border-box';
+    //         }
+    //     });
+    // });
+}
+// Annuler le mode édition sur une ligne spécifique et restaurer les valeurs initiales
+function annulerEditionLigne(tr, seanceDisplay) {
+    var _a, _b;
+    const cells = tr.querySelectorAll('td');
+    cells[0].querySelector('img').src = imageFilm((_a = seanceDisplay.imageFilm128) !== null && _a !== void 0 ? _a : '');
+    cells[1].textContent = seanceDisplay.titleFilm || '';
+    cells[2].textContent = seanceDisplay.duration || '';
+    cells[3].textContent = seanceDisplay.nameSalle || '';
+    cells[4].textContent = ((_b = seanceDisplay.capacity) === null || _b === void 0 ? void 0 : _b.toString(10)) || '';
+    cells[5].textContent = formatDateJJMM(new Date(seanceDisplay.dateJour || '')) || '';
+    cells[6].textContent = seanceDisplay.hourBeginHHSMM || '';
+    cells[7].textContent = seanceDisplay.hourEndHHSMM || '';
+    cells[8].textContent = seanceDisplay.bo || '';
+    cells[9].textContent = seanceDisplay.qualite || '';
+    // Réaffichage des boutons standards
+    const tdButtons = cells[10];
+    tdButtons.textContent = "";
+    const divButton = actionsButtons('edit', tr, seanceDisplay);
+    tdButtons.appendChild(divButton);
+}
+/* -------------------------------------------
+   Fonction pour sauvegarder l'édition d'une ligne
+------------------------------------------- */
+function sauvegarderEditionLigne(tr, seance) {
+    return __awaiter(this, void 0, void 0, function* () {
+        // Collecter les nouvelles valeurs depuis les inputs
+        // Appel API pour enregistrer les modifications
+        // Mettre à jour l'affichage
+    });
+}
+/* ------------------------------------------- */ 
