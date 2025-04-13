@@ -2,6 +2,8 @@
    TABLE "Mes seances"
    ------------------------------------------------ */
 
+
+   
 .title__filter-dropdown {
     position: relative;
     display: inline-block;
@@ -266,9 +268,9 @@ font-weight: bold;
   }
 
   /* Boutons d'actions */
-  .modal-content-btns {
+  .table-content-btns {
     display: flex;
-    justify-content: right;
+    justify-content: center;
   align-items: center;
   margin: 5px;
   padding: 5px;
