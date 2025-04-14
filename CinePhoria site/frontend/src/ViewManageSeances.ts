@@ -1,10 +1,12 @@
 import { DataControllerIntranet } from './DataControllerIntranet.js';
-import { Salle , ListSalles} from './shared-models/Salle.js';
+import { Salle, ListSalles } from './shared-models/Salle.js';
 import { Seance, SeanceDisplay, } from './shared-models/Seance.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { syncTableColumnWidths, imageFilm, formatDateJJMM } from './Helpers.js';
 import { ListFilms } from './shared-models/Film.js';
+import { SeanceSeule } from './shared-models/SeanceSeule.js';
+import { seancesseulesDeleteApi } from './NetworkController.js';
 
 
 // Données utilisées pour les select de saisie
@@ -41,7 +43,7 @@ async function rafraichirTableauSeances(): Promise<void> {
 
     // Charger les séances
     const seances = await DataControllerIntranet.getSeancesDisplayFilter();
-    
+
     // Construction de la page
     const tableSeances = await updateTableSeances(seances) as HTMLTableElement;
     container.appendChild(tableSeances);
@@ -53,7 +55,7 @@ async function rafraichirTableauSeances(): Promise<void> {
     listFilms = await DataControllerIntranet.getListFilmsAll();
     listSalles = await DataControllerIntranet.getSallesByFilter();
 
-    
+
 
 }
 
@@ -142,7 +144,7 @@ export async function updateTableSeances(seancesDisplay: SeanceDisplay[]): Promi
     // THEAD
     const thead = document.createElement('thead');
     const trHead = document.createElement('tr');
-    const cols = ['Date', 'Salle', 'H. Début', 'H. Fin', 'Affiche', 'Titre', 'Durée',  'Capacité',  'Bande', 'Qualité', 'Actions'];
+    const cols = ['Date', 'Salle', 'H. Début', 'H. Fin', 'Affiche', 'Titre', 'Durée', 'Capacité', 'Bande', 'Qualité', 'Actions'];
 
     cols.forEach((col) => {
         const th = document.createElement('th');
@@ -228,6 +230,9 @@ export async function updateTableSeances(seancesDisplay: SeanceDisplay[]): Promi
         tdActions.appendChild(divButton);
         tr.appendChild(tdActions);
 
+        // Stockage de l'id de seance
+        tr.dataset.seanceId = seanceDisplay.seanceId;
+
 
         tbody.appendChild(tr);
     });
@@ -254,26 +259,19 @@ function actionsButtons(mode: string, tr: HTMLTableRowElement, seanceDisplay: Se
                 tdWidths.push(cell.offsetWidth - 30);
             });
             await activerEditionLigne(tr, seanceDisplay, tdWidths);
-            
+
         });
 
         divButton.appendChild(editBtn);
 
-        const dupBtn = document.createElement('button');
-        dupBtn.classList.add('tab__salles-liste-button');
-        dupBtn.textContent = 'Dupliquer';
-        dupBtn.addEventListener('click', () => {
-            // On supprime la salle 
-            // onClickDeleteSalle(salle.id);
-        });
-        divButton.appendChild(dupBtn);
+
 
         const deleteBtn = document.createElement('button');
         deleteBtn.classList.add('tab__salles-liste-button');
         deleteBtn.textContent = 'Supprimer';
         deleteBtn.addEventListener('click', () => {
-            // On supprime la salle 
-            // onClickDeleteSalle(salle.id);
+            // On supprime la salle si on peut
+            onClickDeleteSalle(tr);
         });
         divButton.appendChild(deleteBtn);
     }
@@ -288,10 +286,20 @@ function actionsButtons(mode: string, tr: HTMLTableRowElement, seanceDisplay: Se
             annulerEditionLigne(tr, seanceDisplay);
         });
 
+        // Bouton "Dupliquer"
+        const dupBtn = document.createElement('button');
+        dupBtn.classList.add('tab__salles-liste-button');
+        dupBtn.textContent = 'Dupliquer';
+        dupBtn.addEventListener('click', async () => {
+            // On duplique la ligne courante 
+            await sauvegarderEditionLigne(tr, seanceDisplay, true);
+        });
+        divButton.appendChild(dupBtn);
+
         // Bouton "Enregistrer"
         const saveBtn = document.createElement('button');
         saveBtn.classList.add('tab__salles-liste-button');
-        saveBtn.textContent = 'Enregistrer';
+        saveBtn.textContent = 'Modifier';
         saveBtn.addEventListener('click', async () => {
             await sauvegarderEditionLigne(tr, seanceDisplay);
         });
@@ -310,23 +318,6 @@ function actionsButtons(mode: string, tr: HTMLTableRowElement, seanceDisplay: Se
 // Activer le mode édition sur une ligne spécifique
 async function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDisplay, tdWidths: number[]) {
 
-    // Exemple statique pour listFilms
-    // const listFilms = [
-    //     { affiche: "1-128.jpg", titre: "Film A", duration: "1h30" },
-    //     { affiche: "2-128.jpg", titre: "Film B", duration: "2h10" },
-    //     { affiche: "3-128.jpg", titre: "Film C", duration: "1h45" }
-    // ];
-
-    // Exemple statique pour listSalles
-    // const listSalles = [
-    //     { nomSalle: "Salle Alpha", capacite: 100 },
-    //     { nomSalle: "Salle Beta", capacite: 150 },
-    //     { nomSalle: "Salle Gamma", capacite: 200 }
-    // ];
-
-    // Calculer les tableau de listes
-    
-    
     const cells = tr.querySelectorAll('td');
 
     // 1) Date
@@ -340,7 +331,7 @@ async function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: Seanc
 
     tdDate.textContent = '';
     tdDate.appendChild(inputDate);
-    
+
     // 2) Salle 
     const tdSalle = cells[1];
     const selectSalle = document.createElement('select');
@@ -446,7 +437,7 @@ async function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: Seanc
     tdTitre.textContent = '';
     tdTitre.appendChild(selectTitre);
 
-    
+
     // 8) Capacité
     const tdCapacite = cells[7];
     tdCapacite.style.width = `${tdWidths[7]}px`;
@@ -491,19 +482,6 @@ async function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: Seanc
     tdActions.appendChild(divButton);
 
     tr.appendChild(tdActions);
-    // Ajustement après rendu DOM
-    // requestAnimationFrame(() => {
-    //     const cells = tr.querySelectorAll('td');
-    //     cells.forEach((cell) => {
-    //         const width = cell.offsetWidth;
-    //         const inner = cell.firstElementChild as HTMLElement | null;
-    //         if (inner) {
-    //             inner.style.width = `${width}px`;
-    //             inner.style.boxSizing = 'border-box';
-    //         }
-    //     });
-    // });
-
 
 }
 
@@ -518,11 +496,11 @@ function annulerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDispl
         cells[1].textContent = seanceDisplay.nameSalle || '';
     }
     cells[2].textContent = seanceDisplay.hourBeginHHSMM || '';
-    cells[3].textContent = seanceDisplay.hourEndHHSMM || '';  
+    cells[3].textContent = seanceDisplay.hourEndHHSMM || '';
     cells[4].querySelector('img')!.src = imageFilm(seanceDisplay.imageFilm128 ?? '');
     cells[5].textContent = seanceDisplay.titleFilm || '';
-    cells[6].textContent = seanceDisplay.duration || '';   
-    cells[7].textContent = seanceDisplay.capacity?.toString(10) || '';   
+    cells[6].textContent = seanceDisplay.duration || '';
+    cells[7].textContent = seanceDisplay.capacity?.toString(10) || '';
     cells[8].textContent = seanceDisplay.bo || '';
     cells[9].textContent = seanceDisplay.qualite || '';
 
@@ -537,10 +515,80 @@ function annulerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDispl
 /* -------------------------------------------
    Fonction pour sauvegarder l'édition d'une ligne
 ------------------------------------------- */
-async function sauvegarderEditionLigne(tr: HTMLTableRowElement, seance: SeanceDisplay): Promise<void> {
+async function sauvegarderEditionLigne(tr: HTMLTableRowElement, seance: SeanceDisplay, isDuplicate: boolean = false): Promise<void> {
     // Collecter les nouvelles valeurs depuis les inputs
-    // Appel API pour enregistrer les modifications
-    // Mettre à jour l'affichage
+    const cells = tr.querySelectorAll('td');
+    const id = tr.dataset.seanceId;
+    const newSeance = new SeanceSeule({ id: id });
+
+    // Date
+    const inputDate = cells[0].querySelector('input') as HTMLInputElement;
+    newSeance.dateJour = inputDate?.value || '';
+
+    // Salle
+    const selectSalle = cells[1].querySelector('select') as HTMLSelectElement;
+    const salleId = listSalles.find(s => s.nomSalle === selectSalle?.value)?.id || '';
+    newSeance.salleId = salleId;
+
+    const numPMR = listSalles.find(s => s.nomSalle === selectSalle?.value)?.numPMR || '0';
+    newSeance.numFreePMR = numPMR!.toString(10);
+
+    // Heures
+    const selectHeureDebut = cells[2].querySelector('select') as HTMLSelectElement;
+    const selectHeureFin = cells[3].querySelector('select') as HTMLSelectElement;
+    newSeance.hourBeginHHSMM = selectHeureDebut?.value || '';
+    newSeance.hourEndHHSMM = selectHeureFin?.value || '';
+
+    // filmId
+    const nomFilm = (cells[5].querySelector('select') as HTMLSelectElement).value;
+    const filmId = listFilms.find(f => f.titre === nomFilm)?.id || ''
+    newSeance.filmId = filmId;
+
+    // Capacité (texte)
+    newSeance.numFreeSeats = cells[7].textContent?.trim() || '0';
+
+    // BO
+    const selectBO = cells[8].querySelector('select') as HTMLSelectElement;
+    newSeance.bo = selectBO?.value || '';
+
+    // Qualité
+    const selectQualite = cells[9].querySelector('select') as HTMLSelectElement;
+    newSeance.qualite = selectQualite?.value || '';
+
+    newSeance.alertAvailibility = "";
+
+    if (isDuplicate) {
+        // On cree une nouvelle séance à partir de la ligne
+        newSeance.id = crypto.randomUUID();
+    }
+
+    // console.log(newSeance);
+    try {
+        const result = await DataControllerIntranet.createOrUpdateSeance(newSeance);
+        if (result.message === 'create') {
+            alert("Séance dupliquée");
+        } else {
+            alert("Séance modifiée");
+        }
+        await rafraichirTableauSeances();
+    } catch (error) {
+        alert("Une erreur est survenue : " + error)
+    }
+
 }
 
-/* ------------------------------------------- */
+/* -------------------------------------------
+   Fonction pour supprimer une ligne
+------------------------------------------- */
+async function onClickDeleteSalle(tr: HTMLTableRowElement): Promise<void> {
+    const seanceId = tr.dataset.seanceId!;
+    try {
+        const result = await seancesseulesDeleteApi(seanceId)
+        alert("Suppression réussie :" + result.message)
+        await rafraichirTableauSeances();
+    } catch (error) {
+        console.error("Erreur dans la suppression " + error);
+        alert("Suppression impossible : " + error);
+    }
+
+}

@@ -11,6 +11,8 @@ import { DataControllerIntranet } from './DataControllerIntranet.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { syncTableColumnWidths, imageFilm, formatDateJJMM } from './Helpers.js';
+import { SeanceSeule } from './shared-models/SeanceSeule.js';
+import { seancesseulesDeleteApi } from './NetworkController.js';
 // Données utilisées pour les select de saisie
 let listFilms;
 let listSalles;
@@ -208,6 +210,8 @@ export function updateTableSeances(seancesDisplay) {
             const divButton = actionsButtons('edit', tr, seanceDisplay);
             tdActions.appendChild(divButton);
             tr.appendChild(tdActions);
+            // Stockage de l'id de seance
+            tr.dataset.seanceId = seanceDisplay.seanceId;
             tbody.appendChild(tr);
         });
         container.appendChild(table);
@@ -234,20 +238,12 @@ function actionsButtons(mode, tr, seanceDisplay) {
             yield activerEditionLigne(tr, seanceDisplay, tdWidths);
         }));
         divButton.appendChild(editBtn);
-        const dupBtn = document.createElement('button');
-        dupBtn.classList.add('tab__salles-liste-button');
-        dupBtn.textContent = 'Dupliquer';
-        dupBtn.addEventListener('click', () => {
-            // On supprime la salle 
-            // onClickDeleteSalle(salle.id);
-        });
-        divButton.appendChild(dupBtn);
         const deleteBtn = document.createElement('button');
         deleteBtn.classList.add('tab__salles-liste-button');
         deleteBtn.textContent = 'Supprimer';
         deleteBtn.addEventListener('click', () => {
-            // On supprime la salle 
-            // onClickDeleteSalle(salle.id);
+            // On supprime la salle si on peut
+            onClickDeleteSalle(tr);
         });
         divButton.appendChild(deleteBtn);
     }
@@ -260,10 +256,19 @@ function actionsButtons(mode, tr, seanceDisplay) {
         cancelBtn.addEventListener('click', () => {
             annulerEditionLigne(tr, seanceDisplay);
         });
+        // Bouton "Dupliquer"
+        const dupBtn = document.createElement('button');
+        dupBtn.classList.add('tab__salles-liste-button');
+        dupBtn.textContent = 'Dupliquer';
+        dupBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+            // On duplique la ligne courante 
+            yield sauvegarderEditionLigne(tr, seanceDisplay, true);
+        }));
+        divButton.appendChild(dupBtn);
         // Bouton "Enregistrer"
         const saveBtn = document.createElement('button');
         saveBtn.classList.add('tab__salles-liste-button');
-        saveBtn.textContent = 'Enregistrer';
+        saveBtn.textContent = 'Modifier';
         saveBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
             yield sauvegarderEditionLigne(tr, seanceDisplay);
         }));
@@ -278,19 +283,6 @@ function actionsButtons(mode, tr, seanceDisplay) {
 // Activer le mode édition sur une ligne spécifique
 function activerEditionLigne(tr, seanceDisplay, tdWidths) {
     return __awaiter(this, void 0, void 0, function* () {
-        // Exemple statique pour listFilms
-        // const listFilms = [
-        //     { affiche: "1-128.jpg", titre: "Film A", duration: "1h30" },
-        //     { affiche: "2-128.jpg", titre: "Film B", duration: "2h10" },
-        //     { affiche: "3-128.jpg", titre: "Film C", duration: "1h45" }
-        // ];
-        // Exemple statique pour listSalles
-        // const listSalles = [
-        //     { nomSalle: "Salle Alpha", capacite: 100 },
-        //     { nomSalle: "Salle Beta", capacite: 150 },
-        //     { nomSalle: "Salle Gamma", capacite: 200 }
-        // ];
-        // Calculer les tableau de listes
         const cells = tr.querySelectorAll('td');
         // 1) Date
         const tdDate = cells[0];
@@ -443,18 +435,6 @@ function activerEditionLigne(tr, seanceDisplay, tdWidths) {
         const divButton = actionsButtons('save', tr, seanceDisplay);
         tdActions.appendChild(divButton);
         tr.appendChild(tdActions);
-        // Ajustement après rendu DOM
-        // requestAnimationFrame(() => {
-        //     const cells = tr.querySelectorAll('td');
-        //     cells.forEach((cell) => {
-        //         const width = cell.offsetWidth;
-        //         const inner = cell.firstElementChild as HTMLElement | null;
-        //         if (inner) {
-        //             inner.style.width = `${width}px`;
-        //             inner.style.boxSizing = 'border-box';
-        //         }
-        //     });
-        // });
     });
 }
 // Annuler le mode édition sur une ligne spécifique et restaurer les valeurs initiales
@@ -485,11 +465,74 @@ function annulerEditionLigne(tr, seanceDisplay) {
 /* -------------------------------------------
    Fonction pour sauvegarder l'édition d'une ligne
 ------------------------------------------- */
-function sauvegarderEditionLigne(tr, seance) {
-    return __awaiter(this, void 0, void 0, function* () {
+function sauvegarderEditionLigne(tr_1, seance_1) {
+    return __awaiter(this, arguments, void 0, function* (tr, seance, isDuplicate = false) {
+        var _a, _b, _c, _d;
         // Collecter les nouvelles valeurs depuis les inputs
-        // Appel API pour enregistrer les modifications
-        // Mettre à jour l'affichage
+        const cells = tr.querySelectorAll('td');
+        const id = tr.dataset.seanceId;
+        const newSeance = new SeanceSeule({ id: id });
+        // Date
+        const inputDate = cells[0].querySelector('input');
+        newSeance.dateJour = (inputDate === null || inputDate === void 0 ? void 0 : inputDate.value) || '';
+        // Salle
+        const selectSalle = cells[1].querySelector('select');
+        const salleId = ((_a = listSalles.find(s => s.nomSalle === (selectSalle === null || selectSalle === void 0 ? void 0 : selectSalle.value))) === null || _a === void 0 ? void 0 : _a.id) || '';
+        newSeance.salleId = salleId;
+        const numPMR = ((_b = listSalles.find(s => s.nomSalle === (selectSalle === null || selectSalle === void 0 ? void 0 : selectSalle.value))) === null || _b === void 0 ? void 0 : _b.numPMR) || '0';
+        newSeance.numFreePMR = numPMR.toString(10);
+        // Heures
+        const selectHeureDebut = cells[2].querySelector('select');
+        const selectHeureFin = cells[3].querySelector('select');
+        newSeance.hourBeginHHSMM = (selectHeureDebut === null || selectHeureDebut === void 0 ? void 0 : selectHeureDebut.value) || '';
+        newSeance.hourEndHHSMM = (selectHeureFin === null || selectHeureFin === void 0 ? void 0 : selectHeureFin.value) || '';
+        // filmId
+        const nomFilm = cells[5].querySelector('select').value;
+        const filmId = ((_c = listFilms.find(f => f.titre === nomFilm)) === null || _c === void 0 ? void 0 : _c.id) || '';
+        newSeance.filmId = filmId;
+        // Capacité (texte)
+        newSeance.numFreeSeats = ((_d = cells[7].textContent) === null || _d === void 0 ? void 0 : _d.trim()) || '0';
+        // BO
+        const selectBO = cells[8].querySelector('select');
+        newSeance.bo = (selectBO === null || selectBO === void 0 ? void 0 : selectBO.value) || '';
+        // Qualité
+        const selectQualite = cells[9].querySelector('select');
+        newSeance.qualite = (selectQualite === null || selectQualite === void 0 ? void 0 : selectQualite.value) || '';
+        newSeance.alertAvailibility = "";
+        if (isDuplicate) {
+            // On cree une nouvelle séance à partir de la ligne
+            newSeance.id = crypto.randomUUID();
+        }
+        // console.log(newSeance);
+        try {
+            const result = yield DataControllerIntranet.createOrUpdateSeance(newSeance);
+            if (result.message === 'create') {
+                alert("Séance dupliquée");
+            }
+            else {
+                alert("Séance modifiée");
+            }
+            yield rafraichirTableauSeances();
+        }
+        catch (error) {
+            alert("Une erreur est survenue : " + error);
+        }
     });
 }
-/* ------------------------------------------- */ 
+/* -------------------------------------------
+   Fonction pour supprimer une ligne
+------------------------------------------- */
+function onClickDeleteSalle(tr) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const seanceId = tr.dataset.seanceId;
+        try {
+            const result = yield seancesseulesDeleteApi(seanceId);
+            alert("Suppression réussie :" + result.message);
+            yield rafraichirTableauSeances();
+        }
+        catch (error) {
+            console.error("Erreur dans la suppression " + error);
+            alert("Suppression impossible : " + error);
+        }
+    });
+}

@@ -189,22 +189,26 @@ export class DataControllerIntranet {
     }
     // Création ou mise à jour. Optimisation possible au niveau des API rest 
     // mais le temps tourne et je veux rester standard....
-    public static async createOrUpdateSeance(seanceSeule: SeanceSeule): Promise<boolean> {
+    public static async createOrUpdateSeance(seanceSeule: SeanceSeule): Promise<{ message: string }> {
         let result: { message: string } = { message: "" };
         try {
             // On cree ou met a jour selon que l'on trouve la seance sur le serveur
             try {
                 const seanceSeuleUpdate = await seancesseulesSelectApi(seanceSeule.id);
-                result.message = "update";
+                if (seanceSeuleUpdate) {
+                    result.message = "update";
+                } else {
+                    result.message = "create"
+                }
             } catch (error) {
                 result.message = "create"
             }
-            if (result.message = "create") {
+            if (result.message === "create") {
                 await seancesseulesCreateApi(seanceSeule);
             } else {
                 await seancesseulesUpdateApi(seanceSeule.id, seanceSeule);
             }
-            return true;
+            return result;
         }
         catch (error) {
             switch (result.message) {
@@ -221,7 +225,7 @@ export class DataControllerIntranet {
                     console.error(`Erreur inconue dans le create/update de seance : ${error}, seance = ${JSON.stringify(seanceSeule)}`);
                     break;
             }
-            return false;
+            return result;
         }
     }
 
@@ -256,11 +260,11 @@ export class DataControllerIntranet {
             if (!DataControllerIntranet._filterNameCinema) {
                 cinemaName = 'all'
             } else {
-            cinemaName = DataControllerIntranet._filterNameCinema;
+                cinemaName = DataControllerIntranet._filterNameCinema;
             }
-            
+
             let salles: Salle[] = [];
-            
+
             if (cinemaName === 'all') {
                 salles = await sallesSelectAllApi();
             } else {
@@ -268,18 +272,20 @@ export class DataControllerIntranet {
             }
             let listSalles: ListSalles[];
             if (cinemaName === 'all') {
-            listSalles = Array.from(
-                new Map(
-                    salles
-                        .filter(s => s.id && s.nameSalle)
-                        .map(s => [s.id, {
-                            id: s.id,
-                            // Si on est sur tous les cinemas, on ajoute le com du cinema dans l'intitulé de la salle
-                            nomSalle: s.nameCinema! + "-" + s.nameSalle!,
-                            capacite: s.capacity!
-                        }])
-                ).values()
-            ); }
+                listSalles = Array.from(
+                    new Map(
+                        salles
+                            .filter(s => s.id && s.nameSalle)
+                            .map(s => [s.id, {
+                                id: s.id,
+                                // Si on est sur tous les cinemas, on ajoute le com du cinema dans l'intitulé de la salle
+                                nomSalle: s.nameCinema! + "-" + s.nameSalle!,
+                                capacite: s.capacity!,
+                                numPMR: s.numPMR!
+                            }])
+                    ).values()
+                );
+            }
             else {
                 listSalles = Array.from(
                     new Map(
@@ -288,7 +294,8 @@ export class DataControllerIntranet {
                             .map(s => [s.id, {
                                 id: s.id,
                                 nomSalle: s.nameSalle!,
-                                capacite: s.capacity!
+                                capacite: s.capacity!,
+                                numPMR: s.numPMR!
                             }])
                     ).values()
                 );
