@@ -1,12 +1,15 @@
 import { DataControllerIntranet } from './DataControllerIntranet.js';
-import { Salle } from './shared-models/Salle.js';
+import { Salle , ListSalles} from './shared-models/Salle.js';
 import { Seance, SeanceDisplay, } from './shared-models/Seance.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { syncTableColumnWidths, imageFilm, formatDateJJMM } from './Helpers.js';
+import { ListFilms } from './shared-models/Film.js';
 
 
-
+// Données utilisées pour les select de saisie
+let listFilms: ListFilms[];
+let listSalles: ListSalles[];
 
 /**
  * Entrée principale du module
@@ -36,9 +39,9 @@ async function rafraichirTableauSeances(): Promise<void> {
     }
     container.innerHTML = '';
 
-    // Charger les films
+    // Charger les séances
     const seances = await DataControllerIntranet.getSeancesDisplayFilter();
-
+    
     // Construction de la page
     const tableSeances = await updateTableSeances(seances) as HTMLTableElement;
     container.appendChild(tableSeances);
@@ -46,10 +49,11 @@ async function rafraichirTableauSeances(): Promise<void> {
     // Mise à jour dynamique des largeurs de colonnes
     syncTableColumnWidths(tableSeances);
 
-    // Initialisation le code de validation du formulaire d'ajout en ligne 1, les écouteurs et le bouton de définition du plan
-    // Le formulaire est identique à celui de modification d'une ligne existante dans la modal
-    // initFormulaireSalles('create');
+    // Mise à jour de la list des films et de salle
+    listFilms = await DataControllerIntranet.getListFilmsAll();
+    listSalles = await DataControllerIntranet.getSallesByFilter();
 
+    
 
 }
 
@@ -103,6 +107,7 @@ async function initFiltreCinema(): Promise<void> {
             } else {
                 DataControllerIntranet.filterNameCinema = val; // ex: "Paris"
             }
+            listSalles = await DataControllerIntranet.getSallesByFilter();
 
             console.log("Choix du filtre Cinema = ", DataControllerIntranet.filterNameCinema);
 
@@ -137,8 +142,7 @@ export async function updateTableSeances(seancesDisplay: SeanceDisplay[]): Promi
     // THEAD
     const thead = document.createElement('thead');
     const trHead = document.createElement('tr');
-    const cols = ['Affiche', 'Titre', 'Durée', 'Salle', 'Capacité', 'Date', 'H. Début', 'H. Fin', 'Bande', 'Qualité', 'Actions'];
-    //const cols = ['A', 'T', 'D', 'S', 'C', 'D', 'H', 'H', 'B', 'Q', 'A'];
+    const cols = ['Date', 'Salle', 'H. Début', 'H. Fin', 'Affiche', 'Titre', 'Durée',  'Capacité',  'Bande', 'Qualité', 'Actions'];
 
     cols.forEach((col) => {
         const th = document.createElement('th');
@@ -159,7 +163,32 @@ export async function updateTableSeances(seancesDisplay: SeanceDisplay[]): Promi
     seancesDisplay.forEach((seanceDisplay) => {
 
         const tr = document.createElement('tr');
-        // 1) Affiche
+
+        // 1) Date
+        const tdDateJour = document.createElement('td');
+        tdDateJour.textContent = formatDateJJMM(new Date(seanceDisplay.dateJour || '')) || '';
+        tr.appendChild(tdDateJour);
+
+        // 2) Salle
+        const tdSalle = document.createElement('td');
+        if (!DataControllerIntranet.filterNameCinema || DataControllerIntranet.filterNameCinema === 'all') {
+            tdSalle.textContent = seanceDisplay.nameCinema + "-" + seanceDisplay.nameSalle || '';
+        } else {
+            tdSalle.textContent = seanceDisplay.nameSalle || '';
+        }
+        tr.appendChild(tdSalle);
+
+        // 3) Heure Debut
+        const tdHeurD = document.createElement('td');
+        tdHeurD.textContent = seanceDisplay.hourBeginHHSMM || '';
+        tr.appendChild(tdHeurD);
+
+        // 4) Heure Fin
+        const tdHeurF = document.createElement('td');
+        tdHeurF.textContent = seanceDisplay.hourEndHHSMM || '';
+        tr.appendChild(tdHeurF);
+
+        // 5) Affiche
         const tdImg = document.createElement('td');
         const img = document.createElement('img');
         img.src = imageFilm(seanceDisplay.imageFilm128 ?? '');
@@ -168,40 +197,20 @@ export async function updateTableSeances(seancesDisplay: SeanceDisplay[]): Promi
         tdImg.appendChild(img);
         tr.appendChild(tdImg);
 
-        // 2) Titre
+        // 6) Titre
         const tdTitre = document.createElement('td');
         tdTitre.textContent = seanceDisplay.titleFilm || '';
         tr.appendChild(tdTitre);
 
-        // 3) Durée
+        // 7) Durée
         const tdDuration = document.createElement('td');
         tdDuration.textContent = seanceDisplay.duration || '';
         tr.appendChild(tdDuration);
 
-        // 4) Salle
-        const tdSalle = document.createElement('td');
-        tdSalle.textContent = seanceDisplay.nameSalle || '';
-        tr.appendChild(tdSalle);
-
-        // 5) Capacité
+        // 8) Capacité
         const tdCapacite = document.createElement('td');
         tdCapacite.textContent = seanceDisplay.capacity?.toString(10) || '';
         tr.appendChild(tdCapacite);
-
-        // 6) Date
-        const tdDateJour = document.createElement('td');
-        tdDateJour.textContent = formatDateJJMM(new Date(seanceDisplay.dateJour || '')) || '';
-        tr.appendChild(tdDateJour);
-
-        // 7) Heure Debut
-        const tdHeurD = document.createElement('td');
-        tdHeurD.textContent = seanceDisplay.hourBeginHHSMM || '';
-        tr.appendChild(tdHeurD);
-
-        // 8) Heure Fin
-        const tdHeurF = document.createElement('td');
-        tdHeurF.textContent = seanceDisplay.hourEndHHSMM || '';
-        tr.appendChild(tdHeurF);
 
         // 9) Bande
         const tdBande = document.createElement('td');
@@ -244,7 +253,7 @@ function actionsButtons(mode: string, tr: HTMLTableRowElement, seanceDisplay: Se
             cells.forEach((cell) => {
                 tdWidths.push(cell.offsetWidth - 30);
             });
-            activerEditionLigne(tr, seanceDisplay, tdWidths);
+            await activerEditionLigne(tr, seanceDisplay, tdWidths);
             
         });
 
@@ -299,93 +308,61 @@ function actionsButtons(mode: string, tr: HTMLTableRowElement, seanceDisplay: Se
    Fonction pour activer l'édition d'une ligne
 ------------------------------------------- */
 // Activer le mode édition sur une ligne spécifique
-function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDisplay, tdWidths: number[]) {
+async function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDisplay, tdWidths: number[]) {
 
     // Exemple statique pour listFilms
-    const listFilms = [
-        { affiche: "1-128.jpg", titre: "Film A", duration: "1h30" },
-        { affiche: "2-128.jpg", titre: "Film B", duration: "2h10" },
-        { affiche: "3-128.jpg", titre: "Film C", duration: "1h45" }
-    ];
+    // const listFilms = [
+    //     { affiche: "1-128.jpg", titre: "Film A", duration: "1h30" },
+    //     { affiche: "2-128.jpg", titre: "Film B", duration: "2h10" },
+    //     { affiche: "3-128.jpg", titre: "Film C", duration: "1h45" }
+    // ];
 
     // Exemple statique pour listSalles
-    const listSalles = [
-        { nomSalle: "Salle Alpha", capacite: 100 },
-        { nomSalle: "Salle Beta", capacite: 150 },
-        { nomSalle: "Salle Gamma", capacite: 200 }
-    ];
+    // const listSalles = [
+    //     { nomSalle: "Salle Alpha", capacite: 100 },
+    //     { nomSalle: "Salle Beta", capacite: 150 },
+    //     { nomSalle: "Salle Gamma", capacite: 200 }
+    // ];
+
+    // Calculer les tableau de listes
+    
+    
     const cells = tr.querySelectorAll('td');
 
-    // 2) Titre (et indirectement Affiche et Durée)
-    const tdTitre = cells[1];
-    const selectTitre = document.createElement('select');
-    listFilms.forEach(film => {
-        const option = document.createElement('option');
-        option.value = film.titre;
-        option.textContent = film.titre;
-        if (film.titre === seanceDisplay.titleFilm) option.selected = true;
-        selectTitre.appendChild(option);
-    });
-    selectTitre.style.width = `${tdWidths[1]}px`;
-    selectTitre.style.boxSizing = 'border-box';
-    selectTitre.style.textAlign = 'center';
+    // 1) Date
+    const tdDate = cells[0];
+    const inputDate = document.createElement('input');
+    inputDate.type = 'date';
+    inputDate.valueAsDate = new Date(seanceDisplay.dateJour || '');
+    inputDate.style.width = `${tdWidths[0]}px`;
+    inputDate.style.boxSizing = 'border-box';
+    inputDate.style.textAlign = 'center';
 
-    const tdAffiche = cells[0];
-    tdAffiche.style.width = `${tdWidths[0]}px`;
-    tdAffiche.style.boxSizing = 'border-box';
-
-    const tdDuration = cells[2];
-    tdDuration.style.width = `${tdWidths[2]}px`;
-    tdDuration.style.boxSizing = 'border-box';
-
-    selectTitre.addEventListener('change', () => {
-        const selectedFilm = listFilms.find(f => f.titre === selectTitre.value);
-        if (selectedFilm) {
-            cells[0].querySelector('img')!.src = imageFilm(selectedFilm.affiche);
-            cells[2].textContent = selectedFilm.duration;
-        }
-    });
-    tdTitre.textContent = '';
-    tdTitre.appendChild(selectTitre);
-
-    // 4) Salle (et indirectement Capacité)
-    const tdSalle = cells[3];
+    tdDate.textContent = '';
+    tdDate.appendChild(inputDate);
+    
+    // 2) Salle 
+    const tdSalle = cells[1];
     const selectSalle = document.createElement('select');
     listSalles.forEach(salle => {
         const option = document.createElement('option');
         option.value = salle.nomSalle;
         option.textContent = salle.nomSalle;
-        if (salle.nomSalle === seanceDisplay.nameSalle) option.selected = true;
+        if (salle.id === seanceDisplay.salleId) option.selected = true;
         selectSalle.appendChild(option);
     });
-    selectSalle.style.width = `${tdWidths[3]}px`;
+    selectSalle.style.width = `${tdWidths[1]}px`;
     selectSalle.style.boxSizing = 'border-box';
     selectSalle.style.textAlign = 'center';
 
     selectSalle.addEventListener('change', () => {
         const selectedSalle = listSalles.find(s => s.nomSalle === selectSalle.value);
         if (selectedSalle) {
-            cells[4].textContent = selectedSalle.capacite.toString();
+            cells[7].textContent = selectedSalle.capacite!.toString();
         }
     });
     tdSalle.textContent = '';
     tdSalle.appendChild(selectSalle);
-
-    const tdCapacite = cells[4];
-    tdCapacite.style.width = `${tdWidths[4]}px`;
-    tdCapacite.style.boxSizing = 'border-box';
-
-    // 6) Date
-    const tdDate = cells[5];
-    const inputDate = document.createElement('input');
-    inputDate.type = 'date';
-    inputDate.valueAsDate = new Date(seanceDisplay.dateJour || '');
-    inputDate.style.width = `${tdWidths[5]}px`;
-    inputDate.style.boxSizing = 'border-box';
-    inputDate.style.textAlign = 'center';
-
-    tdDate.textContent = '';
-    tdDate.appendChild(inputDate);
 
     // Helper pour générer les options toutes les 5 minutes
     function generateTimeOptions(startHour: number, endHour: number): string[] {
@@ -402,8 +379,8 @@ function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDispl
         return options;
     }
 
-    // 7) Heure Début (10:00 → 00:00)
-    const tdHeureDebut = cells[6];
+    // 3) Heure Début (10:00 → 00:00)
+    const tdHeureDebut = cells[2];
     const selectHeureDebut = document.createElement('select');
     generateTimeOptions(10, 24).forEach(time => {
         const option = document.createElement('option');
@@ -412,14 +389,14 @@ function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDispl
         if (time === seanceDisplay.hourBeginHHSMM) option.selected = true;
         selectHeureDebut.appendChild(option);
     });
-    selectHeureDebut.style.width = `${tdWidths[6]}px`;
+    selectHeureDebut.style.width = `${tdWidths[2]}px`;
     selectHeureDebut.style.boxSizing = 'border-box';
     selectHeureDebut.style.textAlign = 'center';
     tdHeureDebut.textContent = '';
     tdHeureDebut.appendChild(selectHeureDebut);
 
-    // 8) Heure Fin (11:00 → 02:00)
-    const tdHeureFin = cells[7];
+    // 4) Heure Fin (11:00 → 02:00)
+    const tdHeureFin = cells[3];
     const selectHeureFin = document.createElement('select');
     generateTimeOptions(11, 26).forEach(time => {
         const option = document.createElement('option');
@@ -428,11 +405,52 @@ function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDispl
         if (time === seanceDisplay.hourEndHHSMM) option.selected = true;
         selectHeureFin.appendChild(option);
     });
-    selectHeureFin.style.width = `${tdWidths[7]}px`;
+    selectHeureFin.style.width = `${tdWidths[3]}px`;
     selectHeureFin.style.boxSizing = 'border-box';
     selectHeureFin.style.textAlign = 'center';
     tdHeureFin.textContent = '';
     tdHeureFin.appendChild(selectHeureFin);
+
+    // 5) Affiche
+
+    const tdAffiche = cells[4];
+    tdAffiche.style.width = `${tdWidths[4]}px`;
+    tdAffiche.style.boxSizing = 'border-box';
+
+    // 6) Titre
+    const tdTitre = cells[5];
+    const selectTitre = document.createElement('select');
+    listFilms.forEach(film => {
+        const option = document.createElement('option');
+        option.value = film.titre;
+        option.textContent = film.titre;
+        if (film.id === seanceDisplay.filmId) option.selected = true;
+        selectTitre.appendChild(option);
+    });
+    selectTitre.style.width = `${tdWidths[5]}px`;
+    selectTitre.style.boxSizing = 'border-box';
+    selectTitre.style.textAlign = 'center';
+
+    // 7) Duree
+    const tdDuration = cells[6];
+    tdDuration.style.width = `${tdWidths[6]}px`;
+    tdDuration.style.boxSizing = 'border-box';
+
+    selectTitre.addEventListener('change', () => {
+        const selectedFilm = listFilms.find(f => f.titre === selectTitre.value);
+        if (selectedFilm) {
+            cells[4].querySelector('img')!.src = imageFilm(selectedFilm.affiche!);
+            cells[6].textContent = selectedFilm.duration!;
+        }
+    });
+    tdTitre.textContent = '';
+    tdTitre.appendChild(selectTitre);
+
+    
+    // 8) Capacité
+    const tdCapacite = cells[7];
+    tdCapacite.style.width = `${tdWidths[7]}px`;
+    tdCapacite.style.boxSizing = 'border-box';
 
     // 9) BO
     const tdBO = cells[8];
@@ -493,14 +511,18 @@ function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDispl
 function annulerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDisplay) {
     const cells = tr.querySelectorAll('td');
 
-    cells[0].querySelector('img')!.src = imageFilm(seanceDisplay.imageFilm128 ?? '');
-    cells[1].textContent = seanceDisplay.titleFilm || '';
-    cells[2].textContent = seanceDisplay.duration || '';
-    cells[3].textContent = seanceDisplay.nameSalle || '';
-    cells[4].textContent = seanceDisplay.capacity?.toString(10) || '';
-    cells[5].textContent = formatDateJJMM(new Date(seanceDisplay.dateJour || '')) || '';
-    cells[6].textContent = seanceDisplay.hourBeginHHSMM || '';
-    cells[7].textContent = seanceDisplay.hourEndHHSMM || '';
+    cells[0].textContent = formatDateJJMM(new Date(seanceDisplay.dateJour || '')) || '';
+    if (!DataControllerIntranet.filterNameCinema || DataControllerIntranet.filterNameCinema === 'all') {
+        cells[1].textContent = seanceDisplay.nameCinema + "-" + seanceDisplay.nameSalle || '';
+    } else {
+        cells[1].textContent = seanceDisplay.nameSalle || '';
+    }
+    cells[2].textContent = seanceDisplay.hourBeginHHSMM || '';
+    cells[3].textContent = seanceDisplay.hourEndHHSMM || '';  
+    cells[4].querySelector('img')!.src = imageFilm(seanceDisplay.imageFilm128 ?? '');
+    cells[5].textContent = seanceDisplay.titleFilm || '';
+    cells[6].textContent = seanceDisplay.duration || '';   
+    cells[7].textContent = seanceDisplay.capacity?.toString(10) || '';   
     cells[8].textContent = seanceDisplay.bo || '';
     cells[9].textContent = seanceDisplay.qualite || '';
 

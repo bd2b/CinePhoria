@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi } from './NetworkController.js';
-import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi } from './NetworkController.js';
+import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi } from './NetworkController.js';
 export class DataControllerIntranet {
     static allFilms() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -137,11 +137,40 @@ export class DataControllerIntranet {
         }
         DataControllerIntranet._filterNameCinema = value.trim();
     }
+    static seanceSort(s) {
+        return s.sort((a, b) => {
+            var _a, _b, _c, _d, _e, _f, _g, _h;
+            const nomFilmA = ((_a = a.titleFilm) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || '';
+            const nomFilmB = ((_b = b.titleFilm) === null || _b === void 0 ? void 0 : _b.toLowerCase()) || '';
+            const nomSalleA = ((_c = a.nameSalle) === null || _c === void 0 ? void 0 : _c.toLowerCase()) || '';
+            const nomSalleB = ((_d = b.nameSalle) === null || _d === void 0 ? void 0 : _d.toLowerCase()) || '';
+            const dateSeanceA = ((_e = a.dateJour) === null || _e === void 0 ? void 0 : _e.toLowerCase()) || '';
+            const dateSeanceB = ((_f = b.dateJour) === null || _f === void 0 ? void 0 : _f.toLowerCase()) || '';
+            const heureSeanceA = ((_g = a.hourBeginHHSMM) === null || _g === void 0 ? void 0 : _g.toLowerCase()) || '';
+            const heureSeanceB = ((_h = b.hourBeginHHSMM) === null || _h === void 0 ? void 0 : _h.toLowerCase()) || '';
+            if (dateSeanceA < dateSeanceB)
+                return -1;
+            if (dateSeanceA > dateSeanceB)
+                return 1;
+            // if (nomFilmA < nomFilmB) return -1;
+            // if (nomFilmA > nomFilmB) return 1;
+            // Sinon on compare nameSalle
+            if (nomSalleA < nomSalleB)
+                return -1;
+            if (nomSalleA > nomSalleB)
+                return 1;
+            if (heureSeanceA < heureSeanceB)
+                return -1;
+            if (heureSeanceA > heureSeanceB)
+                return 1;
+            return 0;
+        });
+    }
     // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
     static getSeancesDisplayFilter() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield seancesDisplayByCinemaApi([DataControllerIntranet._filterNameCinema || 'all']);
+                return DataControllerIntranet.seanceSort(yield seancesDisplayByCinemaApi([DataControllerIntranet._filterNameCinema || 'all']));
             }
             catch (error) {
                 console.error(`Erreur dans recherche des seanceDisplay : ${error}`);
@@ -153,7 +182,7 @@ export class DataControllerIntranet {
     static getSeancesDisplayByCinema(cinemas) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                return yield seancesDisplayByCinemaApi(cinemas);
+                return DataControllerIntranet.seanceSort(yield seancesDisplayByCinemaApi(cinemas));
             }
             catch (error) {
                 console.error(`Erreur dans recherche des seanceDisplay : ${error}`);
@@ -202,6 +231,73 @@ export class DataControllerIntranet {
             }
         });
     }
+    static getListFilmsAll() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const filmsAll = yield filmsSelectAllApi();
+                const listFilms = Array.from(new Map(filmsAll
+                    .filter(f => f.id && f.titleFilm && f.isActiveForNewSeances)
+                    .map(f => [f.id, {
+                        id: f.id,
+                        titre: f.titleFilm,
+                        duration: f.duration,
+                        affiche: f.imageFilm128
+                    }])).values());
+                return listFilms;
+            }
+            catch (error) {
+                console.error(`Erreur recupération ListFilmsAll : ${error}`);
+                return [];
+            }
+        });
+    }
+    // Recupération des salles du cinema selectionne dans le filtre
+    static getSallesByFilter() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                let cinemaName = "";
+                if (!DataControllerIntranet._filterNameCinema) {
+                    cinemaName = 'all';
+                }
+                else {
+                    cinemaName = DataControllerIntranet._filterNameCinema;
+                }
+                let salles = [];
+                if (cinemaName === 'all') {
+                    salles = yield sallesSelectAllApi();
+                }
+                else {
+                    salles = yield sallesSelectCinemaApi(cinemaName);
+                }
+                let listSalles;
+                if (cinemaName === 'all') {
+                    listSalles = Array.from(new Map(salles
+                        .filter(s => s.id && s.nameSalle)
+                        .map(s => [s.id, {
+                            id: s.id,
+                            // Si on est sur tous les cinemas, on ajoute le com du cinema dans l'intitulé de la salle
+                            nomSalle: s.nameCinema + "-" + s.nameSalle,
+                            capacite: s.capacity
+                        }])).values());
+                }
+                else {
+                    listSalles = Array.from(new Map(salles
+                        .filter(s => s.id && s.nameSalle)
+                        .map(s => [s.id, {
+                            id: s.id,
+                            nomSalle: s.nameSalle,
+                            capacite: s.capacity
+                        }])).values());
+                }
+                return listSalles;
+            }
+            catch (error) {
+                console.error(`Erreur recupération ListFilmsAll : ${error}`);
+                return [];
+            }
+        });
+    }
+    // Calculer les tableau de listes
     constructor() {
         console.log("DataCIntranet : Initialisation");
     }

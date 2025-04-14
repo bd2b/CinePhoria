@@ -14,3 +14,9 @@ export class Salle {
        Object.assign(this, data);
      }
   };
+
+export interface ListSalles {
+   id: string;
+   nomSalle: string;
+   capacite?: number;
+}

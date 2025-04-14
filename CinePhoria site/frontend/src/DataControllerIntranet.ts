@@ -1,9 +1,9 @@
-import { Film } from './shared-models/Film.js';
+import { Film, ListFilms } from './shared-models/Film.js';
 import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi } from './NetworkController.js';
-import { Salle } from './shared-models/Salle.js';
+import { Salle, ListSalles } from './shared-models/Salle.js';
 import {
     sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi,
-    seancesseulesDeleteApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi
+    seancesseulesDeleteApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi
 } from './NetworkController.js';
 import { Seance, SeanceDisplay } from './shared-models/Seance.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
@@ -141,10 +141,37 @@ export class DataControllerIntranet {
 
     }
 
+    private static seanceSort(s: SeanceDisplay[]): SeanceDisplay[] {
+        return s.sort((a, b) => {
+            const nomFilmA = a.titleFilm?.toLowerCase() || '';
+            const nomFilmB = b.titleFilm?.toLowerCase() || '';
+            const nomSalleA = a.nameSalle?.toLowerCase() || '';
+            const nomSalleB = b.nameSalle?.toLowerCase() || '';
+            const dateSeanceA = a.dateJour?.toLowerCase() || '';
+            const dateSeanceB = b.dateJour?.toLowerCase() || '';
+            const heureSeanceA = a.hourBeginHHSMM?.toLowerCase() || '';
+            const heureSeanceB = b.hourBeginHHSMM?.toLowerCase() || '';
+
+            if (dateSeanceA < dateSeanceB) return -1;
+            if (dateSeanceA > dateSeanceB) return 1;
+
+            // if (nomFilmA < nomFilmB) return -1;
+            // if (nomFilmA > nomFilmB) return 1;
+
+            // Sinon on compare nameSalle
+            if (nomSalleA < nomSalleB) return -1;
+            if (nomSalleA > nomSalleB) return 1;
+
+            if (heureSeanceA < heureSeanceB) return -1;
+            if (heureSeanceA > heureSeanceB) return 1;
+
+            return 0;
+        });
+    }
     // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
     public static async getSeancesDisplayFilter(): Promise<SeanceDisplay[]> {
         try {
-            return await seancesDisplayByCinemaApi([DataControllerIntranet._filterNameCinema || 'all'])
+            return DataControllerIntranet.seanceSort(await seancesDisplayByCinemaApi([DataControllerIntranet._filterNameCinema || 'all']));
         } catch (error) {
             console.error(`Erreur dans recherche des seanceDisplay : ${error}`)
             return [];
@@ -154,7 +181,7 @@ export class DataControllerIntranet {
     // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
     public static async getSeancesDisplayByCinema(cinemas: string[]): Promise<SeanceDisplay[]> {
         try {
-            return await seancesDisplayByCinemaApi(cinemas)
+            return DataControllerIntranet.seanceSort(await seancesDisplayByCinemaApi(cinemas));
         } catch (error) {
             console.error(`Erreur dans recherche des seanceDisplay : ${error}`)
             return [];
@@ -197,6 +224,87 @@ export class DataControllerIntranet {
             return false;
         }
     }
+
+    public static async getListFilmsAll(): Promise<ListFilms[]> {
+        try {
+            const filmsAll = await filmsSelectAllApi();
+
+            const listFilms = Array.from(
+                new Map(
+                    filmsAll
+                        .filter(f => f.id && f.titleFilm && f.isActiveForNewSeances)
+                        .map(f => [f.id, {
+                            id: f.id!,
+                            titre: f.titleFilm!,
+                            duration: f.duration,
+                            affiche: f.imageFilm128
+                        }])
+                ).values()
+            );
+
+            return listFilms;
+
+        } catch (error) {
+            console.error(`Erreur recupération ListFilmsAll : ${error}`);
+            return []
+        }
+    }
+    // Recupération des salles du cinema selectionne dans le filtre
+    public static async getSallesByFilter(): Promise<ListSalles[]> {
+        try {
+            let cinemaName = "";
+            if (!DataControllerIntranet._filterNameCinema) {
+                cinemaName = 'all'
+            } else {
+            cinemaName = DataControllerIntranet._filterNameCinema;
+            }
+            
+            let salles: Salle[] = [];
+            
+            if (cinemaName === 'all') {
+                salles = await sallesSelectAllApi();
+            } else {
+                salles = await sallesSelectCinemaApi(cinemaName)
+            }
+            let listSalles: ListSalles[];
+            if (cinemaName === 'all') {
+            listSalles = Array.from(
+                new Map(
+                    salles
+                        .filter(s => s.id && s.nameSalle)
+                        .map(s => [s.id, {
+                            id: s.id,
+                            // Si on est sur tous les cinemas, on ajoute le com du cinema dans l'intitulé de la salle
+                            nomSalle: s.nameCinema! + "-" + s.nameSalle!,
+                            capacite: s.capacity!
+                        }])
+                ).values()
+            ); }
+            else {
+                listSalles = Array.from(
+                    new Map(
+                        salles
+                            .filter(s => s.id && s.nameSalle)
+                            .map(s => [s.id, {
+                                id: s.id,
+                                nomSalle: s.nameSalle!,
+                                capacite: s.capacity!
+                            }])
+                    ).values()
+                );
+            }
+
+            return listSalles;
+
+        } catch (error) {
+            console.error(`Erreur recupération ListFilmsAll : ${error}`);
+            return []
+        }
+    }
+
+
+    // Calculer les tableau de listes
+
     constructor() {
         console.log("DataCIntranet : Initialisation");
     }

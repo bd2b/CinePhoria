@@ -87,9 +87,16 @@ export function dateProchainMercredi(date = new Date()) {
 /**
  * Formate la date (locale) au format jj/mm (ex : 09/01)
  */
+// export function formatDateJJMM(date: Date): string {
+//     const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate().toString();
+//     const month = (date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1).toString();
+//     return `${day}/${month}`;
+// }
+
 export function formatDateJJMM(date: Date): string {
-    const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate().toString();
-    const month = (date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1).toString();
+    const local = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+    const day = local.getDate() < 10 ? '0' + local.getDate() : local.getDate().toString();
+    const month = (local.getMonth() + 1) < 10 ? '0' + (local.getMonth() + 1) : (local.getMonth() + 1).toString();
     return `${day}/${month}`;
 }
 

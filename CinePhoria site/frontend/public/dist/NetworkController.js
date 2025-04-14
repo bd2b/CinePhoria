@@ -649,7 +649,7 @@ export function getReservationQRCodeApi(reservationId) {
 export function askResetPwdApi(email) {
     return __awaiter(this, void 0, void 0, function* () {
         const endpoint = `http://localhost:3500/api/utilisateur/askresetpwd`;
-        const body = JSON.stringify({ email: email });
+        const body = { email: email };
         console.log(body);
         const responseJSON = yield apiRequest(endpoint, 'POST', body, false // Pas d'authentification requise
         );
@@ -660,7 +660,7 @@ export function askResetPwdApi(email) {
 export function resetPwdApi(email, codeConfirm, newPassword) {
     return __awaiter(this, void 0, void 0, function* () {
         const endpoint = `http://localhost:3500/api/utilisateur/resetpwd`;
-        const body = JSON.stringify({ email: email, codeConfirm: codeConfirm, newPassword: newPassword });
+        const body = { email: email, codeConfirm: codeConfirm, newPassword: newPassword };
         console.log(body);
         const responseJSON = yield apiRequest(endpoint, 'POST', body, false // Pas d'authentification requise
         );
@@ -808,6 +808,18 @@ export function sallesCreateApi(salle) {
 export function sallesSelectApi(salleId) {
     return __awaiter(this, void 0, void 0, function* () {
         const endpoint = `http://localhost:3500/api/salles/${salleId}`;
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}
+/**
+ * Récupération des salles d'un cinema (GET /api/salles/cinema/:cinema)
+ * @param cinema Le nom du cinema
+ * @returns un tableau de salles
+ */
+export function sallesSelectCinemaApi(nameCinema) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/salles/cinema/${nameCinema}`;
         const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
         return responseJSON;
     });

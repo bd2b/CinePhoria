@@ -13,7 +13,7 @@ CREATE TABLE Compte (
   isValidated             int(1) DEFAULT 0 NOT NULL, 
   passwordText            varchar(100), 
   datePassword            datetime NULL comment 'Date de dernier changement du mot de passe', 
-  oldpasswordsArray       longtext DEFAULT '' comment 'Liste des mots de passe deja utilise' , 
+  oldpasswordsArray       longtext comment 'Liste des mots de passe deja utilise' , 
   dateDerniereConnexion   datetime NULL, 
   numTentativeConnexionKO int(10) DEFAULT 0 NOT NULL, 
   PRIMARY KEY (email), 
@@ -54,6 +54,7 @@ CREATE TABLE Film (
   categorySeeing       varchar(100) NOT NULL, 
   note                 double NOT NULL, 
   isCoupDeCoeur        int(1) NOT NULL, 
+  isActiveForNewSeances int(1) NOT NULL, 
   filmDescription      longtext NOT NULL, 
   filmAuthor           varchar(100) NOT NULL, 
   filmDistribution     varchar(255) NOT NULL, 
@@ -210,6 +211,7 @@ SELECT
   Film.dateSortieCinePhoria,
   Film.note, 
   Film.isCoupDeCoeur,
+  Film.isActiveForNewSeances,
   Film.categorySeeing,    
   Film.linkBO, 
   Film.imageFilm128,
@@ -246,6 +248,7 @@ CREATE VIEW ViewFilmsSortiesDeLaSemaine AS
         film.dateSortieCinePhoria AS dateSortieCinePhoria,
         film.note AS note,
         film.isCoupDeCoeur AS isCoupDeCoeur,
+        film.isActiveForNewSeances AS isActiveForNewSeances,
         film.categorySeeing AS categorySeeing,
         film.linkBO AS linkBO,
         film.imageFilm128 AS imageFilm128,
@@ -278,6 +281,7 @@ SELECT
   Film.dateSortieCinePhoria,
   Film.note, 
   Film.isCoupDeCoeur,
+  Film.isActiveForNewSeances,
   Film.categorySeeing,    
   Film.linkBO, 
   Film.imageFilm128,
@@ -360,6 +364,7 @@ CREATE PROCEDURE CheckAvailabilityAndReserve(
     IN p_SeanceId VARCHAR(100),
     IN p_TarifSeats JSON,
     IN p_PMRSeats INT,
+    IN p_seatsReserved VARCHAR(256),
     OUT p_Result VARCHAR(255) -- Chaine ("StatutEmail", "StatutReservation")
 )
 -- Création d'une reservation avec des places sur tarif et un nombre de place PMR
@@ -555,9 +560,9 @@ BEGIN
 			-- Générer une nouvelle réservation
 			SET v_message_erreur = "Mise a jour Reservation : insertion";
 			INSERT INTO Reservation
-				(Id, Utilisateurid, seanceid, stateReservation, numberPMR,timeStampCreate)
+				(Id, Utilisateurid, seanceid, stateReservation, numberPMR, seatsReserved, timeStampCreate)
 			VALUES
-				(v_newReservationId, v_utilisateurID, p_SeanceId, "ReserveToConfirm", p_PMRSeats, CURRENT_TIMESTAMP);
+				(v_newReservationId, v_utilisateurID, p_SeanceId, "ReserveToConfirm", p_PMRSeats, p_seatsReserved, CURRENT_TIMESTAMP);
 			-- Insérer les données dans SeatsForTarif pour chaque élément du dictionnaire JSON
 			SET v_key_index = 0;
 			WHILE v_key_index < v_key_count DO

@@ -37,6 +37,7 @@ export function onLoadManageFilms() {
         initButtons();
         // Initialiser les inputs de fichier
         initInputFile();
+        setFormEditable(false);
     });
 }
 /* ---------------------------------------------------
@@ -127,82 +128,17 @@ function buildFilmCard(film) {
         filmSelectedList = film;
         fillFormWithFilm(film);
     }));
+    if (!film.isActiveForNewSeances) {
+        // Le film n'est pas selectionnable, on met la vignette en gris
+        img.classList.add('simpleCard__affiche-img--disabled');
+        divCard.classList.add('listFilms__simpleCard--disabled');
+    }
+    else {
+        img.classList.remove('simpleCard__affiche-img--disabled');
+        divCard.classList.remove('listFilms__simpleCard--disabled');
+    }
     return divCard;
 }
-/* ---------------------------------------------------
-   Affichage du détail d'un film dans la partie droite
---------------------------------------------------- */
-// async function afficherDetailFilm(film: Film) {
-//     const containerDetail = document.querySelector('.films__detailFilm');
-//     if (!containerDetail) return;
-//     // Affiches
-//     const afficheSmall = document.getElementById('affiche-small') as HTMLImageElement | null;
-//     if (afficheSmall) {
-//         afficheSmall.src = film.imageFilm128 ? imageFilm(film.imageFilm128) : 'https://dummyimage.com/128x128/DAA520/000'
-//         //  afficheSmall.src = `assets/static/${film.imageFilm128 || 'placeholder128.jpg'}`;
-//     }
-//     const afficheLarge = document.getElementById('affiche-large') as HTMLImageElement | null;
-//     if (afficheLarge) {
-//         afficheLarge.src = film.imageFilm1024 ? imageFilm(film.imageFilm1024) : 'https://dummyimage.com/1024x1024/DAA520/000'
-//     }
-//     // Titre
-//     const nomFilm = document.getElementById('titleFilm');
-//     if (nomFilm) nomFilm.textContent = film.titleFilm ?? '';
-//     // Genres
-//     const genreFilm = document.getElementById('genreArray');
-//     if (genreFilm) genreFilm.textContent = film.genreArray ?? '';
-//     // Réalisateur
-//     const realisateurFilm = document.getElementById('filmAuthor');
-//     if (realisateurFilm) realisateurFilm.textContent = film.filmAuthor ?? '';
-//     // Durée
-//     const dureeFilm = document.getElementById('duration');
-//     if (dureeFilm) dureeFilm.textContent = film.duration ?? '';
-//     // Pitch
-//     const pitchFilm = document.getElementById('filmPitch');
-//     if (pitchFilm) pitchFilm.textContent = film.filmPitch ?? '';
-//     // Distribution
-//     const distributionFilm = document.getElementById('filmDistribution');
-//     if (distributionFilm) distributionFilm.textContent = film.filmDistribution ?? '';
-//     // Lien BO
-//     const linkBOFilm = document.getElementById('linkBO');
-//     if (linkBOFilm) linkBOFilm.textContent = film.linkBO ?? '';
-//     // Catégorie
-//     const categoriePublic = containerDetail.querySelector('#title__filter-dropdown-button-genre');
-//     if (categoriePublic) {
-//         categoriePublic.innerHTML = `${film.categorySeeing ?? 'TP'}<span class="chevron">▼</span>`;
-//     }
-//     // Gestion ouverture/fermeture du dropdown
-//     const catBtn = document.getElementById('title__filter-dropdown-button-genre');
-//     const dropdownContent = document.querySelector('.title__filter-button-drowdown-content');
-//     if (catBtn && dropdownContent) {
-//         catBtn.addEventListener('click', (e) => {
-//             e.stopPropagation();
-//             dropdownContent.classList.toggle('show');
-//         });
-//         // Fermeture quand on clique ailleurs sur la page
-//         document.addEventListener('click', () => {
-//             dropdownContent.classList.remove('show');
-//         });
-//         // Sélection d’un élément
-//         dropdownContent.querySelectorAll('a').forEach((item) => {
-//             item.addEventListener('click', (event) => {
-//                 event.preventDefault();
-//                 const selection = (event.target as HTMLElement).textContent || 'TP';
-//                 catBtn.innerHTML = `${selection}<span class="chevron">▼</span>`;
-//                 dropdownContent.classList.remove('show');
-//             });
-//         });
-//     }
-//     // Coup de coeur
-//     const coupDeCoeurCheckbox = containerDetail.querySelector('#coupCoeur') as HTMLInputElement | null;
-//     if (coupDeCoeurCheckbox) {
-//         coupDeCoeurCheckbox.checked = film.isCoupDeCoeur ?? false;
-//     }
-//     // Description
-//     const descriptionFilm = document.getElementById('filmDescription');
-//     if (descriptionFilm) descriptionFilm.textContent = film.filmDescription ?? '';
-//     console.log("Détail affiché pour " + (film.titleFilm ?? ''));
-// }
 function effacerDetailFilm() {
     const containerDetail = document.querySelector('.films__detailFilm');
     if (!containerDetail)
@@ -382,31 +318,6 @@ function onClickCancelEdit() {
     });
 }
 /**
- * Fonction de vérification des champs du formulaire
- * Si Ok on rend actif l'enregistrement
- */
-function checkFormValidity() {
-    var _a;
-    // const requiredNamedField = ['titleFilm', 'genreArray', 'duration', 'linkBO', 'note',
-    //    'filmDescription', 'filmAuthor', 'filmDistribution'];
-    const requiredNamedField = ['titleFilm'];
-    const requiredFields = requiredNamedField.map(id => { var _a, _b; return ((_b = (_a = document.getElementById(id)) === null || _a === void 0 ? void 0 : _a.textContent) === null || _b === void 0 ? void 0 : _b.trim()) || ''; });
-    const test = document.getElementById('titleFilm');
-    const testContent = (_a = test === null || test === void 0 ? void 0 : test.textContent) === null || _a === void 0 ? void 0 : _a.trim();
-    if (test && testContent && testContent.length > 0) {
-        console.log("non vide");
-    }
-    else {
-        console.log("vide");
-    }
-    const isValid = requiredFields.every(val => val && val.length > 0);
-    const btnEdit = document.getElementById("title__right-button-Modifier");
-    if (btnEdit && btnEdit.textContent === "Enregistrer") {
-        btnEdit.classList.toggle('inactif', !isValid);
-        btnEdit.disabled = !isValid;
-    }
-}
-/**
  * Fonction d'écouteur sur les champs de saisie
  */
 function initListen(init) {
@@ -416,12 +327,12 @@ function initListen(init) {
         const el = document.getElementById(id);
         if (el instanceof HTMLInputElement || el instanceof HTMLDivElement) {
             if (init) {
-                el.addEventListener('input', checkFormValidity);
-                el.addEventListener('blur', checkFormValidity);
+                el.addEventListener('input', updateSaveButtonState);
+                el.addEventListener('blur', updateSaveButtonState);
             }
             else {
-                el.removeEventListener('input', () => { });
-                el.removeEventListener('blur', () => { });
+                el.removeEventListener('input', updateSaveButtonState);
+                el.removeEventListener('blur', updateSaveButtonState);
             }
         }
     });
@@ -532,13 +443,17 @@ function buildFilmFromForm() {
     if (catBtn) {
         film.categorySeeing = ((_j = catBtn.textContent) === null || _j === void 0 ? void 0 : _j.replace('▼', '').trim()) || 'TP';
     }
+    // isActiveForNewSeances
+    const afnsCheckbox = document.getElementById('isActiveForNewSeances');
+    if (afnsCheckbox)
+        film.isActiveForNewSeances = afnsCheckbox.checked;
     return film;
 }
 /**
  * Affiche un film dans le formulaire
  */
 function fillFormWithFilm(film) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     // Affiches
     const afficheSmall = document.getElementById('affiche-small');
     if (afficheSmall) {
@@ -581,7 +496,6 @@ function fillFormWithFilm(film) {
     const catBtn = document.getElementById('title__filter-dropdown-button-genre');
     const dropdownContent = document.querySelector('.title__filter-button-drowdown-content');
     if (catBtn && dropdownContent) {
-        console.log("------");
         catBtn.innerHTML = `${(_k = film.categorySeeing) !== null && _k !== void 0 ? _k : 'TP'}<span class="chevron">▼</span>`;
         catBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -595,17 +509,27 @@ function fillFormWithFilm(film) {
         dropdownContent.querySelectorAll('.categorie-item').forEach((item) => {
             item.removeEventListener('click', (event) => { });
             item.addEventListener('click', (event) => {
+                if (catBtn.disabled)
+                    return; // ignore si désactivé
                 console.log("listener ", event.target.textContent || 'TP');
                 event.preventDefault();
                 const selection = event.target.textContent || 'TP';
                 catBtn.innerHTML = `${selection}<span class="chevron">▼</span>`;
                 dropdownContent.classList.remove('show');
+                updateSaveButtonState();
             });
         });
     }
     else {
         console.error("Pas de dropdown");
     }
+    // isActiveForNewSeances
+    const afnsCheckbox = document.getElementById('isActiveForNewSeances');
+    if (afnsCheckbox)
+        afnsCheckbox.checked = (_l = film.isActiveForNewSeances) !== null && _l !== void 0 ? _l : false;
+    // Ajouter des écouteur pour le changement des checkbox
+    cdcCheckbox === null || cdcCheckbox === void 0 ? void 0 : cdcCheckbox.addEventListener('change', updateSaveButtonState);
+    afnsCheckbox === null || afnsCheckbox === void 0 ? void 0 : afnsCheckbox.addEventListener('change', updateSaveButtonState);
 }
 /**
  * Rend éditable formulaire
@@ -631,4 +555,79 @@ function setFormEditable(editable) {
     });
     document.getElementById('upload128').hidden = !editable; // masquer = editable;
     document.getElementById('upload1024').hidden = !editable; // masquer = editable;
+    ['isActiveForNewSeances', 'coupCoeur'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.disabled = !editable;
+        }
+    });
+    const catBtn = document.getElementById('title__filter-dropdown-button-genre');
+    if (catBtn) {
+        if (editable) {
+            catBtn.classList.remove('inactif');
+            catBtn.disabled = false;
+        }
+        else {
+            catBtn.classList.add('inactif');
+            catBtn.disabled = true;
+        }
+    }
+    const divList = document.getElementById("title__filter-listcategorie");
+    if (divList) {
+    }
+}
+function isFormValid() {
+    const requiredFields = [
+        'titleFilm',
+        'genreArray',
+        'filmAuthor',
+        'duration',
+        'filmDistribution',
+        'linkBO',
+        'filmDescription'
+    ];
+    return requiredFields.every(id => {
+        const el = document.getElementById(id);
+        if (el)
+            return (el === null || el === void 0 ? void 0 : el.innerText.trim().length) > 0;
+    });
+}
+function isFormModified() {
+    if (!filmSelectedList)
+        return false;
+    const isDifferent = (id, value) => {
+        const el = document.getElementById(id);
+        return (el === null || el === void 0 ? void 0 : el.innerText.trim()) !== (value || '');
+    };
+    if (isDifferent('titleFilm', filmSelectedList.titleFilm))
+        return true;
+    if (isDifferent('genreArray', filmSelectedList.genreArray))
+        return true;
+    if (isDifferent('filmAuthor', filmSelectedList.filmAuthor))
+        return true;
+    if (isDifferent('duration', filmSelectedList.duration))
+        return true;
+    if (isDifferent('filmDistribution', filmSelectedList.filmDistribution))
+        return true;
+    if (isDifferent('linkBO', filmSelectedList.linkBO))
+        return true;
+    if (isDifferent('filmDescription', filmSelectedList.filmDescription))
+        return true;
+    const catBtn = document.getElementById('title__filter-dropdown-button-genre');
+    if ((catBtn === null || catBtn === void 0 ? void 0 : catBtn.innerText.trim().split('▼')[0].trim()) !== (filmSelectedList.categorySeeing || 'TP'))
+        return true;
+    const coupCoeur = document.getElementById('coupCoeur');
+    if ((coupCoeur === null || coupCoeur === void 0 ? void 0 : coupCoeur.checked) !== !!filmSelectedList.isCoupDeCoeur)
+        return true;
+    const actifSeance = document.getElementById('isActiveForNewSeances');
+    if ((actifSeance === null || actifSeance === void 0 ? void 0 : actifSeance.checked) !== !!filmSelectedList.isActiveForNewSeances)
+        return true;
+    return false;
+}
+function updateSaveButtonState() {
+    const btnSave = document.getElementById('title__right-button-Modifier');
+    if (!btnSave)
+        return;
+    btnSave.disabled = !(isFormValid() && isFormModified());
+    btnSave.classList.toggle('inactif', btnSave.disabled);
 }

@@ -146,7 +146,7 @@ export class ReservationDAO {
 
   static async reserveForUtilisateur(p_utilisateurId: string): Promise<ReservationForUtilisateur[]> {
     const connection = await mysql.createConnection(dbConfig);
-
+    try {
     // Étape 1 : Récupérer les informations des reservations dans la base pour l'utilisateur donné
     const [rows] = await connection.execute(
       `SELECT *
@@ -159,6 +159,10 @@ export class ReservationDAO {
 
     // Map des lignes pour les convertir en instances de Seance
     return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
+  } catch(error) {
+    logger.info("Erreur dans reserveForUtilisateur")
+    return []
+  }
   }
 
   static async getReservationById(p_reservationId: string): Promise<ReservationForUtilisateur[]> {

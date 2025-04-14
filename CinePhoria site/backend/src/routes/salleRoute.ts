@@ -17,6 +17,9 @@ router.post('/', authenticateJWT, SalleController.createSalle);
 logger.info('Declaration route GET /api/salles/:id');
 router.get('/:id', authenticateJWT , SalleController.getSalleById);
 
+logger.info('Declaration route GET /api/salles/cinema/:cinema');
+router.get('/cinema/:cinema', authenticateJWT , SalleController.getSalleByCinema);
+
 logger.info('Declaration route PUT /api/salles/:id');
 router.put('/:id', authenticateJWT, SalleController.updateSalle);
 

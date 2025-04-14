@@ -15,6 +15,7 @@ interface Film {
 
   note: number;
   isCoupDeCoeur: boolean;
+  isActiveForNewSeances: boolean;
   filmDescription: string;
   filmAuthor?: string;
   filmDistribution?: string;

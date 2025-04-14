@@ -53,9 +53,9 @@ export class FilmDAO {
       await connection.execute(
         `INSERT INTO Film
        (id, titleFilm, filmPitch, genreArray, duration, linkBO, dateSortieCinePhoria,
-        categorySeeing, note, isCoupDeCoeur, filmDescription, filmAuthor, filmDistribution,
+        categorySeeing, note, isCoupDeCoeur, isActiveForNewSeances, filmDescription, filmAuthor, filmDistribution,
         imageFilm128, imageFilm1024)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           newId,
           film.titleFilm || null,
@@ -67,6 +67,7 @@ export class FilmDAO {
           film.categorySeeing || null,
           film.note || 0,
           film.isCoupDeCoeur ? 1 : 0,
+          film.isActiveForNewSeances ? 1 : 0,
           film.filmDescription || null,
           film.filmAuthor || null,
           film.filmDistribution || null,
@@ -101,6 +102,7 @@ export class FilmDAO {
           categorySeeing=?,
           note=?,
           isCoupDeCoeur=?,
+          isActiveForNewSeances=?,
           filmDescription=?,
           filmAuthor=?,
           filmDistribution=?,
@@ -117,6 +119,7 @@ export class FilmDAO {
           film.categorySeeing || null,
           film.note || 0,
           film.isCoupDeCoeur ? 1 : 0,
+          film.isActiveForNewSeances ? 1 : 0,
           film.filmDescription || null,
           film.filmAuthor || null,
           film.filmDistribution || null,

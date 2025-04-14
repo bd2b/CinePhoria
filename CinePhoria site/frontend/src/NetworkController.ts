@@ -760,7 +760,7 @@ export async function getReservationQRCodeApi(reservationId: string): Promise<HT
 
 export async function askResetPwdApi(email: string): Promise<void> {
     const endpoint = `http://localhost:3500/api/utilisateur/askresetpwd`;
-    const body = JSON.stringify({ email: email });
+    const body = { email: email };
     console.log(body);
     const responseJSON = await apiRequest<void>(
         endpoint,
@@ -774,7 +774,7 @@ export async function askResetPwdApi(email: string): Promise<void> {
 
 export async function resetPwdApi(email: string, codeConfirm: string, newPassword: string): Promise<void> {
     const endpoint = `http://localhost:3500/api/utilisateur/resetpwd`;
-    const body = JSON.stringify({ email: email, codeConfirm: codeConfirm, newPassword: newPassword });
+    const body = { email: email, codeConfirm: codeConfirm, newPassword: newPassword };
     console.log(body);
     const responseJSON = await apiRequest<void>(
         endpoint,
@@ -976,6 +976,22 @@ export async function sallesCreateApi(salle: Salle): Promise<{ message: string; 
 export async function sallesSelectApi(salleId: string): Promise<Salle> {
     const endpoint = `http://localhost:3500/api/salles/${salleId}`;
     const responseJSON = await apiRequest<Salle>(
+        endpoint,
+        'GET',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Récupération des salles d'un cinema (GET /api/salles/cinema/:cinema)
+ * @param cinema Le nom du cinema
+ * @returns un tableau de salles
+ */
+export async function sallesSelectCinemaApi(nameCinema: string): Promise<Salle[]> {
+    const endpoint = `http://localhost:3500/api/salles/cinema/${nameCinema}`;
+    const responseJSON = await apiRequest<Salle[]>(
         endpoint,
         'GET',
         undefined,

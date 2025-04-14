@@ -122,17 +122,19 @@ export class UtilisateurController {
 
   static async sendCodeReset(req: Request, res: Response): Promise<void> {
     try {
+      logger.info("Début sendCodeReset")
       const { email } = req.body;
+      logger.info("Début sendCodeReset 2")
 
       // Validation des données d'entrée
       if (!email ) {
         res.status(400).json({ message: 'Données manquantes ou invalides.' });
         return;
       }
-
+      logger.info("Début sendCodeReset 3")
       // Appel au DAO pour Recupérer le code de confirmation
       const result = await UtilisateurDAO.createCodeConfirm(email, 'reset');
-        
+      logger.info("Début sendCodeReset 4")
       // Gestion du résultat
       if (result.startsWith('Erreur')) {
         res.status(400).json({ message: result });
