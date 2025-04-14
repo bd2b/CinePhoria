@@ -15,11 +15,11 @@ export class SalleDAO {
         logger.info('Exécution de la requête : SELECT * FROM Salle');
         const [rows] = await connection.execute('SELECT * FROM Salle');
         await connection.end();
-    
+
         // On convertit chaque record en Salle
         return (rows as any[]).map(row => new Salle(row));
-    
-      }
+
+    }
 
     // Create
     static async createSalle(salle: Salle): Promise<string> {
@@ -35,15 +35,15 @@ export class SalleDAO {
     (id, nameCinema, nameSalle, capacity, numPMR, rMax, fMax, seatsAbsents)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    newId, 
+                    newId,
                     salle.nameCinema || null,
                     salle.nameSalle || null,
-                    salle.capacity || 0 ,
+                    salle.capacity || 0,
                     salle.numPMR || 0,
                     salle.rMax || 0,
                     salle.fMax || 0,
                     salle.seatsAbsents || ""
-                    
+
                 ]
             );
             await connection.end();
@@ -58,18 +58,18 @@ export class SalleDAO {
     // Update
     static async updateSalle(id: string, salle: Salle): Promise<boolean> {
         // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
-        
+
         const connection = await mysql.createConnection(dbConfig);
         try {
             logger.info(`Mise à jour de la salle ${id} ${salle.nameSalle}`);
             const [result] = await connection.execute(
-            `UPDATE Salle SET
+                `UPDATE Salle SET
                 nameCinema=?, nameSalle=?, capacity=?, numPMR=?, rMax=?, fMax=?, seatsAbsents=?
                 WHERE id=?`,
-                [   
+                [
                     salle.nameCinema || null,
                     salle.nameSalle || null,
-                    salle.capacity || 0 ,
+                    salle.capacity || 0,
                     salle.numPMR || 0,
                     salle.rMax || 0,
                     salle.fMax || 0,
@@ -113,11 +113,21 @@ export class SalleDAO {
         logger.info('Connexion réussie à la base de données');
         const [rows] = await connection.execute('SELECT * FROM Salle WHERE id = ?', [id]);
         await connection.end();
-    
+
         const data = (rows as any[])[0];
         return data ? new Salle(data) : null;
-      }
-    
+    }
+
+    static async findByCinema(nameCinema: string): Promise<Salle[] | null> {
+        const connection = await mysql.createConnection(dbConfig);
+        logger.info('Connexion réussie à la base de données');
+        const [rows] = await connection.execute('SELECT * FROM Salle WHERE nameCinema = ?', [nameCinema]);
+        await connection.end();
+
+        const data = (rows as any[]);
+        return data ;
+    }
+
 }
 
 // *** générateur d'UUID

@@ -61,6 +61,11 @@
     border: 10px, border, rgb(var(--primary-color));
 }
 
+.simpleCard__affiche-img--disabled {
+    filter: grayscale(100%) brightness(0.7);
+    opacity: 0.7;
+}
+
 .simpleCard__detail {
     flex-shrink: 1;
     display: flex;
@@ -313,6 +318,9 @@
     text-decoration: none;
     color: black;
   }
+  .title__filter-dropdown-button.inactif + .title__filter-button-drowdown-content {
+    display: none !important;
+}
   
   .title__filter-button-drowdown-content a:hover {
     background-color: #f1f1f1;
@@ -321,3 +329,10 @@
   .title__filter-button-drowdown-content.show {
     display: block;
   }
+
+  .title__filter-dropdown-button.inactif,
+.title__filter-dropdown-button.inactif:hover {
+    pointer-events: none;
+    opacity: 0.6; /* visuellement grisé, optionnel */
+    cursor: default;
+}

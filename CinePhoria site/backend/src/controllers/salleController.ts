@@ -28,6 +28,21 @@ export class SalleController {
         }
       }
 
+      static async getSalleByCinema(req: Request, res: Response) {
+        try {
+          const salles = await SalleDAO.findByCinema(req.params.cinema);
+        //   if (!film) {
+        //     return res.status(404).json({ message: 'Salle non trouvé' });
+        //   }
+          res.json(salles);
+        } catch (error: any) {
+          res.status(500).json({ error: error.message });
+        }
+      }
+
+
+
+
   // POST => create a Salle
   static async createSalle(req: Request, res: Response) {
     try {

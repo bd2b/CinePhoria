@@ -364,6 +364,7 @@ export class DataController {
                     categorySeeing: seance.categorySeeing,
                     note: seance.note ? parseFloat(seance.note) : undefined, // Convertir en number si présent
                     isCoupDeCoeur: seance.isCoupDeCoeur === '1', // Convertir en boolean
+                    isActiveForNewSeances: seance.isActiveForNewSeances === '1',
                     filmDescription: seance.filmDescription,
                     filmAuthor: seance.filmAuthor,
                     filmDistribution: seance.filmDistribution,

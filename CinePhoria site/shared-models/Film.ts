@@ -11,6 +11,7 @@ export class Film {
     categorySeeing?: string;
     note?: number;
     isCoupDeCoeur?: boolean;
+    isActiveForNewSeances?: boolean;
     filmDescription?: string;
     filmAuthor?: string;
     filmDistribution?: string;
@@ -35,6 +36,7 @@ export interface FilmInterface {
    
        note: number;
        isCoupDeCoeur: boolean;
+       isActiveForNewSeances: boolean;
        filmDescription: string;
        filmAuthor?: string;
        filmDistribution?: string;
@@ -43,3 +45,11 @@ export interface FilmInterface {
        imageFilm1024: string;
    
      };
+
+
+export interface ListFilms  { 
+      id: string;
+      titre: string;
+      duration?: string;
+      affiche?: string;
+  }

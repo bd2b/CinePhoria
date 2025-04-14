@@ -20,6 +20,7 @@ export class Seance {
   dateSortieCinePhoria?: string;
   note?: string; 
   isCoupDeCoeur?: string;
+  isActiveForNewSeances?: string;
   categorySeeing?: string;    
   linkBO?: string; 
   imageFilm128?: string;
@@ -75,6 +76,7 @@ export interface SeanceInterface {
  filmdateSortieCinePhoria?: string;
  filmnote?: string; 
  filmisCoupDeCoeur?: string;
+ filmisActiveForNewSeances?: string;
  filmcategorySeeing?: string;    
  filmlinkBO?: string; 
  filmimageFilm128?: string;
@@ -106,6 +108,9 @@ export class SeanceDisplay {
   duration?: string;
   qualite?: string;
   imageFilm128?: string;
+
+  salleId?: string;
+  filmId?: string;
 
  constructor(data: Partial<SeanceDisplay>) {
     Object.assign(this, data);

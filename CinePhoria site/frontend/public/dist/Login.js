@@ -141,17 +141,20 @@ export function login() {
         function validateForm() {
             const emailValid = validateEmail(emailInput.value);
             const fieldsFilled = areAllFieldsFilled();
-            if (emailValid) {
-                forgotBtn.classList.remove("inactif");
-                forgotBtn.disabled = false;
-                createAccountBtn.classList.add("inactif");
-                createAccountBtn.disabled = true;
-            }
-            else {
-                forgotBtn.classList.add("inactif");
-                forgotBtn.disabled = true;
-                createAccountBtn.classList.remove("inactif");
-                createAccountBtn.disabled = false;
+            if (forgotBtn && createAccountBtn) {
+                // La modal de connexion dispose des boutons Oubli de mot de passe et Creation Compte
+                if (emailValid) {
+                    forgotBtn.classList.remove("inactif");
+                    forgotBtn.disabled = false;
+                    createAccountBtn.classList.add("inactif");
+                    createAccountBtn.disabled = true;
+                }
+                else {
+                    forgotBtn.classList.add("inactif");
+                    forgotBtn.disabled = true;
+                    createAccountBtn.classList.remove("inactif");
+                    createAccountBtn.disabled = false;
+                }
             }
             // Activation/désactivation du bouton de soumission
             if (!(emailValid && fieldsFilled)) {

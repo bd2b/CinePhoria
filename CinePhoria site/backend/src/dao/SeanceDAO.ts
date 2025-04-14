@@ -26,7 +26,8 @@ export class SeanceDAO {
       seanceId, titleFilm, nameSalle, nameCinema, 
       capacity,
       dateJour, hourBeginHHSMM, hourEndHHSMM, 
-      bo, duration, qualite, imageFilm128
+      bo, duration, qualite, imageFilm128,
+      salleId, filmId
     FROM ViewFilmsSeancesSalle
     `
     logger.info(`Exécution de la requête : ${requeteSelect}`);
@@ -79,14 +80,16 @@ export class SeanceDAO {
         seanceId, titleFilm, nameSalle, nameCinema, 
         capacity,
         dateJour, hourBeginHHSMM, hourEndHHSMM, 
-        bo, duration, qualite, imageFilm128
+        bo, duration, qualite, imageFilm128,
+        salleId, filmId
       FROM ViewFilmsSeancesSalle`;
     } else {
       requete = `SELECT 
         seanceId, titleFilm, nameSalle, nameCinema, 
         capacity,
         dateJour, hourBeginHHSMM, hourEndHHSMM, 
-        bo, duration, qualite, imageFilm128
+        bo, duration, qualite, imageFilm128,
+        salleId, filmId
       FROM ViewFilmsSeancesSalle
       WHERE nameCinema in (${nameCinemaList})`;
     }

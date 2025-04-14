@@ -1,7 +1,7 @@
 import { deleteCookie, validateEmail } from "./Helpers.js";
 import { dataController } from "./DataController.js";
 import { userDataController } from "./DataControllerUser.js";
-import { loginApi, logoutApi , askResetPwdApi , resetPwdApi } from "./NetworkController.js";
+import { loginApi, logoutApi, askResetPwdApi, resetPwdApi } from "./NetworkController.js";
 import { confirmReserve } from "./ViewReservationPlaces.js";
 import { ReservationState } from "./shared-models/Reservation.js";
 
@@ -145,18 +145,21 @@ export async function login(invite: string = "Veuillez vous connecter...", enabl
     function validateForm(): void {
         const emailValid = validateEmail(emailInput.value);
         const fieldsFilled = areAllFieldsFilled();
-        if (emailValid) {
-            forgotBtn!.classList.remove("inactif");
-            forgotBtn!.disabled = false;
+        if (forgotBtn && createAccountBtn) {
+            // La modal de connexion dispose des boutons Oubli de mot de passe et Creation Compte
+            if (emailValid) {
+                forgotBtn!.classList.remove("inactif");
+                forgotBtn!.disabled = false;
 
-            createAccountBtn!.classList.add("inactif");
-            createAccountBtn!.disabled = true;
-        } else {
-            forgotBtn!.classList.add("inactif");
-            forgotBtn!.disabled = true;
-            
-            createAccountBtn!.classList.remove("inactif");
-            createAccountBtn!.disabled = false;
+                createAccountBtn!.classList.add("inactif");
+                createAccountBtn!.disabled = true;
+            } else {
+                forgotBtn!.classList.add("inactif");
+                forgotBtn!.disabled = true;
+
+                createAccountBtn!.classList.remove("inactif");
+                createAccountBtn!.disabled = false;
+            }
         }
         // Activation/désactivation du bouton de soumission
         if (!(emailValid && fieldsFilled)) {
@@ -285,7 +288,7 @@ function showReinitModal(email: string) {
         if (evt.target === reinitModal) closeFunc();
     });
 
-    continueBtn?.removeEventListener('click', async () => {});
+    continueBtn?.removeEventListener('click', async () => { });
     continueBtn?.addEventListener('click', async () => {
         // On génére l'envoi d'un code
         askResetPwdApi(email);
@@ -380,7 +383,7 @@ function showNewPasswordModal(email: string) {
     resendBtn!.disabled = false;
     resendBtn!.classList.remove('inactif');
 
-    resendBtn?.removeEventListener('click', async () => {});
+    resendBtn?.removeEventListener('click', async () => { });
     resendBtn?.addEventListener('click', async () => {
         askResetPwdApi(email)
         alert("Nous vous avons renvoyé un code.");
@@ -409,7 +412,7 @@ function showNewPasswordModal(email: string) {
  * Placeholder : Valide le changement de mot de passe
  */
 async function validateChange(email: string, code: string, newpass: string): Promise<string> {
-    await resetPwdApi(email,code,newpass);
+    await resetPwdApi(email, code, newpass);
     return "OK"
 }
 
