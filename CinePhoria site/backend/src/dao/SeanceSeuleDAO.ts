@@ -28,12 +28,12 @@ export class SeanceSeuleDAO {
             // On génére un id (UUID) côté back si il n'est pas fourni
             const newId = seanceseule.id || generateUUID();
 
-            logger.info(`Insertion d'une nouvelle séence : ${newId}`);
+            logger.info(`Insertion d'une nouvelle séance : ${newId}`);
             await connection.execute(
                 `INSERT INTO Seance
 
     (id, filmId, salleId, dateJour, hourBeginHHSMM, hourEndHHSMM, qualite, bo, numFreeSeats, numFreePMR, alertAvailibility)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
                     newId, 
                     seanceseule.filmId || null,

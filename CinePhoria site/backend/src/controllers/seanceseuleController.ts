@@ -18,11 +18,11 @@ export class SeanceSeuleController {
   
     static async getSeanceSeuleById(req: Request, res: Response) {
         try {
-          const film = await SeanceSeuleDAO.findById(req.params.id);
+          const seanceSeule = await SeanceSeuleDAO.findById(req.params.id);
         //   if (!film) {
         //     return res.status(404).json({ message: 'SeanceSeule non trouvé' });
         //   }
-          res.json(film);
+          res.json(seanceSeule);
         } catch (error: any) {
           res.status(500).json({ error: error.message });
         }
