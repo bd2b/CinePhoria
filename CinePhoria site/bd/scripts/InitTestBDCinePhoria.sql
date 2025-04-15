@@ -3,6 +3,7 @@ DROP PROCEDURE IF EXISTS InitBaseTest;
 DELIMITER $$
 CREATE PROCEDURE InitBaseTest()
 BEGIN
+
 DECLARE UUIDUtilisateur1 VARCHAR(100) DEFAULT UUID();
 DECLARE UUIDUtilisateur2 VARCHAR(100) DEFAULT UUID();
 DECLARE UUIDUtilisateur3 VARCHAR(100) DEFAULT UUID();
@@ -122,6 +123,8 @@ DECLARE UUIDTarifQualite12 VARCHAR(100) DEFAULT UUID();
 
   DECLARE v_film_varName VARCHAR(50);   -- ex: "UUIDFilm3"
   DECLARE v_film_realId VARCHAR(100);   -- ex: <valeur>
+  
+  SET time_zone = 'Europe/Paris';
 
 INSERT INTO Cinema
   (nameCinema, 

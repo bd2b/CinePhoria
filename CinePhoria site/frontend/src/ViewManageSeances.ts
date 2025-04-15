@@ -3,7 +3,7 @@ import { Salle, ListSalles } from './shared-models/Salle.js';
 import { Seance, SeanceDisplay, } from './shared-models/Seance.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
-import { syncTableColumnWidths, imageFilm, formatDateJJMM } from './Helpers.js';
+import { syncTableColumnWidths, imageFilm, formatDateJJMM , parseLocalDate, formatDateJJMMStr, formatterJJMM } from './Helpers.js';
 import { ListFilms } from './shared-models/Film.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
 import { seancesseulesDeleteApi } from './NetworkController.js';
@@ -168,7 +168,7 @@ export async function updateTableSeances(seancesDisplay: SeanceDisplay[]): Promi
 
         // 1) Date
         const tdDateJour = document.createElement('td');
-        tdDateJour.textContent = formatDateJJMM(new Date(seanceDisplay.dateJour || '')) || '';
+        tdDateJour.textContent = formatterJJMM.format(new Date(seanceDisplay.dateJour || ''));
         tr.appendChild(tdDateJour);
 
         // 2) Salle
@@ -321,6 +321,7 @@ async function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: Seanc
     const cells = tr.querySelectorAll('td');
 
     // 1) Date
+    console.log("Date Entrée = ", seanceDisplay.dateJour)
     const tdDate = cells[0];
     const inputDate = document.createElement('input');
     inputDate.type = 'date';
@@ -489,7 +490,7 @@ async function activerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: Seanc
 function annulerEditionLigne(tr: HTMLTableRowElement, seanceDisplay: SeanceDisplay) {
     const cells = tr.querySelectorAll('td');
 
-    cells[0].textContent = formatDateJJMM(new Date(seanceDisplay.dateJour || '')) || '';
+    cells[0].textContent = formatDateJJMM(parseLocalDate(seanceDisplay.dateJour || '')) || '';
     if (!DataControllerIntranet.filterNameCinema || DataControllerIntranet.filterNameCinema === 'all') {
         cells[1].textContent = seanceDisplay.nameCinema + "-" + seanceDisplay.nameSalle || '';
     } else {

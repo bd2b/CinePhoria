@@ -397,6 +397,8 @@ BEGIN
     DECLARE v_current_value INT;
     DECLARE v_total_sum INT;
     
+    
+    
    -- Gestion des erreurs
 	DECLARE EXIT HANDLER FOR SQLEXCEPTION
 	BEGIN
@@ -404,6 +406,8 @@ BEGIN
 	ROLLBACK;
 	SET p_Result =  CONCAT(v_statut_email, ",", "Erreur : erreur interne SQL = ",v_message_erreur);
 	END;
+    
+    SET time_zone = 'Europe/Paris';
     
     -- Calculer le nombre de clés dans le JSON
     SET v_key_count = JSON_LENGTH(JSON_KEYS(p_TarifSeats));
@@ -626,7 +630,7 @@ BEGIN
         ROLLBACK;
         SET p_Result =  "Erreur : erreur interne procedure.";
     END;
-    
+    SET time_zone = 'Europe/Paris';
 block_label: BEGIN
  -- Recherche de l'email pour test existence
 	SET v_utilisateur_exist = (
@@ -701,6 +705,7 @@ BEGIN
        ROLLBACK;
 	   SET p_Result =  "Erreur : erreur interne procedure.";
 	END;
+    SET time_zone = 'Europe/Paris';
     
 block_label: BEGIN
     
@@ -776,6 +781,8 @@ BEGIN
        ROLLBACK;
 	   SET p_Result =  "Erreur : erreur interne procedure.";
 	END;
+    
+    SET time_zone = 'Europe/Paris';
     
 block_label: BEGIN
     
@@ -870,6 +877,7 @@ CREATE PROCEDURE ConfirmUtilisateur(
         ROLLBACK;
         SET p_Result =  "Erreur : erreur interne procedure";
 	 END;
+     SET time_zone = 'Europe/Paris';
     
     START transaction;
     
@@ -938,7 +946,7 @@ CREATE PROCEDURE ConfirmCompte(
         ROLLBACK;
         SET p_Result =  "Erreur : erreur interne procedure";
 	END;
-    
+    SET time_zone = 'Europe/Paris';
     START transaction;
     
      -- Début d'un bloc labellisé
@@ -981,6 +989,8 @@ BEGIN
         ROLLBACK;
         CALL logTrace(CONCAT('Erreur interne : ', p_message));
     END;
+    
+    SET time_zone = 'Europe/Paris';
 
     START TRANSACTION;
 
@@ -1045,6 +1055,8 @@ BEGIN
         ROLLBACK;
         CALL logTrace('PurgeOldUsers: ROLLBACK déclenché en raison d\'une erreur SQL : ');
 	END;
+    
+    SET time_zone = 'Europe/Paris';
 
     -- Obtenez l'heure actuelle
     SET v_current_time = CURRENT_TIMESTAMP;
@@ -1134,6 +1146,9 @@ CREATE PROCEDURE ConfirmReserve(
         ROLLBACK;
         SET p_Result =  "Erreur : erreur interne procedure";
 	END;
+    
+    SET time_zone = 'Europe/Paris';
+    
     START transaction;
     
      -- Début d'un bloc labellisé
@@ -1210,6 +1225,8 @@ BEGIN
 	 CALL logTrace('CancelReserve: ROLLBACK : ');
      SET p_Result = 'Erreur : Erreur interne SQL';
 	END;
+    
+    SET time_zone = 'Europe/Paris';
 
 	block_label: BEGIN
     
@@ -1292,6 +1309,8 @@ BEGIN
 		ROLLBACK;
 		CALL logTrace('PurgeOldReservations: ROLLBACK : ');
 	END;
+    
+    SET time_zone = 'Europe/Paris';
 
     -- Stockage l'heure actuelle
     SET v_current_time = NOW();

@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { DataControllerIntranet } from './DataControllerIntranet.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
-import { syncTableColumnWidths, imageFilm, formatDateJJMM } from './Helpers.js';
+import { syncTableColumnWidths, imageFilm, formatDateJJMM, parseLocalDate, formatterJJMM } from './Helpers.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
 import { seancesseulesDeleteApi } from './NetworkController.js';
 // Données utilisées pour les select de saisie
@@ -158,7 +158,7 @@ export function updateTableSeances(seancesDisplay) {
             const tr = document.createElement('tr');
             // 1) Date
             const tdDateJour = document.createElement('td');
-            tdDateJour.textContent = formatDateJJMM(new Date(seanceDisplay.dateJour || '')) || '';
+            tdDateJour.textContent = formatterJJMM.format(new Date(seanceDisplay.dateJour || ''));
             tr.appendChild(tdDateJour);
             // 2) Salle
             const tdSalle = document.createElement('td');
@@ -285,6 +285,7 @@ function activerEditionLigne(tr, seanceDisplay, tdWidths) {
     return __awaiter(this, void 0, void 0, function* () {
         const cells = tr.querySelectorAll('td');
         // 1) Date
+        console.log("Date Entrée = ", seanceDisplay.dateJour);
         const tdDate = cells[0];
         const inputDate = document.createElement('input');
         inputDate.type = 'date';
@@ -441,7 +442,7 @@ function activerEditionLigne(tr, seanceDisplay, tdWidths) {
 function annulerEditionLigne(tr, seanceDisplay) {
     var _a, _b;
     const cells = tr.querySelectorAll('td');
-    cells[0].textContent = formatDateJJMM(new Date(seanceDisplay.dateJour || '')) || '';
+    cells[0].textContent = formatDateJJMM(parseLocalDate(seanceDisplay.dateJour || '')) || '';
     if (!DataControllerIntranet.filterNameCinema || DataControllerIntranet.filterNameCinema === 'all') {
         cells[1].textContent = seanceDisplay.nameCinema + "-" + seanceDisplay.nameSalle || '';
     }

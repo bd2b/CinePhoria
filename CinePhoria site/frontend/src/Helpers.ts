@@ -87,18 +87,41 @@ export function dateProchainMercredi(date = new Date()) {
 /**
  * Formate la date (locale) au format jj/mm (ex : 09/01)
  */
-// export function formatDateJJMM(date: Date): string {
-//     const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate().toString();
-//     const month = (date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1).toString();
-//     return `${day}/${month}`;
-// }
-
 export function formatDateJJMM(date: Date): string {
-    const local = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
-    const day = local.getDate() < 10 ? '0' + local.getDate() : local.getDate().toString();
-    const month = (local.getMonth() + 1) < 10 ? '0' + (local.getMonth() + 1) : (local.getMonth() + 1).toString();
+    // console.log("Date en entrée : ", date)
+    const day = date.getDate() < 10 ? '0' + date.getDate() : date.getDate().toString();
+    const month = (date.getMonth() + 1) < 10 ? '0' + (date.getMonth() + 1) : (date.getMonth() + 1).toString();
+    // console.log("Date en sortie = ", `${day}/${month}`);
     return `${day}/${month}`;
 }
+
+export function parseLocalDate(rawDateStr: string): Date {
+    const dateStr = rawDateStr.slice(0, 10); // garde seulement YYYY-MM-DD
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d);
+}
+
+export function formatDateJJMMStr(dateStr: string): string {
+    const cleanStr = dateStr.slice(0, 10); // extrait "YYYY-MM-DD"
+    const [y, m, d] = cleanStr.split('-');
+    return `${d}/${m}`;
+}
+
+export const formatterJJMM = new Intl.DateTimeFormat("fr-FR", {
+    timeZone: "Europe/Paris",
+    day: "2-digit",
+    month: "2-digit"
+});
+
+// Avec compensation du format universel en GTC + 2
+// export function formatDateJJMM(date: Date): string {
+//     console.log("Date en entrée : ", date)
+//     const local = new Date(date.getTime() + date.getTimezoneOffset() * 60000);
+//     const day = local.getDate() < 10 ? '0' + local.getDate() : local.getDate().toString();
+//     const month = (local.getMonth() + 1) < 10 ? '0' + (local.getMonth() + 1) : (local.getMonth() + 1).toString();
+//     console.log("Date en sortie = ", `${day}/${month}`);
+//     return `${day}/${month}`;
+// }
 
 /**
  * Formate la date (locale) au format yyyy-mm-dd, sans dépendre d’UTC.
