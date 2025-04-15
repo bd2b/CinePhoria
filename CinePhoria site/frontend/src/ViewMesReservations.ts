@@ -11,6 +11,7 @@ import { seanceCardView } from "./ViewReservation.js";
 import { Seance } from "./shared-models/Seance.js";
 import { updateTableContent } from "./ViewReservationPlaces.js";
 
+
 export async function onLoadMesReservations() {
     console.log("=====> chargement onLoadMesReservations")
 
@@ -99,29 +100,6 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
 
     // Pour chaque reservation
     reservations.forEach((resa) => {
-        // Acces à la seance
-        // const seance = dataController.allSeances.find((s) => { return s.seanceId === resa.seanceId });
-        // if (!seance) {
-        //     console.error("Pas de seance pour la réservation")
-        //     return;
-        // }
-
-        // const resaSeanceId = resa.seanceId;
-        // if (!resaSeanceId) {
-        //     console.error("resa.seanceId est undefined ou null !");
-        // }
-
-        // const seances = dataController.allSeances.filter((s) => s.seanceId === resaSeanceId);
-        // if (!seances) {
-        //     console.error("Pas de seance pour la réservation filtre")
-        // }
-
-        // const seance = dataController.allSeances.find((s) => s.seanceId === resaSeanceId);
-        // if (!seance) {
-        //     console.error(`Pas de séance trouvée pour la réservation avec seanceId = ${resaSeanceId}`);
-        // } else {
-        //     console.log("Séance trouvée :", seance);
-        // }
 
         const resaSeanceId = resa.seanceId!;
         if (!resaSeanceId) {
@@ -129,18 +107,6 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
         } else {
             console.log("resaSeanceId =", resaSeanceId);
         }
-
-        // Vérification des types et valeurs
-        // console.log("Liste des séances :");
-        // dataController.allSeances.forEach((s) => console.log(s.seanceId));
-
-        // Vérifie `filter()`
-        // const seances = dataController.allSeances.filter((s) => s.seanceId === resaSeanceId);
-        // if (seances.length === 0) {
-        //     console.error("Pas de séance pour la réservation (via filter)");
-        // } else {
-        //     console.log("Séances trouvées via filter :", seances);
-        // }
 
         // Vérifie `find()`
         let seance = dataController.allSeances.find((s) => s.seanceId === resaSeanceId);
@@ -193,10 +159,6 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
 
             // Créer une date en combinant dateVar (année/mois/jour) avec l'heureVar (HH:MM)
             const dateHeureLimite = new Date(dateVar.getFullYear(), dateVar.getMonth(), dateVar.getDate(), hh, mm);
-            // console.log(resa.reservationId + "-" + seance.seanceId);
-            // console.log("Date jour " + dateVar + " HeureMn " + seance.hourBeginHHSMM)
-            // console.log("Date Heure de la seance = " + dateHeureLimite);
-            // console.log("Date maintenat = " + new Date());
 
             // Vérifier si la date actuelle est avant ou après la date et heure de la séance
             if ((new Date()) > dateHeureLimite) {
@@ -306,9 +268,7 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
             tdSuppr.appendChild(btnSuppr);
 
             tr.appendChild(tdSuppr);
-
         }
-
         tbody.appendChild(tr);
     });
 
@@ -332,8 +292,7 @@ async function onClickDetailReservation(resa: ReservationForUtilisateur, p_seanc
     // On met a jour la seance dans le cache
     await dataController.updateSeances([seance.seanceId]);
     seance = dataController.seanceById(p_seance.seanceId);
-    const modalDetailLocalHTML = `
-    
+    const modalDetailLocalHTML = `  
         <div class="modal__content-wrapper">
             <div class="modal__title">
                 <div class="title__detailReservation title-h2">

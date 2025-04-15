@@ -14,6 +14,7 @@ import { updateContentPlace } from './ViewReservationPlaces.js';
 import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReservationDisplay.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
+import { imageFilm } from "./Helpers.js";
 export function onLoadReservation() {
     return __awaiter(this, void 0, void 0, function* () {
         // On initialise le dataController si il est vide
@@ -260,7 +261,7 @@ function afficherListeFilms() {
         // Créer l'image
         const img = document.createElement('img');
         img.classList.add('listFilms__simpleCard-img');
-        img.src = "assets/static/" + film.imageFilm128;
+        img.src = imageFilm(film.imageFilm128);
         img.alt = (_a = film.titleFilm) !== null && _a !== void 0 ? _a : 'Affiche';
         // Titre
         const pTitre = document.createElement('p');
@@ -312,7 +313,7 @@ export function afficherDetailsFilm() {
     container.innerHTML = `
     <div class="detailFilm__twocolumns">
       <div class="twocolumns__left">
-        <img src="./assets/static/${(_a = film.imageFilm1024) !== null && _a !== void 0 ? _a : ''}" alt="Affiche" class="twocolumns__left-img">
+        <img src="${imageFilm((_a = film.imageFilm1024) !== null && _a !== void 0 ? _a : '')}" alt="Affiche" class="twocolumns__left-img">
         <button class="twocolumns__left-button-bo" id="openModal">Bande Annonce</button>
       </div>
       <div class="twocolumns__right">

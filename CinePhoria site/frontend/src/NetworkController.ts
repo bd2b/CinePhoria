@@ -1149,3 +1149,22 @@ export async function seancesDisplayByCinemaApi(cinemas: string[]): Promise<Sean
     );
     return responseJSON;
 }
+
+/**
+* Récupération de toutes les reservations en fonction d'une liste de cinema 
+* (GET /api/reservation/cinema/filter?)
+* http://localhost:3500/api/reservation/cinema/filter?cinemasList="Paris"
+* @returns Un tableau de ReservationForUtilisateur
+*/
+export async function reservationsByCinemaApi(cinemas: string[]): Promise<ReservationForUtilisateur[]> {
+    const filter = cinemas.map(s => `"${s}"`).join(',');
+    const endpoint = `http://localhost:3500/api/reservation/cinema/filter?cinemasList=${filter}`;
+    // Requête authentifiée
+    const responseJSON = await apiRequest<ReservationForUtilisateur[]>(
+        endpoint,
+        'GET',
+        undefined,
+        true
+    );
+    return responseJSON;
+}

@@ -336,6 +336,26 @@ export class ReservationController {
     }
   }
 
+  static async getReservationsByCinemas(req: Request, res: Response) {
+      try {
+        // Vérification et conversion de cinemasList en string
+        const cinemasList = req.query.cinemasList;
+        if (!cinemasList || typeof cinemasList !== 'string') {
+          return res.status(400).json({ message: `cinemasList doit être une chaîne de caractères : ${cinemasList}` });
+        }
+    
+        const seances = await ReservationDAO.getReservationsByCinemas(cinemasList)
+        
+        if (seances.length === 0) {
+          return res.status(404).json({ message: `Reservation non trouvées pour ${cinemasList}` });
+        }
+    
+        res.json(seances);
+      } catch (error: any) {
+        res.status(500).json({ error: error.message });
+      }
+    }
+
   // API Rest pour tester la création de QRCode
   static async getQRCode(req: Request, res: Response): Promise<void> {
     try {
