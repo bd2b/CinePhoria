@@ -12,6 +12,7 @@ import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReserva
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { getSeatsBookedApi } from './NetworkController.js';
+import { imageFilm } from "./Helpers.js";
 
 
 export async function onLoadReservation() {
@@ -305,7 +306,7 @@ function afficherListeFilms(): void {
     // Créer l'image
     const img = document.createElement('img');
     img.classList.add('listFilms__simpleCard-img');
-    img.src = "assets/static/" + film.imageFilm128;
+    img.src = imageFilm(film.imageFilm128!);
     img.alt = film.titleFilm ?? 'Affiche';
 
     // Titre
@@ -371,7 +372,7 @@ export function afficherDetailsFilm(): void {
   container.innerHTML = `
     <div class="detailFilm__twocolumns">
       <div class="twocolumns__left">
-        <img src="./assets/static/${film.imageFilm1024 ?? ''}" alt="Affiche" class="twocolumns__left-img">
+        <img src="${imageFilm(film.imageFilm1024 ?? '')}" alt="Affiche" class="twocolumns__left-img">
         <button class="twocolumns__left-button-bo" id="openModal">Bande Annonce</button>
       </div>
       <div class="twocolumns__right">

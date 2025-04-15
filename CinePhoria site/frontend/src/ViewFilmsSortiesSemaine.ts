@@ -2,6 +2,7 @@ import { getCookie, setCookie } from "./Helpers.js";
 import { dataController } from "./DataController.js";
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
+import { imageFilm } from "./Helpers.js";
 
 interface Film {
   id: string;
@@ -65,7 +66,7 @@ export async function onLoadVisiteur() {
       card.innerHTML = `
           <div class="film__cardreservation"> <!-- Card pour chaque film-->
             <div class="cardreservation__image">
-              <img src="assets/static/${film.imageFilm1024}" class="cardreservation__image-img" alt="Affiche du film ${film.titleFilm}">
+              <img src="${imageFilm(film.imageFilm1024!)}" class="cardreservation__image-img" alt="Affiche du film ${film.titleFilm}">
             </div>
             <div class="cardreservation__description">
                 <h2 class="cardreservation__description-title">${film.titleFilm}</h2>

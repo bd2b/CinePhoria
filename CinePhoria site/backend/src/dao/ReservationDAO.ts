@@ -179,7 +179,31 @@ export class ReservationDAO {
 
     // Map des lignes pour les convertir en instances de Seance
     return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
+  }
 
+  static async getReservationsByCinemas(nameCinemaList: string): Promise<ReservationForUtilisateur[]> {
+    const connection = await mysql.createConnection(dbConfig);
+    let requete: string = '';
+    logger.info("Selecteur de cinema = " + nameCinemaList);
+    if (nameCinemaList === '"all"') {
+      requete = `
+      SELECT 
+        *
+      FROM viewutilisateurreservation `;
+    } else {
+      requete = `
+        SELECT 
+        *
+      FROM viewutilisateurreservation 
+      WHERE nameCinema in (${nameCinemaList})`;
+    }
+    logger.info(`Exécution de la requête : ${requete}`);
+
+    const [rows] = await connection.execute(requete);
+    await connection.end();
+
+    // Map des lignes pour les convertir en instances de Seance
+    return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
   }
 
   static async setReservationStateById(p_reservationId: string, p_stateReservation: string): Promise<boolean> {

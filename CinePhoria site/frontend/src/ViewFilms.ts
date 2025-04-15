@@ -1,6 +1,6 @@
 // ViewFilm.ts
 import { dataController } from './DataController.js';
-import { formatDateLocalYYYYMMDD, setCookie } from './Helpers.js';
+import { formatDateLocalYYYYMMDD, setCookie , imageFilm } from './Helpers.js';
 import { Film } from './shared-models/Film.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { Seance } from './shared-models/Seance.js';
@@ -257,7 +257,7 @@ function buildFilmCard(film: Film): HTMLDivElement {
     divCard.classList.add('listFilms__simpleCard');
 
     const img = document.createElement('img');
-    img.src = `assets/static/${film.imageFilm128 ?? ''}`;
+    img.src = `${imageFilm(film.imageFilm128 ?? '')}`;
     img.alt = 'Affiche';
     img.classList.add('simpleCard__affiche-img');
 
@@ -319,7 +319,7 @@ async function afficherDetailFilm(film: Film): Promise<void> {
     // Image
     const imgAffiche = containerDetail.querySelector('.twocolumns__left-img') as HTMLImageElement | null;
     if (imgAffiche) {
-        imgAffiche.src = `assets/static/${film.imageFilm1024 ?? ''}`;
+        imgAffiche.src = `${imageFilm(film.imageFilm1024 ?? '')}`;
         imgAffiche.alt = film.titleFilm ?? 'Affiche';
     }
 

@@ -10,12 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { DataControllerIntranet } from './DataControllerIntranet.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
-import { syncTableColumnWidths, imageFilm, formatDateJJMM, parseLocalDate, formatterJJMM } from './Helpers.js';
+import { syncTableColumnWidths, imageFilm, formatDateJJMM, parseLocalDate, formatterJJMM, formatDateLocalYYYYMMDD } from './Helpers.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
 import { seancesseulesDeleteApi } from './NetworkController.js';
 // Données utilisées pour les select de saisie
 let listFilms;
 let listSalles;
+let filtreJour = '';
 /**
  * Entrée principale du module
  */
@@ -25,8 +26,9 @@ export function onLoadManageSeances() {
         // Charger menu et footer
         yield chargerMenu(); // Header
         yield chargerCinemaSites(); // Footer
-        // Initialisation filtre Cinema
+        // Initialisation filtres
         yield initFiltreCinema();
+        yield initFiltreJour();
         // Rafraîchir le tableau des seances
         yield rafraichirTableauSeances();
     });
@@ -43,7 +45,10 @@ function rafraichirTableauSeances() {
         }
         container.innerHTML = '';
         // Charger les séances
-        const seances = yield DataControllerIntranet.getSeancesDisplayFilter();
+        let seances = yield DataControllerIntranet.getSeancesDisplayFilter();
+        if (filtreJour) {
+            seances = seances.filter((s) => s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false);
+        }
         // Construction de la page
         const tableSeances = yield updateTableSeances(seances);
         container.appendChild(tableSeances);
@@ -124,6 +129,47 @@ function initFiltreCinema() {
                 yield rafraichirTableauSeances();
             }));
         });
+    });
+}
+function initFiltreJour() {
+    return __awaiter(this, void 0, void 0, function* () {
+        // On met en place un input que l'on ajuste aux jours
+        // dans la fourchette couverte par dataController.genre (soit all filtré par le cinema et le filtre genres)
+        // 1) On insère un <input type="date"> en plus, ou on le rajoute dans la page
+        let containerFilters = document.querySelector('.title__filters-films');
+        if (!containerFilters)
+            return;
+        let inputDate = document.createElement('input');
+        inputDate.type = 'date';
+        inputDate.classList.add('filter-jour-input');
+        containerFilters.prepend(inputDate);
+        // 4) On écoute les changements
+        inputDate.removeEventListener('change', () => __awaiter(this, void 0, void 0, function* () { }));
+        inputDate.addEventListener('change', () => __awaiter(this, void 0, void 0, function* () {
+            filtreJour = inputDate.value; // ex. "2025-03-15"
+            yield rafraichirTableauSeances();
+        }));
+        // 5) Construire initialement la liste des jours activables
+        yield construireListeJours();
+    });
+}
+function construireListeJours() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const inputDate = document.querySelector('.filter-jour-input');
+        if (!inputDate)
+            return;
+        // On calcule les dates min et max et on applique sur le champ date
+        const allDates = (yield DataControllerIntranet.getSeancesDisplayFilter()).map((s) => s.dateJour).filter(Boolean).sort();
+        if (allDates.length > 0) {
+            const dateMinYYYYMMDD = formatDateLocalYYYYMMDD(new Date(allDates[0]));
+            const dateMaxYYYYMMDD = formatDateLocalYYYYMMDD(new Date(allDates[allDates.length - 1]));
+            inputDate.min = dateMinYYYYMMDD;
+            inputDate.max = dateMaxYYYYMMDD;
+        }
+        else {
+            inputDate.min = '';
+            inputDate.max = '';
+        }
     });
 }
 /* -------------------------------------------

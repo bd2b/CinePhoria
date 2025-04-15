@@ -938,3 +938,18 @@ export function seancesDisplayByCinemaApi(cinemas) {
         return responseJSON;
     });
 }
+/**
+* Récupération de toutes les reservations en fonction d'une liste de cinema
+* (GET /api/reservation/cinema/filter?)
+* http://localhost:3500/api/reservation/cinema/filter?cinemasList="Paris"
+* @returns Un tableau de ReservationForUtilisateur
+*/
+export function reservationsByCinemaApi(cinemas) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const filter = cinemas.map(s => `"${s}"`).join(',');
+        const endpoint = `http://localhost:3500/api/reservation/cinema/filter?cinemasList=${filter}`;
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}

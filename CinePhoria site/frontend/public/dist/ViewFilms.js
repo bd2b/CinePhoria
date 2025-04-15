@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 // ViewFilm.ts
 import { dataController } from './DataController.js';
-import { formatDateLocalYYYYMMDD } from './Helpers.js';
+import { formatDateLocalYYYYMMDD, imageFilm } from './Helpers.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
@@ -250,7 +250,7 @@ function buildFilmCard(film) {
     const divCard = document.createElement('div');
     divCard.classList.add('listFilms__simpleCard');
     const img = document.createElement('img');
-    img.src = `assets/static/${(_a = film.imageFilm128) !== null && _a !== void 0 ? _a : ''}`;
+    img.src = `${imageFilm((_a = film.imageFilm128) !== null && _a !== void 0 ? _a : '')}`;
     img.alt = 'Affiche';
     img.classList.add('simpleCard__affiche-img');
     const detailDiv = document.createElement('div');
@@ -306,7 +306,7 @@ function afficherDetailFilm(film) {
         // Image
         const imgAffiche = containerDetail.querySelector('.twocolumns__left-img');
         if (imgAffiche) {
-            imgAffiche.src = `assets/static/${(_a = film.imageFilm1024) !== null && _a !== void 0 ? _a : ''}`;
+            imgAffiche.src = `${imageFilm((_a = film.imageFilm1024) !== null && _a !== void 0 ? _a : '')}`;
             imgAffiche.alt = (_b = film.titleFilm) !== null && _b !== void 0 ? _b : 'Affiche';
         }
         // Titre
