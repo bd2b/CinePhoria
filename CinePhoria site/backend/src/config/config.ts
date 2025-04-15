@@ -17,7 +17,8 @@ export const dbConfig = {
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_DATABASE || 'mydatabase',
-  multipleStatements: true // Autorise plusieurs requêtes dans une seule commande
+  multipleStatements: true, // Autorise plusieurs requêtes dans une seule commande
+  timezone: 'Europe/Paris'
 };
 
 // Exporter la configuration de l'envoi de mail, lue depuis les variables d'environnement
