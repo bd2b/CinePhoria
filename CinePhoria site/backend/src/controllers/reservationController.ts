@@ -63,31 +63,7 @@ export class ReservationController {
   }
 
 
-  static async getReservationById(req: Request, res: Response): Promise<void> {
-    try {
-      // Recuperation de l'ID de la reservation
-      const reservationId = req.params.reservationid?.trim();
-
-      if (!reservationId) {
-        res.status(400).json({ message: `L'ID de la réservation est requis.` });
-        return;
-
-      }
-      // Récupération des réservations
-      const reservations = await ReservationDAO.getReservationById(reservationId);
-
-      if (!reservations || reservations.length === 0) {
-        res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}` });
-        return;
-      }
-
-      res.status(200).json(reservations);
-    } catch (error: any) {
-      logger.error(`Erreur lors de la récupération des réservations: ${error.message}`);
-      res.status(500).json({ error: "Erreur interne du serveur." });
-    }
-
-  }
+  
   static async setReservationStateById(req: Request, res: Response): Promise<void> {
     try {
       // Récupération des paramètres de la requête
@@ -355,6 +331,53 @@ export class ReservationController {
         res.status(500).json({ error: error.message });
       }
     }
+
+    // SELECT => select a Reservation
+    static async getReservationById(req: Request, res: Response): Promise<void> {
+      try {
+        // Recuperation de l'ID de la reservation
+        const reservationId = req.params.reservationid?.trim();
+  
+        if (!reservationId) {
+          res.status(400).json({ message: `L'ID de la réservation est requis.` });
+          return;
+  
+        }
+        // Récupération des réservations
+        const reservations = await ReservationDAO.getReservationById(reservationId);
+  
+        if (!reservations || reservations.length === 0) {
+          res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}` });
+          return;
+        }
+  
+        res.status(200).json(reservations);
+      } catch (error: any) {
+        logger.error(`Erreur lors de la récupération des réservations: ${error.message}`);
+        res.status(500).json({ error: "Erreur interne du serveur." });
+      }
+  
+    }
+
+// PUT => update a Reservation
+static async updateReservationAvis(req: Request, res: Response) {
+  try {
+    const reservationid = req.params.reservationid;
+    const data = req.body;
+    logger.info(`Mise à jour de l'avis ${reservationid} avec data=`, data);
+
+    const reservationAvisToUpdate = data;
+    const result = await ReservationDAO.updateReservationAvis(reservationid, reservationAvisToUpdate);
+
+    if (result) {
+      res.json({ message: 'OK' });
+    } else {
+      res.status(404).json({ message: 'Erreur: Reservation non trouvée, avis non mis à jour' });
+    }
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
   // API Rest pour tester la création de QRCode
   static async getQRCode(req: Request, res: Response): Promise<void> {

@@ -58,7 +58,7 @@ export class ReservationForUtilisateur {
   timestampcreate?:Date;
   seatsReserved?:string;
   displayname?:string;
-  dateJour?:Date;
+  dateJour?: string;
   titleFilm?:string;
   nameCinema?:string;
   isEvaluationMustBeReview?:boolean;
@@ -86,4 +86,10 @@ export class SeatsForReservation {
   }
 };
 
+export interface ReservationAvis {
+  id: string;
+  evaluation?: string;
+  isEvaluationMustBeReview?: boolean;
+  note?: number;
+};
 

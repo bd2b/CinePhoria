@@ -249,10 +249,11 @@ function buildIntranetMenuAdmin() {
     subMenu.style.backgroundColor = '#F8F8FF';
     subMenu.style.border = '1px solid #999';
     // Ajout des items
-    const item1 = createLevel2Item('Gérer les films', 'manageFilms.html');
-    const item2 = createLevel2Item('Gérer les salles', 'manageSalles.html');
-    const item3 = createLevel2Item('Gérer les comptes employés', 'manageEmploye.html');
-    subMenu.append(item1, item2, item3);
+    const item1 = createLevel2Item('Modérer les avis', 'manageAvis.html');
+    const item2 = createLevel2Item('Gérer les films', 'manageFilms.html');
+    const item3 = createLevel2Item('Gérer les salles', 'manageSalles.html');
+    const item4 = createLevel2Item('Gérer les comptes employés', 'manageEmploye.html');
+    subMenu.append(item1, item2, item3, item4);
     // Au survol ou clic, on affiche
     mainBtn.addEventListener('mouseover', () => {
         subMenu.style.display = 'block';
@@ -291,7 +292,7 @@ function buildIntranetMenuEmploye() {
     const item1 = createLevel2Item('Gérer les films', 'manageFilms.html');
     const item2 = createLevel2Item('Gérer les salles', 'manageSalles.html');
     const item3 = createLevel2Item('Gérer les séances', 'manageSeances.html');
-    const item4 = createLevel2Item('Modérer les avis', 'moderer.html');
+    const item4 = createLevel2Item('Moderer les avis', 'manageAvis.html');
     subMenu.append(item1, item2, item3, item4);
     mainBtn.addEventListener('mouseover', () => {
         subMenu.style.display = 'block';

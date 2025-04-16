@@ -15,7 +15,7 @@ export class SeanceSeuleController {
           res.status(500).json({ error: error.message });
         }
       };
-  
+  // SELECT => select a SeanceSeule
     static async getSeanceSeuleById(req: Request, res: Response) {
         try {
           const seanceSeule = await SeanceSeuleDAO.findById(req.params.id);

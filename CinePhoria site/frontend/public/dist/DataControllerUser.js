@@ -13,7 +13,7 @@ export var ProfilUtilisateur;
 (function (ProfilUtilisateur) {
     ProfilUtilisateur["Utilisateur"] = "mesreservations.html";
     ProfilUtilisateur["Administrateur"] = "manageEmploye.html";
-    ProfilUtilisateur["Employee"] = "moderer.html";
+    ProfilUtilisateur["Employee"] = "manageAvis.html";
     ProfilUtilisateur["Visiteur"] = "visiteur.html";
 })(ProfilUtilisateur || (ProfilUtilisateur = {}));
 export class DataControllerUser {

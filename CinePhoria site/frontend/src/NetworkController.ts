@@ -1,7 +1,7 @@
 import { ReservationState, TarifForSeats } from './shared-models/Reservation';
 import { isUUID, validateEmail } from './Helpers.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
-import { ReservationForUtilisateur, SeatsForReservation } from './shared-models/Reservation.js';
+import { ReservationForUtilisateur, SeatsForReservation , ReservationAvis} from './shared-models/Reservation.js';
 import { userDataController } from './DataControllerUser.js';
 import { handleApiError } from './Global.js';
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
@@ -225,53 +225,7 @@ export async function setReservationApi(
     return responseJSON;
 }
 
-export async function setReservationApi2(
-    email: string,
-    seanceId: string,
-    tarifSeats: TarifForSeats, // { tarifId: numberOfSeats, ... }
-    pmrSeats: number
-): Promise<{ statut: string; utilisateurId: string; reservationId: string }> {
-    const body = { email, seanceId, tarifSeats, pmrSeats };
-    const response = await fetch('http://localhost:3500/api/reservation', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
 
-    if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || 'Erreur inconnue');
-    }
-
-    // Réponse OK -> { statut, utilisateurId, reservationId }
-    const responseJSON = await response.json();
-    const { statut, utilisateurId, reservationId } = responseJSON;
-
-    // f) Contrôles de cohérence
-    //   - Vérifier seanceId identique
-    //   - Vérifier si utilisateurId est un UUID
-    //   - Gérer statut
-    let messageError = "";
-    if (!isUUID(reservationId)) {
-        messageError += `ReservationID invalide.`;
-    }
-    if (!isUUID(utilisateurId)) {
-        messageError += `UtilisateurId invalide.`;
-    }
-    if (statut == 'NA') {
-        messageError = `Une erreur s'est produite côté serveur (NA).`;
-    }
-    if (utilisateurId.startsWith('Erreur')) {
-        messageError += " Erreur utilisateur : " + utilisateurId;
-    }
-    if (reservationId.startsWith('Erreur')) {
-        messageError += " Erreur reservation : " + reservationId;
-    }
-    if (messageError !== "") {
-        throw new Error(messageError);
-    }
-    return responseJSON;
-}
 
 /**
  * Confirmation de la création de l'utilisateur
@@ -339,28 +293,6 @@ export async function confirmCompteApi(email: string, codeConfirm: string): Prom
     console.log("Message retour", responseJSON);
     return responseJSON;
 }
-
-export async function confirmCompteApi2(email: string, codeConfirm: string) {
-    const body = { email, codeConfirm };
-    const response = await fetch('http://localhost:3500/api/utilisateur/confirmCompte', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-    if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || 'Erreur inconnue');
-    }
-
-    // Examen de la reponse
-    const responseJSON = await response.json();
-    console.log("Message retour", responseJSON);
-    return responseJSON;
-}
-
-
-
-
 
 /**
  * Fonction de confirmation de la reservation
@@ -1164,6 +1096,24 @@ export async function reservationsByCinemaApi(cinemas: string[]): Promise<Reserv
         endpoint,
         'GET',
         undefined,
+        true
+    );
+    return responseJSON;
+}
+
+
+/**
+ * Mise à jour d’un avis (PUT /api/reservation/avis/:reservationid)
+ * @param reservationid L'identifiant de la reservetion à mettre à jour
+ * @param reservationAvis Les nouvelles informations de la reservation
+ * @returns { message } si la mise à jour est réussie
+ */
+export async function reservationAvisUpdateApi(reservationId: string, reservationAvis: ReservationAvis): Promise<{ message: string }> {
+    const endpoint = `http://localhost:3500//api/reservation/avis/${reservationId}`;
+    const responseJSON = await apiRequest<{ message: string }>(
+        endpoint,
+        'PUT',
+        reservationAvis,
         true
     );
     return responseJSON;

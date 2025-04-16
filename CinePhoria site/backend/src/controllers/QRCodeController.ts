@@ -63,7 +63,8 @@ export async function createQRCode(reservationId: string): Promise<void> {
     textQRCode += seances[0].nameCinema + ",";
     textQRCode += seances[0].nameSalle + ",";
     textQRCode += reservations[0].titleFilm + ",";
-    textQRCode += formatDateLocalYYYYMMDD(reservations[0].dateJour!) + ",";
+    textQRCode += reservations[0].dateJour! + ",";
+    // textQRCode += formatDateLocalYYYYMMDD(reservations[0].dateJour!) + ",";
     textQRCode += seances[0].hourBeginHHSMM + ",";
     textQRCode += reservations[0].totalSeats + " siège(s),";
     if (reservations[0].seatsReserved && reservations[0].seatsReserved !== '') {
@@ -78,7 +79,8 @@ export async function createQRCode(reservationId: string): Promise<void> {
       throw new Error("Format d'heure invalide, attendu 'HH:MM'");
     }
     // Création de la date d'expiration
-    const dateSeance = reservations[0].dateJour!;
+    // Modif à tester
+    const dateSeance = new Date(reservations[0].dateJour!);
     const dateExpiration = new Date(dateSeance.getFullYear(), dateSeance.getMonth(), dateSeance.getDate(), hh, mm);
     // Ajouter une heure
     dateExpiration.setHours(dateExpiration.getHours() + 1);

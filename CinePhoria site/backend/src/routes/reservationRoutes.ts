@@ -42,6 +42,10 @@ router.get('/cinema/filter', (req, res) => {
 // GET /api/seats/id/:reservationid'
 router.get('/seats/id/:reservationid', ReservationController.getSeatsForReservation);
 
+// PUT /api/reservation/avis/:reservationid
+router.put('/avis/:reservationid', ReservationController.updateReservationAvis);
+
+
 // GET /api/reservation/qrcode
 router.get('/qrcode/:reservationid', ReservationController.getQRCode)
 
