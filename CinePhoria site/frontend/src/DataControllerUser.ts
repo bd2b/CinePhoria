@@ -5,7 +5,7 @@ import { deleteCookie, getCookie, setCookie } from './Helpers.js';
 export enum ProfilUtilisateur {
     Utilisateur = "mesreservations.html",
     Administrateur = "manageEmploye.html",
-    Employee = "moderer.html",
+    Employee = "manageAvis.html",
     Visiteur = "visiteur.html"
 }
 

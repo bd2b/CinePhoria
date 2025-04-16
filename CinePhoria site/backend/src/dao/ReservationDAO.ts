@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../config/config';
 import logger from '../config/configLog';
-import { ReservationForUtilisateur, SeatsForReservation } from "../shared-models/Reservation";
+import { ReservationForUtilisateur, SeatsForReservation , Reservation, ReservationAvis } from "../shared-models/Reservation";
 
 export class ReservationDAO {
   static async checkAvailabilityAndReserve(
@@ -278,4 +278,37 @@ static async setReservationEvaluationById(p_reservationId: string, p_note: numbe
     return (rows as any[]).map((row) => new SeatsForReservation(row));
 
   }
+
+  
+
+// Update
+static async updateReservationAvis(id: string, reservationAvis: ReservationAvis): Promise<boolean> {
+    // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
+    
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+        logger.info(`Mise à jour de l'avis pour ${id}`);
+        const [result] = await connection.execute(
+        `UPDATE Reservation SET
+          evaluation = ?,
+          note = ?,
+          isEvaluationMustBeReview = ?
+          WHERE id=?`,
+          [   reservationAvis.evaluation || null,
+              reservationAvis.note || null,
+              reservationAvis.isEvaluationMustBeReview || null,
+              id
+          ]
+        );
+        await connection.end();
+        // result => un objet du type ResultSetHeader
+        const rowsAffected = (result as any).affectedRows || 0;
+        return rowsAffected > 0;
+    } catch (err) {
+        await connection.end();
+        logger.error('Erreur update ReservationAvis:', err);
+        throw err;
+    }
+}
+
 }

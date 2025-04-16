@@ -3,10 +3,12 @@ import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi } from './NetworkCont
 import { Salle, ListSalles } from './shared-models/Salle.js';
 import {
     sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi,
-    seancesseulesDeleteApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi
+    seancesseulesDeleteApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi,
+    reservationsByCinemaApi, reservationAvisUpdateApi
 } from './NetworkController.js';
 import { Seance, SeanceDisplay } from './shared-models/Seance.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
+import { ReservationForUtilisateur, Reservation, ReservationAvis } from './shared-models/Reservation.js';
 
 export class DataControllerIntranet {
 
@@ -204,9 +206,9 @@ export class DataControllerIntranet {
                 result.message = "create"
             }
             if (result.message === "create") {
-                await seancesseulesCreateApi(seanceSeule);
+                result = await seancesseulesCreateApi(seanceSeule);
             } else {
-                await seancesseulesUpdateApi(seanceSeule.id, seanceSeule);
+                result = await seancesseulesUpdateApi(seanceSeule.id, seanceSeule);
             }
             return result;
         }
@@ -309,8 +311,68 @@ export class DataControllerIntranet {
         }
     }
 
+    // Gestion des reservation pour manageavis
+    // Les requetes sont en temps reel sans cache local, néanmoins pour éviter de surcharger le réseau
+    // On met en place le filtrage par cinema pour l'affichage et la mise à jour de la seule entité seance
 
-    // Calculer les tableau de listes
+    // On utilise filterNameCinema commun à séance pour la gestion du filtre
+
+    private static reservationSort(s: ReservationForUtilisateur[]): ReservationForUtilisateur[] {
+        return s.sort((a, b) => {
+            const nomFilmA = a.titleFilm?.toLowerCase() || '';
+            const nomFilmB = b.titleFilm?.toLowerCase() || '';
+            const displaynameA = a.displayname?.toLowerCase() || '';
+            const displaynameB = b.displayname?.toLowerCase() || '';
+            const dateSeanceA = a.dateJour?.toLowerCase() || '';
+            const dateSeanceB = b.dateJour?.toLowerCase() || '';
+
+            if (dateSeanceA < dateSeanceB) return -1;
+            if (dateSeanceA > dateSeanceB) return 1;
+
+            if (nomFilmA < nomFilmB) return -1;
+            if (nomFilmA > nomFilmB) return 1;
+
+            // Sinon on compare nameSalle
+            if (displaynameA < displaynameB) return -1;
+            if (displaynameA > displaynameB) return 1;
+
+            return 0;
+        });
+    }
+
+    // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
+    public static async getReservationForUtilisateurFilter(): Promise<ReservationForUtilisateur[]> {
+        try {
+            return DataControllerIntranet.reservationSort(await reservationsByCinemaApi([DataControllerIntranet._filterNameCinema || 'all']));
+        } catch (error) {
+            console.error(`Erreur dans recherche des reservations : ${error}`)
+            return [];
+        }
+    }
+
+    // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
+    public static async getReservationForUtilisateurByCinema(cinemas: string[]): Promise<ReservationForUtilisateur[]> {
+        try {
+            return DataControllerIntranet.reservationSort(await reservationsByCinemaApi(cinemas));
+        } catch (error) {
+            console.error(`Erreur dans recherche des reservations : ${error}`)
+            return [];
+        }
+    }
+    // Mise à jour de l'avis d'une réservation
+    public static async updateReservationAvis(reservationAvis: ReservationAvis): Promise<{ message: string }> {
+        let result: { message: string } = { message: "" };
+
+        // On cree ou met a jour selon que l'on trouve la seance sur le serveur
+        try {
+            result = await reservationAvisUpdateApi(reservationAvis.id, reservationAvis);
+            return result;
+        }
+        catch (error) {
+            console.error(`Erreur inconue dans la mise à jour de l'avis : ${error}, Avis = ${JSON.stringify(reservationAvis)}`);
+            return result;
+        }
+    }
 
     constructor() {
         console.log("DataCIntranet : Initialisation");

@@ -16,6 +16,7 @@ import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { onLoadManageFilms } from "./ViewManageFilms.js";
 import { onLoadManageSalles } from "./ViewManageSalles.js";
 import { onLoadManageSeances } from "./ViewManageSeances.js";
+import { onLoadManageAvis } from "./ViewManageAvis.js";
 const pageHandlers = {
     "visiteur.html": onLoadVisiteur,
     "reservation.html": onLoadReservation,
@@ -23,7 +24,8 @@ const pageHandlers = {
     "films.html": onLoadFilms,
     "manageFilms.html": onLoadManageFilms,
     "manageSalles.html": onLoadManageSalles,
-    "manageSeances.html": onLoadManageSeances
+    "manageSeances.html": onLoadManageSeances,
+    "manageAvis.html": onLoadManageAvis
 };
 const pagesPublic = ["visiteur.html", "reservation.html", "films.html",
     "manageFilms.html", "manageSalles.html", "manageSeances.html"]; // TODO manageXXXXX à supprimer

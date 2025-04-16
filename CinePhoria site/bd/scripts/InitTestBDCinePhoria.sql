@@ -613,12 +613,12 @@ VALUES
   
   
    /***********************************************************************
-   *  Génération de séances : sur les 7 cinemas, 4 salles, 4 séances par jour par salle, un film différent dans chaque salle, de la veille à 21 jours
+   *  Génération de séances : sur les 7 cinemas, 4 salles, 4 séances par jour par salle, un film différent dans chaque salle, de 21 jours avant à 21 jours apres
    ***********************************************************************/
   sp_generate_seances : BEGIN
   
     -- 1) Détermination des bornes
-    SET v_start = DATE_SUB(CURDATE(), INTERVAL 1 DAY);
+    SET v_start = DATE_SUB(CURDATE(), INTERVAL 21 DAY);
     SET v_end   = DATE_ADD(CURDATE(), INTERVAL 21 DAY);
 
     WHILE DAYOFWEEK(v_end) <> 3 DO

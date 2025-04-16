@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi } from './NetworkController.js';
-import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi } from './NetworkController.js';
+import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi, reservationsByCinemaApi, reservationAvisUpdateApi } from './NetworkController.js';
 export class DataControllerIntranet {
     static allFilms() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -210,10 +210,10 @@ export class DataControllerIntranet {
                     result.message = "create";
                 }
                 if (result.message === "create") {
-                    yield seancesseulesCreateApi(seanceSeule);
+                    result = yield seancesseulesCreateApi(seanceSeule);
                 }
                 else {
-                    yield seancesseulesUpdateApi(seanceSeule.id, seanceSeule);
+                    result = yield seancesseulesUpdateApi(seanceSeule.id, seanceSeule);
                 }
                 return result;
             }
@@ -304,7 +304,74 @@ export class DataControllerIntranet {
             }
         });
     }
-    // Calculer les tableau de listes
+    // Gestion des reservation pour manageavis
+    // Les requetes sont en temps reel sans cache local, néanmoins pour éviter de surcharger le réseau
+    // On met en place le filtrage par cinema pour l'affichage et la mise à jour de la seule entité seance
+    // On utilise filterNameCinema commun à séance pour la gestion du filtre
+    static reservationSort(s) {
+        return s.sort((a, b) => {
+            var _a, _b, _c, _d, _e, _f;
+            const nomFilmA = ((_a = a.titleFilm) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || '';
+            const nomFilmB = ((_b = b.titleFilm) === null || _b === void 0 ? void 0 : _b.toLowerCase()) || '';
+            const displaynameA = ((_c = a.displayname) === null || _c === void 0 ? void 0 : _c.toLowerCase()) || '';
+            const displaynameB = ((_d = b.displayname) === null || _d === void 0 ? void 0 : _d.toLowerCase()) || '';
+            const dateSeanceA = ((_e = a.dateJour) === null || _e === void 0 ? void 0 : _e.toLowerCase()) || '';
+            const dateSeanceB = ((_f = b.dateJour) === null || _f === void 0 ? void 0 : _f.toLowerCase()) || '';
+            if (dateSeanceA < dateSeanceB)
+                return -1;
+            if (dateSeanceA > dateSeanceB)
+                return 1;
+            if (nomFilmA < nomFilmB)
+                return -1;
+            if (nomFilmA > nomFilmB)
+                return 1;
+            // Sinon on compare nameSalle
+            if (displaynameA < displaynameB)
+                return -1;
+            if (displaynameA > displaynameB)
+                return 1;
+            return 0;
+        });
+    }
+    // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
+    static getReservationForUtilisateurFilter() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return DataControllerIntranet.reservationSort(yield reservationsByCinemaApi([DataControllerIntranet._filterNameCinema || 'all']));
+            }
+            catch (error) {
+                console.error(`Erreur dans recherche des reservations : ${error}`);
+                return [];
+            }
+        });
+    }
+    // 🏆 Variable calculée : retourne les séances filtrées par cinéma en mode display
+    static getReservationForUtilisateurByCinema(cinemas) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                return DataControllerIntranet.reservationSort(yield reservationsByCinemaApi(cinemas));
+            }
+            catch (error) {
+                console.error(`Erreur dans recherche des reservations : ${error}`);
+                return [];
+            }
+        });
+    }
+    // Mise à jour de l'avis d'une réservation
+    static updateReservationAvis(reservationAvis) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = { message: "" };
+            // On cree ou met a jour selon que l'on trouve la seance sur le serveur
+            try {
+                result = yield reservationAvisUpdateApi(reservationAvis.id, reservationAvis);
+                return result;
+            }
+            catch (error) {
+                console.error(`Erreur inconue dans la mise à jour de l'avis : ${error}, Avis = ${JSON.stringify(reservationAvis)}`);
+                return result;
+            }
+        });
+    }
     constructor() {
         console.log("DataCIntranet : Initialisation");
     }
