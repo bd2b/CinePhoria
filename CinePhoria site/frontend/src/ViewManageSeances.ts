@@ -10,6 +10,7 @@ import { SeanceSeule } from './shared-models/SeanceSeule.js';
 import { seancesseulesDeleteApi } from './NetworkController.js';
 
 
+
 // Données utilisées pour les select de saisie
 let listFilms: ListFilms[];
 let listSalles: ListSalles[];

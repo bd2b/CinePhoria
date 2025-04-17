@@ -51,7 +51,7 @@ BEGIN
       -- Cyclique doneEvaluated / doneUnevaluated
       SET state = IF(MOD(r, 2) = 0, 'doneUnevaluated', 'doneEvaluated');
       SET pmr = MOD(r, 2);
-      SET must_review = MOD(r + 1, 2);
+      SET must_review = MOD(r + 1, 3); -- pour se décaller de l'état.
       SET friandise = IF(MOD(r, 5) = 0, 1, 0);
       SET res_id = UUID();
 
@@ -77,6 +77,7 @@ BEGIN
       VALUES
         (res_id, current_user_var, s_id, state, pmr,
          IF(state = 'doneEvaluated', @evaluation, NULL),
+  --       must_review, IF(state = 'doneEvaluated', @note, NULL),
          must_review, IF(state = 'doneEvaluated', @note, NULL),
          friandise, FLOOR(RAND()*10),
          DATE_SUB(s_date, INTERVAL 1 DAY), '', '');

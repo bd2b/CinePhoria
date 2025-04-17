@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../config/config';
 import logger from '../config/configLog';
-import { ReservationForUtilisateur, SeatsForReservation , Reservation, ReservationAvis } from "../shared-models/Reservation";
+import { ReservationForUtilisateur, SeatsForReservation, Reservation, ReservationAvis } from "../shared-models/Reservation";
 
 export class ReservationDAO {
   static async checkAvailabilityAndReserve(
@@ -81,7 +81,7 @@ export class ReservationDAO {
        */
 
 
-      
+
       return retour;
 
     } catch (error) {
@@ -147,22 +147,22 @@ export class ReservationDAO {
   static async reserveForUtilisateur(p_utilisateurId: string): Promise<ReservationForUtilisateur[]> {
     const connection = await mysql.createConnection(dbConfig);
     try {
-    // Étape 1 : Récupérer les informations des reservations dans la base pour l'utilisateur donné
-    const [rows] = await connection.execute(
-      `SELECT *
+      // Étape 1 : Récupérer les informations des reservations dans la base pour l'utilisateur donné
+      const [rows] = await connection.execute(
+        `SELECT *
      FROM viewutilisateurreservation 
      WHERE utilisateurId = ?`,
-      [p_utilisateurId]
-    );
-    logger.info(`SELECT * FROM viewutilisateurreservation WHERE utilisateurId = ${p_utilisateurId}`);
-    await connection.end();
+        [p_utilisateurId]
+      );
+      logger.info(`SELECT * FROM viewutilisateurreservation WHERE utilisateurId = ${p_utilisateurId}`);
+      await connection.end();
 
-    // Map des lignes pour les convertir en instances de Seance
-    return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
-  } catch(error) {
-    logger.info("Erreur dans reserveForUtilisateur")
-    return []
-  }
+      // Map des lignes pour les convertir en instances de Seance
+      return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
+    } catch (error) {
+      logger.info("Erreur dans reserveForUtilisateur")
+      return []
+    }
   }
 
   static async getReservationById(p_reservationId: string): Promise<ReservationForUtilisateur[]> {
@@ -209,36 +209,36 @@ export class ReservationDAO {
   static async setReservationStateById(p_reservationId: string, p_stateReservation: string): Promise<boolean> {
     const connection = await mysql.createConnection(dbConfig);
     try {
-        const [result] = await connection.execute(
-            `UPDATE Reservation 
+      const [result] = await connection.execute(
+        `UPDATE Reservation 
             SET stateReservation = ?
             WHERE id = ?`,
-            [p_stateReservation, p_reservationId]
-        );
+        [p_stateReservation, p_reservationId]
+      );
 
-        logger.info(`UPDATE Reservation SET stateReservation = ${p_stateReservation} WHERE id = ${p_reservationId}`);
+      logger.info(`UPDATE Reservation SET stateReservation = ${p_stateReservation} WHERE id = ${p_reservationId}`);
 
-        // Vérification du succès de l'update
-        const updateResult = result as any; // Type générique pour accéder aux propriétés MySQL
-        return updateResult.affectedRows > 0; // Retourne true si au moins une ligne a été affectée
+      // Vérification du succès de l'update
+      const updateResult = result as any; // Type générique pour accéder aux propriétés MySQL
+      return updateResult.affectedRows > 0; // Retourne true si au moins une ligne a été affectée
     } catch (error) {
-        logger.error(`Erreur lors de la mise à jour de la réservation ${p_reservationId}:`, error);
-        return false;
+      logger.error(`Erreur lors de la mise à jour de la réservation ${p_reservationId}:`, error);
+      return false;
     } finally {
-        await connection.end();
+      await connection.end();
     }
-}
+  }
 
-static async setReservationEvaluationById(p_reservationId: string, p_note: number, p_evaluation: string, p_isEvaluationMustBeReview: boolean): Promise<boolean> {
-  const connection = await mysql.createConnection(dbConfig);
-  try {
+  static async setReservationEvaluationById(p_reservationId: string, p_note: number, p_evaluation: string, p_isEvaluationMustBeReview: boolean): Promise<boolean> {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
       const [result] = await connection.execute(
-          `UPDATE Reservation 
+        `UPDATE Reservation 
           SET note = ?,
           evaluation = ?,
           isEvaluationMustBeReview = ?
           WHERE id = ?`,
-          [p_note, p_evaluation, (p_isEvaluationMustBeReview ? 1 : 0) , p_reservationId]
+        [p_note, p_evaluation, p_isEvaluationMustBeReview, p_reservationId]
       );
 
       logger.info(`UPDATE Reservation SET note = ${p_note}, evaluation = ${p_evaluation}, isEvaluationMustBeReview = ${(p_isEvaluationMustBeReview ? 1 : 0)} WHERE id = ${p_reservationId}`);
@@ -246,13 +246,13 @@ static async setReservationEvaluationById(p_reservationId: string, p_note: numbe
       // Vérification du succès de l'update
       const updateResult = result as any; // Type générique pour accéder aux propriétés MySQL
       return updateResult.affectedRows > 0; // Retourne true si au moins une ligne a été affectée
-  } catch (error) {
+    } catch (error) {
       logger.error(`Erreur lors de la mise à jour de la réservation ${p_reservationId}:`, error);
       return false;
-  } finally {
+    } finally {
       await connection.end();
+    }
   }
-}
 
 
   static async getSeatsForReservation(p_reservationId: string): Promise<SeatsForReservation[]> {
@@ -279,36 +279,37 @@ static async setReservationEvaluationById(p_reservationId: string, p_note: numbe
 
   }
 
-  
 
-// Update
-static async updateReservationAvis(id: string, reservationAvis: ReservationAvis): Promise<boolean> {
+
+  // Update
+  static async updateReservationAvis(id: string, reservationAvis: ReservationAvis): Promise<boolean> {
     // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
-    
     const connection = await mysql.createConnection(dbConfig);
     try {
-        logger.info(`Mise à jour de l'avis pour ${id}`);
-        const [result] = await connection.execute(
+      logger.info(`Mise à jour de l'avis pour ${id}`);
+      const [result] = await connection.execute(
         `UPDATE Reservation SET
           evaluation = ?,
           note = ?,
           isEvaluationMustBeReview = ?
           WHERE id=?`,
-          [   reservationAvis.evaluation || null,
-              reservationAvis.note || null,
-              reservationAvis.isEvaluationMustBeReview || null,
-              id
-          ]
-        );
-        await connection.end();
-        // result => un objet du type ResultSetHeader
-        const rowsAffected = (result as any).affectedRows || 0;
-        return rowsAffected > 0;
+        [reservationAvis.evaluation || null,
+        reservationAvis.note || null,
+        reservationAvis.isEvaluationMustBeReview !== undefined
+          ? reservationAvis.isEvaluationMustBeReview
+          : false,
+          id
+        ]
+      );
+      await connection.end();
+      // result => un objet du type ResultSetHeader
+      const rowsAffected = (result as any).affectedRows || 0;
+      return rowsAffected > 0;
     } catch (err) {
-        await connection.end();
-        logger.error('Erreur update ReservationAvis:', err);
-        throw err;
+      await connection.end();
+      logger.error('Erreur update ReservationAvis:', err);
+      throw err;
     }
-}
+  }
 
 }

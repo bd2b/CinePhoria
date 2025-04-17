@@ -901,7 +901,8 @@ export function reservationsByCinemaApi(cinemas) {
  */
 export function reservationAvisUpdateApi(reservationId, reservationAvis) {
     return __awaiter(this, void 0, void 0, function* () {
-        const endpoint = `http://localhost:3500//api/reservation/avis/${reservationId}`;
+        console.log(JSON.stringify(reservationAvis));
+        const endpoint = `http://localhost:3500/api/reservation/avis/${reservationId}`;
         const responseJSON = yield apiRequest(endpoint, 'PUT', reservationAvis, true);
         return responseJSON;
     });
