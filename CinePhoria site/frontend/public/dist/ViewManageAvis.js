@@ -16,7 +16,7 @@ let filtreJour = '';
  * Entrée principale du module
  */
 export function onLoadManageAvis() {
-    return __awaiter(this, void 0, void 0, function* () {
+    return __awaiter(this, arguments, void 0, function* (vfiltreJour = "", filtreCinema = "all") {
         console.log("=====> chargement onLoadManageAvis");
         // Charger menu et footer
         yield chargerMenu(); // Header
@@ -24,12 +24,15 @@ export function onLoadManageAvis() {
         // Initialisation filtres
         yield initFiltreCinema();
         yield initFiltreJour();
+        // On reporte les valeurs de filtre précédentes
+        filtreJour = vfiltreJour;
+        DataControllerIntranet.filterNameCinema = filtreCinema;
         // Rafraîchir le tableau des avis
         yield rafraichirTableauAvis();
     });
 }
 /* ---------------------------------------------------
-   Rafraîchit la liste de toutes les seances
+   Rafraîchit la liste de touts les Avis
 --------------------------------------------------- */
 function rafraichirTableauAvis() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -41,12 +44,12 @@ function rafraichirTableauAvis() {
         container.innerHTML = '';
         // Charger les avis
         let avis = yield DataControllerIntranet.getReservationForUtilisateurFilter();
+        avis = avis.filter((a) => (a.statereservation === 'doneEvaluated' && a.isEvaluationMustBeReview));
         if (filtreJour) {
             avis = avis.filter((s) => s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false);
         }
         // Construction de la page
-        const tableAvis = yield updateTableSeances(avis);
-        tableAvis.classList.add('tab__avis-liste');
+        const tableAvis = yield updateTableAvis(avis);
         container.appendChild(tableAvis);
         // Mise à jour dynamique des largeurs de colonnes
         syncTableColumnWidths(tableAvis);
@@ -134,9 +137,13 @@ function initFiltreJour() {
         let containerFilters = document.querySelector('.title__filters-films');
         if (!containerFilters)
             return;
-        let inputDate = document.createElement('input');
-        inputDate.type = 'date';
-        inputDate.classList.add('filter-jour-input');
+        let inputDate = document.querySelector('.filter-jour-input');
+        if (!inputDate) {
+            inputDate = document.createElement('input');
+            inputDate.classList.add('filter-jour-input');
+            inputDate.type = 'date';
+        }
+        inputDate.value = filtreJour;
         containerFilters.prepend(inputDate);
         // 4) On écoute les changements
         inputDate.removeEventListener('change', () => __awaiter(this, void 0, void 0, function* () { }));
@@ -154,7 +161,7 @@ function construireListeJours() {
         if (!inputDate)
             return;
         // On calcule les dates min et max et on applique sur le champ date
-        const allDates = (yield DataControllerIntranet.getSeancesDisplayFilter()).map((s) => s.dateJour).filter(Boolean).sort();
+        const allDates = (yield DataControllerIntranet.getReservationForUtilisateurFilter()).map((s) => s.dateJour).filter(Boolean).sort();
         if (allDates.length > 0) {
             const dateMinYYYYMMDD = formatDateLocalYYYYMMDD(new Date(allDates[0]));
             const dateMaxYYYYMMDD = formatDateLocalYYYYMMDD(new Date(allDates[allDates.length - 1]));
@@ -170,18 +177,19 @@ function construireListeJours() {
 /* -------------------------------------------
    Construction de la table des avis
 ------------------------------------------- */
-export function updateTableSeances(reservationsForUtilisateur) {
+export function updateTableAvis(reservationsForUtilisateur) {
     return __awaiter(this, void 0, void 0, function* () {
         // Container global
         const container = document.createElement('div');
-        container.classList.add('avis-liste');
+        container.classList.add('tab__avis-liste');
         // Table
         const table = document.createElement('table');
-        table.classList.add('avis-liste-table');
+        table.classList.add('tab__avis-liste-table');
+        table.id = "tab__avis-liste-table";
         // THEAD
         const thead = document.createElement('thead');
         const trHead = document.createElement('tr');
-        const cols = ['Date', 'Film', 'Utilisateur', 'Note', 'Commentaire', 'Validé', 'A Supprimer'];
+        const cols = ['Date', 'Film', 'Utilisateur', 'Note', 'Commentaire', 'Modéré', 'A Supprimer'];
         cols.forEach((col) => {
             const th = document.createElement('th');
             th.textContent = col;
@@ -195,7 +203,7 @@ export function updateTableSeances(reservationsForUtilisateur) {
         table.appendChild(tbody);
         // Pour chaque avis, on affiche une ligne de restitution des champ et un bouton éditer.
         reservationsForUtilisateur.forEach((reservationUtilisateur) => {
-            var _a, _b;
+            var _a;
             const tr = document.createElement('tr');
             // 1) Date
             const tdDateJour = document.createElement('td');
@@ -221,7 +229,12 @@ export function updateTableSeances(reservationsForUtilisateur) {
             const tdAvisRevu = document.createElement('td');
             const inputAvisRevu = document.createElement('input');
             inputAvisRevu.type = 'checkbox';
-            inputAvisRevu.checked = (_b = reservationUtilisateur.isEvaluationMustBeReview) !== null && _b !== void 0 ? _b : false;
+            inputAvisRevu.checked = true;
+            if (reservationUtilisateur.isEvaluationMustBeReview) {
+                inputAvisRevu.checked = false;
+            }
+            // inputAvisRevu.checked = reservationUtilisateur.isEvaluationMustBeReview ?? false;
+            tdAvisRevu.dataset.ischecked = inputAvisRevu.checked ? "true" : "false";
             tdAvisRevu.appendChild(inputAvisRevu);
             tr.appendChild(tdAvisRevu);
             // 5) A supprimer
@@ -231,7 +244,29 @@ export function updateTableSeances(reservationsForUtilisateur) {
             inputASupprimer.checked = false;
             tdASupprimer.appendChild(inputASupprimer);
             tr.appendChild(tdASupprimer);
+            tr.dataset.reservationId = reservationUtilisateur.reservationId;
             tbody.appendChild(tr);
+        });
+        // Logique de désactivation mutuelle à l'interaction (pas à la construction)
+        tbody.querySelectorAll('tr').forEach(tr => {
+            const inputASupprimer = tr.querySelector('td:nth-child(7) input[type="checkbox"]');
+            const inputAvisRevu = tr.querySelector('td:nth-child(6) input[type="checkbox"]');
+            inputASupprimer.addEventListener('change', () => {
+                if (inputASupprimer.checked) {
+                    inputAvisRevu.disabled = true;
+                }
+                else {
+                    inputAvisRevu.disabled = false;
+                }
+            });
+            inputAvisRevu.addEventListener('change', () => {
+                if (inputAvisRevu.checked) {
+                    inputASupprimer.disabled = true;
+                }
+                else {
+                    inputASupprimer.disabled = false;
+                }
+            });
         });
         container.appendChild(table);
         return container;
@@ -249,20 +284,88 @@ function actionsButtons() {
     editBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
         yield onClickAppliquerUpdate();
     }));
+    divButton.appendChild(editBtn);
     const annuleBtn = document.createElement('button');
     annuleBtn.classList.add('tab__salles-liste-button');
-    annuleBtn.textContent = "Appliquer";
+    annuleBtn.textContent = "Remise à zéro";
     annuleBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
         yield onClickAnnuleUpdate();
     }));
+    divButton.appendChild(annuleBtn);
     return divButton;
 }
+/* -------------------------------------------
+   Fonction d'application des modifications
+------------------------------------------- */
 function onClickAppliquerUpdate() {
     return __awaiter(this, void 0, void 0, function* () {
+        const table = document.getElementById('tab__avis-liste-table');
+        if (!table)
+            return;
+        const lignes = table.querySelectorAll('tbody tr');
+        const reservationsToUpdate = [];
+        let countUpdate = 0;
+        let countDelete = 0;
+        lignes.forEach((tr) => {
+            var _a, _b, _c, _d;
+            const reservationId = tr.dataset.reservationId;
+            if (!reservationId)
+                return;
+            const inputAvisRevu = tr.querySelector('td:nth-child(6) input[type="checkbox"]');
+            const tdAvisRevu = inputAvisRevu === null || inputAvisRevu === void 0 ? void 0 : inputAvisRevu.parentElement;
+            const isCheckedAvis = (_a = inputAvisRevu === null || inputAvisRevu === void 0 ? void 0 : inputAvisRevu.checked) !== null && _a !== void 0 ? _a : false;
+            const wasCheckedAvis = (tdAvisRevu === null || tdAvisRevu === void 0 ? void 0 : tdAvisRevu.dataset.ischecked) === 'true';
+            const inputASupprimer = tr.querySelector('td:nth-child(7) input[type="checkbox"]');
+            const isToDelete = (_b = inputASupprimer === null || inputASupprimer === void 0 ? void 0 : inputASupprimer.checked) !== null && _b !== void 0 ? _b : false;
+            const tdNote = tr.querySelector('td:nth-child(4)');
+            const tdEvaluation = tr.querySelector('td:nth-child(5)');
+            if (isToDelete) {
+                reservationsToUpdate.push({
+                    id: reservationId,
+                    evaluation: "Evaluation supprimée car non conforme aux usages",
+                    isEvaluationMustBeReview: false,
+                    note: undefined
+                });
+                countDelete++;
+            }
+            else if (isCheckedAvis && !wasCheckedAvis) {
+                reservationsToUpdate.push({
+                    id: reservationId,
+                    evaluation: ((_c = tdEvaluation === null || tdEvaluation === void 0 ? void 0 : tdEvaluation.textContent) === null || _c === void 0 ? void 0 : _c.trim()) || "",
+                    isEvaluationMustBeReview: false,
+                    note: ((_d = tdNote === null || tdNote === void 0 ? void 0 : tdNote.textContent) === null || _d === void 0 ? void 0 : _d.trim()) ? parseFloat(tdNote.textContent.trim()) : undefined
+                });
+                countUpdate++;
+            }
+        });
+        for (const reservationAvis of reservationsToUpdate) {
+            yield DataControllerIntranet.updateReservationAvis(reservationAvis);
+        }
+        alert(`${countUpdate} validation(s) réalisée(s) et ${countDelete} avis supprimé(s)`);
+        onLoadManageAvis(filtreJour, DataControllerIntranet.filterNameCinema);
     });
 }
 function onClickAnnuleUpdate() {
     return __awaiter(this, void 0, void 0, function* () {
+        const table = document.getElementById('tab__avis-liste-table');
+        if (!table)
+            return;
+        const lignes = table.querySelectorAll('tbody tr');
+        lignes.forEach((tr) => {
+            const inputAvisRevu = tr.querySelector('td:nth-child(6) input[type="checkbox"]');
+            const inputASupprimer = tr.querySelector('td:nth-child(7) input[type="checkbox"]');
+            const tdAvisRevu = inputAvisRevu === null || inputAvisRevu === void 0 ? void 0 : inputAvisRevu.parentElement;
+            if (inputASupprimer)
+                inputASupprimer.checked = false;
+            if (inputAvisRevu && tdAvisRevu) {
+                inputAvisRevu.checked = tdAvisRevu.dataset.ischecked === 'true';
+            }
+            // Réactiver les deux checkboxes
+            if (inputASupprimer)
+                inputASupprimer.disabled = false;
+            if (inputAvisRevu)
+                inputAvisRevu.disabled = false;
+        });
     });
 }
 //     if (mode === 'edit') {

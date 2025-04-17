@@ -7,6 +7,7 @@ import { sallesUpdateApi, sallesCreateApi, sallesDeleteApi } from './NetworkCont
 import { syncTableColumnWidths } from './Helpers.js';
 
 
+
 let isDefinePlan = false;
 
 /**

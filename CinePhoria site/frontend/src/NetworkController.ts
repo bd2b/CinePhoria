@@ -1109,7 +1109,8 @@ export async function reservationsByCinemaApi(cinemas: string[]): Promise<Reserv
  * @returns { message } si la mise à jour est réussie
  */
 export async function reservationAvisUpdateApi(reservationId: string, reservationAvis: ReservationAvis): Promise<{ message: string }> {
-    const endpoint = `http://localhost:3500//api/reservation/avis/${reservationId}`;
+    console.log(JSON.stringify(reservationAvis));
+    const endpoint = `http://localhost:3500/api/reservation/avis/${reservationId}`;
     const responseJSON = await apiRequest<{ message: string }>(
         endpoint,
         'PUT',

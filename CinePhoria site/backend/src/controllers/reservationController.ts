@@ -4,6 +4,7 @@ import { ReservationDAO } from '../dao/ReservationDAO';
 import { ReservationState } from '../shared-models/Reservation';
 import { UtilisateurDAO } from '../dao/UtilisateurDAO';
 import { MailNetwork } from '../services/MailNetwork';
+import { ReservationAvis } from '../shared-models/Reservation';
 
 import { createQRCode, deleteQRCode, getQRCodeImage } from '../controllers/QRCodeController';
 
@@ -42,9 +43,9 @@ export class ReservationController {
         type CodeConf = {
           codeConfirm: string, numTry: number, dateCreateCode: Date
         };
-        const codesConfirm: CodeConf[] = await UtilisateurDAO.getCodeConfirm(email,'create');
+        const codesConfirm: CodeConf[] = await UtilisateurDAO.getCodeConfirm(email, 'create');
         if (codesConfirm.length === 0) {
-          logger.error("Erreur dans la récupération de code"); 
+          logger.error("Erreur dans la récupération de code");
         } else {
           // Envoie du mail
           const statutMail = await MailNetwork.sendMailCodeConfirm(email, codesConfirm[0].codeConfirm);
@@ -63,7 +64,7 @@ export class ReservationController {
   }
 
 
-  
+
   static async setReservationStateById(req: Request, res: Response): Promise<void> {
     try {
       // Récupération des paramètres de la requête
@@ -313,71 +314,79 @@ export class ReservationController {
   }
 
   static async getReservationsByCinemas(req: Request, res: Response) {
-      try {
-        // Vérification et conversion de cinemasList en string
-        const cinemasList = req.query.cinemasList;
-        if (!cinemasList || typeof cinemasList !== 'string') {
-          return res.status(400).json({ message: `cinemasList doit être une chaîne de caractères : ${cinemasList}` });
-        }
-    
-        const seances = await ReservationDAO.getReservationsByCinemas(cinemasList)
-        
-        if (seances.length === 0) {
-          return res.status(404).json({ message: `Reservation non trouvées pour ${cinemasList}` });
-        }
-    
-        res.json(seances);
-      } catch (error: any) {
-        res.status(500).json({ error: error.message });
+    try {
+      // Vérification et conversion de cinemasList en string
+      const cinemasList = req.query.cinemasList;
+      if (!cinemasList || typeof cinemasList !== 'string') {
+        return res.status(400).json({ message: `cinemasList doit être une chaîne de caractères : ${cinemasList}` });
       }
-    }
 
-    // SELECT => select a Reservation
-    static async getReservationById(req: Request, res: Response): Promise<void> {
-      try {
-        // Recuperation de l'ID de la reservation
-        const reservationId = req.params.reservationid?.trim();
-  
-        if (!reservationId) {
-          res.status(400).json({ message: `L'ID de la réservation est requis.` });
-          return;
-  
-        }
-        // Récupération des réservations
-        const reservations = await ReservationDAO.getReservationById(reservationId);
-  
-        if (!reservations || reservations.length === 0) {
-          res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}` });
-          return;
-        }
-  
-        res.status(200).json(reservations);
-      } catch (error: any) {
-        logger.error(`Erreur lors de la récupération des réservations: ${error.message}`);
-        res.status(500).json({ error: "Erreur interne du serveur." });
+      const seances = await ReservationDAO.getReservationsByCinemas(cinemasList)
+
+      if (seances.length === 0) {
+        return res.status(404).json({ message: `Reservation non trouvées pour ${cinemasList}` });
       }
-  
+
+      res.json(seances);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
-
-// PUT => update a Reservation
-static async updateReservationAvis(req: Request, res: Response) {
-  try {
-    const reservationid = req.params.reservationid;
-    const data = req.body;
-    logger.info(`Mise à jour de l'avis ${reservationid} avec data=`, data);
-
-    const reservationAvisToUpdate = data;
-    const result = await ReservationDAO.updateReservationAvis(reservationid, reservationAvisToUpdate);
-
-    if (result) {
-      res.json({ message: 'OK' });
-    } else {
-      res.status(404).json({ message: 'Erreur: Reservation non trouvée, avis non mis à jour' });
-    }
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
   }
-}
+
+  // SELECT => select a Reservation
+  static async getReservationById(req: Request, res: Response): Promise<void> {
+    try {
+      // Recuperation de l'ID de la reservation
+      const reservationId = req.params.reservationid?.trim();
+
+      if (!reservationId) {
+        res.status(400).json({ message: `L'ID de la réservation est requis.` });
+        return;
+
+      }
+      // Récupération des réservations
+      const reservations = await ReservationDAO.getReservationById(reservationId);
+
+      if (!reservations || reservations.length === 0) {
+        res.status(404).json({ message: `Aucune réservation trouvée pour ${reservationId}` });
+        return;
+      }
+
+      res.status(200).json(reservations);
+    } catch (error: any) {
+      logger.error(`Erreur lors de la récupération des réservations: ${error.message}`);
+      res.status(500).json({ error: "Erreur interne du serveur." });
+    }
+
+  }
+
+  // PUT => update a Reservation
+  static async updateReservationAvis(req: Request, res: Response) {
+    try {
+      const reservationid = req.params.reservationid;
+      const data = req.body;
+      
+      const reservationAvisToUpdate: ReservationAvis = {
+        id: reservationid,
+        evaluation: typeof data.evaluation === 'string' ? data.evaluation : '',
+        isEvaluationMustBeReview: Boolean(data.isEvaluationMustBeReview),
+        note: data.note === null || typeof data.note === 'number' ? data.note : null
+      };
+
+      logger.info(`Mise à jour de l'avis ${reservationid} avec data = ${JSON.stringify(reservationAvisToUpdate)}`);
+
+      // const reservationAvisToUpdate = data;
+      const result = await ReservationDAO.updateReservationAvis(reservationid, reservationAvisToUpdate);
+
+      if (result) {
+        res.json({ message: 'OK' });
+      } else {
+        res.status(404).json({ message: 'Erreur: Reservation non trouvée, avis non mis à jour' });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 
   // API Rest pour tester la création de QRCode
   static async getQRCode(req: Request, res: Response): Promise<void> {
