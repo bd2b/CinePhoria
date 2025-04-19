@@ -93,7 +93,7 @@ export class UtilisateurDAO {
       );
       logger.info("Execution de la procedure changePWD ")
       logger.info("Paramètres :", { email }, "et mot de passe hashé");
-      logger.info("Result :",JSON.stringify(result));
+      logger.info("Result :", JSON.stringify(result));
 
     } catch (error) {
       logger.error('Erreur dans CreateUtilisateur', error);
@@ -421,6 +421,125 @@ export class UtilisateurDAO {
     } finally {
       await connection.end();
     }
+  }
+
+  static async createEmploye(
+    email: string,
+    password: string,
+    isAdministrateur: boolean,
+    firstnameEmploye: string,
+    lastnameEmploye: string,
+    matricule: string,
+    listCinemas: string
+  ): Promise<string> {  // Retour uniquement de la chaîne de caractères
+    const passwordHashed = await hashPassword(password);
+    const connection = await mysql.createConnection(dbConfig);
+
+    try {
+      // Exécution de la procédure stockée avec @result
+      const results = await connection.query(
+        `CALL CreateEmploye(?, ?, ?, ?, ?, ?, ?, @result);
+         SELECT @result AS result;`,
+        [email, passwordHashed,
+          isAdministrateur, firstnameEmploye,
+          lastnameEmploye, matricule, listCinemas]
+      );
+      logger.info("Execution de la procedure CreateEmploye ")
+      logger.info("Paramètres :", [email, passwordHashed,
+        isAdministrateur, firstnameEmploye,
+        lastnameEmploye, matricule, listCinemas], "et mot de passe hashé");
+
+      // Forcer TypeScript à comprendre la structure des résultats
+      const callResults = results as any[][];  // Correction du typage
+      const selectResult = callResults[0][1] as Array<{ result: string }>;
+
+      // Vérification et extraction du résultat
+      if (selectResult && selectResult.length > 0 && selectResult[0].result) {
+        const utilisateurId = selectResult[0].result;
+        logger.info("Résultat = " + utilisateurId);
+
+        // Retourner uniquement la chaîne utilisateurId
+        return utilisateurId;
+      } else {
+        logger.error("Erreur : Résultat non disponible.");
+        throw new Error('Erreur : Résultat non disponible.');
+      }
+    } catch (error) {
+      logger.error('Erreur dans CreateUtilisateur', error);
+      throw new Error('Erreur lors de l’exécution de la procédure stockée.');
+    } finally {
+      await connection.end();
+    }
+  };
+
+  // Update
+
+  static async updateEmploye(matricule: string, comptePersonne: ComptePersonne): Promise<boolean> {
+    const connection = await mysql.createConnection(dbConfig);
+
+    try {
+      logger.info(`Mise à jour l'employe ${matricule}`);
+
+      // Début de la transaction
+      await connection.beginTransaction();
+
+      // Supprimer les lignes existantes pour le matricule donné
+      await connection.execute(
+        `DELETE FROM EmployeCinema WHERE matricule=?`,
+        [matricule]
+      );
+
+      // Insérer de nouvelles lignes issues de la chaîne listCinemas
+      const cinemas = comptePersonne.listCinemas?.split(',');
+      if (cinemas) {
+      for (const cinema of cinemas) {
+        await connection.execute(
+          `INSERT INTO EmployeCinema (nameCinema, matricule) VALUES (?, ?)`,
+          [cinema.trim(), matricule]
+        );
+      }
+    }
+
+      // Mettre à jour les détails de l'employé
+      await connection.execute(
+        `UPDATE Employe SET
+             isAdministrateur=?, lastnameEmploye=?, firstnameEmploye=?
+             WHERE matricule=?`,
+        [comptePersonne.isAdministrateur ? 1 : 0,
+        comptePersonne.lastnameEmploye || "",
+        comptePersonne.firstnameEmploye || "",
+          matricule]
+      );
+
+      // Valider la transaction
+      await connection.commit();
+      await connection.end();
+      return true;
+    } catch (err) {
+      // Annuler la transaction en cas d'erreur
+      await connection.rollback();
+      await connection.end();
+      logger.error('Erreur update employe:', err);
+      throw err;
+    }
+  }
+
+
+  /**
+   * Recherche des employés v la valeur de viewComptePersonne correspondant à ident
+   * @param ident peut etre utilisateur.id, compte.email, employe.matricule
+   * @returns 
+   */
+  static async getEmployeComptes(): Promise<ComptePersonne[] | []> {
+    const connection = await mysql.createConnection(dbConfig);
+    logger.info('Connexion réussie à la base de données');
+    let requete = 'select * from viewComptePersonne where matricule is not null;';
+
+    const [rows] = await connection.execute(requete);
+    await connection.end();
+
+    const data = (rows as any[]);
+    return data ? data as ComptePersonne[] : [];
   }
 };
 
