@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { UtilisateurDAO } from '../dao/UtilisateurDAO';
 import logger from '../config/configLog';
 import { MailNetwork } from '../services/MailNetwork';
+import { ComptePersonne } from '../shared-models/Utilisateur';
 
 export class UtilisateurController {
   static async createUtilisateur(req: Request, res: Response): Promise<void> {
@@ -182,5 +183,63 @@ export class UtilisateurController {
       res.status(500).json({ message: 'Erreur interne du serveur.' });
     }
   };
+
+  static async createEmploye(req: Request, res: Response): Promise<void> {
+    try {
+      const { email, password, isAdministrateur, firstnameEmploye, 
+        lastnameEmploye, matricule, listCinemas } = req.body;
+
+      // Validation des données d'entrée
+      if (  !email || !password || !isAdministrateur ||
+         !firstnameEmploye || !lastnameEmploye || !matricule || !listCinemas) {
+        res.status(400).json({ message: 'Données manquantes ou invalides.' });
+        return;
+      }
+
+      // Appel au DAO pour exécuter la procédure stockée
+      const result = await UtilisateurDAO.createEmploye(
+        email, password, isAdministrateur, firstnameEmploye, 
+        lastnameEmploye, matricule, listCinemas
+      );
+
+      // Gestion du résultat
+      if (result.startsWith('Erreur')) {
+        res.status(400).json({ message: result });
+      } else {
+        res.status(200).json({ id: result });
+      };
+    } catch (error) {
+      console.error('Erreur dans createEmploye:', error);
+      res.status(500).json({ message: 'Erreur interne du serveur.' });
+    }
+  };
+
+
+  static async getEmployesComptes(res: Response) {
+    try {
+      const comptePersonnes = await UtilisateurDAO.getEmployeComptes();
+      res.json(comptePersonnes);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  };
+// PUT => update a ComptePersonne pour les champs modifiables
+  static async updateEmploye(req: Request, res: Response) {
+    try {
+      const matricule = req.params.matricule;
+      const data = req.body;
+      logger.info(`Mise à jour de l'employe ${matricule} avec data=`, data);
+
+      const comptePersonne = new ComptePersonne(data);
+      const result = await UtilisateurDAO.updateEmploye(matricule, comptePersonne);
+      if (result) {
+        res.json({ message: 'OK' });
+      } else {
+        res.status(404).json({ message: 'Erreur: Employe non trouvé ou non mis à jour' });
+      } 
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+      }
+    }
 
 }

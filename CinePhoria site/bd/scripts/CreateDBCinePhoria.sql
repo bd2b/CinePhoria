@@ -154,7 +154,7 @@ SELECT
     null as isAdministrateur,
     null as lastnameEmploye,
     null as firstnameEmploye,
-    null as nameCinema
+    null as listCinemas
 FROM Compte
 JOIN Utilisateur ON compte.email = utilisateur.email
 
@@ -169,8 +169,10 @@ compte.email,
     employe.matricule as matricule,
     employe.isAdministrateur as isAdministrateur,
     employe.lastnameEmploye as lastnameEmploye,
-    employe.firstnameEmploye as firstnameEmploye,
-    employe_cinema.nameCinema as nameCinema
+    employe.firstnameEmploye as firstnameEmploye, 
+    (SELECT GROUP_CONCAT(nameCinema)
+                    FROM Employe_Cinema
+                    WHERE matricule = employe.matricule) as listCinemas
 FROM Compte
 JOIN Employe ON compte.email = employe.email
 JOIN Employe_Cinema ON employe.matricule = employe_cinema.matricule;
@@ -605,8 +607,6 @@ END $$
 DELIMITER ;
 -- Select pour gérer le point virgule de fin
 SELECT 1 ;
--- Select pour gérer le point virgule de fin
-SELECT 1 ;
 DROP PROCEDURE IF EXISTS CreateUtilisateur;
 DELIMITER $$
 CREATE PROCEDURE CreateUtilisateur(
@@ -680,6 +680,113 @@ block_label: BEGIN
             
 	-- Retourne l'id de l'utilisateur
 	SET p_Result = v_utilisateurId;
+
+END block_label;
+END $$
+DELIMITER ;
+select 1;
+DROP PROCEDURE IF EXISTS CreateEmploye;
+DELIMITER $$
+CREATE PROCEDURE CreateEmploye(
+    IN p_email VARCHAR(100),
+    IN p_password VARCHAR(100),
+    IN p_isAdministrateur INT(1),
+    IN p_firstNameEmploye VARCHAR(100),
+	IN p_lastNameEmploye VARCHAR(100),
+    IN p_matricule INT(10),
+    IN p_listCinemas VARCHAR(250),
+    OUT p_Result VARCHAR(255) 
+)
+-- Création d'un enmploye qui engendre la creation d'un compte. L'employe est créé sans besoin de confirmation.
+-- Le mot de passe est enregistré mais n'est pas utilisable tel quel en raison du hash mis en place dans le back.
+-- Retour "OK" ou "Erreur : erreur interne procedure." ou "Erreur : email existant." ou "Erreur : employe existant"
+BEGIN
+	DECLARE v_employe_exist INT;
+    DECLARE v_compte_exist INT;
+    DECLARE v_pos INT DEFAULT 1;
+    DECLARE v_separator_pos INT;
+    DECLARE v_cinema_name VARCHAR(100);
+
+ -- Gestion des erreurs
+  DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- En cas d'erreur SQL, effectuer un rollback
+       ROLLBACK;
+       SET p_Result =  "Erreur : erreur interne procedure.";
+    END;
+    SET time_zone = 'Europe/Paris';
+block_label: BEGIN
+ -- Recherche de l'email pour test existence
+	SET v_employe_exist = (
+		SELECT COUNT(*)
+		FROM Employe
+		WHERE Employe.email = p_email
+	);
+
+	IF v_employe_exist > 0 THEN
+		SET p_Result = "Erreur : employe existant";
+		LEAVE block_label;
+	END IF;
+    
+    -- Recherche du compte pour test existence
+	SET v_compte_exist = (
+		SELECT COUNT(*)
+		FROM Compte
+		WHERE Compte.email = p_email
+	);
+
+	IF v_compte_exist > 0 THEN
+		SET p_Result = "Erreur : email existant";
+		LEAVE block_label;
+	END IF;
+    
+	-- Début de la transaction
+    START TRANSACTION;
+    
+    INSERT INTO Compte
+		(email,  isValidated, passwordText, datePassword) 
+	VALUES 
+		(p_email, 1, p_password, NOW())
+	;
+        
+	INSERT INTO Employe 
+		(matricule, email, isAdministrateur, firstNameEmploye, lastNameEmploye) 
+	VALUES 
+		(p_matricule, p_email , p_isAdministrateur, p_firstNameEmploye, p_lastNameEmploye)
+	;
+    
+   -- Ajout des lignes Employe_Table
+-- Tant que la chaîne p_listCinemas n'est pas vide
+
+-- Ajout des lignes Employe_Table
+WHILE v_pos > 0 DO
+    -- Trouver la position du séparateur (virgule)
+    SET v_separator_pos = LOCATE(',', p_listCinemas, v_pos);
+
+    -- Si une virgule est trouvée, on extrait la portion avant la virgule
+    IF v_separator_pos > 0 THEN
+        SET v_cinema_name = TRIM(SUBSTRING(p_listCinemas, v_pos, v_separator_pos - v_pos));
+        -- Afficher le nom du cinéma extrait
+        SELECT CONCAT('Extracted cinema: ', v_cinema_name);
+        SET v_pos = v_separator_pos + 1; -- Avancer la position au-delà de la virgule
+    ELSE
+        -- Sinon, on prend le reste de la chaîne
+        SET v_cinema_name = TRIM(SUBSTRING(p_listCinemas, v_pos));
+        -- Afficher le nom du cinéma extrait
+        SELECT CONCAT('Extracted cinema: ', v_cinema_name);
+        SET v_pos = 0; -- Fin de la boucle
+    END IF;
+
+    -- Insérer la ligne dans la table
+    INSERT INTO Employe_Cinema (nameCinema, matricule)
+    VALUES (v_cinema_name, p_matricule);
+END WHILE;
+    
+	-- Tout s'est bien passé, on valide la transaction
+	COMMIT;
+            
+	-- Retourne l'id de l'utilisateur
+	SET p_Result = 'OK';
 
 END block_label;
 END $$
