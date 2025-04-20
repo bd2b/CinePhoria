@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sections/main-manageemployes.css">
+
+    <script type="module" src="dist/main.js" defer></script>
+
+    <title>CinePhoria</title>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="header__nav">
+            <div class="nav__logo ">
+                <a href="./visiteur.html">
+                    <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
+            </div>
+            <div class="nav__actions">
+
+            </div>
+            <div class="nav__mobile-menu" id="navMobileMenu">
+                <img src="assets/menu.svg" alt="Menu">
+            </div>
+
+            <div class="mobile-menu" id="mobileMenu">
+                <button class="mobile-menu__close" id="mobileMenuClose">&times;</button>
+                <nav class="mobile-menu__nav">
+
+                </nav>
+            </div>
+        </nav>
+    </header>
+    <main class="main main__container">
+        <div class="container__title">
+            <div class="title__left">
+                <h1 class="title__left-h1" id="titleLeft">Gérer les comptes</h1>
+            </div>
+            <div class="title__filters">
+                <div class="right__actions">
+                    <button class="title__right-button" id="title__right-button-Ajouter">Ajouter un compte <span
+                            class="plus">+</span></button>
+                    <button class="title__right-button" id="title__right-button-Modifier">Modifier <span
+                            class="plus">...</span></button>
+                    <button class="title__right-button" id="title__right-button-Annuler"
+                        style="display:none">Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container__employes">
+            <div class="employes__listEmployes">
+                <!-- Liste de cartes de employes (remplies dynamiquement par JS) -->
+            </div>
+            <div class="employes__detailEmploye">
+                <!-- formulaure de présentation du employe (remplies dynamiquement par JS) -->
+                <div class="form-detailemploye">
+                    <div class="employe-details">
+                        <div class="detail-row">
+                            <div class="field-group">
+                                <div class="label"><span style="color:red">*</span> Nom du Employe</div>
+                                <div class="field-value" id="titleEmploye">Bons Baisers de Russie</div>
+
+                            </div>
+                            <div class="field-group">
+                                <div class="label">Genre<span style="color:red">*</span> </div>
+                                <div class="field-value" id="genreArray">Action, Policier, Espionnage, Thriller
+                                </div>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="field-group">
+                                <div class="label"><span style="color:red">*</span> Réalisateur</div>
+                                <div class="field-value" id="employeAuthor">Réalisation : Ian Flemming</div>
+                            </div>
+                            <div class="field-group">
+                                <div class="label"><span style="color:red">*</span> Durée du employe</div>
+                                <div class="field-value" id="duration">1h54</div>
+                            </div>
+                        </div>
+                        <div class="field-group">
+                            <div class="label">Pitch du employe (accroche de 5 mots maximum)</div>
+                            <div class="field-value" id="employePitch">Un super employe !</div>
+                        </div>
+
+                        <div class="field-group">
+                            <div class="label"><span style="color:red">*</span> Distribution</div>
+                            <div class="field-value" id="employeDistribution">Acteurs: Sean Connery, Daniela Bianchi,
+                                Nathalie Nerval, Pedro
+                                Armendáriz, Lotte Lenya</div>
+                        </div>
+                        <div class="field-group">
+                            <div class="label"><span style="color:red">*</span> Lien vers la BO</div>
+                            <div class="field-value" id="linkBO">https://www.youtube.com/embed/Q0EiAfDmqx0</div>
+                        </div>
+
+                        <div class="detail-row">
+                            <div class="field-group categorie-public">
+                                <div class="title__filter-dropdown titre__filter-dropdown-genre">
+                                    <button class="title__filter-dropdown-button"
+                                        id="title__filter-dropdown-button-genre">Catégorie public<span
+                                            class="chevron">▼</span></button>
+                                    <div class="title__filter-button-drowdown-content" id="title__filter-listcategorie">
+                                        <a class="categorie-item" href="#">TP</a>
+                                        <a class="categorie-item" href="#">-18</a>
+                                        <a class="categorie-item" href="#">-16</a>
+                                        <a class="categorie-item" href="#">-12</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="coup-de-coeur">
+                                <input type="checkbox" id="coupCoeur">
+                                <label for="coupCoeur">Coup de coeur</label>
+                            </div>
+                            <div class="coup-de-coeur">
+                                <input type="checkbox" id="isActiveForNewSeances">
+                                <label for="isActiveForNewSeances">Actif pour de nouvelles séances</label>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+                    <div class="field-group ">
+                        <div class="label"><span style="color:red">*</span> Description</div>
+                        <div class="field-value" id="employeDescription">
+                            En pleine guerre froide, le dernier joyau technologique soviétique, le Lektor, est convoité
+                            par le SPECTRE, la redoutable organisation criminelle dont faisait partie le Dr Julius No et
+                            par les services secrets britanniques qui chargent Bond de le récupérer. Mais cette affaire
+                            cache en réalité une redoutable mise en scène du SPECTRE pour piéger 007 en misant sur son
+                            point faible, les femmes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer" id="footer">
+
+    </footer>
+    <!-- Modale Affichage Bande Annonce -->
+    <div id="videoModal" class="modalyoutube">
+        <div class="modalyoutube-content">
+            <span class="closeyoutube">&times;</span>
+            <!-- Vidéo YouTube -->
+            <iframe id="youtubeVideo" width="560" height="315" src="" title="YouTube video player" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+</body>
+
+</html>
