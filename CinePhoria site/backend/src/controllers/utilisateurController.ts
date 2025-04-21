@@ -184,6 +184,7 @@ export class UtilisateurController {
     }
   };
 
+
   static async createEmploye(req: Request, res: Response): Promise<void> {
     try {
       const { email, password, isAdministrateur, firstnameEmploye, 
@@ -191,7 +192,7 @@ export class UtilisateurController {
 
       // Validation des données d'entrée
       if (  !email || !password || !isAdministrateur ||
-         !firstnameEmploye || !lastnameEmploye || !matricule || !listCinemas) {
+         !firstnameEmploye || !lastnameEmploye || !matricule ) {
         res.status(400).json({ message: 'Données manquantes ou invalides.' });
         return;
       }
@@ -215,9 +216,9 @@ export class UtilisateurController {
   };
 
 
-  static async getEmployesComptes(res: Response) {
+  static async getEmployesComptes(req: Request,res: Response) {
     try {
-      const comptePersonnes = await UtilisateurDAO.getEmployeComptes();
+      const comptePersonnes = await UtilisateurDAO.getEmployesComptes();
       res.json(comptePersonnes);
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -226,12 +227,13 @@ export class UtilisateurController {
 // PUT => update a ComptePersonne pour les champs modifiables
   static async updateEmploye(req: Request, res: Response) {
     try {
-      const matricule = req.params.matricule;
-      const data = req.body;
-      logger.info(`Mise à jour de l'employe ${matricule} avec data=`, data);
+      const { email, password, isAdministrateur, firstnameEmploye, 
+        lastnameEmploye, matricule, listCinemas } = req.body;
 
-      const comptePersonne = new ComptePersonne(data);
-      const result = await UtilisateurDAO.updateEmploye(matricule, comptePersonne);
+      logger.info(`Mise à jour de l'employe ${matricule} avec data=`, req.body);
+
+      const result = await UtilisateurDAO.updateEmploye(email, password, isAdministrateur, firstnameEmploye, 
+        lastnameEmploye, matricule, listCinemas);
       if (result) {
         res.json({ message: 'OK' });
       } else {
@@ -241,5 +243,36 @@ export class UtilisateurController {
         res.status(500).json({ error: error.message });
       }
     }
+
+    
+    // GET => Récupérer un compte unitaire
+    static async getEmployeByMatricule(req: Request, res: Response) {
+      try {
+        const employe = await UtilisateurDAO.getEmployeByMatricule(req.params.matricule);
+        res.json(employe);
+      } catch (error: any) {
+        res.status(500).json({ error: error.message });
+      }
+    };
+    
+    
+
+    // DELETE => remove a SeanceSeule
+  static async deleteEmployeByMatricule(req: Request, res: Response) {
+    try {
+      const matricule = parseInt(req.params.matricule, 10);
+      logger.info(`Suppression de l'employe ${matricule}`);
+
+      const success = await UtilisateurDAO.deleteEmployeByMatricule(matricule);
+
+      if (success) {
+        res.json({ message: 'OK' });
+      } else {
+        res.status(404).json({ message: 'Erreur: Employe non trouvé ou déjà supprimé' });
+      }
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 
 }

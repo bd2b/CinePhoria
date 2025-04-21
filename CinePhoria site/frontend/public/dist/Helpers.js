@@ -1,3 +1,4 @@
+export const listCinemasConst = ["Paris", "Bordeaux", "Nantes", "Lille", "Toulouse", "Charleroi", "Liège"];
 // Fonction pour obtenir la valeur d'un cookie
 export function getCookie(name) {
     var _a;
@@ -188,4 +189,16 @@ export function syncTableColumnWidths(table) {
         const width = td.getBoundingClientRect().width;
         theadCols[i].style.width = `${width}px`;
     });
+}
+export function isPasswordValid(password) {
+    const minLength = 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*]/.test(password);
+    return (password.length >= minLength &&
+        hasUpperCase &&
+        hasLowerCase &&
+        hasNumber &&
+        hasSpecialChar);
 }

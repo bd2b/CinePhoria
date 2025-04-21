@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt';
-import mysql from 'mysql2/promise';
+import mysql, { FieldPacket } from 'mysql2/promise';
 import { dbConfig, nombreTentativeLoginKO } from '../config/config';
 import logger from '../config/configLog';
 import { UtilisateurCompte, ComptePersonne } from '../shared-models/Utilisateur';
@@ -426,44 +426,46 @@ export class UtilisateurDAO {
   static async createEmploye(
     email: string,
     password: string,
-    isAdministrateur: boolean,
+    isAdministrateur: string,
     firstnameEmploye: string,
     lastnameEmploye: string,
     matricule: string,
-    listCinemas: string
+    listCinemas: string | undefined
   ): Promise<string> {  // Retour uniquement de la chaîne de caractères
     const passwordHashed = await hashPassword(password);
     const connection = await mysql.createConnection(dbConfig);
+    const isAdministrateurNumber = isAdministrateur === "true" ? 1 : 0;
+    const matriculeNumber = parseInt(matricule, 10);
+    const listCinemasString = listCinemas || '';
 
     try {
       // Exécution de la procédure stockée avec @result
-      const results = await connection.query(
+      const requete = `CALL CreateEmploye(${email}, ${passwordHashed}, ${isAdministrateurNumber}, 
+      ${firstnameEmploye}, ${lastnameEmploye}, ${matriculeNumber}, ${listCinemasString}, @result);
+      SELECT @result AS result;`;
+      logger.info(`Requete =  ${requete}`);
+      const [results] = await connection.query(
         `CALL CreateEmploye(?, ?, ?, ?, ?, ?, ?, @result);
          SELECT @result AS result;`,
         [email, passwordHashed,
-          isAdministrateur, firstnameEmploye,
-          lastnameEmploye, matricule, listCinemas]
+          isAdministrateurNumber, firstnameEmploye,
+          lastnameEmploye, matriculeNumber, listCinemasString]
       );
       logger.info("Execution de la procedure CreateEmploye ")
       logger.info("Paramètres :", [email, passwordHashed,
-        isAdministrateur, firstnameEmploye,
-        lastnameEmploye, matricule, listCinemas], "et mot de passe hashé");
+        isAdministrateurNumber, firstnameEmploye,
+        lastnameEmploye, matriculeNumber, listCinemasString], "et mot de passe hashé");
 
+      //logger.info("Apres requete");
       // Forcer TypeScript à comprendre la structure des résultats
-      const callResults = results as any[][];  // Correction du typage
-      const selectResult = callResults[0][1] as Array<{ result: string }>;
+      //logger.info(`Resultat = ${JSON.stringify(results)}`);
 
-      // Vérification et extraction du résultat
-      if (selectResult && selectResult.length > 0 && selectResult[0].result) {
-        const utilisateurId = selectResult[0].result;
-        logger.info("Résultat = " + utilisateurId);
-
-        // Retourner uniquement la chaîne utilisateurId
-        return utilisateurId;
-      } else {
-        logger.error("Erreur : Résultat non disponible.");
-        throw new Error('Erreur : Résultat non disponible.');
-      }
+      const callResults = results as any[];
+      const flatResults = callResults.flat(Infinity);
+      const retour = flatResults.find((item: any) => item && typeof item === 'object' && 'result' in item)?.result;
+      
+      return retour || 'Erreur : Résultat non disponible dans retour.';
+      
     } catch (error) {
       logger.error('Erreur dans CreateUtilisateur', error);
       throw new Error('Erreur lors de l’exécution de la procédure stockée.');
@@ -474,7 +476,18 @@ export class UtilisateurDAO {
 
   // Update
 
-  static async updateEmploye(matricule: string, comptePersonne: ComptePersonne): Promise<boolean> {
+  static async updateEmploye(
+    email: string, // Non mise à jour
+    password: string, // == "" -> pas de mise à jour
+    isAdministrateur: number,
+    firstnameEmploye: string,
+    lastnameEmploye: string,
+    matricule: number,
+    listCinemas: string): Promise<boolean> {
+
+    const passwordHashed = (password === "") ? "" : (await hashPassword(password))!;
+
+
     const connection = await mysql.createConnection(dbConfig);
 
     try {
@@ -485,29 +498,38 @@ export class UtilisateurDAO {
 
       // Supprimer les lignes existantes pour le matricule donné
       await connection.execute(
-        `DELETE FROM EmployeCinema WHERE matricule=?`,
+        `DELETE FROM Employe_Cinema WHERE matricule=?`,
         [matricule]
       );
 
       // Insérer de nouvelles lignes issues de la chaîne listCinemas
-      const cinemas = comptePersonne.listCinemas?.split(',');
+      const cinemas = listCinemas?.split(',');
       if (cinemas) {
-      for (const cinema of cinemas) {
-        await connection.execute(
-          `INSERT INTO EmployeCinema (nameCinema, matricule) VALUES (?, ?)`,
-          [cinema.trim(), matricule]
-        );
+        for (const cinema of cinemas) {
+          await connection.execute(
+            `INSERT INTO Employe_Cinema (nameCinema, matricule) VALUES (?, ?)`,
+            [cinema.trim(), matricule]
+          );
+        }
       }
-    }
+      // Mettre à jour du mot de passe si fournis
+      if (passwordHashed !== "")
+        await connection.execute(
+          `UPDATE Compte SET
+            passwordText=?
+             WHERE email=?`,
+          [passwordHashed,
+            email]
+        );
 
       // Mettre à jour les détails de l'employé
       await connection.execute(
         `UPDATE Employe SET
              isAdministrateur=?, lastnameEmploye=?, firstnameEmploye=?
              WHERE matricule=?`,
-        [comptePersonne.isAdministrateur ? 1 : 0,
-        comptePersonne.lastnameEmploye || "",
-        comptePersonne.firstnameEmploye || "",
+        [isAdministrateur ? 1 : 0,
+        lastnameEmploye || "",
+        firstnameEmploye || "",
           matricule]
       );
 
@@ -530,7 +552,7 @@ export class UtilisateurDAO {
    * @param ident peut etre utilisateur.id, compte.email, employe.matricule
    * @returns 
    */
-  static async getEmployeComptes(): Promise<ComptePersonne[] | []> {
+  static async getEmployesComptes(): Promise<ComptePersonne[] | []> {
     const connection = await mysql.createConnection(dbConfig);
     logger.info('Connexion réussie à la base de données');
     let requete = 'select * from viewComptePersonne where matricule is not null;';
@@ -541,5 +563,67 @@ export class UtilisateurDAO {
     const data = (rows as any[]);
     return data ? data as ComptePersonne[] : [];
   }
-};
 
+
+  static async getEmployeByMatricule(matricule: string): Promise<ComptePersonne | null> {
+    const connection = await mysql.createConnection(dbConfig);
+    logger.info('Connexion réussie à la base de données');
+    const requete = 'select * from viewComptePersonne where matricule = ?;';
+    const [rows] = await connection.execute((requete), [matricule]);
+    await connection.end();
+
+    const data = (rows as any[])[0];
+    return data ? data as ComptePersonne : null;
+  }
+
+  // Delete
+  static async deleteEmployeByMatricule(matricule: number): Promise<boolean> {
+    const connection = await mysql.createConnection(dbConfig);
+    try {
+      // Récupération de l'email
+      const requete = 'select email from Employe where matricule = ?;';
+      const [rows] = await connection.execute((requete), [matricule]);
+      const emailObj = (rows as any[])[0] as { email: string };
+      logger.info(`Suppression de l'Employe : matricule = ${matricule}, email = ${JSON.stringify(emailObj)} soit ${emailObj.email}`);
+
+      logger.info(`Suppression de l'Employe_Cinema ${matricule}`);
+      const [result1] = await connection.execute(
+        'DELETE FROM Employe_Cinema WHERE matricule = ?',
+        [matricule]
+      );
+      const rowsAffected1 = (result1 as any).affectedRows || 0;
+      if (rowsAffected1 === 0) {
+        throw new Error(`Erreur: suppression Employe_Cinema = ${matricule}`);
+      };
+
+      logger.info(`Suppression de l'Employe ${matricule}`);
+      const [result2] = await connection.execute(
+        'DELETE FROM Employe WHERE matricule = ?',
+        [matricule]
+      );
+      const rowsAffected2 = (result2 as any).affectedRows || 0;
+      if (rowsAffected2 === 0) {
+        throw new Error(`Erreur: suppression Employe = ${matricule}`);
+      };
+
+      logger.info(`Suppression du compte ${emailObj.email}`);
+      const [result3] = await connection.execute(
+        'DELETE FROM Compte WHERE email = ?',
+        [emailObj.email]
+      );
+      const rowsAffected3 = (result2 as any).affectedRows || 0;
+      if (rowsAffected2 === 0) {
+        throw new Error(`Erreur: suppression Compte = ${emailObj.email}`);
+      };
+
+      await connection.end();
+      return true;
+    } catch (err) {
+      logger.error('Erreur delete Employe:', err);
+      throw Error(`Impossible de supprimer Employer : ${err}`);
+    } finally {
+      await connection.end();
+    }
+  }
+
+};

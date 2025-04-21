@@ -154,7 +154,10 @@ SELECT
     null as isAdministrateur,
     null as lastnameEmploye,
     null as firstnameEmploye,
-    null as listCinemas
+    null as listCinemas,
+    (select count(*)
+		FROM Connexions
+        where email = compte.email) as numConnexions
 FROM Compte
 JOIN Utilisateur ON compte.email = utilisateur.email
 
@@ -172,7 +175,10 @@ compte.email,
     employe.firstnameEmploye as firstnameEmploye, 
     (SELECT GROUP_CONCAT(nameCinema)
                     FROM Employe_Cinema
-                    WHERE matricule = employe.matricule) as listCinemas
+                    WHERE matricule = employe.matricule) as listCinemas,
+	(select count(*)
+		FROM Connexions
+        where email = compte.email) as numConnexions
 FROM Compte
 JOIN Employe ON compte.email = employe.email
 JOIN Employe_Cinema ON employe.matricule = employe_cinema.matricule;
@@ -758,6 +764,7 @@ block_label: BEGIN
    -- Ajout des lignes Employe_Table
 -- Tant que la chaîne p_listCinemas n'est pas vide
 
+if (p_listCinemas <> "") THEN
 -- Ajout des lignes Employe_Table
 WHILE v_pos > 0 DO
     -- Trouver la position du séparateur (virgule)
@@ -781,6 +788,7 @@ WHILE v_pos > 0 DO
     INSERT INTO Employe_Cinema (nameCinema, matricule)
     VALUES (v_cinema_name, p_matricule);
 END WHILE;
+END IF;
     
 	-- Tout s'est bien passé, on valide la transaction
 	COMMIT;

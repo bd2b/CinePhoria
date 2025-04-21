@@ -1,14 +1,16 @@
 import { Film, ListFilms } from './shared-models/Film.js';
-import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi } from './NetworkController.js';
+import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi, employeUpdateApi } from './NetworkController.js';
 import { Salle, ListSalles } from './shared-models/Salle.js';
 import {
     sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi,
     seancesseulesDeleteApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi,
-    reservationsByCinemaApi, reservationAvisUpdateApi
+    reservationsByCinemaApi, reservationAvisUpdateApi,
+    employesSelectAllApi , getEmployeByMatriculeApi, employeCreateApi , employeDeleteApi
 } from './NetworkController.js';
 import { Seance, SeanceDisplay } from './shared-models/Seance.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
 import { ReservationForUtilisateur, Reservation, ReservationAvis } from './shared-models/Reservation.js';
+import { ComptePersonne } from './shared-models/Utilisateur.js';
 
 export class DataControllerIntranet {
 
@@ -371,6 +373,80 @@ export class DataControllerIntranet {
         catch (error) {
             console.error(`Erreur inconue dans la mise à jour de l'avis : ${error}, Avis = ${JSON.stringify(reservationAvis)}`);
             return result;
+        }
+    }
+
+    // Gestion des employés
+    public static async getListEmployesAll(): Promise<ComptePersonne[]> {
+        try {
+            const employesAll = await employesSelectAllApi();
+            return employesAll;
+
+        } catch (error) {
+            console.error(`Erreur recupération ListEmployesAll : ${error}`);
+            return []
+        }
+    }
+
+    public static async getEmployesByMatricule(matricule: number): Promise<ComptePersonne | undefined> {
+        try {
+            const employe = await getEmployeByMatriculeApi(matricule);
+            return employe;
+
+        } catch (error) {
+            console.error(`Erreur recupération ListEmployesAll : ${error}`);
+            
+        }
+    }
+
+
+    // Création ou mise à jour. Optimisation possible au niveau des API rest 
+    // mais le temps tourne et je veux rester standard....
+    public static async createOrUpdateEmploye(employe: ComptePersonne, password: string): Promise<{ message: string }> {
+        let result: { message: string } = { message: "" };
+        try {
+            // On cree ou met a jour selon que l'on trouve la seance sur le serveur
+            try {
+                const employeUpdate = await getEmployeByMatriculeApi(employe.matricule!);
+                if (employeUpdate) {
+                    result.message = "update";
+                } else {
+                    result.message = "create"
+                }
+            } catch (error) {
+                result.message = "create"
+            }
+            if (result.message === "create") {
+                result = await employeCreateApi(employe, password);
+            } else {
+                result = await employeUpdateApi(employe, password);
+            }
+            return result;
+        }
+        catch (error) {
+            switch (result.message) {
+                case "":
+                    console.error(`Erreur dans la recherche de employe : ${error} , matricule = ${employe.matricule}`);
+                    break;
+                case "update":
+                    console.error(`Erreur dans l'update de employe : ${error}, employe = ${JSON.stringify(employe)}`);
+                    break;
+                case "create":
+                    console.error(`Erreur dans le create de employe : ${error}, employe = ${JSON.stringify(employe)}`);
+                    break;
+                default:
+                    console.error(`Erreur inconue dans le create/update de employe : ${error}, employe = ${JSON.stringify(employe)}`);
+                    break;
+            }
+            throw error;
+        }
+    }
+
+    public static async deleteEmploye(matricule: number): Promise<void> {
+        try {
+            await employeDeleteApi(matricule);
+        } catch (error) {
+            console.log("Erreur delete Employé", error)
         }
     }
 

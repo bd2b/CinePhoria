@@ -141,8 +141,8 @@ VALUES
   ("Nantes", "1, avenue des déportés", "Nantes", "F-44000", "cinephoriaNantes@mail.fr", "+33 4 40 23 10 12","Première séance : 13h","7j sur 7"),
   ("Lille", "10 boulevard du Général de Gaulle", "Lille", "F-59000", "cinephoriaLille@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
   ("Bordeaux", "99 rue Sainte-Catherine", "Bordeaux", "F-33000", "cinephoriaBordeaux@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
-  ("Liege", "10 rue de Charleroi", "Liege", "B-0100", "cinephoriaLiege@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
-  ("Charleroi", "70 rue de Liege", "Charleroi", "B-0200", "cinephoriaCharleroi@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7")
+  ("Liège", "10 rue de Charleroi", "Liège", "B-0100", "cinephoriaLiège@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Charleroi", "70 rue de Liège", "Charleroi", "B-0200", "cinephoriaCharleroi@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7")
   ;
   
 INSERT INTO Compte
@@ -190,11 +190,11 @@ INSERT INTO Employe_Cinema
   (nameCinema, 
   matricule) 
 VALUES 
-	("Liege", 202515),
+	("Liège", 202515),
 	("Charleroi", 202515),
 	("Paris", 202513),
     ("Toulouse", 202514),
-    ("Liege", 202512),
+    ("Liège", 202512),
 	("Charleroi", 202512),
     ("Toulouse", 202512),
     ("Paris", 202512)
@@ -515,10 +515,10 @@ VALUES
   (UUIDSalle3C,"Salle 3", "Charleroi", 96, 2,12,8,''),
   (UUIDSalle4C,"Salle 4", "Charleroi", 50, 0,5,10,''),
 
-  (UUIDSalle1G,"Salle 1", "Liege", 190, 10, 20, 10, '"R13F0", "R13F1","R13F2", "R13F3","R13F4", "R13F5", "R13F6", "R13F7", "R13F8", "R13F9"'),
-  (UUIDSalle2G,"Salle 2", "Liege", 96, 2,12,8,''),
-  (UUIDSalle3G,"Salle 3", "Liege", 96, 2,12,8,''),
-  (UUIDSalle4G,"Salle 4", "Liege", 50, 0,5,10,'')
+  (UUIDSalle1G,"Salle 1", "Liège", 190, 10, 20, 10, '"R13F0", "R13F1","R13F2", "R13F3","R13F4", "R13F5", "R13F6", "R13F7", "R13F8", "R13F9"'),
+  (UUIDSalle2G,"Salle 2", "Liège", 96, 2,12,8,''),
+  (UUIDSalle3G,"Salle 3", "Liège", 96, 2,12,8,''),
+  (UUIDSalle4G,"Salle 4", "Liège", 50, 0,5,10,'')
  ;
   
 INSERT INTO Incident

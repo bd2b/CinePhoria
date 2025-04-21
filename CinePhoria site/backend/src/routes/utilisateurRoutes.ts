@@ -17,15 +17,21 @@ router.post('/resetpwd', UtilisateurController.validateChangePwd);
 // (Futur) GET /api/reservation/:id
 // router.get('/:id', authenticateJWT, UtilisateurController.getUtilisateurById);
 
+
+router.post('/createEmploye', authenticateJWT, UtilisateurController.createEmploye);
+router.get('/getemployes', authenticateJWT, UtilisateurController.getEmployesComptes);
+router.put('/updateemploye', authenticateJWT, UtilisateurController.updateEmploye );
+
+router.get('/getemploye/:matricule', authenticateJWT, UtilisateurController.getEmployeByMatricule);
+
+router.delete('/deleteemploye/:matricule', authenticateJWT, UtilisateurController.deleteEmployeByMatricule);
+
+
 // GET /api/utilisateur
 router.get('/:ident', UtilisateurController.getUtilisateur);
 
 // (Futur) GET /api/reservation/:email
 router.get('/mail/:email', UtilisateurController.getUtilisateurByMail);
 
-
-router.post('/createEmploye', authenticateJWT, UtilisateurController.createEmploye);
-router.get('/getemployes', authenticateJWT, UtilisateurController.getEmployesComptes);
-router.put('/updateemploye/:matricule', authenticateJWT, UtilisateurController.updateEmploye );
 
 export default router;
