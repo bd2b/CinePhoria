@@ -87,7 +87,8 @@ END IF;
 set v_TarifSeats =CONCAT(v_TarifSeats,'}');
 
 set v_PMRSeats = 0;
-call CheckAvailabilityAndReserve( v_email, v_SeanceId, v_TarifSeats, v_PMRSeats, v_Result);
+call logTrace(Concat( v_email, v_SeanceId, v_TarifSeats,"-", v_PMRSeats,"-", "", v_Result));
+call CheckAvailabilityAndReserve( v_email, v_SeanceId, v_TarifSeats, v_PMRSeats, "", v_Result);
 -- Verification que l'on a un resultat compose du statut Provisoire et de deux UUID separé par une ,
 set v_conforme = (
 SELECT v_Result
@@ -130,7 +131,7 @@ if v_Result <> "OK" then
 	CALL LogTrace("Test_CheckAvailabilityAndReserve : Cas 2 confirmation utilisateur =  KO");
     LEAVE block_procedure;
 end if;
-call CheckAvailabilityAndReserve( v_email, v_SeanceId, v_TarifSeats, v_PMRSeats, v_Result);
+call CheckAvailabilityAndReserve( v_email, v_SeanceId, v_TarifSeats, v_PMRSeats, "",v_Result);
 
 -- Verification que l'on a un resultat compose du statut confirme et de deux UUID separé par une ,
 set v_conforme = (
@@ -147,7 +148,7 @@ ELSE
 END IF;
 
 -- cas 3 l'utilisateur n'existe pas
-call CheckAvailabilityAndReserve( CONCAT(UUID(),'@gmail2.com'), v_SeanceId, v_TarifSeats, v_PMRSeats, v_Result);
+call CheckAvailabilityAndReserve( CONCAT(UUID(),'@gmail2.com'), v_SeanceId, v_TarifSeats, v_PMRSeats, "", v_Result);
 
 -- Verification que l'on a un resultat compose du statut Provisoire et de deux UUID separé par une ,
 set v_conforme = (

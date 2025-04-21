@@ -7,8 +7,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi } from './NetworkController.js';
-import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi, reservationsByCinemaApi, reservationAvisUpdateApi } from './NetworkController.js';
+import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi, employeUpdateApi } from './NetworkController.js';
+import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi, reservationsByCinemaApi, reservationAvisUpdateApi, employesSelectAllApi, getEmployeByMatriculeApi, employeCreateApi, employeDeleteApi } from './NetworkController.js';
 export class DataControllerIntranet {
     static allFilms() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -369,6 +369,86 @@ export class DataControllerIntranet {
             catch (error) {
                 console.error(`Erreur inconue dans la mise à jour de l'avis : ${error}, Avis = ${JSON.stringify(reservationAvis)}`);
                 return result;
+            }
+        });
+    }
+    // Gestion des employés
+    static getListEmployesAll() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const employesAll = yield employesSelectAllApi();
+                return employesAll;
+            }
+            catch (error) {
+                console.error(`Erreur recupération ListEmployesAll : ${error}`);
+                return [];
+            }
+        });
+    }
+    static getEmployesByMatricule(matricule) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const employe = yield getEmployeByMatriculeApi(matricule);
+                return employe;
+            }
+            catch (error) {
+                console.error(`Erreur recupération ListEmployesAll : ${error}`);
+            }
+        });
+    }
+    // Création ou mise à jour. Optimisation possible au niveau des API rest 
+    // mais le temps tourne et je veux rester standard....
+    static createOrUpdateEmploye(employe, password) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let result = { message: "" };
+            try {
+                // On cree ou met a jour selon que l'on trouve la seance sur le serveur
+                try {
+                    const employeUpdate = yield getEmployeByMatriculeApi(employe.matricule);
+                    if (employeUpdate) {
+                        result.message = "update";
+                    }
+                    else {
+                        result.message = "create";
+                    }
+                }
+                catch (error) {
+                    result.message = "create";
+                }
+                if (result.message === "create") {
+                    result = yield employeCreateApi(employe, password);
+                }
+                else {
+                    result = yield employeUpdateApi(employe, password);
+                }
+                return result;
+            }
+            catch (error) {
+                switch (result.message) {
+                    case "":
+                        console.error(`Erreur dans la recherche de employe : ${error} , matricule = ${employe.matricule}`);
+                        break;
+                    case "update":
+                        console.error(`Erreur dans l'update de employe : ${error}, employe = ${JSON.stringify(employe)}`);
+                        break;
+                    case "create":
+                        console.error(`Erreur dans le create de employe : ${error}, employe = ${JSON.stringify(employe)}`);
+                        break;
+                    default:
+                        console.error(`Erreur inconue dans le create/update de employe : ${error}, employe = ${JSON.stringify(employe)}`);
+                        break;
+                }
+                throw error;
+            }
+        });
+    }
+    static deleteEmploye(matricule) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield employeDeleteApi(matricule);
+            }
+            catch (error) {
+                console.log("Erreur delete Employé", error);
             }
         });
     }

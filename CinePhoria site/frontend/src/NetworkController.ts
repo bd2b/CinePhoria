@@ -1,12 +1,12 @@
 import { ReservationState, TarifForSeats } from './shared-models/Reservation';
 import { isUUID, validateEmail } from './Helpers.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
-import { ReservationForUtilisateur, SeatsForReservation , ReservationAvis} from './shared-models/Reservation.js';
+import { ReservationForUtilisateur, SeatsForReservation, ReservationAvis } from './shared-models/Reservation.js';
 import { userDataController } from './DataControllerUser.js';
 import { handleApiError } from './Global.js';
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { Mail } from './shared-models/Mail.js';
-import { Seance , SeanceDisplay } from './shared-models/Seance.js';
+import { Seance, SeanceDisplay } from './shared-models/Seance.js';
 import { Film } from './shared-models/Film.js';
 import { Salle } from './shared-models/Salle.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
@@ -32,20 +32,20 @@ async function apiRequest<T>(
         }
 
         const headers: HeadersInit = {};
-/** Probleme pour l'envoie de fichier
- * Le problème vient du fait que le serveur ne reçoit pas tes données en form-data 
- * (du coup req.body.resolution et req.files sont vides). 
- * Avec express-fileupload, si on envoie bien du multipart/form-data, 
- * on devrait retrouver quelque chose dans req.files.imageFile et 
- * req.body.resolution.
- * 
- * La cause la plus fréquente : 
- * tu forces Content-Type: application/json quelque part ou 
- * tu n’envoies pas correctement le formData. 
- * Assure-toi que dans ta fonction apiRequest (ou équivalent), 
- * tu n’ajoutes pas de header Content-Type quand tu envoies un FormData. 
- * Il faut laisser le navigateur définir tout seul le boundary du multipart.
- */ 
+        /** Probleme pour l'envoie de fichier
+         * Le problème vient du fait que le serveur ne reçoit pas tes données en form-data 
+         * (du coup req.body.resolution et req.files sont vides). 
+         * Avec express-fileupload, si on envoie bien du multipart/form-data, 
+         * on devrait retrouver quelque chose dans req.files.imageFile et 
+         * req.body.resolution.
+         * 
+         * La cause la plus fréquente : 
+         * tu forces Content-Type: application/json quelque part ou 
+         * tu n’envoies pas correctement le formData. 
+         * Assure-toi que dans ta fonction apiRequest (ou équivalent), 
+         * tu n’ajoutes pas de header Content-Type quand tu envoies un FormData. 
+         * Il faut laisser le navigateur définir tout seul le boundary du multipart.
+         */
 
         let finalBody: BodyInit | undefined;
         if (body instanceof FormData) {
@@ -1115,6 +1115,119 @@ export async function reservationAvisUpdateApi(reservationId: string, reservatio
         endpoint,
         'PUT',
         reservationAvis,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+* Récupération de tous les employes (GET api/utilisateur/getemployes)
+* @returns Un tableau d'employes
+*/
+export async function employesSelectAllApi(): Promise<ComptePersonne[]> {
+    const endpoint = 'http://localhost:3500/api/utilisateur/getemployes';
+    // Requête authentifiée
+    const responseJSON = await apiRequest<ComptePersonne[]>(
+        endpoint,
+        'GET',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Récupération d’un employe par son ID (GET /api/utilisateur/employe/:matricule)
+ * @param matricule le matricule de l'agent
+ * @returns L’objet ComptePersonne correspondant
+ */
+export async function getEmployeByMatriculeApi(matricule: number): Promise<ComptePersonne> {
+    const endpoint = `http://localhost:3500/api/utilisateur/getemploye/${matricule}`;
+    const responseJSON = await apiRequest<ComptePersonne>(
+        endpoint,
+        'GET',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Création d’un nouvel employe (POST /api/utilisateur/createEmploye)
+ * @param seanceseule Les informations du seanceseule à créer
+ * @returns { message, id } où 'id' est l'identifiant du seanceseule créé
+ */
+export async function employeCreateApi(employe: ComptePersonne, password: string = ""): Promise<{ message: string; id: string }> {
+    const endpoint = 'http://localhost:3500/api/utilisateur/createEmploye';
+    const formData = new FormData();
+    formData.append('email', employe.email);
+    formData.append('password', password);
+
+    if (employe.isAdministrateur && employe.isAdministrateur === 1) {
+        formData.append('isAdministrateur', "true");
+    } else {
+        formData.append('isAdministrateur', "false");
+    }
+    formData.append('firstnameEmploye', employe.firstnameEmploye || '');
+    formData.append('lastnameEmploye', employe.lastnameEmploye || '');
+    formData.append('matricule', employe.matricule?.toString(10) || '');
+    formData.append('listCinemas', employe.listCinemas || '');
+
+
+    // Requête authentifiée
+    const responseJSON = await apiRequest<{ message: string; id: string }>(
+        endpoint,
+        'POST',
+        formData,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+ * Mise à jour d’un employe (PUT /api/utilisateur/updateemploye/:matricule)
+ * @param employe Les nouvelles informations employe
+ * @returns { message } si la mise à jour est réussie
+ */
+export async function employeUpdateApi(employe: ComptePersonne, password: string): Promise<{ message: string }> {
+    const endpoint = `http://localhost:3500/api/utilisateur/updateemploye`;
+
+    const formData = new FormData();
+    formData.append('email', employe.email);
+    formData.append('password', password);
+
+    if (employe.isAdministrateur && employe.isAdministrateur === 1) {
+        formData.append('isAdministrateur', "true");
+    } else {
+        formData.append('isAdministrateur', "false");
+    }
+    formData.append('firstnameEmploye', employe.firstnameEmploye || '');
+    formData.append('lastnameEmploye', employe.lastnameEmploye || '');
+    formData.append('matricule', employe.matricule?.toString(10) || '');
+    formData.append('listCinemas', employe.listCinemas || '');
+
+    const responseJSON = await apiRequest<{ message: string }>(
+        endpoint,
+        'PUT',
+        formData,
+        true
+    );
+    return responseJSON;
+}
+
+employeDeleteApi
+
+/**
+ * Suppression d’un employe qui ne s'est jamais connecte (DELETE /api/utilisateur/deleteemploye/:matricule)
+ * @param matricule L'identifiant du salle à supprimer
+ * @returns { message } si la suppression est réussie
+ */
+export async function employeDeleteApi(matricule: number): Promise<{ message: string }> {
+    const endpoint = `http://localhost:3500/api/utilisateur/deleteemploye/${matricule}`;
+    const responseJSON = await apiRequest<{ message: string }>(
+        endpoint,
+        'DELETE',
+        undefined,
         true
     );
     return responseJSON;

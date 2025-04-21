@@ -8,6 +8,7 @@ import { onLoadManageFilms } from "./ViewManageFilms.js";
 import { onLoadManageSalles } from "./ViewManageSalles.js";
 import { onLoadManageSeances } from "./ViewManageSeances.js";
 import { onLoadManageAvis } from "./ViewManageAvis.js";
+import { onLoadManageEmployes } from "./ViewManageEmploye.js";
 
 
 
@@ -19,7 +20,8 @@ const pageHandlers: Record<string, () => void> = {
     "manageFilms.html" : onLoadManageFilms,
     "manageSalles.html" : onLoadManageSalles,
     "manageSeances.html" : onLoadManageSeances,
-    "manageAvis.html" : onLoadManageAvis
+    "manageAvis.html" : onLoadManageAvis,
+    "manageEmployes.html" : onLoadManageEmployes
 };
 
 const pagesPublic = [ "visiteur.html", "reservation.html", "films.html" , 
@@ -70,7 +72,7 @@ export function handleApiError(error: any): never {
         console.error("🚨 Erreur non gérée :", error);
     }
 
-    throw error;
+    throw error.message;
 }
 
 /**

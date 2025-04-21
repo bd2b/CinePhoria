@@ -12,6 +12,7 @@ export class ComptePersonne {
   lastnameEmploye?: string;
   firstnameEmploye?: string;
   listCinemas?: string;
+  numConnexions?: number;
   constructor(data: Partial<ComptePersonne>) {
     Object.assign(this, data);
   }

@@ -176,7 +176,7 @@ function buildMenuUtilisateur() {
  *   - Intranet (sous-menu)
  *     -> Gérer les films (manageFilm.html)
  *     -> Gérer les salles (manageSalle.html)
- *     -> Gérer les comptes employés (manageEmploye.html)
+ *     -> Gérer les comptes employés (manageEmployes.html)
  *   - Deconnexion
  */
 function buildMenuAdministrateur() {
@@ -252,7 +252,7 @@ function buildIntranetMenuAdmin() {
     const item1 = createLevel2Item('Modérer les avis', 'manageAvis.html');
     const item2 = createLevel2Item('Gérer les films', 'manageFilms.html');
     const item3 = createLevel2Item('Gérer les salles', 'manageSalles.html');
-    const item4 = createLevel2Item('Gérer les comptes employés', 'manageEmploye.html');
+    const item4 = createLevel2Item('Gérer les comptes employés', 'manageEmployes.html');
     subMenu.append(item1, item2, item3, item4);
     // Au survol ou clic, on affiche
     mainBtn.addEventListener('mouseover', () => {

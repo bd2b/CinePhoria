@@ -907,3 +907,93 @@ export function reservationAvisUpdateApi(reservationId, reservationAvis) {
         return responseJSON;
     });
 }
+/**
+* Récupération de tous les employes (GET api/utilisateur/getemployes)
+* @returns Un tableau d'employes
+*/
+export function employesSelectAllApi() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = 'http://localhost:3500/api/utilisateur/getemployes';
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}
+/**
+ * Récupération d’un employe par son ID (GET /api/utilisateur/employe/:matricule)
+ * @param matricule le matricule de l'agent
+ * @returns L’objet ComptePersonne correspondant
+ */
+export function getEmployeByMatriculeApi(matricule) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/utilisateur/getemploye/${matricule}`;
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}
+/**
+ * Création d’un nouvel employe (POST /api/utilisateur/createEmploye)
+ * @param seanceseule Les informations du seanceseule à créer
+ * @returns { message, id } où 'id' est l'identifiant du seanceseule créé
+ */
+export function employeCreateApi(employe_1) {
+    return __awaiter(this, arguments, void 0, function* (employe, password = "") {
+        var _a;
+        const endpoint = 'http://localhost:3500/api/utilisateur/createEmploye';
+        const formData = new FormData();
+        formData.append('email', employe.email);
+        formData.append('password', password);
+        if (employe.isAdministrateur && employe.isAdministrateur === 1) {
+            formData.append('isAdministrateur', "true");
+        }
+        else {
+            formData.append('isAdministrateur', "false");
+        }
+        formData.append('firstnameEmploye', employe.firstnameEmploye || '');
+        formData.append('lastnameEmploye', employe.lastnameEmploye || '');
+        formData.append('matricule', ((_a = employe.matricule) === null || _a === void 0 ? void 0 : _a.toString(10)) || '');
+        formData.append('listCinemas', employe.listCinemas || '');
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'POST', formData, true);
+        return responseJSON;
+    });
+}
+/**
+ * Mise à jour d’un employe (PUT /api/utilisateur/updateemploye/:matricule)
+ * @param employe Les nouvelles informations employe
+ * @returns { message } si la mise à jour est réussie
+ */
+export function employeUpdateApi(employe, password) {
+    return __awaiter(this, void 0, void 0, function* () {
+        var _a;
+        const endpoint = `http://localhost:3500/api/utilisateur/updateemploye`;
+        const formData = new FormData();
+        formData.append('email', employe.email);
+        formData.append('password', password);
+        if (employe.isAdministrateur && employe.isAdministrateur === 1) {
+            formData.append('isAdministrateur', "true");
+        }
+        else {
+            formData.append('isAdministrateur', "false");
+        }
+        formData.append('firstnameEmploye', employe.firstnameEmploye || '');
+        formData.append('lastnameEmploye', employe.lastnameEmploye || '');
+        formData.append('matricule', ((_a = employe.matricule) === null || _a === void 0 ? void 0 : _a.toString(10)) || '');
+        formData.append('listCinemas', employe.listCinemas || '');
+        const responseJSON = yield apiRequest(endpoint, 'PUT', formData, true);
+        return responseJSON;
+    });
+}
+employeDeleteApi;
+/**
+ * Suppression d’un employe qui ne s'est jamais connecte (DELETE /api/utilisateur/deleteemploye/:matricule)
+ * @param matricule L'identifiant du salle à supprimer
+ * @returns { message } si la suppression est réussie
+ */
+export function employeDeleteApi(matricule) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `http://localhost:3500/api/utilisateur/deleteemploye/${matricule}`;
+        const responseJSON = yield apiRequest(endpoint, 'DELETE', undefined, true);
+        return responseJSON;
+    });
+}

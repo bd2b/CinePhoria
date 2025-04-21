@@ -26,11 +26,12 @@
 
 .listEmployes__simpleCard {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
-    padding: 0px;
+    justify-content: center;
+    padding: 10px;
 
-    width: 100%;
+    width: 95%;
     height: 200px;
 
     gap: 10px;
@@ -83,8 +84,22 @@
 .simpleCard__detail-titre-p {
     flex: none;
     width: 100%;
-
+    
     font-size: var(--subheadline-font-size);
+}
+
+.simpleCard__detail-titre-p.numConnexions {
+    color: rgba(23, 23, 23, 0.90);
+    font-size: 15px;
+    font-family: Actor;
+    line-height: 24px;
+}
+
+.simpleCard__detail-titre-p.supprimer-button {
+    font-size: 15px;
+    font-family: Actor;
+    line-height: 20px;
+    max-width: 50px;
 }
 
 .simpleCard__detail-pitch-p {
@@ -217,11 +232,20 @@
     flex-wrap: wrap;
 }
 
+.detail-row.passwordEdit {
+    display: none;
+}
+
+
+
 .field-group {
     flex: 1;
     display: flex;
     flex-direction: column;
     gap: 4px;
+}
+.checkbox {
+    flex-direction: row;
 }
 
 .label {
@@ -336,3 +360,4 @@
     opacity: 0.6; /* visuellement grisé, optionnel */
     cursor: default;
 }
+

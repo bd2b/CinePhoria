@@ -12,7 +12,7 @@ import { deleteCookie, getCookie, setCookie } from './Helpers.js';
 export var ProfilUtilisateur;
 (function (ProfilUtilisateur) {
     ProfilUtilisateur["Utilisateur"] = "mesreservations.html";
-    ProfilUtilisateur["Administrateur"] = "manageEmploye.html";
+    ProfilUtilisateur["Administrateur"] = "manageEmployes.html";
     ProfilUtilisateur["Employee"] = "manageAvis.html";
     ProfilUtilisateur["Visiteur"] = "visiteur.html";
 })(ProfilUtilisateur || (ProfilUtilisateur = {}));

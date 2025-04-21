@@ -22,11 +22,16 @@ export class ReservationDAO {
       logger.info("Execution de la procedure CheckAvailabilityAndReserve ")
       logger.info("Parametre =", [email, seanceId, JSON.stringify(tarifSeats), pmrSeats, seatsReserved]);
       // Forcer TypeScript à comprendre la structure des résultats
-      const callResults = results as any[]; // Type générique pour le résultat brut
-      const selectResult = callResults[1] as Array<{ result: string }>; // Spécifier que le résultat attendu est un tableau d'objets avec une clé "result"
+      logger.info(`Resultat = ${JSON.stringify(results)}`);
 
-      // Récupérer la chaîne dans @result
-      return selectResult[0]?.result || 'Erreur : Résultat non disponible.';
+      const [procedureResult, selectResult] = results as [any, any[]];
+      // Recherche sécurisée du champ "result"
+      const retour = Array.isArray(selectResult)
+        ? selectResult.find(row => 'result' in row)?.result
+        : null;
+
+      return retour || 'Erreur : Résultat non disponible dans retour.';
+
     } catch (error) {
       logger.info('Erreur dans checkAvailabilityAndReserve:', error);
       throw new Error('Erreur lors de l’exécution de la procédure stockée.');

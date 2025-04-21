@@ -17,6 +17,7 @@ import { onLoadManageFilms } from "./ViewManageFilms.js";
 import { onLoadManageSalles } from "./ViewManageSalles.js";
 import { onLoadManageSeances } from "./ViewManageSeances.js";
 import { onLoadManageAvis } from "./ViewManageAvis.js";
+import { onLoadManageEmployes } from "./ViewManageEmploye.js";
 const pageHandlers = {
     "visiteur.html": onLoadVisiteur,
     "reservation.html": onLoadReservation,
@@ -25,7 +26,8 @@ const pageHandlers = {
     "manageFilms.html": onLoadManageFilms,
     "manageSalles.html": onLoadManageSalles,
     "manageSeances.html": onLoadManageSeances,
-    "manageAvis.html": onLoadManageAvis
+    "manageAvis.html": onLoadManageAvis,
+    "manageEmployes.html": onLoadManageEmployes
 };
 const pagesPublic = ["visiteur.html", "reservation.html", "films.html",
     "manageFilms.html", "manageSalles.html", "manageSeances.html"]; // TODO manageXXXXX à supprimer
@@ -68,7 +70,7 @@ export function handleApiError(error) {
     else {
         console.error("🚨 Erreur non gérée :", error);
     }
-    throw error;
+    throw error.message;
 }
 /**
  * Mise en place du chargement de page basé sur l'évenment DOMContentLoaded qui exploite
