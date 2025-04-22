@@ -465,19 +465,19 @@ export function updateTableContent(qualite_1) {
                 // Colonne Places (boutons + -)
                 const tdNum = document.createElement('td');
                 tdNum.classList.add('content-td', 'content-num-td');
-                const btnAdd = document.createElement('button');
-                btnAdd.classList.add('num__add-button');
-                btnAdd.textContent = '+';
+                const btnRemove = document.createElement('button');
+                btnRemove.classList.add('num__remove-button');
+                btnRemove.textContent = '-';
                 const spanPlaces = document.createElement('span');
                 spanPlaces.classList.add('num__num-span');
                 spanPlaces.id = 'num__place';
                 spanPlaces.textContent = '0'; // Au départ, 0
-                const btnRemove = document.createElement('button');
-                btnRemove.classList.add('num__remove-button');
-                btnRemove.textContent = '-';
-                tdNum.appendChild(btnAdd);
-                tdNum.appendChild(spanPlaces);
+                const btnAdd = document.createElement('button');
+                btnAdd.classList.add('num__add-button');
+                btnAdd.textContent = '+';
                 tdNum.appendChild(btnRemove);
+                tdNum.appendChild(spanPlaces);
+                tdNum.appendChild(btnAdd);
                 // Colonne Total
                 const tdPrice = document.createElement('td');
                 tdPrice.classList.add('content-td', 'content-price-td');
@@ -581,16 +581,16 @@ function updateInputPMR(numMaxPMR) {
     contentLibelle.textContent = 'Personne à mobilité réduite :';
     const contentNumPMR = document.createElement('div');
     contentNumPMR.classList.add('content__num-pmr');
-    const btnAddPMR = document.createElement('button');
-    btnAddPMR.classList.add('num__add-button', 'num__add-pmr');
-    btnAddPMR.textContent = '+';
+    const btnRemovePMR = document.createElement('button');
+    btnRemovePMR.classList.add('num__remove-button', 'num__remove-pmr');
+    btnRemovePMR.textContent = '-';
     const spanPMR = document.createElement('span');
     spanPMR.classList.add('num__num-span', 'num__numpmr-span');
     spanPMR.id = 'num__pmr';
     spanPMR.textContent = '0';
-    const btnRemovePMR = document.createElement('button');
-    btnRemovePMR.classList.add('num__remove-button', 'num__remove-pmr');
-    btnRemovePMR.textContent = '-';
+    const btnAddPMR = document.createElement('button');
+    btnAddPMR.classList.add('num__add-button', 'num__add-pmr');
+    btnAddPMR.textContent = '+';
     if (!btnAddPMR || !btnRemovePMR || !spanPMR)
         throw new Error('Erreur updateInputPMR');
     ;
@@ -622,9 +622,9 @@ function updateInputPMR(numMaxPMR) {
             spanPMR.textContent = String(currentVal);
         }
     });
-    contentNumPMR.appendChild(btnAddPMR);
-    contentNumPMR.appendChild(spanPMR);
     contentNumPMR.appendChild(btnRemovePMR);
+    contentNumPMR.appendChild(spanPMR);
+    contentNumPMR.appendChild(btnAddPMR);
     pmrContent.appendChild(contentLibelle);
     pmrContent.appendChild(contentNumPMR);
     return pmrContent;

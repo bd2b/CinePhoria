@@ -93,3 +93,9 @@ export interface ReservationAvis {
   note?: number;
 };
 
+export interface ReservationStats {
+  titreFilm: string;
+  jour: string // format YYYY-MM-JJ
+  totalPlaces: number;
+}
+
