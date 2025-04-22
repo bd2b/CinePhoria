@@ -4,6 +4,7 @@ import { Mail } from '../shared-models/Mail';
 import { mailConfig } from '../config/config';
 import nodemailer from 'nodemailer';
 import logger from '../config/configLog'
+import { mailToSend } from '../models/Mail';
 
 const isBouchon = true;
 logger.info ( isBouchon ? "ENVOI DE MAIL bouchonne" : "ENVOI DE MAIL en service");
@@ -75,17 +76,15 @@ export class MailNetwork {
         from: mailConfig.SMTP_FROM,
         to: email,
         subject: 'CinePhoria: Vérification de votre email',
-        text: `
-        Bonjour,
 
-        Voici le code de vérification à renseigner sur le site CinePhoria
+        html: mailToSend(
+          'Bonjour',
+          `<p>Voici le code de vérification à renseigner sur le site CinePhoria<br>
+          ${codeConfirm}<br>
+          <br>A bientôt dans nos cinémas,<\p>`,
+        `L'équipe de Cinephoria`
+        ),
 
-        ${codeConfirm}
-        
-        A bientôt dans nos cinémas,
-
-        L'équipe de CinePhoria
-        `
         
       };
       logger.info( "mailOptions = " + JSON.stringify(mailOptions))

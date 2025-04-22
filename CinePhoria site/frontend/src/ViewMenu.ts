@@ -24,6 +24,8 @@ export async function chargerMenu() {
     return;
   }
 
+  const logoHeader = document.querySelector('.nav__logo-img') as HTMLImageElement;
+
   // 3) Construire le menu selon le profil
   switch (profil) {
     case ProfilUtilisateur.Visiteur:
@@ -76,6 +78,10 @@ export async function chargerMenu() {
 
       // c) Couleur de fond
       header.style.background = 'linear-gradient(90deg, #F8F8FF 0%, rgba(178, 34, 34, 0.3) 100%)';
+
+      // d) Logo
+      if (!logoHeader) { console.error("Pas de logo")}
+      logoHeader.src = "assets/camera-cinephoria-admin.png";
       break;
     }
 
@@ -93,6 +99,10 @@ export async function chargerMenu() {
 
       // c) Couleur de fond
       header.style.background = 'linear-gradient(90deg, #F8F8FF 0%, rgba(34, 139, 34, 0.25) 100%)';
+
+      // d) Logo
+      if (!logoHeader) { console.error("Pas de logo")}
+      logoHeader.src = "assets/camera-cinephoria-employe.png";
       break;
     }
 
