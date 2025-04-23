@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../config/config';
 import logger from '../config/configLog';
-import { ReservationForUtilisateur, SeatsForReservation, Reservation, ReservationAvis , ReservationStats } from "../shared-models/Reservation";
+import { ReservationForUtilisateur, SeatsForReservation, Reservation, ReservationAvis, ReservationStats } from "../shared-models/Reservation";
 
 export class ReservationDAO {
   static async checkAvailabilityAndReserve(
@@ -291,6 +291,8 @@ export class ReservationDAO {
     // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
     const connection = await mysql.createConnection(dbConfig);
     try {
+      // Début de la transaction
+      await connection.beginTransaction();
       logger.info(`Mise à jour de l'avis pour ${id}`);
       const [result] = await connection.execute(
         `UPDATE Reservation SET
@@ -306,14 +308,51 @@ export class ReservationDAO {
           id
         ]
       );
-      await connection.end();
       // result => un objet du type ResultSetHeader
       const rowsAffected = (result as any).affectedRows || 0;
-      return rowsAffected > 0;
+      if (rowsAffected === 0) {
+        throw new Error("Mise à jour avis non effectuée");
+      }
+
+      // Mise à jour de la note du film
+      if (reservationAvis.note) {
+        logger.info(`Mise à jour de la note du film`);
+        const [result] = await connection.execute(
+          `UPDATE Film f
+            JOIN (
+                    SELECT s.Filmid AS filmId, AVG(r.note) AS avgNote
+                    FROM Reservation r
+                    JOIN Seance s ON r.Seanceid = s.id
+                    WHERE r.stateReservation = 'doneEvaluated'
+                          AND r.isEvaluationMustBeReview = 0
+                          AND r.note IS NOT NULL
+                          AND s.Filmid = (
+                                SELECT s2.Filmid
+                                FROM Reservation r2
+                                JOIN Seance s2 ON r2.Seanceid = s2.id
+                                WHERE r2.id = ?
+                                LIMIT 1
+                          )
+                    GROUP BY s.Filmid
+                  ) AS sub ON f.id = sub.filmId
+              SET f.note = ROUND(sub.avgNote, 1);`,
+          [id]
+        );
+        // result => un objet du type ResultSetHeader
+        const rowsAffected = (result as any).affectedRows || 0;
+        if (rowsAffected === 0) {
+            throw new Error("Mise à jour note du film non effectuée");
+        }
+      }
+       // Valider la transaction
+       await connection.commit();
+      return true;
     } catch (err) {
-      await connection.end();
+      await connection.rollback();
       logger.error('Erreur update ReservationAvis:', err);
       throw err;
+    } finally {
+      await connection.end();
     }
   }
 
