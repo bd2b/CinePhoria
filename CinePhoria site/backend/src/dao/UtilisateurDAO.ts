@@ -545,6 +545,7 @@ export class UtilisateurDAO {
       logger.error('Erreur update employe:', err);
       throw err;
     }
+
   }
 
 
@@ -588,6 +589,8 @@ export class UtilisateurDAO {
       logger.info(`Suppression de l'Employe : matricule = ${matricule}, email = ${JSON.stringify(emailObj)} soit ${emailObj.email}`);
 
       logger.info(`Suppression de l'Employe_Cinema ${matricule}`);
+      // Début de la transaction
+      await connection.beginTransaction();
       const [result1] = await connection.execute(
         'DELETE FROM Employe_Cinema WHERE matricule = ?',
         [matricule]
@@ -616,10 +619,11 @@ export class UtilisateurDAO {
       if (rowsAffected2 === 0) {
         throw new Error(`Erreur: suppression Compte = ${emailObj.email}`);
       };
-
-      await connection.end();
+    // Valider la transaction
+      await connection.commit();
       return true;
     } catch (err) {
+      await connection.rollback();
       logger.error('Erreur delete Employe:', err);
       throw Error(`Impossible de supprimer Employer : ${err}`);
     } finally {
