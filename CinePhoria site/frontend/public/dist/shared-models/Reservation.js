@@ -40,3 +40,9 @@ export class SeatsForReservation {
 }
 ;
 ;
+export class ReservationStats {
+    constructor(data) {
+        Object.assign(this, data);
+    }
+}
+;

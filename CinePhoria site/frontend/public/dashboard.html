@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sections/main-dashboard.css">
+
+    <script type="module" src="dist/main.js" defer></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.9/dist/chart.umd.min.js"></script>
+
+
+    <title>CinePhoria</title>
+</head>
+
+
+<body>
+    <header class="header">
+        <nav class="header__nav">
+            <div class="nav__logo ">
+                <a href="./visiteur.html">
+                    <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
+            </div>
+            <div class="nav__actions">
+
+            </div>
+            <div class="nav__mobile-menu" id="navMobileMenu">
+                <img src="assets/menu.svg" alt="Menu">
+            </div>
+
+            <div class="mobile-menu" id="mobileMenu">
+                <button class="mobile-menu__close" id="mobileMenuClose">&times;</button>
+                <nav class="mobile-menu__nav">
+
+                </nav>
+            </div>
+        </nav>
+    </header>
+    <main class="main main__container">
+        <div class="container__title">
+            <div class="title__left">
+                <h1 class="title__left-h1" id="titleLeft">Dashboard</h1>
+            </div>
+            <div class="title__filters">
+                <div class="right__actions">
+                
+                </div>
+            </div>
+        </div>
+
+        <div class="container__dashboard">
+            <div class="dashboard__listFilms" id="dashboard__listFilms">
+                <!-- Liste des films(remplies dynamiquement par JS) -->
+            </div>
+            <div class="dashboard__content">
+                <!-- formulaire de présentation employe du graph -->
+                <div class="content__graph">
+                    <div class="graph__chart detail-row">
+                        
+                    </div>
+                    <div class="graph__date detail-row">
+                    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer" id="footer">
+    </footer>
+</body>
+
+</html>

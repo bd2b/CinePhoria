@@ -1,7 +1,7 @@
 import { ReservationState, TarifForSeats } from './shared-models/Reservation';
 import { isUUID, validateEmail } from './Helpers.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
-import { ReservationForUtilisateur, SeatsForReservation, ReservationAvis } from './shared-models/Reservation.js';
+import { ReservationForUtilisateur, SeatsForReservation, ReservationAvis, ReservationStats } from './shared-models/Reservation.js';
 import { userDataController } from './DataControllerUser.js';
 import { handleApiError } from './Global.js';
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
@@ -1227,6 +1227,22 @@ export async function employeDeleteApi(matricule: number): Promise<{ message: st
     const responseJSON = await apiRequest<{ message: string }>(
         endpoint,
         'DELETE',
+        undefined,
+        true
+    );
+    return responseJSON;
+}
+
+/**
+* Récupération de toutes les stats de réservation (GET api/reservation/getreservationstats)
+* @returns Un tableau d'employes
+*/
+export async function getReservationStatsApi(): Promise<ReservationStats[]> {
+    const endpoint = 'http://localhost:3500/api/reservation/getreservationstats';
+    // Requête authentifiée
+    const responseJSON = await apiRequest<ReservationStats[]>(
+        endpoint,
+        'GET',
         undefined,
         true
     );

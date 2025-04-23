@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import { dbConfig } from '../config/config';
 import logger from '../config/configLog';
-import { ReservationForUtilisateur, SeatsForReservation, Reservation, ReservationAvis } from "../shared-models/Reservation";
+import { ReservationForUtilisateur, SeatsForReservation, Reservation, ReservationAvis , ReservationStats } from "../shared-models/Reservation";
 
 export class ReservationDAO {
   static async checkAvailabilityAndReserve(
@@ -315,6 +315,18 @@ export class ReservationDAO {
       logger.error('Erreur update ReservationAvis:', err);
       throw err;
     }
+  }
+
+  static async getReservationStatsAll(): Promise<ReservationStats[]> {
+
+    const connection = await mysql.createConnection(dbConfig);
+    logger.info('Exécution de la requête : SELECT * FROM viewfilmreservationdate');
+    const [rows] = await connection.execute('SELECT * FROM viewfilmreservationdate');
+    await connection.end();
+
+    // On convertit chaque record en SeanceSeule
+    return (rows as any[]).map(row => new ReservationStats(row));
+
   }
 
 }

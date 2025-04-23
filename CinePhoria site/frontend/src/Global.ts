@@ -9,6 +9,7 @@ import { onLoadManageSalles } from "./ViewManageSalles.js";
 import { onLoadManageSeances } from "./ViewManageSeances.js";
 import { onLoadManageAvis } from "./ViewManageAvis.js";
 import { onLoadManageEmployes } from "./ViewManageEmploye.js";
+import { onLoadDashboard } from "./ViewDashboard.js";
 
 
 
@@ -21,7 +22,8 @@ const pageHandlers: Record<string, () => void> = {
     "manageSalles.html" : onLoadManageSalles,
     "manageSeances.html" : onLoadManageSeances,
     "manageAvis.html" : onLoadManageAvis,
-    "manageEmployes.html" : onLoadManageEmployes
+    "manageEmployes.html" : onLoadManageEmployes,
+    "dashboard.html" : onLoadDashboard
 };
 
 const pagesPublic = [ "visiteur.html", "reservation.html", "films.html" , 

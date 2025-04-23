@@ -5,11 +5,12 @@ import {
     sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi,
     seancesseulesDeleteApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi,
     reservationsByCinemaApi, reservationAvisUpdateApi,
-    employesSelectAllApi , getEmployeByMatriculeApi, employeCreateApi , employeDeleteApi
+    employesSelectAllApi , getEmployeByMatriculeApi, employeCreateApi , employeDeleteApi,
+    getReservationStatsApi
 } from './NetworkController.js';
 import { Seance, SeanceDisplay } from './shared-models/Seance.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
-import { ReservationForUtilisateur, Reservation, ReservationAvis } from './shared-models/Reservation.js';
+import { ReservationForUtilisateur, Reservation, ReservationAvis, ReservationStats } from './shared-models/Reservation.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
 
 export class DataControllerIntranet {
@@ -447,6 +448,18 @@ export class DataControllerIntranet {
             await employeDeleteApi(matricule);
         } catch (error) {
             console.log("Erreur delete Employé", error)
+        }
+    }
+
+     // Gestion des stats
+     public static async getReservationStatsAll(): Promise<ReservationStats[]> {
+        try {
+            const reservationStatsAll = await getReservationStatsApi();
+            return reservationStatsAll;
+
+        } catch (error) {
+            console.error(`Erreur recupération ReservationState : ${error}`);
+            return []
         }
     }
 

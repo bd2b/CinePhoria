@@ -264,7 +264,8 @@ function buildIntranetMenuAdmin() {
     const item2 = createLevel2Item('Gérer les films', 'manageFilms.html');
     const item3 = createLevel2Item('Gérer les salles', 'manageSalles.html');
     const item4 = createLevel2Item('Gérer les comptes employés', 'manageEmployes.html');
-    subMenu.append(item1, item2, item3, item4);
+    const item5 = createLevel2Item('Dashboard', 'dashboard.html');
+    subMenu.append(item1, item2, item3, item4, item5);
     // Au survol ou clic, on affiche
     mainBtn.addEventListener('mouseover', () => {
         subMenu.style.display = 'block';
