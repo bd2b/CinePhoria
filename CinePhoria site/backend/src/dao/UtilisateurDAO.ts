@@ -479,7 +479,7 @@ export class UtilisateurDAO {
   static async updateEmploye(
     email: string, // Non mise à jour
     password: string, // == "" -> pas de mise à jour
-    isAdministrateur: number,
+    isAdministrateur: string,
     firstnameEmploye: string,
     lastnameEmploye: string,
     matricule: number,
@@ -489,6 +489,7 @@ export class UtilisateurDAO {
 
 
     const connection = await mysql.createConnection(dbConfig);
+    const isAdministrateurNumber = isAdministrateur === "true" ? 1 : 0;
 
     try {
       logger.info(`Mise à jour l'employe ${matricule}`);
@@ -527,7 +528,7 @@ export class UtilisateurDAO {
         `UPDATE Employe SET
              isAdministrateur=?, lastnameEmploye=?, firstnameEmploye=?
              WHERE matricule=?`,
-        [isAdministrateur ? 1 : 0,
+        [isAdministrateurNumber,
         lastnameEmploye || "",
         firstnameEmploye || "",
           matricule]

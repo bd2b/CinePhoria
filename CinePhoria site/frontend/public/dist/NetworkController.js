@@ -997,3 +997,15 @@ export function employeDeleteApi(matricule) {
         return responseJSON;
     });
 }
+/**
+* Récupération de toutes les stats de réservation (GET api/reservation/getreservationstats)
+* @returns Un tableau d'employes
+*/
+export function getReservationStatsApi() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = 'http://localhost:3500/api/reservation/getreservationstats';
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        return responseJSON;
+    });
+}

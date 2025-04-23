@@ -24,6 +24,9 @@ router.post('/setstate', authenticateJWT , ReservationController.setReservationS
 // Modifier une évaluation
 router.post('/setevaluation', authenticateJWT, ReservationController.setReservationEvaluationById);
 
+// Recupérer les stats de reservations
+router.get('/getreservationstats', authenticateJWT ,ReservationController.getReservationStatsAll);
+
 // Recupérer les reservations d'un utilisateur
 router.get('/:utilisateurId', authenticateJWT ,ReservationController.getReservationForUtilisateur);
 

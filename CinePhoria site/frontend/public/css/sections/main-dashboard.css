@@ -1,4 +1,4 @@
-.container__employes {
+.container__dashboard {
     display: flex;
     flex-direction: row;
     flex-wrap: nowrap;
@@ -8,8 +8,8 @@
     gap: 10px;
 }
 
-/* --------------------- COLONNE 1 Liste des employes */
-.employes__listEmployes {
+/* --------------------- COLONNE 1 Liste des films */
+.dashboard__listFilms {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -24,7 +24,7 @@
 
 }
 
-.listEmployes__simpleCard {
+.listFilms__simpleCard {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -32,7 +32,7 @@
     padding: 10px;
 
     width: 95%;
-    height: 200px;
+    height: 90px;
 
     gap: 10px;
     background: rgb(var(--secondary-color));
@@ -42,11 +42,11 @@
     cursor: pointer;
 }
 
-.listEmployes__simpleCard:hover {
+/* .listFilms__simpleCard:hover {
     background: rgb(var(--ternary-color), 0.5);
-}
+} */
 
-.listEmployes__simpleCard:selected {
+.listFilms__simpleCard.selected {
     background: rgb(var(--ternary-color));
     border: 3px solid rgb(var(--primary-color), 0.6);
 }
@@ -87,24 +87,8 @@
     max-width: 50px;
 }
 
-.simpleCard__detail-pitch-p {
-    flex: none;
-    width: 100%;
-
-    font-size: var(--body-font-size);
-}
-
-.simpleCard__evaluation {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    gap: 5px;
-    width: 100%;
-}
-
-
 /* --------------------- COLONNE 2 détail du employe */
-.employes__detailEmploye {
+.dashboard__content {
     flex: 2;
     display: flex;
     flex-direction: column;
@@ -127,7 +111,7 @@
     border-radius: 12px;
 }
 
-.form-detailemploye {
+.content__graph {
     width: 100%;
     height: 100%;
     padding: 20px;
@@ -136,6 +120,10 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
+}
+
+#reservationChart{
+    height: 400px;;
 }
 
 .employe-images {

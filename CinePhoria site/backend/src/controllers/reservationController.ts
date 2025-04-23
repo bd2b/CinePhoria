@@ -440,4 +440,13 @@ export class ReservationController {
     }
   }
 
+  static async getReservationStatsAll(req: Request, res: Response) {
+          try {
+            const reservationStats = await ReservationDAO.getReservationStatsAll();
+            res.json(reservationStats);
+            
+          } catch (error: any) {
+            res.status(500).json({ error: error.message });
+          }
+        };
 }

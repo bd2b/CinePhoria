@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi, employeUpdateApi } from './NetworkController.js';
-import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi, reservationsByCinemaApi, reservationAvisUpdateApi, employesSelectAllApi, getEmployeByMatriculeApi, employeCreateApi, employeDeleteApi } from './NetworkController.js';
+import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi, reservationsByCinemaApi, reservationAvisUpdateApi, employesSelectAllApi, getEmployeByMatriculeApi, employeCreateApi, employeDeleteApi, getReservationStatsApi } from './NetworkController.js';
 export class DataControllerIntranet {
     static allFilms() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -449,6 +449,19 @@ export class DataControllerIntranet {
             }
             catch (error) {
                 console.log("Erreur delete Employé", error);
+            }
+        });
+    }
+    // Gestion des stats
+    static getReservationStatsAll() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const reservationStatsAll = yield getReservationStatsApi();
+                return reservationStatsAll;
+            }
+            catch (error) {
+                console.error(`Erreur recupération ReservationState : ${error}`);
+                return [];
             }
         });
     }

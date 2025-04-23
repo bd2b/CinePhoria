@@ -93,9 +93,13 @@ export interface ReservationAvis {
   note?: number;
 };
 
-export interface ReservationStats {
-  titreFilm: string;
-  jour: string // format YYYY-MM-JJ
-  totalPlaces: number;
-}
+export class ReservationStats {
+  filmTitre!: string;
+  jour!: string // format YYYY-MM-JJ
+  totalPlaces!: number;
+
+  constructor(data: Partial<ReservationStats>) {
+    Object.assign(this, data);
+  }
+};
 
