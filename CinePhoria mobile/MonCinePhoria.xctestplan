@@ -1,0 +1,41 @@
+{
+  "configurations" : [
+    {
+      "id" : "CF0627E5-C179-4072-B4C6-AD98789692B2",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:MonCinePhoria.xcodeproj",
+      "identifier" : "ED35A9DA2CF1C67D00A2145B",
+      "name" : "MonCinePhoria"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "skippedTests" : {
+        "suites" : [
+          {
+            "name" : "MonCinePhoriaTests"
+          }
+        ],
+        "xctestClasses" : [
+          {
+            "name" : "MonCinePhoriaTests"
+          }
+        ]
+      },
+      "target" : {
+        "containerPath" : "container:MonCinePhoria.xcodeproj",
+        "identifier" : "ED2E98362CFDE0180053F860",
+        "name" : "MonCinePhoriaTests"
+      }
+    }
+  ],
+  "version" : 2
+}

@@ -1,0 +1,175 @@
+
+
+Install vsftp
+sudo apt install vsftpd
+
+sudo nano /etc/vsftpd.conf
+avec 
+anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+chroot_local_user=YES
+user_sub_token=$USER
+local_root=/home/$USER/ftp
+
+
+
+mkdir -p /home/cinephoria/ftp/files
+chown nobody:nogroup /home/cinephoria/ftp
+chmod a-w /home/cinephoria/ftp
+sudo chown cinephoria:cinephoria /home/cinephoria/ftp/files
+
+
+Script install_vsftpd.sh
+#!/bin/bash
+
+echo "📦 Installation de vsftpd..."
+sudo apt update
+sudo apt install -y vsftpd
+
+echo "⚙️ Configuration de vsftpd..."
+
+# Sauvegarde de l'ancien fichier
+sudo cp /etc/vsftpd.conf /etc/vsftpd.conf.bak
+
+# Réécriture minimale du fichier de conf
+sudo bash -c 'cat > /etc/vsftpd.conf' <<EOF
+listen=YES
+anonymous_enable=NO
+local_enable=YES
+write_enable=YES
+chroot_local_user=YES
+user_sub_token=\$USER
+local_root=/home/\$USER/ftp
+
+pasv_enable=YES
+pasv_min_port=10000
+pasv_max_port=10100
+
+allow_writeable_chroot=YES
+EOF
+
+echo "🔁 Redémarrage du service..."
+sudo systemctl restart vsftpd
+echo "✅ vsftpd installé et configuré."
+
+
+chmod +x install_vsftpd.sh
+./install_vsftpd.sh
+
+script setup_folders.sh
+#!/bin/bash
+
+echo "📁 Création des répertoires d'app et de données..."
+
+mkdir -p /srv/cinephoria/{app,config,scripts,public,logs,uploads}
+mkdir -p /srv/mysql
+mkdir -p /srv/mongo
+
+echo "📁 Arborescence créée sous /srv/"
+tree /srv -L 2
+
+chmod +x setup_folders.sh
+./setup_folders.sh
+
+
+fix_permissions.sh
+#!/bin/bash
+
+echo "🔐 Attribution des permissions sur /srv..."
+
+# App Cinephoria : propriété à l'utilisateur applicatif
+sudo chown -R cinephoria:cinephoria /srv/cinephoria
+sudo chmod -R 755 /srv/cinephoria
+
+# Dossier FTP : réservé au groupe FTP (lecture publique possible)
+sudo chown -R root:ftp /srv/ftp
+sudo chmod -R 755 /srv/ftp
+
+# Dossier MySQL : laissé à mysql si service local
+if id "mysql" &>/dev/null; then
+  echo "→ MySQL user found, assigning /srv/mysql to mysql:mysql"
+  sudo chown -R mysql:mysql /srv/mysql
+else
+  echo "→ MySQL user not found, skipping ownership"
+fi
+sudo chmod -R 750 /srv/mysql
+
+# Dossier MongoDB : même chose
+if id "mongodb" &>/dev/null; then
+  echo "→ MongoDB user found, assigning /srv/mongo to mongodb:mongodb"
+  sudo chown -R mongodb:mongodb /srv/mongo
+else
+  echo "→ MongoDB user not found, skipping ownership"
+fi
+sudo chmod -R 750 /srv/mongo
+
+echo "✅ Permissions appliquées."
+
+
+create_user.sh
+#!/bin/bash
+
+USERNAME="cinephoria"
+PASSWORD="ChangeThisPassword123"  # À modifier manuellement après première exécution
+
+echo "👤 Création de l'utilisateur $USERNAME..."
+
+# Vérifie si l'utilisateur existe déjà
+if id "$USERNAME" &>/dev/null; then
+  echo "⚠️  L'utilisateur $USERNAME existe déjà. Opération annulée."
+  exit 1
+fi
+
+# Création de l'utilisateur avec un home dédié
+sudo useradd -m -s /bin/bash "$USERNAME"
+
+# Définition du mot de passe
+echo "$USERNAME:$PASSWORD" | sudo chpasswd
+
+# Création d'un groupe spécifique si besoin (ici même nom que l'utilisateur)
+sudo usermod -aG ftp,sudo "$USERNAME"
+
+# Création du dossier FTP
+sudo mkdir -p /home/$USERNAME/ftp/files
+sudo chown nobody:nogroup /home/$USERNAME/ftp
+sudo chmod a-w /home/$USERNAME/ftp
+sudo chown $USERNAME:$USERNAME /home/$USERNAME/ftp/files
+
+# Création des répertoires de service
+sudo mkdir -p /srv/cinephoria/{app,config,scripts,public,logs,uploads}
+sudo mkdir -p /srv/{mysql,mongo}
+sudo chown -R $USERNAME:$USERNAME /srv/cinephoria
+sudo chmod -R 755 /srv/cinephoria
+
+echo "✅ Utilisateur $USERNAME créé avec accès FTP et arborescence app prête."
+echo "🔐 Pense à modifier le mot de passe avec : sudo passwd $USERNAME"
+
+Installation de docker
+curl -fsSL https://get.docker.com | sh
+sudo usermod -aG docker $USER
+
+Deconnexion et reconnextion
+
+Creation de 
+/srv/cinephoria/docker-compose.yml
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: cinephoria-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: dsc!@HH234
+      MYSQL_DATABASE: cinephoria
+      MYSQL_USER: cineadmin
+      MYSQL_PASSWORD: studi2025
+    ports:
+      - "3306:3306"
+    volumes:
+      - /srv/mysql:/var/lib/mysql
+      
+
+cd /srv/cinephoria
+docker compose up -d
+

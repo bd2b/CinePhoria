@@ -79,13 +79,11 @@ struct SeatsView: View {
             
             // Montant total
             HStack {
-                //                Text(" ")
-                //                    .font(.title2)
-                //                    .bold()
                 Spacer()
                 Text("\(totalPrice, specifier: "%.2f") €")
                     .font(customFont(style: .title2))
                     .bold()
+                    .accessibilityIdentifier("TotalPrice")
             }
         }
         .padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 20))

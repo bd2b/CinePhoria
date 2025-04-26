@@ -95,7 +95,8 @@ import Foundation
     var numberErrorLogin: Int = 0 {
         didSet {
             if numberErrorLogin >= 3 {
-                UserDefaults.standard.rememberMe = false
+                // Forçage de la suppression des donnees
+                deleteData()
             }
         }
     }
@@ -118,14 +119,12 @@ import Foundation
         
     }
     
-    func reinit () {
+    /// Suppression des données
+    func deleteData () {
+        
         isLoggedIn = false
         rememberMe = false
         UserDefaults.standard.rememberMe = false
-        
-        
-        showWelcomeScreen = true
-        UserDefaults.standard.hasSeenWelcomeScreen = false
         
         if let userName = userName {
             do {
@@ -136,6 +135,15 @@ import Foundation
                 print(error.localizedDescription)
             }
         }
+        deleteReservationsToLocal()
+    }
+    
+    /// Réinitialisation complete = suppression des données + présentation de l'écran d'accueil
+    func reinit () {
+        deleteData()
+        showWelcomeScreen = true
+        UserDefaults.standard.hasSeenWelcomeScreen = false
+        
         numberErrorLogin = 0
     }
     
@@ -153,7 +161,7 @@ import Foundation
     
     func login(user: String, pwd: String, rememberMe: Bool) -> Bool {
         
-        let userAuthorized = [ "admin", "user@example.com", "vide@example.com", "error@example.com"]
+        let userAuthorized = [ "admin", "user@example.com", "vide@example.com", "error@example.com", "inedit"]
         
         let loginSuccess =  userAuthorized.contains(user) && pwd == "password"
         

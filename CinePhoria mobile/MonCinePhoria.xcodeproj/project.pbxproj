@@ -8,10 +8,35 @@
 
 /* Begin PBXBuildFile section */
 		ED2B32302CF38EA700A72F54 /* Giffy in Frameworks */ = {isa = PBXBuildFile; productRef = ED2B322F2CF38EA700A72F54 /* Giffy */; };
+		ED2E980B2CFDB4080053F860 /* SetupTests.md in Resources */ = {isa = PBXBuildFile; fileRef = ED2E980A2CFDB4080053F860 /* SetupTests.md */; };
 		ED698BFA2CFC91EB00BC9C73 /* ChangeName.md in Resources */ = {isa = PBXBuildFile; fileRef = ED698BF92CFC91EB00BC9C73 /* ChangeName.md */; };
+		EDDAB3712D00AB68000A4DA6 /* FLAnimatedImage in Frameworks */ = {isa = PBXBuildFile; productRef = EDDAB3702D00AB68000A4DA6 /* FLAnimatedImage */; };
+		EDE3E7EC2D00B21500EF9A93 /* Giffy in Frameworks */ = {isa = PBXBuildFile; productRef = EDE3E7EB2D00B21500EF9A93 /* Giffy */; };
+		EDE3E7EE2D00B23E00EF9A93 /* Giffy in Frameworks */ = {isa = PBXBuildFile; productRef = EDE3E7ED2D00B23E00EF9A93 /* Giffy */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		ED2E983B2CFDE0180053F860 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED35A9D32CF1C67D00A2145B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ED35A9DA2CF1C67D00A2145B;
+			remoteInfo = MonCinePhoria;
+		};
+		ED2E984C2CFE01950053F860 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = ED35A9D32CF1C67D00A2145B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ED35A9DA2CF1C67D00A2145B;
+			remoteInfo = MonCinePhoria;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		ED2E980A2CFDB4080053F860 /* SetupTests.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = SetupTests.md; sourceTree = "<group>"; };
+		ED2E98372CFDE0180053F860 /* MonCinePhoriaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonCinePhoriaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED2E98462CFE01950053F860 /* MonCinePhoriaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MonCinePhoriaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED2E98512CFE08B30053F860 /* MonCinePhoriaUITests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; name = MonCinePhoriaUITests.xctestplan; path = MonCinePhoriaUITests/MonCinePhoriaUITests.xctestplan; sourceTree = "<group>"; };
 		ED35A9DB2CF1C67D00A2145B /* MonCinePhoria.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MonCinePhoria.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED698BF92CFC91EB00BC9C73 /* ChangeName.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = ChangeName.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -26,7 +51,30 @@
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		EDE3E7F62D00BE2000EF9A93 /* Exceptions for "MonCinePhoriaUITests" folder in "Copy Bundle Resources" phase from "MonCinePhoriaUITests" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = ED2E98442CFE01950053F860 /* Resources */;
+			membershipExceptions = (
+				Test.entitlements,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		ED2E98382CFDE0180053F860 /* MonCinePhoriaTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = MonCinePhoriaTests;
+			sourceTree = "<group>";
+		};
+		ED2E98472CFE01950053F860 /* MonCinePhoriaUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EDE3E7F62D00BE2000EF9A93 /* Exceptions for "MonCinePhoriaUITests" folder in "Copy Bundle Resources" phase from "MonCinePhoriaUITests" target */,
+			);
+			path = MonCinePhoriaUITests;
+			sourceTree = "<group>";
+		};
 		ED35A9DD2CF1C67D00A2145B /* MonCinePhoria */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -38,11 +86,28 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		ED2E98342CFDE0180053F860 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED2E98432CFE01950053F860 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EDE3E7EE2D00B23E00EF9A93 /* Giffy in Frameworks */,
+				EDE3E7EC2D00B21500EF9A93 /* Giffy in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ED35A9D82CF1C67D00A2145B /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				ED2B32302CF38EA700A72F54 /* Giffy in Frameworks */,
+				EDDAB3712D00AB68000A4DA6 /* FLAnimatedImage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -52,8 +117,12 @@
 		ED35A9D22CF1C67D00A2145B = {
 			isa = PBXGroup;
 			children = (
+				ED2E98512CFE08B30053F860 /* MonCinePhoriaUITests.xctestplan */,
 				ED698BF92CFC91EB00BC9C73 /* ChangeName.md */,
+				ED2E980A2CFDB4080053F860 /* SetupTests.md */,
 				ED35A9DD2CF1C67D00A2145B /* MonCinePhoria */,
+				ED2E98382CFDE0180053F860 /* MonCinePhoriaTests */,
+				ED2E98472CFE01950053F860 /* MonCinePhoriaUITests */,
 				ED35A9DC2CF1C67D00A2145B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -62,6 +131,8 @@
 			isa = PBXGroup;
 			children = (
 				ED35A9DB2CF1C67D00A2145B /* MonCinePhoria.app */,
+				ED2E98372CFDE0180053F860 /* MonCinePhoriaTests.xctest */,
+				ED2E98462CFE01950053F860 /* MonCinePhoriaUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -69,6 +140,54 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		ED2E98362CFDE0180053F860 /* MonCinePhoriaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ED2E983D2CFDE0180053F860 /* Build configuration list for PBXNativeTarget "MonCinePhoriaTests" */;
+			buildPhases = (
+				ED2E98332CFDE0180053F860 /* Sources */,
+				ED2E98342CFDE0180053F860 /* Frameworks */,
+				ED2E98352CFDE0180053F860 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ED2E983C2CFDE0180053F860 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				ED2E98382CFDE0180053F860 /* MonCinePhoriaTests */,
+			);
+			name = MonCinePhoriaTests;
+			packageProductDependencies = (
+			);
+			productName = MonCinePhoriaTests;
+			productReference = ED2E98372CFDE0180053F860 /* MonCinePhoriaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		ED2E98452CFE01950053F860 /* MonCinePhoriaUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ED2E984E2CFE01950053F860 /* Build configuration list for PBXNativeTarget "MonCinePhoriaUITests" */;
+			buildPhases = (
+				ED2E98422CFE01950053F860 /* Sources */,
+				ED2E98432CFE01950053F860 /* Frameworks */,
+				ED2E98442CFE01950053F860 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				ED2E984D2CFE01950053F860 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				ED2E98472CFE01950053F860 /* MonCinePhoriaUITests */,
+			);
+			name = MonCinePhoriaUITests;
+			packageProductDependencies = (
+				EDE3E7EB2D00B21500EF9A93 /* Giffy */,
+				EDE3E7ED2D00B23E00EF9A93 /* Giffy */,
+			);
+			productName = MonCinePhoriaUITests;
+			productReference = ED2E98462CFE01950053F860 /* MonCinePhoriaUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 		ED35A9DA2CF1C67D00A2145B /* MonCinePhoria */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = ED35A9E92CF1C68400A2145B /* Build configuration list for PBXNativeTarget "MonCinePhoria" */;
@@ -87,6 +206,7 @@
 			name = MonCinePhoria;
 			packageProductDependencies = (
 				ED2B322F2CF38EA700A72F54 /* Giffy */,
+				EDDAB3702D00AB68000A4DA6 /* FLAnimatedImage */,
 			);
 			productName = CinePhoriaTest;
 			productReference = ED35A9DB2CF1C67D00A2145B /* MonCinePhoria.app */;
@@ -102,6 +222,14 @@
 				LastSwiftUpdateCheck = 1610;
 				LastUpgradeCheck = 1610;
 				TargetAttributes = {
+					ED2E98362CFDE0180053F860 = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = ED35A9DA2CF1C67D00A2145B;
+					};
+					ED2E98452CFE01950053F860 = {
+						CreatedOnToolsVersion = 16.1;
+						TestTargetID = ED35A9DA2CF1C67D00A2145B;
+					};
 					ED35A9DA2CF1C67D00A2145B = {
 						CreatedOnToolsVersion = 16.1;
 					};
@@ -118,6 +246,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				ED2B322E2CF38EA700A72F54 /* XCRemoteSwiftPackageReference "Giffy" */,
+				EDDAB36F2D00AB68000A4DA6 /* XCRemoteSwiftPackageReference "FLAnimatedImage" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ED35A9DC2CF1C67D00A2145B /* Products */;
@@ -125,15 +254,32 @@
 			projectRoot = "";
 			targets = (
 				ED35A9DA2CF1C67D00A2145B /* MonCinePhoria */,
+				ED2E98362CFDE0180053F860 /* MonCinePhoriaTests */,
+				ED2E98452CFE01950053F860 /* MonCinePhoriaUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		ED2E98352CFDE0180053F860 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED2E98442CFE01950053F860 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ED35A9D92CF1C67D00A2145B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ED2E980B2CFDB4080053F860 /* SetupTests.md in Resources */,
 				ED698BFA2CFC91EB00BC9C73 /* ChangeName.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -141,6 +287,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		ED2E98332CFDE0180053F860 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		ED2E98422CFE01950053F860 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		ED35A9D72CF1C67D00A2145B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -150,7 +310,90 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		ED2E983C2CFDE0180053F860 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ED35A9DA2CF1C67D00A2145B /* MonCinePhoria */;
+			targetProxy = ED2E983B2CFDE0180053F860 /* PBXContainerItemProxy */;
+		};
+		ED2E984D2CFE01950053F860 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ED35A9DA2CF1C67D00A2145B /* MonCinePhoria */;
+			targetProxy = ED2E984C2CFE01950053F860 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		ED2E983E2CFDE0180053F860 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z5R7RAJTVS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.db2db.MonCinePhoriaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MonCinePhoria.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MonCinePhoria";
+			};
+			name = Debug;
+		};
+		ED2E983F2CFDE0180053F860 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z5R7RAJTVS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.db2db.MonCinePhoriaTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MonCinePhoria.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/MonCinePhoria";
+			};
+			name = Release;
+		};
+		ED2E984F2CFE01950053F860 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z5R7RAJTVS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.db2db.MonCinePhoriaUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MonCinePhoria;
+			};
+			name = Debug;
+		};
+		ED2E98502CFE01950053F860 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z5R7RAJTVS;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.db2db.MonCinePhoriaUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MonCinePhoria;
+			};
+			name = Release;
+		};
 		ED35A9E72CF1C68400A2145B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -211,6 +454,8 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				"SWIFT_SKIP_AUTOLINKING_FRAMEWORKS[arch=*]" = No;
+				"SWIFT_SKIP_AUTOLINKING_LIBRARIES[arch=*]" = No;
 			};
 			name = Debug;
 		};
@@ -275,6 +520,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MonCinePhoria/MonCinePhoria.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MonCinePhoria/Preview Content\"";
@@ -306,6 +552,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = MonCinePhoria/MonCinePhoria.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"MonCinePhoria/Preview Content\"";
@@ -335,6 +582,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		ED2E983D2CFDE0180053F860 /* Build configuration list for PBXNativeTarget "MonCinePhoriaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED2E983E2CFDE0180053F860 /* Debug */,
+				ED2E983F2CFDE0180053F860 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ED2E984E2CFE01950053F860 /* Build configuration list for PBXNativeTarget "MonCinePhoriaUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				ED2E984F2CFE01950053F860 /* Debug */,
+				ED2E98502CFE01950053F860 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		ED35A9D62CF1C67D00A2145B /* Build configuration list for PBXProject "MonCinePhoria" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -364,12 +629,33 @@
 				kind = branch;
 			};
 		};
+		EDDAB36F2D00AB68000A4DA6 /* XCRemoteSwiftPackageReference "FLAnimatedImage" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Flipboard/FLAnimatedImage";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.17;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		ED2B322F2CF38EA700A72F54 /* Giffy */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = ED2B322E2CF38EA700A72F54 /* XCRemoteSwiftPackageReference "Giffy" */;
+			productName = Giffy;
+		};
+		EDDAB3702D00AB68000A4DA6 /* FLAnimatedImage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EDDAB36F2D00AB68000A4DA6 /* XCRemoteSwiftPackageReference "FLAnimatedImage" */;
+			productName = FLAnimatedImage;
+		};
+		EDE3E7EB2D00B21500EF9A93 /* Giffy */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Giffy;
+		};
+		EDE3E7ED2D00B23E00EF9A93 /* Giffy */ = {
+			isa = XCSwiftPackageProductDependency;
 			productName = Giffy;
 		};
 /* End XCSwiftPackageProductDependency section */

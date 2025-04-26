@@ -16,6 +16,7 @@ struct FutureView: View {
                 .font(customFont(style: .title3))
                 .foregroundStyle(.bleuNuitPrimaire)
                 .multilineTextAlignment(.center)
+                .accessibilityIdentifier("QRCode")
         }
         .frame(width: 150, height: 150)
         .padding(10)
@@ -41,6 +42,7 @@ struct ToEvaluateView: View {
                 .font(customFont(style: .title3))
                 .foregroundStyle(.bleuNuitPrimaire)
                 .multilineTextAlignment(.center)
+                .accessibilityIdentifier("ToEvaluate")
         }
         .frame(width: 150, height: 150)
         .padding(10)
@@ -70,8 +72,7 @@ struct EvaluatedView: View {
                 .font(customFont(style: .headline))
                 .frame(width: 150, height: 40)
                 .foregroundStyle(.doréAccentuation)
-//                .background(.bleuNuitPrimaire) // Remplacez par `.bleuNuitPrimaire`
-//                .clipShape(CustomCornerRadiusShape(radius: 10, corners: [.topLeft, .topRight]))
+                .accessibilityIdentifier("Evaluated")
 
             VStack(spacing: 0) {
                 if let evaluation = evaluation {
@@ -83,6 +84,7 @@ struct EvaluatedView: View {
                             .bold()
                             .padding(10)
                             .frame(maxWidth: .infinity, alignment: .center)
+                            .accessibilityIdentifier("EvaluationValue")
                     }
                     .frame(width: 150, height: 100) // Limite la hauteur
                 }
@@ -93,6 +95,7 @@ struct EvaluatedView: View {
                         .frame(width: 150, height: 20)
                         .foregroundStyle(.white)
                         .background(.doréAccentuation)
+                        .accessibilityIdentifier("NoteValue")
                 }
             }
             .clipShape(CustomCornerRadiusShape(radius: 10, corners: [.bottomLeft, .bottomRight])) // Coins arrondis
@@ -116,7 +119,7 @@ struct EvaluatedView: View {
 ///  doneEvaluated :  la réservation est passée et il y a une évaluation, on affiche l'évaluation sans action
 struct ActionsView: View {
     
-    var reservation: Reservation
+    @ObservedObject var reservation: Reservation
 
     var body: some View {
         switch reservation.stateReservation {

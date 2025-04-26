@@ -1,19 +1,21 @@
 # macOS files
-.DS_Store
+**/.DS_Store
 
 # Build artifacts
-build/
-DerivedData/
+**/build/
+**/DerivedData/
 
 # Logs
-*.log
+**/*.log
+
+# Script systems
+**/*.sh
 
 # Xcode specific files
 CinePhoria mobile/MonCinePhoria.xcodeproj/project.xcworkspace/xcuserdata/*/UserInterfaceState.xcuserstate
-CinePhoriai\ mobile/MonCinePhoria.xcodeproj/project.xcworkspace/xcuserdata/*/UserInterfaceState.xcuserstate
 xcuserdata/               # Exclut les préférences utilisateur
 *.xcuserdatad/            # Préférences utilisateur supplémentaires
-*.xcuserstate             # État local de l'utilisateur
+**/*.xcuserstate             # État local de l'utilisateur
 xcdebugger/               # Données de débogage locales
 
 # Swift Package Manager
@@ -34,3 +36,26 @@ Carthage/Build/
 # CocoaPods
 Pods/
 Podfile.lock
+
+#Saas
+CinePhoria\ site/saas/
+
+
+# Exclure le répertoire node_modules pour tous les sous-répertoires
+**/node_modules/
+
+# Exclure les fichiers Sass compilés si nécessaire
+**/*.css.map
+
+# Exclure les fichiers de logs générés par npm ou d'autres outils
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Exclure les fichiers système spécifiques à macOS
+.DS_Store
+
+# Exclure les fichiers temporaires
+*.tmp
+*.swp
+

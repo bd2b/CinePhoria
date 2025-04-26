@@ -55,4 +55,21 @@ extension DataController {
             }
         }
     }
+    
+    /// Supprime la copie locale
+    func deleteReservationsToLocal() {
+        if let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = documentDirectory.appendingPathComponent(nameFileReservations)
+            
+            // Supprimer le fichier existant si nécessaire
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                do {
+                    try FileManager.default.removeItem(at: fileURL)
+                } catch {
+                    print("Erreur lors de la suppression du fichier local : \(error)")
+                }
+            }
+        }
+    }
+    
 }

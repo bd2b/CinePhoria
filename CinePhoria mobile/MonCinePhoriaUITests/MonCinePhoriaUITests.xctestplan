@@ -1,0 +1,44 @@
+{
+  "configurations" : [
+    {
+      "id" : "7CB02932-1FBE-4CAC-8EEB-3220330E55D4",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "diagnosticCollectionPolicy" : "Always",
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:MonCinePhoria.xcodeproj",
+      "identifier" : "ED35A9DA2CF1C67D00A2145B",
+      "name" : "MonCinePhoria"
+    },
+    "uiTestingScreenshotsLifetime" : "keepAlways",
+    "userAttachmentLifetime" : "keepAlways"
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "skippedTests" : [
+        "MonCinePhoriaUITests\/testLaunchPerformance()",
+        "MonCinePhoriaUITestsLaunchTests",
+        "MonCinePhoriaUITestsLaunchTests\/testLaunch()"
+      ],
+      "target" : {
+        "containerPath" : "container:MonCinePhoria.xcodeproj",
+        "identifier" : "ED2E98452CFE01950053F860",
+        "name" : "MonCinePhoriaUITests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:MonCinePhoria.xcodeproj",
+        "identifier" : "ED2E98362CFDE0180053F860",
+        "name" : "MonCinePhoriaTests"
+      }
+    }
+  ],
+  "version" : 1
+}

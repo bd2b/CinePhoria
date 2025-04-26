@@ -2,8 +2,8 @@
   {
     "id" : "412B6981-0C3C-456B-8026-A73937CDE536",
     "seance" : {
-      "hourEnd" : "16:00",
-      "hourBegin" : "14:50",
+      "hourEndHHSMM" : "16:00",
+      "hourBeginHHSMM" : "14:50",
       "date" : 754062600,
       "location" : "Salle 1",
       "qualite" : "3D",
@@ -50,9 +50,9 @@
       }
     ],
     "seance" : {
-      "hourBegin" : "14:50",
+      "hourBeginHHSMM" : "14:50",
       "bo" : "VF",
-      "hourEnd" : "16:00",
+      "hourEndHHSMM" : "16:00",
       "date" : 785598600,
       "location" : "Salle 1",
       "qualite" : "3D"
@@ -105,8 +105,8 @@
       "qualite" : "3D",
       "date" : 785598600,
       "location" : "Salle 1",
-      "hourBegin" : "14:50",
-      "hourEnd" : "16:00",
+      "hourBeginHHSMM" : "14:50",
+      "hourEndHHSMM" : "16:00",
       "bo" : "VF"
     },
     "seats" : [
@@ -160,8 +160,8 @@
     "seance" : {
       "qualite" : "3D",
       "date" : 785598600,
-      "hourBegin" : "14:50",
-      "hourEnd" : "16:00",
+      "hourBeginHHSMM" : "14:50",
+      "hourEndHHSMM" : "16:00",
       "bo" : "VF",
       "location" : "Salle 1"
     }

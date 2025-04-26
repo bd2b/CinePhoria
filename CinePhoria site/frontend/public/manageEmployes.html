@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sections/main-manageemployes.css">
+
+    <script type="module" src="dist/main.js" defer></script>
+
+    <title>CinePhoria</title>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="header__nav">
+            <div class="nav__logo ">
+                <a href="./visiteur.html">
+                    <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
+            </div>
+            <div class="nav__actions">
+
+            </div>
+            <div class="nav__mobile-menu" id="navMobileMenu">
+                <img src="assets/menu.svg" alt="Menu">
+            </div>
+
+            <div class="mobile-menu" id="mobileMenu">
+                <button class="mobile-menu__close" id="mobileMenuClose">&times;</button>
+                <nav class="mobile-menu__nav">
+
+                </nav>
+            </div>
+        </nav>
+    </header>
+    <main class="main main__container">
+        <div class="container__title">
+            <div class="title__left">
+                <h1 class="title__left-h1" id="titleLeft">Gérer les comptes</h1>
+            </div>
+            <div class="title__filters">
+                <div class="right__actions">
+                    <button class="title__right-button" id="title__right-button-Ajouter">Ajouter un compte <span
+                            class="plus">+</span></button>
+                    <button class="title__right-button" id="title__right-button-Modifier">Modifier <span
+                            class="plus">...</span></button>
+                    <button class="title__right-button" id="title__right-button-Annuler"
+                        style="display:none">Annuler</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container__employes">
+            <div class="employes__listEmployes">
+                <!-- Liste de cartes de employes (remplies dynamiquement par JS) -->
+            </div>
+            <div class="employes__detailEmploye">
+                <!-- formulaire de présentation employe (remplies dynamiquement par JS) -->
+                <div class="form-detailemploye">
+                    <div class="employe-details">
+                        <div class="detail-row">
+                            <div class="field-group">
+                                <div class="label">Matricule : <span style="color:red">*</span></div>
+                                <div class="field-value" id="matricule"></div>
+                            </div>
+                            <div class="field-group">
+                                <div class="label"> email : <span style="color:red">*</span></div>
+                                <div class="field-value" id="email"></div>
+                            </div>
+
+                        </div>
+                        <div class="detail-row">
+                            <div class="field-group">
+                                <div class="label">Nom : <span style="color:red">*</span></div>
+                                <div class="field-value" id="lastNameEmploye"></div>
+                            </div>
+                            <div class="field-group">
+                                <div class="label">Prénom : <span style="color:red">*</span></div>
+                                <div class="field-value" id="firstNameEmploye"></div>
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="field-group checkbox" display="flex">
+                                <div class="label">Administrateur ?</div>
+                                <input type="checkbox" id="isAdministrateur">
+                            </div>
+                        </div>
+    
+                        <div class="detail-row">
+                            <div class="field-group checkbox" display="flex">
+                                <div class="label">Paris : </div>
+                                <input type="checkbox" id="Paris">
+                            </div>
+                            <div class="field-group checkbox" display="flex">
+                                <div class="label">Bordeaux : </div>
+                                <input type="checkbox" id="Bordeaux">
+                            </div>
+                            <div class="field-group checkbox" display="flex">
+                                <div class="label">Nantes : </div>
+                                <input type="checkbox" id="Nantes">
+                            </div>
+                            <div class="field-group checkbox" display="flex">
+                                <div class="label">Lille : </div>
+                                <input type="checkbox" id="Lille">
+                            </div>
+                            <div class="field-group checkbox" display="flex">
+                                <div class="label">Toulouse : </div>
+                                <input type="checkbox" id="Toulouse">
+                            </div>
+                            <div class="field-group checkbox" display="flex">
+                                <div class="label">Charleroi : </div>
+                                <input type="checkbox" id="Charleroi">
+                            </div>
+                            <div class="field-group checkbox" display="flex">
+                                <div class="label">Liège : </div>
+                                <input type="checkbox" id="Liège">
+                            </div>
+                        </div>
+
+                        
+
+                        <div class="detail-row passwordEdit">
+                            <div class="field-group">
+                                <div class="label">Mot de passe : <span class="span-password" style="color:red">*</span></div>
+                                <input type="password" class="field-value" id="firstPassword">
+                            </div>
+                            <div class="field-group">
+                                <div class="label">Confirmez le mot de passe : <span class="span-password" style="color:red">*</span></div>
+                                <input type="password" class="field-value" id="confirmPassword">
+                            </div>
+                        </div>
+                        <div class="detail-row">
+                            <div class="field-group" display="flex">
+                                <div class="label" id="messageErreur"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="footer" id="footer">
+    </footer>
+</body>
+
+</html>
