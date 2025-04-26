@@ -85,7 +85,7 @@ export class UtilisateurDAO {
     const passwordHashed = await hashPassword(newPWD);
     try {
       const result = connection.query(
-        `UPDATE COMPTE 
+        `UPDATE Compte 
           SET passwordText = ?,
               datePassword = NOW(),
               oldPasswordsArray = CONCAT(oldPasswordsArray,',',passwordText)
@@ -101,7 +101,6 @@ export class UtilisateurDAO {
     } finally {
       await connection.end();
     }
-
   }
 
 
@@ -301,7 +300,7 @@ export class UtilisateurDAO {
   static async findById(id: string): Promise<UtilisateurCompte | null> {
     const connection = await mysql.createConnection(dbConfig);
     logger.info('Connexion réussie à la base de données');
-    const [rows] = await connection.execute('select id, compte.email as email, displayName, dateDerniereConnexion, datePassword, oldPasswordsArray from Utilisateur inner join Compte on compte.email = utilisateur.email  where id = ? ;', [id]);
+    const [rows] = await connection.execute('SELECT id, Compte.email as email, displayName, dateDerniereConnexion, datePassword, oldPasswordsArray FROM Utilisateur INNER JOIN Compte ON Compte.email = Utilisateur.email WHERE id = ? ;', [id]);
     await connection.end();
 
     const data = (rows as any[])[0];
@@ -309,7 +308,7 @@ export class UtilisateurDAO {
   }
 
   /**
-   * Recherche de la valeur de viewComptePersonne correspondant à ident
+   * Recherche de la valeur de ViewComptePersonne correspondant à ident
    * @param ident peut etre utilisateur.id, compte.email, employe.matricule
    * @returns 
    */
@@ -318,15 +317,13 @@ export class UtilisateurDAO {
     logger.info('Connexion réussie à la base de données');
     let requete = ""
     if (validateEmail(ident)) {
-      requete = 'select * from viewComptePersonne where email = ? ;';
+      requete = 'SELECT * FROM ViewComptePersonne WHERE email = ? ;';
       logger.info("Recherche par email = " + ident);
-
     } else if (isUUID(ident)) {
-      requete = 'select * from viewComptePersonne where utilisateurid = ? ;';
+      requete = 'SELECT * FROM ViewComptePersonne WHERE utilisateurid = ? ;';
       logger.info("Recherche par id = " + ident);
-
     } else {
-      requete = 'select * from viewComptePersonne where matricule = ? ;';
+      requete = 'SELECT * FROM ViewComptePersonne WHERE matricule = ? ;';
       logger.info("Recherche par matricule = " + ident);
     }
     const [rows] = await connection.execute(requete, [ident]);
@@ -339,7 +336,7 @@ export class UtilisateurDAO {
   static async findByMail(email: string): Promise<UtilisateurCompte | null> {
     const connection = await mysql.createConnection(dbConfig);
     logger.info('Connexion réussie à la base de données');
-    const [rows] = await connection.execute('select id, compte.email as email, displayName, dateDerniereConnexion, datePassword, oldPasswordsArray from Utilisateur inner join Compte on compte.email = utilisateur.email  where utilisateur.email = ? ;', [email]);
+    const [rows] = await connection.execute('SELECT id, Compte.email as email, displayName, dateDerniereConnexion, datePassword, oldPasswordsArray FROM Utilisateur INNER JOIN Compte ON Compte.email = Utilisateur.email WHERE Utilisateur.email = ? ;', [email]);
     await connection.end();
 
     const data = (rows as any[])[0];
@@ -550,14 +547,14 @@ export class UtilisateurDAO {
 
 
   /**
-   * Recherche des employés v la valeur de viewComptePersonne correspondant à ident
+   * Recherche des employés v la valeur de ViewComptePersonne correspondant à ident
    * @param ident peut etre utilisateur.id, compte.email, employe.matricule
    * @returns 
    */
   static async getEmployesComptes(): Promise<ComptePersonne[] | []> {
     const connection = await mysql.createConnection(dbConfig);
     logger.info('Connexion réussie à la base de données');
-    let requete = 'select * from viewComptePersonne where matricule is not null;';
+    let requete = 'SELECT * FROM ViewComptePersonne WHERE matricule IS NOT NULL;';
 
     const [rows] = await connection.execute(requete);
     await connection.end();
@@ -570,7 +567,7 @@ export class UtilisateurDAO {
   static async getEmployeByMatricule(matricule: string): Promise<ComptePersonne | null> {
     const connection = await mysql.createConnection(dbConfig);
     logger.info('Connexion réussie à la base de données');
-    const requete = 'select * from viewComptePersonne where matricule = ?;';
+    const requete = 'SELECT * FROM ViewComptePersonne WHERE matricule = ?;';
     const [rows] = await connection.execute((requete), [matricule]);
     await connection.end();
 

@@ -136,13 +136,13 @@ INSERT INTO Cinema
   ligne1,
   ligne2) 
 VALUES 
-  ("Paris", "10 rue de la Paix", "Paris", "F-75000", "cinephoriaParis@mail.fr", "+33 1 45 25 70 00","Première séance : 13h","7j sur 7"),
-  ("Toulouse", "10 rue Matabiau", "Toulouse", "F-31000", "cinephoriaToulous@email.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
-  ("Nantes", "1, avenue des déportés", "Nantes", "F-44000", "cinephoriaNantes@mail.fr", "+33 4 40 23 10 12","Première séance : 13h","7j sur 7"),
-  ("Lille", "10 boulevard du Général de Gaulle", "Lille", "F-59000", "cinephoriaLille@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
-  ("Bordeaux", "99 rue Sainte-Catherine", "Bordeaux", "F-33000", "cinephoriaBordeaux@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
-  ("Liège", "10 rue de Charleroi", "Liège", "B-0100", "cinephoriaLiège@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
-  ("Charleroi", "70 rue de Liège", "Charleroi", "B-0200", "cinephoriaCharleroi@mail.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7")
+  ("Paris", "10 rue de la Paix", "Paris", "F-75000", "cinephoriaParis@7art.fr", "+33 1 45 25 70 00","Première séance : 13h","7j sur 7"),
+  ("Toulouse", "10 rue Matabiau", "Toulouse", "F-31000", "cinephoriaToulous@e7art.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Nantes", "1, avenue des déportés", "Nantes", "F-44000", "cinephoriaNantes@7art.fr", "+33 4 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Lille", "10 boulevard du Général de Gaulle", "Lille", "F-59000", "cinephoriaLille@7art.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Bordeaux", "99 rue Sainte-Catherine", "Bordeaux", "F-33000", "cinephoriaBordeaux@7art.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Liège", "10 rue de Charleroi", "Liège", "B-0100", "cinephoriaLiège@7art.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7"),
+  ("Charleroi", "70 rue de Liège", "Charleroi", "B-0200", "cinephoriaCharleroi@7art.fr", "+33 5 40 23 10 12","Première séance : 13h","7j sur 7")
   ;
   
 INSERT INTO Compte
@@ -152,26 +152,26 @@ INSERT INTO Compte
   datePassword, 
   oldpasswordsArray) 
 VALUES 
-  ("djamila@mail.fr"		, 1, "password", "2024-12-01 08:00:00", "abcd12345"),
-  ("jean@mail.fr"			, 1, "password", "2024-12-02 08:00:00", "abcd12345"),
-  ("kevin@mail.fr"			, 1, "password", "2024-12-03 08:00:00", "abcd12345"),
-  ("administrateur@mail.fr"	, 1, "password", "2024-12-04 08:00:00", "abcd12345"),
-  ("employeParis@mail.fr"	, 1, "password", "2024-12-05 08:00:00", "abcd12345"),
-  ("employeToulouse@mail.fr", 1, "password", "2024-12-06 08:00:00", "abcd12345"),
-  ("employeBelgique@mail.fr", 1, "password", "2024-12-07 08:00:00", "abcd12345"),
-  ("nonvalide@mail.fr"		, 0, "", null , "")
+  ("djamila@7art.fr"		, 1, "password", "2024-12-01 08:00:00", "abcd12345"),
+  ("jean@7art.fr"			, 1, "password", "2024-12-02 08:00:00", "abcd12345"),
+  ("kevin@7art.fr"			, 1, "password", "2024-12-03 08:00:00", "abcd12345"),
+  ("administrateur@7art.fr"	, 1, "password", "2024-12-04 08:00:00", "abcd12345"),
+  ("employeParis@7art.fr"	, 1, "password", "2024-12-05 08:00:00", "abcd12345"),
+  ("employeToulouse@7art.fr", 1, "password", "2024-12-06 08:00:00", "abcd12345"),
+  ("employeBelgique@7art.fr", 1, "password", "2024-12-07 08:00:00", "abcd12345"),
+  ("nonvalide@7art.fr"		, 0, "", null , "")
   ;
 INSERT INTO Connexions
   ( email, dateConnexion
  ) 	
 VALUES 
-("djamila@mail.fr"		, "2024-12-01 15:30:00"),
-("jean@mail.fr"			, "2024-12-01 15:30:00"),
-("kevin@mail.fr"			, "2024-12-01 15:30:00"),
-("administrateur@mail.fr"	, "2024-12-01 15:30:00"),
-("employeParis@mail.fr"	, "2024-12-01 15:30:00"),
-("employeToulouse@mail.fr", "2024-12-01 15:30:00"),
-("employeBelgique@mail.fr", "2024-12-01 15:30:00")
+("djamila@7art.fr"		, "2024-12-01 15:30:00"),
+("jean@7art.fr"			, "2024-12-01 15:30:00"),
+("kevin@7art.fr"			, "2024-12-01 15:30:00"),
+("administrateur@7art.fr"	, "2024-12-01 15:30:00"),
+("employeParis@7art.fr"	, "2024-12-01 15:30:00"),
+("employeToulouse@7art.fr", "2024-12-01 15:30:00"),
+("employeBelgique@7art.fr", "2024-12-01 15:30:00")
 ;
 
 INSERT INTO Employe
@@ -181,10 +181,10 @@ INSERT INTO Employe
   lastnameEmploye, 
   firstnameEmploye) 
 VALUES 
-  (202512, "administrateur@mail.fr" , 1 , "Durand" , "Charlotte"),
-  (202513, "employeParis@mail.fr" , 0 , "Martin" , "Pauline"),
-  (202514, "employeToulouse@mail.fr" , 0 , "Noir" , "Pierre"),
-  (202515, "employeBelgique@mail.fr" , 0 , "Blanc" , "André")
+  (202512, "administrateur@7art.fr" , 1 , "Durand" , "Charlotte"),
+  (202513, "employeParis@7art.fr" , 0 , "Martin" , "Pauline"),
+  (202514, "employeToulouse@7art.fr" , 0 , "Noir" , "Pierre"),
+  (202515, "employeBelgique@7art.fr" , 0 , "Blanc" , "André")
   ;
 INSERT INTO Employe_Cinema
   (nameCinema, 
@@ -205,9 +205,9 @@ INSERT INTO Utilisateur
   email, 
   displayName) 
 VALUES 
-  (UUIDUtilisateur1, "djamila@mail.fr" , "Djamila"),
-  (UUIDUtilisateur2, "jean@mail.fr" , "Cinephile toujours"),
-  (UUIDUtilisateur3, "kevin@mail.fr" , "KeChe")
+  (UUIDUtilisateur1, "djamila@7art.fr" , "Djamila"),
+  (UUIDUtilisateur2, "jean@7art.fr" , "Cinephile toujours"),
+  (UUIDUtilisateur3, "kevin@7art.fr" , "KeChe")
 ;
 
 

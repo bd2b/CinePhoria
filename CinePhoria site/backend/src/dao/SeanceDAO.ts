@@ -120,11 +120,11 @@ export class SeanceDAO {
     // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation
     const [rows] = await connection.execute(
       `SELECT siegesReserves
-     FROM viewseancesiegesreserves 
+     FROM ViewSeanceSiegesReserves 
      WHERE seanceId = ? LIMIT 1`,
       [p_seanceId]
     );
-    logger.info(`SELECT siegesReserves FROM viewseancesiegesreserves WHERE seanceId = ${p_seanceId}`);
+    logger.info(`SELECT siegesReserves FROM ViewSeanceSiegesReserves WHERE seanceId = ${p_seanceId}`);
     await connection.end();
 
     // Map des lignes pour les convertir en instances de string

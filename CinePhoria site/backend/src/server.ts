@@ -1,12 +1,15 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: './.env' });
-
 import express from 'express';
 import cors from 'cors';
 import logger  from './config/configLog';
 import sanitizeQueryMiddleware from './middlewares/sanitiseQueryMiddleware';
 import fileUpload from 'express-fileupload';
 
+
+import dotenv from 'dotenv';
+dotenv.config({ path: './.env' });
+
+const mode = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
+console.log(`🛠️ Mode actuel : ${mode}`);
 // Connexion à la base MongoDB
 import { connectDBMongo } from './config/config';
 connectDBMongo()

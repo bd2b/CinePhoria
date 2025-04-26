@@ -8,6 +8,9 @@
 # Logs
 **/*.log
 
+# Script systems
+**/*.sh
+
 # Xcode specific files
 CinePhoriai\ mobile/MonCinePhoria.xcodeproj/project.xcworkspace/xcuserdata/*/UserInterfaceState.xcuserstate
 xcuserdata/               # Exclut les préférences utilisateur

@@ -1,0 +1,36 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const filmController_1 = require("../controllers/filmController");
+const afficheController_1 = require("../controllers/afficheController");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const configLog_1 = __importDefault(require("../config/configLog"));
+const router = (0, express_1.Router)();
+// /api/films
+router.get('/sorties', filmController_1.FilmController.getSortiesDeLaSemaine);
+configLog_1.default.info('Declaration route POST /api/films/affiche');
+router.post('/affiche', afficheController_1.AfficheController.create);
+configLog_1.default.info('Declaration route GET /api/films/affiche');
+router.get('/affiche', afficheController_1.AfficheController.getAll);
+configLog_1.default.info('Declaration route GET /api/films/affiche/:filmId');
+router.get('/affiche/:filmId', afficheController_1.AfficheController.getById);
+configLog_1.default.info('Declaration route GET /api/films/affichefile/:filmId');
+router.get('/affichefile/:filmId', afficheController_1.AfficheController.getImageById);
+configLog_1.default.info('Declaration route PUT /api/films/affiche/:filmId');
+router.put('/affiche/:filmId', afficheController_1.AfficheController.update);
+configLog_1.default.info('Declaration route DELETE /api/films/affiche/:filmId');
+router.delete('/affiche/:filmId', afficheController_1.AfficheController.delete);
+configLog_1.default.info('Declaration route GET /api/films/');
+router.get('/', authMiddleware_1.authenticateJWT, filmController_1.FilmController.getAllFilms);
+configLog_1.default.info('Declaration route POST /api/films');
+router.post('/', authMiddleware_1.authenticateJWT, filmController_1.FilmController.createFilm);
+configLog_1.default.info('Declaration route /api/films/:id');
+router.get('/:id', authMiddleware_1.authenticateJWT, filmController_1.FilmController.getFilmById);
+configLog_1.default.info('Declaration route PUT /api/films/:id');
+router.put('/:id', authMiddleware_1.authenticateJWT, filmController_1.FilmController.updateFilm);
+configLog_1.default.info('Declaration route DELETE /api/films/:id');
+router.delete('/:id', authMiddleware_1.authenticateJWT, filmController_1.FilmController.deleteFilm);
+exports.default = router;
