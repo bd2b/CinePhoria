@@ -11,7 +11,9 @@ import { onLoadManageAvis } from "./ViewManageAvis.js";
 import { onLoadManageEmployes } from "./ViewManageEmploye.js";
 import { onLoadDashboard } from "./ViewDashboard.js";
 
-
+export const DEVELOPPEMENT = true;
+export const urlBackProd = "https://http://regn.freeboxos.fr:3500";
+export const urlBackDev = "http://localhost:3500";
 
 const pageHandlers: Record<string, () => void> = {
     "visiteur.html": onLoadVisiteur,

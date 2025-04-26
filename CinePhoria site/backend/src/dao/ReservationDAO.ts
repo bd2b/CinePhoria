@@ -155,11 +155,11 @@ export class ReservationDAO {
       // Étape 1 : Récupérer les informations des reservations dans la base pour l'utilisateur donné
       const [rows] = await connection.execute(
         `SELECT *
-     FROM viewutilisateurreservation 
+     FROM ViewUtilisateurReservation 
      WHERE utilisateurId = ?`,
         [p_utilisateurId]
       );
-      logger.info(`SELECT * FROM viewutilisateurreservation WHERE utilisateurId = ${p_utilisateurId}`);
+      logger.info(`SELECT * FROM ViewUtilisateurReservation WHERE utilisateurId = ${p_utilisateurId}`);
       await connection.end();
 
       // Map des lignes pour les convertir en instances de Seance
@@ -175,11 +175,11 @@ export class ReservationDAO {
     // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation
     const [rows] = await connection.execute(
       `SELECT *
-     FROM viewutilisateurreservation 
+     FROM ViewUtilisateurReservation 
      WHERE reservationId = ? LIMIT 1`,
       [p_reservationId]
     );
-    logger.info(`SELECT * FROM viewutilisateurreservation WHERE reservationId = ${p_reservationId}`);
+    logger.info(`SELECT * FROM ViewUtilisateurReservation WHERE reservationId = ${p_reservationId}`);
     await connection.end();
 
     // Map des lignes pour les convertir en instances de Seance
@@ -194,12 +194,12 @@ export class ReservationDAO {
       requete = `
       SELECT 
         *
-      FROM viewutilisateurreservation `;
+      FROM ViewUtilisateurReservation `;
     } else {
       requete = `
         SELECT 
         *
-      FROM viewutilisateurreservation 
+      FROM ViewUtilisateurReservation 
       WHERE nameCinema in (${nameCinemaList})`;
     }
     logger.info(`Exécution de la requête : ${requete}`);
@@ -267,7 +267,7 @@ export class ReservationDAO {
       `SELECT 
       SeatsForTarif.numberSeats as numberSeats,
       TarifQualite.nameTarif as nameTarif,
-      TarifQUalite.price as price
+      TarifQualite.price as price
     
     FROM Reservation
     JOIN SeatsForTarif ON Reservation.id = SeatsForTarif.ReservationId
@@ -276,7 +276,7 @@ export class ReservationDAO {
     WHERE Reservation.id = ?`,
       [p_reservationId]
     );
-    logger.info(`SELECT * FROM viewutilisateurreservation WHERE reservationId = ${p_reservationId}`);
+    logger.info(`SELECT * FROM ViewUtilisateurReservation WHERE reservationId = ${p_reservationId}`);
     await connection.end();
 
     // Map des lignes pour les convertir en liste de places avec tarif
@@ -359,8 +359,8 @@ export class ReservationDAO {
   static async getReservationStatsAll(): Promise<ReservationStats[]> {
 
     const connection = await mysql.createConnection(dbConfig);
-    logger.info('Exécution de la requête : SELECT * FROM viewfilmreservationdate');
-    const [rows] = await connection.execute('SELECT * FROM viewfilmreservationdate');
+    logger.info('Exécution de la requête : SELECT * FROM ViewFilmReservationDate');
+    const [rows] = await connection.execute('SELECT * FROM ViewFilmReservationDate');
     await connection.end();
 
     // On convertit chaque record en SeanceSeule

@@ -8,9 +8,6 @@
 import logger from '../config/configLog';
 import mongoose from 'mongoose';
 
-export const currentEnv = process.env.NODE_ENV || 'development';
-logger.info(`Environnement actif : '${currentEnv}'`);
-
 // Exporter la configuration de la base de données
 export const dbConfig = {
   host: process.env.DB_HOST || 'localhost',

@@ -145,11 +145,11 @@ CREATE TABLE Utilisateur (
 CREATE VIEW ViewComptePersonne AS
 
 SELECT 
-	compte.email, 
-	compte.dateDerniereConnexion,
-    compte.isValidated,
-    utilisateur.id as utilisateurid,
-    utilisateur.displayName as utilisateurDisplayName,
+	Compte.email, 
+	Compte.dateDerniereConnexion,
+    Compte.isValidated,
+    Utilisateur.id as utilisateurid,
+    Utilisateur.displayName as utilisateurDisplayName,
     null as matricule,
     null as isAdministrateur,
     null as lastnameEmploye,
@@ -157,31 +157,31 @@ SELECT
     null as listCinemas,
     (select count(*)
 		FROM Connexions
-        where email = compte.email) as numConnexions
+        where email = Compte.email) as numConnexions
 FROM Compte
-JOIN Utilisateur ON compte.email = utilisateur.email
+JOIN Utilisateur ON Compte.email = Utilisateur.email
 
 UNION
 
 SELECT 
-compte.email, 
-	compte.dateDerniereConnexion,
-    compte.isValidated,
+Compte.email, 
+	Compte.dateDerniereConnexion,
+    Compte.isValidated,
     Null as utilisateurid,
     Null as utilisateurdisplayName,
-    employe.matricule as matricule,
-    employe.isAdministrateur as isAdministrateur,
-    employe.lastnameEmploye as lastnameEmploye,
-    employe.firstnameEmploye as firstnameEmploye, 
+    Employe.matricule as matricule,
+    Employe.isAdministrateur as isAdministrateur,
+    Employe.lastnameEmploye as lastnameEmploye,
+    Employe.firstnameEmploye as firstnameEmploye, 
     (SELECT GROUP_CONCAT(nameCinema)
                     FROM Employe_Cinema
-                    WHERE matricule = employe.matricule) as listCinemas,
+                    WHERE matricule = Employe.matricule) as listCinemas,
 	(select count(*)
 		FROM Connexions
-        where email = compte.email) as numConnexions
+        where email = Compte.email) as numConnexions
 FROM Compte
-JOIN Employe ON compte.email = employe.email
-JOIN Employe_Cinema ON employe.matricule = employe_cinema.matricule;
+JOIN Employe ON Compte.email = Employe.email
+JOIN Employe_Cinema ON Employe.matricule = Employe_Cinema.matricule;
 CREATE VIEW ViewFilmReservationDate AS
     SELECT filmTitre, jour, SUM(Places) AS totalPlaces
 FROM (
@@ -191,8 +191,8 @@ FROM (
         SeatsForTarif.numberSeats AS Places
     FROM Reservation
     INNER JOIN SeatsForTarif ON Reservation.id = SeatsForTarif.ReservationId
-    INNER JOIN Seance ON Reservation.SeanceId = Seance.id
-    INNER JOIN Film ON Seance.FilmId = Film.id
+    INNER JOIN Seance ON Reservation.Seanceid = Seance.id
+    INNER JOIN Film ON Seance.Filmid = Film.id
 ) AS SubQuery
 GROUP BY FilmTitre, Jour;
 CREATE VIEW ViewFilmsSeancesSalle AS
@@ -246,26 +246,26 @@ WHERE
 ;
 CREATE VIEW ViewFilmsSortiesDeLaSemaine AS
  SELECT 
-        film.titleFilm AS titleFilm,
-        film.filmPitch AS filmPitch,
-        film.duration AS duration,
-        film.genreArray AS genreArray,
-        film.filmDescription AS filmDescription,
-        film.filmAuthor AS filmAuthor,
-        film.filmDistribution AS filmDistribution,
-        film.dateSortieCinePhoria AS dateSortieCinePhoria,
-        film.note AS note,
-        film.isCoupDeCoeur AS isCoupDeCoeur,
-        film.isActiveForNewSeances AS isActiveForNewSeances,
-        film.categorySeeing AS categorySeeing,
-        film.linkBO AS linkBO,
-        film.imageFilm128 AS imageFilm128,
-        film.imageFilm1024 AS imageFilm1024
+        Film.titleFilm AS titleFilm,
+        Film.filmPitch AS filmPitch,
+        Film.duration AS duration,
+        Film.genreArray AS genreArray,
+        Film.filmDescription AS filmDescription,
+        Film.filmAuthor AS filmAuthor,
+        Film.filmDistribution AS filmDistribution,
+        Film.dateSortieCinePhoria AS dateSortieCinePhoria,
+        Film.note AS note,
+        Film.isCoupDeCoeur AS isCoupDeCoeur,
+        Film.isActiveForNewSeances AS isActiveForNewSeances,
+        Film.categorySeeing AS categorySeeing,
+        Film.linkBO AS linkBO,
+        Film.imageFilm128 AS imageFilm128,
+        Film.imageFilm1024 AS imageFilm1024
         
     FROM
-        film
+        Film
     WHERE
-        (film.dateSortieCinePhoria = (CURDATE() - INTERVAL (((WEEKDAY(CURDATE()) - 2) + 7) % 7) DAY));
+        (Film.dateSortieCinePhoria = (CURDATE() - INTERVAL (((WEEKDAY(CURDATE()) - 2) + 7) % 7) DAY));
 CREATE VIEW ViewFilmsSortiesRecentes AS
 SELECT
   Seance.id AS seanceId , 
@@ -312,34 +312,34 @@ INNER JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
 WHERE Film.dateSortieCinePhoria = DATE_SUB(CURDATE(), INTERVAL (WEEKDAY(CURDATE()) - 2 + 7) % 7 DAY);
 CREATE VIEW ViewUtilisateurReservation AS
 SELECT 
-    utilisateurid AS utilisateurId,
-    reservation.id AS reservationId,
-    reservation.statereservation AS statereservation,
-    reservation.timestampcreate AS timestampcreate,
-    reservation.seatsReserved AS seatsReserved,
-    utilisateur.displayname AS displayname,
-    seance.dateJour AS dateJour,
-    film.titleFilm AS titleFilm,
-    cinema.nameCinema AS nameCinema,
-    reservation.isEvaluationMustBeReview AS isEvaluationMustBeReview,
-    reservation.note AS note,
-    reservation.evaluation as evaluation,
-    SUM(seatsForTarif.numberSeats) AS totalSeats,
-    SUM(tarifQualite.price * seatsForTarif.numberSeats) AS totalPrice,
-    reservation.numberPmr as numberPMR,
-    film.id as filmId,
-    seance.id as seanceId,
-    utilisateur.email as email
+    Utilisateurid AS utilisateurId,
+    Reservation.id AS reservationId,
+    Reservation.stateReservation AS statereservation,
+    Reservation.timeStampCreate AS timestampcreate,
+    Reservation.seatsReserved AS seatsReserved,
+    Utilisateur.displayName AS displayname,
+    Seance.dateJour AS dateJour,
+    Film.titleFilm AS titleFilm,
+    Cinema.nameCinema AS nameCinema,
+    Reservation.isEvaluationMustBeReview AS isEvaluationMustBeReview,
+    Reservation.note AS note,
+    Reservation.evaluation as evaluation,
+    SUM(SeatsForTarif.numberSeats) AS totalSeats,
+    SUM(TarifQualite.price * SeatsForTarif.numberSeats) AS totalPrice,
+    Reservation.numberPMR as numberPMR,
+    Film.id as filmId,
+    Seance.id as seanceId,
+    Utilisateur.email as email
 FROM Utilisateur
-JOIN Reservation ON Reservation.utilisateurId = Utilisateur.id
+JOIN Reservation ON Reservation.Utilisateurid = Utilisateur.id
 JOIN SeatsForTarif ON SeatsForTarif.ReservationId = Reservation.id 
-JOIN TarifQualite ON SeatsForTarif.tarifQualiteId = TarifQualite.id
+JOIN TarifQualite ON SeatsForTarif.TarifQualiteid = TarifQualite.id
 JOIN Seance ON Reservation.Seanceid = Seance.id
 JOIN Film ON Seance.Filmid = Film.id
 JOIN Salle ON Salle.id = Seance.Salleid
 JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
 -- WHERE Utilisateur.email = "claire@mail.fr"
-GROUP BY Reservation.id, seance.dateJour, film.titleFilm, cinema.nameCinema, reservation.note, reservation.evaluation;
+GROUP BY Reservation.id, Seance.dateJour, Film.titleFilm, Cinema.nameCinema, Reservation.note, Reservation.evaluation;
 -- Vue des sieges occupés par séance
 CREATE VIEW ViewSeanceSiegesReserves AS
 SELECT 
@@ -436,7 +436,7 @@ BEGIN
     block_label: BEGIN
     
 		-- Vérification des parametres
-        SELECT COUNT(*) INTO  v_num from Seance where id = p_SeanceId;
+    SELECT COUNT(*) INTO  v_num from Seance where id = p_SeanceId;
         
         IF  v_num = 0  THEN
             SET v_statut_reservation = "Erreur : Parametre seance_id non valide";
@@ -562,17 +562,17 @@ BEGIN
 
         -- Si les places sont disponibles, les réserver en mettant à jour la table Seance
         SET v_message_erreur = "Mise a jour Seance : ajout des places";
-		UPDATE Seance
-			SET 
-				numFreeSeats = numFreeSeats - v_total_sum,
-				numFreePMR = numFreePMR - p_PMRSeats
-			WHERE id = p_SeanceId
-            ;
+	UPDATE Seance
+		SET 
+			numFreeSeats = numFreeSeats - v_total_sum,
+			numFreePMR = numFreePMR - p_PMRSeats
+		WHERE id = p_SeanceId
+        ;
 
 			-- Générer une nouvelle réservation
 			SET v_message_erreur = "Mise a jour Reservation : insertion";
 			INSERT INTO Reservation
-				(Id, Utilisateurid, seanceid, stateReservation, numberPMR, seatsReserved, timeStampCreate)
+				(Id, Utilisateurid, Seanceid, stateReservation, numberPMR, seatsReserved, timeStampCreate)
 			VALUES
 				(v_newReservationId, v_utilisateurID, p_SeanceId, "ReserveToConfirm", p_PMRSeats, p_seatsReserved, CURRENT_TIMESTAMP);
 			-- Insérer les données dans SeatsForTarif pour chaque élément du dictionnaire JSON
@@ -665,7 +665,7 @@ block_label: BEGIN
 	-- Début de la transaction
     START TRANSACTION;
     
-    INSERT INTO Compte
+	INSERT INTO Compte
 		(email,  isValidated, passwordText, datePassword) 
 	VALUES 
 		(p_email, 0, p_passwordText, NOW())
