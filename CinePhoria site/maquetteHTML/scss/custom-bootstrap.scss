@@ -1,0 +1,23 @@
+// Customisation CinePhoria
+
+// Map avec les couleurs par defaut
+$theme-colors: (
+  "primary": #2C3E50,
+  "secondary": #F8F8FF,
+  "tertiary": #C0C0C0,
+  "success": #228B22,
+  "danger": #B22222
+);
+
+// Ajout de 3 couleurs spécifiques
+$custom-colors: (
+  "accent": #DAA520,
+  "bodybg": #E0E0E0,
+  "bodyfg": #2C3E50
+);
+
+// Merge the maps
+$theme-colors: map-merge($theme-colors, $custom-colors);
+
+// Import de l'ensemble de bootstrap
+@import "../node_modules/bootstrap/scss/bootstrap";

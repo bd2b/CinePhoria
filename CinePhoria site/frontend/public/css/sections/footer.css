@@ -1,0 +1,87 @@
+.footer {
+    display: flex;
+    
+    padding: 0 10px; 
+    gap: 20px;
+    background: rgb(var(--primary-color)) ;
+    color: rgb(var(--secondary-color));
+    
+}
+
+.footer__container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    
+    align-items: center;
+    align-content:center;
+    width: 100%;
+   
+    
+    padding: 10px;
+    gap: 10px;
+   
+}
+
+.container__legal {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    gap: 10px;
+}
+
+.container__legal-a {
+    text-decoration: none;
+    color: rgb(var(--secondary-color));
+}
+
+.container__sites {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+    align-content:center;
+    padding: 10px;
+    gap: 10px;
+}
+.container__site {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+
+}
+
+.site__title {
+    display: flex;
+    font-size: 8px;
+    align-items: center;
+    justify-content: space-around;
+    gap: 5px;
+    width: 100%;
+}
+
+.site__title-img {
+    width: 32px;
+    height: auto;
+    
+}
+
+.site__adresse {
+    font-size: 12px;
+}
+.site__telephone {
+    display:flex;
+}
+.site__telephone-img{
+    width: 24px;
+    height: 24px;;
+}
+.site__seance {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

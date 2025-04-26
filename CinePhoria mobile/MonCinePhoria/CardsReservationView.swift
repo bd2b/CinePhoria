@@ -12,7 +12,6 @@ import Giffy
 
 struct CardsReservationView: View {
     @Bindable var dataController: DataController
-    
     @State private var currentPage: Int = 0
     @State private var isShowingAlert: Bool = false
     @StateObject private var viewModel = CardsReservationViewModel()
@@ -79,15 +78,14 @@ struct CardsReservationView: View {
                 // Cartes avec TabView
                 TabView(selection: $currentPage) {
                     ForEach(0..<dataController.reservations.count, id: \.self) { index in
-                        CardReservationView(reservation: dataController.reservations[index],
+                        CardReservationView(dataController: dataController,
+                                            reservationIndex: index,
                                             geometry: geometry,
                                             viewModel: viewModel)
                         .tag(index) // Associe chaque vue à un index
                         .padding(10)
                     }
                 }
-                
-                
                 .tabViewStyle(PageTabViewStyle()) // Style de défilement par page
                 .indexViewStyle(PageIndexViewStyle(backgroundDisplayMode: .always))
                 .onAppear {
@@ -116,11 +114,10 @@ struct CardsReservationView: View {
                                 promoFriandiseDiscount: dataController.promoFriandiseDiscount)
                         } else {
                             if viewModel.isEvaluationViewShowing {
-                                EvaluationView(reservation: dataController.reservations[currentPage],
-                                    isNewEvaluation: true)
+                                EvaluationView(dataController: dataController, currentPage: currentPage, isNewEvaluation: true)
                             } else {
                                 if viewModel.isEvaluationChangeViewShowing {
-                                    EvaluationView(reservation: dataController.reservations[currentPage], isNewEvaluation: false)
+                                    EvaluationView(dataController: dataController, currentPage: currentPage, isNewEvaluation: false)
                                 }
                             }
                         }
@@ -203,7 +200,10 @@ class CardsReservationViewModel: ObservableObject {
     
     // Vue pour une carte avec orientation adaptative
 struct CardReservationView: View {
-    var reservation: Reservation
+    @Bindable var dataController: DataController
+    var reservationIndex: Int
+    var reservation: Reservation { dataController.reservations[reservationIndex] }
+    
     var geometry: GeometryProxy
     
     @Environment(\.colorScheme) var colorScheme
@@ -228,6 +228,7 @@ struct CardReservationView: View {
                                 viewModel.isFilmViewShowing = true
                             }
                         }
+                        .accessibilityIdentifier("ReservationImage")
                 }
                // Spacer()
                 VStack(alignment: .leading, spacing: 10) {
@@ -236,11 +237,13 @@ struct CardReservationView: View {
                             .font(customFont(style: .title))
                             .bold()
                             .foregroundColor(.white)
+                        .accessibilityIdentifier("ReservationTitle")
                     } else {
                         Text(reservation.film.titleFilm)
                             .font(customFont(style: .title))
                             .bold()
                             .foregroundColor(.bleuNuitPrimaire)
+                        .accessibilityIdentifier("ReservationTitle")
                     }
                     
                     
@@ -252,6 +255,8 @@ struct CardReservationView: View {
                                     viewModel.isSeatsViewShowing = true
                                 }
                             }
+                        .accessibilityIdentifier("SeanceView")
+                        
                         ActionsView(reservation: reservation)
                             .onTapGesture {
                                 DispatchQueue.main.async {
@@ -265,6 +270,7 @@ struct CardReservationView: View {
                                     }
                                 }
                             }
+                        .accessibilityIdentifier("ActionsView")
                     }
                 }
                 .padding(.horizontal, 20)
@@ -295,6 +301,7 @@ struct CardReservationView: View {
                                 viewModel.isFilmViewShowing = true
                             }
                         }
+                        .accessibilityIdentifier("ReservationImage")
                 }
                 
                 if colorScheme == .dark {
@@ -302,11 +309,13 @@ struct CardReservationView: View {
                         .font(customFont(style: .title))
                         .bold()
                         .foregroundColor(.white)
+                        .accessibilityIdentifier("ReservationTitle")
                 } else {
                     Text(reservation.film.titleFilm)
                         .font(customFont(style: .title))
                         .bold()
                         .foregroundColor(.bleuNuitPrimaire)
+                        .accessibilityIdentifier("ReservationTitle")
                 }
                 
                 HStack {
@@ -316,6 +325,8 @@ struct CardReservationView: View {
                                 viewModel.isSeatsViewShowing = true
                             }
                         }
+                        .accessibilityIdentifier("SeanceView")
+
                     ActionsView(reservation: reservation)
                         .onTapGesture {
                             DispatchQueue.main.async {
@@ -330,6 +341,7 @@ struct CardReservationView: View {
                                 }
                             }
                         }
+                        .accessibilityIdentifier("ActionsView")
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sections/main-reservation.css">
+    <link rel="stylesheet" href="css/sections/reservation-panel.css">
+
+    <script type="module" src="dist/main.js" defer></script>
+
+    <title>CinePhoria</title>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="header__nav">
+            <div class="nav__logo ">
+                <a href="./visiteur.html">
+                    <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
+            </div>
+            <nav class="nav__actions">
+                <button class="nav__actions-button nav__actions-button--link">Réservation</button>
+                <button class="nav__actions-button nav__actions-button--link">Films</button>
+                <button class="nav__actions-button nav__actions-button--link">Contact</button>
+                <button class="nav__actions-button nav__actions-button--signin">Connexion</button>
+            </nav>
+            <div class="nav__mobile-menu" id="navMobileMenu">
+                <img src="assets/menu.svg" alt="Menu">
+            </div>
+
+            <div class="mobile-menu" id="mobileMenu">
+                <button class="mobile-menu__close" id="mobileMenuClose">&times;</button>
+                <nav class="mobile-menu__nav">
+                    <button class="nav__actions-button nav__actions-button--link">Réservation</button>
+                    <button class="nav__actions-button nav__actions-button--link">Films</button>
+                    <button class="nav__actions-button nav__actions-button--link">Contact</button>
+                    <button class="nav__actions-button nav__actions-button--signin">Connexion</button>
+                </nav>
+            </div>
+        </nav>
+    </header>
+    <main class="main">
+        <div class="main__container">
+            <div class="container__title"> <!--- Titre -->
+                <div class="title__left">
+                    <h1 class="title__left-h1" id="titleLeft">Réservez au CinéPhoria</h1>
+                </div>
+                <div class="title__filters title__filters-visiteur">
+                    <div class="title__filter-dropdown titre__filter-dropdown-genre">
+                        <button class="title__filter-dropdown-button">Genre <span
+                                class="chevron">▼</span></button><!-- Boutons de sélection-->
+                        <div class="title__filter-button-drowdown-content">
+                            <a href="#">Film d'action</a>
+                            <a href="#">Thriller</a>
+                        </div>
+                    </div>
+                    <div class="title__filter-dropdown">
+                        <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">Choisissez votre
+                            complexe <span class="chevron">▼</span></button><!-- Boutons de sélection-->
+                        <div
+                            class="title__filter-button-drowdown-content title__filter-button-drowdown-content-complexe">
+                            <a href="#" data-cinema="Paris">Paris</a>
+                            <a href="#" data-cinema="Bordeaux">Bordeaux</a>
+                            <a href="#" data-cinema="Nantes">Nantes</a>
+                            <a href="#" data-cinema="Lille">Lille</a>
+                            <a href="#" data-cinema="Toulouse">Toulouse</a>
+                            <a href="#" data-cinema="Charleroi">Charleroi</a>
+                            <a href="#" data-cinema="Liège">Liège</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="container__reservation"> <!--- Reservation -->
+                <div class="reservation__listFilms">
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/1-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Mourir peut Attendre</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/2-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Joker</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/1-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Mourir peut Attendre</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/2-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Joker</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/1-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Mourir peut Attendre</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/2-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Joker</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/1-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Mourir peut Attendre</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/2-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Joker</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/1-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Mourir peut Attendre</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/2-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Joker</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/1-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Mourir peut Attendre</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/2-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Joker</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/1-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Mourir peut Attendre</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/2-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Joker</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/1-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Mourir peut Attendre</p>
+                    </div>
+                    <div class="listFilms__simpleCard">
+                        <img src="assets/static/2-128.jpg" alt="Thumbnail" class="listFilms__simpleCard-img">
+                        <p class="listFilms__simpleCard-p">Joker</p>
+                    </div>
+
+                </div>
+                <div class="reservation__detailFilm">
+                    <div class="detailFilm__twocolumns">
+                        <div class="twocolumns__left">
+                            <img src="assets/static/1-1024.jpg" alt="Affiche" class="twocolumns__left-img">
+                            <button class="twocolumns__left-button-bo">Bande Annonce</button>
+                            <div class="evaluation__note">
+                                <p class="evaluation__note-p">Avis : 3 / 5</p>
+                            </div>
+                            <div class="evaluation__coupdecoeur">
+                                <p class="evaluation__coupdecoeur-p">Coup de coeur</p>
+                                <img src="assets/heart.svg" alt="Coeur" class="evaluation__coupdecoeur-img">
+                            </div>
+                        </div>
+                        <div class="twocolumns__right">
+                            <p class="right__title-p">Mourir peut attendre</p>
+                            <div class="right__caractFilm">
+                                <p class="caractFilm__genre-p">Action, Espionnage, Thriller</p>
+                                <p class="caractFilm__duree-p">1h53</p>
+                                <p class="caractFilm__public-p">TP</p>
+                            </div>
+                            <p class="right__description-p">Bond a quitté les services secrets et coule des jours
+                                heureux en Jamaïque. Mais sa tranquillité est de courte durée car son vieil ami Felix
+                                Leiter de la CIA débarque pour solliciter son aide : il s'agit de sauver un scientifique
+                                qui vient d'être kidnappé. Mais la mission se révèle bien plus dangereuse que prévu et
+                                Bond se retrouve aux trousses d'un mystérieux ennemi détenant de redoutables armes
+                                technologiques…
+
+
+                            </p>
+                            <p class="right__author-p">De Cary Joji Fukunaga
+                            </p>
+                            <p class="right__distribution">Avec Daniel Craig, Léa Seydoux, Rami Malek</p>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="reservation__panel">
+                    <div class="panel__choix">
+                        <div class="panel__tabs">
+                            <p class="tabs__tab-p tabs__tab-nav-p tabs__tab-nav-prec-p">Avant</p>
+                            <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">6/11</p>
+                            <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">7/11</p>
+                            <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">8/11</p>
+                            <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-selected-p">Samedi 9/11</p>
+                            <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">10/11</p>
+                            <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">11/11</p>
+                            <p class="tabs__tab-p tabs__tab-day-p tabs__tab-day-unselected-p">12/11</p>
+                            <p class="tabs__tab-p tabs__tab-nav-p tab-nav-suiv-p">Après</p>
+                        </div>
+                        <div class="panel__seances">
+                            <div class="seances__cardseance">
+                                <div class="cardseance__horaire">
+                                    <p class="horaire__hour horaire__hour-begin-p">19:30</p>
+                                    <p class="horaire__hour horaire__hour-end-p">22:00</p>
+                                </div>
+                                <div class="cardseance__datesalle">
+                                    <div class="datesalle__date">
+                                        <p class="date__month-p">NOV</p>
+                                        <p class="date__day-p">21</p>
+                                    </div>
+                                    <p class="datesalle__salle-p">Salle 1</p>
+                                </div>
+                                <div class="cardseance__qualitebo">
+                                    <img src="assets/3D.png" alt="Qualite" class="qualitebo-qualite-img">
+                                    <p class="qualitebo-bo-p">VF</p>
+                                </div>
+                            </div>
+
+                            <div class="seances__cardseance">
+                                <div class="cardseance__horaire">
+                                    <p class="horaire__hour horaire__hour-begin-p">14:00</p>
+                                    <p class="horaire__hour horaire__hour-end-p">17:00</p>
+                                </div>
+                                <div class="cardseance__datesalle">
+                                    <div class="datesalle__date">
+                                        <p class="date__month-p">NOV</p>
+                                        <p class="date__day-p">21</p>
+                                    </div>
+                                    <p class="datesalle__salle-p">Salle 2</p>
+                                </div>
+                                <div class="cardseance__qualitebo">
+                                    <img src="assets/4DX.png" alt="Qualite" class="qualitebo-qualite-img">
+                                    <p class="qualitebo-bo-p">VO</p>
+                                </div>
+                            </div>
+
+                            <div class="seances__cardseance">
+                                <div class="cardseance__horaire">
+                                    <p class="horaire__hour horaire__hour-begin-p">17:00</p>
+                                    <p class="horaire__hour horaire__hour-end-p">19:30</p>
+                                </div>
+                                <div class="cardseance__datesalle">
+                                    <div class="datesalle__date">
+                                        <p class="date__month-p">NOV</p>
+                                        <p class="date__day-p">21</p>
+                                    </div>
+                                    <p class="datesalle__salle-p">Salle 1</p>
+                                </div>
+                                <div class="cardseance__qualitebo">
+                                    <img src="assets/4DX.png" alt="Qualite" class="qualitebo-qualite-img">
+                                    <p class="qualitebo-bo-p">VO</p>
+                                </div>
+                            </div>
+                            <div class="seances__cardseance">
+                                <div class="cardseance__horaire">
+                                    <p class="horaire__hour horaire__hour-begin-p">17:00</p>
+                                    <p class="horaire__hour horaire__hour-end-p">19:30</p>
+                                </div>
+                                <div class="cardseance__datesalle">
+                                    <div class="datesalle__date">
+                                        <p class="date__month-p">NOV</p>
+                                        <p class="date__day-p">21</p>
+                                    </div>
+                                    <p class="datesalle__salle-p">Salle 1</p>
+                                </div>
+                                <div class="cardseance__qualitebo">
+                                    <img src="assets/4K.png" alt="Qualite" class="qualitebo-qualite-img">
+                                    <p class="qualitebo-bo-p">VO</p>
+                                </div>
+                            </div>
+
+                        </div>
+                        <button class="panel__choixseance-button inactif" id="panel__choixseance-button">Choisissez
+                            votre séance</button>
+                    </div>
+                    <div class="panel__reserve">
+                        <div class="seances__cardseance seances__cardseance-selected" id="seances__cardseance-selected">
+                            <div class="cardseance__horaire">
+                                <p class="horaire__hour horaire__hour-begin-p">19:30</p>
+                                <p class="horaire__hour horaire__hour-end-p">22:00</p>
+                            </div>
+                            <div class="cardseance__datesalle">
+                                <div class="datesalle__date">
+                                    <p class="date__month-p">NOV</p>
+                                    <p class="date__day-p">21</p>
+                                </div>
+                                <p class="datesalle__salle-p">Salle 1</p>
+                            </div>
+                            <div class="cardseance__qualitebo">
+                                <img src="assets/3D.png" alt="Qualite" class="qualitebo-qualite-img">
+                                <p class="qualitebo-bo-p">VF</p>
+                            </div>
+                        </div>
+                        <div class="reserve__form">
+                            <form>
+                                <div class="seances__commande">
+                                    <div class="commande__tabtarif">
+                                        <table class="tabtarif__commande-table">
+                                            <thead class="commande__entete-thead">
+                                                <tr class="entete__content-tr">
+                                                    <th class="content-th content-id-th">#</th>
+                                                    <th class="content-th content-tarif-th">Tarif</th>
+                                                    <th class="content-th content-places-th">Places</th>
+                                                    <th class="content-th content-total-th">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="commande__body-tbody">
+                                                <tr class="body__content-tr">
+                                                    <td class="content-td content-id-td">1</td>
+                                                    <td class="content-td content-tarif-td">Plein tarif (10€)</td>
+                                                    <td class="content-td content-num-td">
+                                                        <button class="num__add-button">+</button>
+                                                        <span class="num__num-span" id="num__place">2</span>
+                                                        <button class="num__remove-button">-</button>
+                                                    </td>
+                                                    <td class="content-td content-price-td">20 €</td>
+                                                </tr>
+                                                <tr class="body__content-tr">
+                                                    <td class="content-td content-id-td">1</td>
+                                                    <td class="content-td content-tarif-td">Tarif réduit (8€)</td>
+                                                    <td class="content-td content-num-td">
+                                                        <button class="num__add-button">+</button>
+                                                        <span class="num__num-span" id="num__place">1</span>
+                                                        <button class="num__remove-button">-</button>
+                                                    </td>
+                                                    <td class="content-td content-price-td">8 €</td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot class="commande__foot-tfoot">
+                                                <tr class="foot__content-tr">
+                                                    <td colspan="3"></td>
+                                                    <td class="content-td content-totalprice-td"
+                                                        id="content-totalprice">28 €</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                    <div class="commande__pmr">
+                                        <div class="pmr__content">
+                                            <p class="content__libelle-p">Personne à mobilité réduite :</p>
+                                            <div class="content__num-pmr">
+                                                <button class="num__add-button num__add-pmr">+</button>
+                                                <span class="num__num-span" id="num__pmr">0</span>
+                                                <button class="num__remove-button num__remove-pmr">-</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="commande__seats">
+                                        <div class="seats__content">
+                                            <p class="content__libelle-p">
+                                                <span class="seats__text-span" id="libelle__seats">Pas de sieges
+                                                    précisés.</span>
+                                                <span class="seats__text-span" id="text__seats"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="commande__mail">
+                                        <p class="commande__mail" id="commande__mail-p">Pour accéder à vos billets,
+                                            renseignez votre email</p>
+                                        <label for="email"><span style="color: red;"
+                                                id="commande__mail-span">*</span></label>
+                                        <input type="email" id="commande__mail-input" name="commande__mail-input"
+                                            required class="commande__mail-input">
+                                        <span id="commande__mail-error" class="error-message"></span>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="div reserve__message" style='display : none' id="statutMessage">Statut de la
+                            reservation</div>
+                        <div class="reserve__actions">
+                            <button class="panel__changer-button">Changer de séance</button>
+                            <button class="panel__choisirSeats-button">Choisir les fauteuils</button>
+                            <button class="panel__jereserve-button">Je réserve</button>
+                            <p class="panel__message-p">Vérification de votre email...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </main>
+    <footer class="footer" id="footer">
+    </footer>
+    <!-- Modale Selection Cinema-->
+    <div id="modal-cinema" class="modalcinema">
+        <div class="modalcinema-content">
+            <h2>Veuillez choisir votre complexe</h2>
+            <div class="title__filter-dropdown">
+                <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">Choisissez votre
+                    complexe <span class="chevron">▼</span></button>
+                <div class="title__filter-button-drowdown-content title__filter-button-drowdown-content-complexe">
+                    <a href="#" data-cinema="Paris">Paris</a>
+                    <a href="#" data-cinema="Bordeaux">Bordeaux</a>
+                    <a href="#" data-cinema="Nantes">Nantes</a>
+                    <a href="#" data-cinema="Lille">Lille</a>
+                    <a href="#" data-cinema="Toulouse">Toulouse</a>
+                    <a href="#" data-cinema="Charleroi">Charleroi</a>
+                    <a href="#" data-cinema="Liège">Liège</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modale Affichage Bande Annonce -->
+    <div id="videoModal" class="modalyoutube">
+        <div class="modalyoutube-content">
+            <span class="closeyoutube">&times;</span>
+            <!-- Vidéo YouTube -->
+            <iframe id="youtubeVideo" width="560" height="315" src="" title="YouTube video player" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+            </iframe>
+        </div>
+    </div>
+
+    <!-- Modale confirmUtilisateur -->
+    <div id="modal-confirmUtilisateur" class="modal">
+        <div class="modal__content-wrapper">
+            <div class="modal__title">
+                <div class="title-h2">
+                    <h2>Création du compte</h2>
+                </div>
+                <!-- Bouton (X) ou autre mécanisme pour fermer la modale si besoin -->
+                <span class="close-modal" id="close-confirmUtilisateur">×</span>
+            </div>
+            <div class="modal__content">
+                <div class="title-p">
+                    <p>Pour récupérer le QRCode de votre réservation, vous devez créer un compte CinePhoria en
+                        enregistrant
+                        les
+                        informations suivantes :</p>
+                </div>
+                <!-- Saisie de l'email -->
+                <div class="form__group">
+                    <label for="confirmUtilisateur-email">Email :</label>
+                    <input type="email" id="confirmUtilisateur-email" class="input__mail" disabled>
+                    <span id="email-error" class="error-message"></span>
+                </div>
+
+                <!-- Saisie du displayName -->
+                <div class="form__group">
+                    <label for="confirmUtilisateur-displayName">Nom ou pseudo :</label>
+                    <input type="text" id="confirmUtilisateur-displayName" class="input__text" required />
+                </div>
+
+
+                <!-- Mot de passe 1 -->
+                <div class="form__group">
+                    <label for="confirmUtilisateur-password1">Mot de passe :</label>
+                    <input type="password" id="confirmUtilisateur-password1" required />
+                </div>
+
+                <!-- Mot de passe 2 -->
+                <div class="form__group">
+                    <label for="confirmUtilisateur-password2">Confirmer le mot de passe :</label>
+                    <input type="password" id="confirmUtilisateur-password2" required />
+                    <span id="password-error" class="error-message"></span>
+                </div>
+
+                <!-- Bouton de validation -->
+                <button id="confirmUtilisateur-submit" class="button button-primary" disabled>
+                    Valider
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Modale confirmMail -->
+    <div id="modal-confirmMail" class="modal">
+        <div class="modal__content-wrapper">
+            <div class="modal__title">
+                <div class="title-h2">
+                    <h2>Verification adresse email</h2>
+                </div>
+                <!-- Bouton (X) ou autre mécanisme pour fermer la modale si besoin -->
+                <span class="close-modal" id="close-confirmMail">×</span>
+            </div>
+            <div class="modal__content">
+                <div class="confirmMail-title title-p" id="confirmMail-title">
+                    <p>Vous avez du recevoir un email contenant un code de confirmation à six chiffres.</p>
+                </div>
+                <!-- Saisie du code de confirmation -->
+                <div class="form__group">
+                    <label for="confirmMail-code">Code de confirmation :</label>
+                    <input type="text" id="confirmMail-code" class="input__code">
+                    <span id="code-error" class="error-message"></span>
+                </div>
+
+                <!-- Bouton de validation -->
+                <button id="confirmMail-submit" class="button button-primary" disabled>
+                    Valider
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modale loginWithEmail -->
+    <div id="modal-loginEmail" class="modal">
+        <div class="modal__content-wrapper">
+            <div class="modal__title">
+                <div class="title__loginEmail title-h2">
+                    <h2>Connexion</h2>
+                </div>
+                <!-- Bouton (X) ou autre mécanisme pour fermer la modale si besoin -->
+                <span class="close-modal" id="close-loginEmail">×</span>
+            </div>
+            <div class="modal__content">
+                <div class="title-p">
+                    <p>Veuillez vous connecter pour valider la réservation.</p>
+                </div>
+                <!-- Email -->
+                <div class="form__group">
+                    <label for="loginEmail-email">Email :</label>
+                    <input type="email" id="loginEmail-email" class="input__mail" disabled />
+                    <span id="email-error" class="error-message"></span>
+                </div>
+                <!-- Mot de passe -->
+                <div class="form__group">
+                    <label for="loginEmail-password">Mot de passe :</label>
+                    <input type="password" id="loginEmail-password" />
+                </div>
+                <!-- Bouton de validation -->
+                <button id="loginEmail-submit" class="button button-primary" disabled>
+                    Connexion
+                </button>
+                <span id="login-error" class="error-message" hidden="true">-</span>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

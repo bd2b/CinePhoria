@@ -1,0 +1,291 @@
+/* Affichage masquage des boutons filtre */
+.titre__filter-dropdown-genre {
+    display: none;
+}
+
+.titre__filter-dropdown-complexe {
+    display: block;
+    width: 250px;
+}
+
+.container__reservation {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    height: calc(100vh - 200px);
+    /* Espace restant après le header */
+    width: 100%;
+    gap: 10px;
+}
+
+/* --------------------- COLONNE 1 Liste des films */
+.reservation__listFilms {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+    width: 100%;
+    gap: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+
+
+}
+
+.reservation__listFilms {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+    /* Zone de défilement vertical */
+    width: 100%;
+    gap: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.listFilms__simpleCard {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 10px;
+
+    width: 90%;
+    /* Pleine largeur par défaut */
+    height: 128px;
+
+    gap: 10px;
+    background: rgb(var(--secondary-color));
+    border-radius: 12px;
+
+    cursor: pointer;
+    transition: all 0.3s ease;
+    /* Transition fluide pour la largeur, la hauteur, et autres changements */
+    box-shadow: none;
+    /* Pas d'ombre par défaut */
+}
+
+.listFilms__simpleCard:hover {
+    background: rgb(var(--ternary-color));
+}
+
+.listFilms__simpleCard.selected {
+    display: none;
+    /* Masquer completement l'item */
+    background: rgb(var(--accent-color));
+    /* Couleur dorée */
+    color: rgb(var(--primary-color));
+    font-size: 1.5em;
+    /* Taille de police normale */
+    height: 80px;
+    /* Réduction de la hauteur */
+    width: 85%;
+    /* Réduction de la largeur */
+    margin: 0 auto;
+    /* Centrer horizontalement */
+    padding: 5px 15px;
+    /* Ajustement du padding */
+    justify-content: center;
+    /* Centre le texte horizontalement */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Ombre subtile */
+}
+
+.listFilms__simpleCard.selected .listFilms__simpleCard-img {
+    display: none;
+    /* Masquer l'image */
+}
+
+.listFilms__simpleCard.selected .listFilms__simpleCard-p {
+    flex-grow: 1;
+    /* Étendre le titre pour occuper tout l'espace */
+    text-align: center;
+    /* Centrer le texte horizontalement */
+}
+
+
+@keyframes highlight {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(0.90);
+        /* Léger zoom */
+    }
+}
+
+
+.listFilms__simpleCard-img {
+    flex: none;
+    order: 3;
+    flex-grow: 0;
+    min-height: 200px;
+    max-width: 87px;
+    object-fit: scale-down;
+}
+
+.listFilms__simpleCard-p {
+    flex: none;
+    order: 3;
+    width: 100%;
+    flex-shrink: 1;
+}
+
+/* --------------------- COLONNE 2 Détail du film sélectionné */
+.reservation__detailFilm {
+    flex: 2;
+
+    display: flex;
+    flex-direction: column;
+    /* flex-wrap: nowrap;
+    overflow-y: auto; */
+    align-items: center;
+    gap: 10px;
+
+    margin-top: 10px;
+    margin-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    width: 100%;
+    height: 95%;
+    background: rgb(var(--ternary-color), 0.5);
+    /* Gray/300 */
+    border: 1px solid #DEE2E6;
+    border-radius: 12px;
+
+
+
+}
+
+.detailFilm__twocolumns {
+    flex: none;
+    order: 0;
+    align-self: stretch;
+    flex-grow: 0;
+
+    display: flex;
+    flex-direction: row;
+    align-items: top;
+
+    gap: 40px;
+
+
+    width: 100%;
+    height: 100%;
+
+}
+
+.evaluation__coupdecoeur {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    gap: 5px;
+    background: rgb(var(--background-color));
+    border-radius: 8px;
+    height: 30px;
+    font-size: var(--caption2-font-size);
+}
+
+.evaluation__note {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 10px;
+    gap: 2px;
+    background: rgb(var(--background-color));
+    border-radius: 8px;
+    height: 30px;
+    font-size: var(--caption2-font-size);
+}
+
+.evaluation__coupdecoeur-img {
+    width: 24px;
+    height: 24px;
+}
+
+
+.twocolumns__left {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: top;
+    justify-content: center;
+
+    gap: 20px;
+}
+
+.twocolumns__left-img {
+    width: auto;
+    max-width: 150px;
+    height: 200px;
+    object-fit: scale-down;
+}
+
+.twocolumns__right {
+
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+    align-items: left;
+    justify-content: start;
+    gap: 10px;
+    width: 100%;
+    height: 100%;
+    padding-top: 10px;
+}
+
+.right__title-p {
+    font-size: var(--subheadline-font-size);
+
+    height: auto;
+}
+
+.right__caractFilm {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--caption-font-size)
+}
+
+.caractFilm__public-p {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 3px 0px;
+
+    width: 30px;
+    height: 30px;
+
+    background: linear-gradient(180deg, #DAA520 0%, #745811 100%);
+    border-radius: 10px;
+
+}
+
+
+.right__description-p {
+    font-size: var(--caption-font-size)
+}
+
+.reservation__engage-button {
+    max-width: 150;
+    flex-shrink: 0;
+}
+
+
+
+
+/* --------------------- COLONNE 3 Panneau de réservation */
+/* --------------------- CHOIX DE LA SEANCE */
+/* Voir reservation-panel.css */

@@ -10,9 +10,13 @@
 import SwiftUI
 
 struct EvaluationView: View {
-    var reservation: Reservation
+
+    @Bindable var dataController: DataController
+    var currentPage: Int
     var isNewEvaluation: Bool
     var isDeletingEvaluation: Bool = false
+    
+
     
     @State private var sliderValue: Double = 2.5
     @State private var userInput: String = "" // Texte saisi par l'utilisateur
@@ -28,11 +32,10 @@ struct EvaluationView: View {
             
             // Slider gradué
             VStack {
-                Text("Note : \(sliderValue, specifier: "%.1f")")
+                Text("Note: \(String(format: "%.1f", sliderValue))")
                     .font(customFont(style: .title3))
                 Slider(value: $sliderValue, in: 0...5, step: 0.5)
                     .padding(.horizontal)
-                    
             }
             
             // Zone de saisie de texte
@@ -73,26 +76,24 @@ struct EvaluationView: View {
             }
         }
         .onAppear() {
-            if !isNewEvaluation {
-                if let note = reservation.note {
-                    sliderValue = note
-                }
-                if let evaluation = reservation.evaluation {
-                    userInput = evaluation
-                }
+            if let sliderValue = dataController.reservations[currentPage].note {
+                self.sliderValue = sliderValue
             }
-        }
+            if let userInput = dataController.reservations[currentPage].evaluation {
+                self.userInput = userInput
+            }
+      }
         .padding()
     }
     func eraseEvaluation() {
-        reservation.evaluation = nil
-        reservation.note = nil
+        dataController.reservations[currentPage].evaluation = nil
+        dataController.reservations[currentPage].note = nil
         
         dismiss()
     }
     func submit() {
-        reservation.evaluation = userInput
-        reservation.note = sliderValue
+        dataController.reservations[currentPage].evaluation = userInput
+        dataController.reservations[currentPage].note = sliderValue
         
         dismiss()
     }
@@ -100,13 +101,16 @@ struct EvaluationView: View {
 
 
 #Preview {
-    EvaluationView(reservation: Reservation.samplesReservation[1], isNewEvaluation:  true)
+    @Previewable @State var dataController = DataController()
+    EvaluationView(dataController: dataController, currentPage: 0, isNewEvaluation: true)
 }
 
 #Preview {
-    EvaluationView(reservation: Reservation.samplesReservation[2], isNewEvaluation:  false)
+    @Previewable @State var dataController = DataController()
+    EvaluationView(dataController: dataController, currentPage: 1, isNewEvaluation: false)
 }
-
 #Preview {
-    EvaluationView(reservation: Reservation.samplesReservation[3], isNewEvaluation:  false)
+    @Previewable @State var dataController = DataController()
+    EvaluationView(dataController: dataController, currentPage: 2, isNewEvaluation: false)
+    
 }

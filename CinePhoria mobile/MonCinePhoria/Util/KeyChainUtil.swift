@@ -22,8 +22,13 @@ public func setValue(_ value: String, for user: String, and service: String) thr
     var query: [String: Any] = [:]
     query[String(kSecClass)] = kSecClassGenericPassword
     query[String(kSecAttrService)] = service
+ //   query[String(kSecAttrAccessGroup)] = service + ".Shared"
     query[String(kSecAttrAccount)] = user
+ //   query[String(kSecAttrAccessible)] = kSecAttrAccessibleWhenUnlocked
   
+    let status2 = SecItemAdd(query as CFDictionary, nil)
+    print("Keychain set status: \(status2)") // Vérifiez ce statut
+    
     var status = SecItemCopyMatching(query as CFDictionary, nil)
     switch status {
     case errSecSuccess:
@@ -48,11 +53,13 @@ public func setValue(_ value: String, for user: String, and service: String) thr
 }
 
 
-func deleteValue(for user: String, and service: String) throws {
+public func deleteValue(for user: String, and service: String) throws {
     var query: [String: Any] = [:]
     query[String(kSecClass)] = kSecClassGenericPassword
     query[String(kSecAttrService)] = service
+//    query[String(kSecAttrAccessGroup)] = service + ".Shared"
     query[String(kSecAttrAccount)] = user
+ //   query[String(kSecAttrAccessible)] = kSecAttrAccessibleAfterFirstUnlock
     
     let status = SecItemDelete(query as CFDictionary)
 }
@@ -61,10 +68,12 @@ public func getValue(for user: String, and service: String) throws -> String? {
     var query: [String: Any] = [:]
     query[String(kSecClass)] = kSecClassGenericPassword
     query[String(kSecAttrService)] = service
+//    query[String(kSecAttrAccessGroup)] = service + ".Shared"
     query[String(kSecAttrAccount)] = user
     query[String(kSecMatchLimit)] = kSecMatchLimitOne
     query[String(kSecReturnAttributes)] = kCFBooleanTrue
     query[String(kSecReturnData)] = kCFBooleanTrue
+ //   query[String(kSecAttrAccessible)] = kSecAttrAccessibleAfterFirstUnlock
 
     var queryResult: AnyObject?
     let status = SecItemCopyMatching(query as CFDictionary, &queryResult)

@@ -15,6 +15,7 @@ struct CaracteristiqueFilmView: View {
         HStack  {
             Text(film.genre ?? "Indeterminé")
                 .font(customFont(style: .body))
+                .accessibilityIdentifier("genre")
                 
             Spacer()
             HStack {
@@ -31,10 +32,12 @@ struct CaracteristiqueFilmView: View {
                             .fill(.doréAccentuation.mix( with: .black, by: 0.25))
                             .offset(y: 4)
                     )
+                    .accessibilityIdentifier("categorie")
                 
                 
                 Text(film.duration ?? "Non connu")
                     .font(customFont(style: .body))
+                    .accessibilityIdentifier("duration")
             }
         }
         .padding()
@@ -53,6 +56,7 @@ struct FilmView: View {
                         imageFilm.image1024()
                             .resizable()
                             .scaledToFit()
+                            .accessibilityIdentifier("imageFilm")
                     }
                 }
                 .frame(maxWidth: .infinity, maxHeight: 300)
@@ -61,6 +65,7 @@ struct FilmView: View {
                 VStack  {
                     Text(film.titleFilm)
                         .font(customFont(style: .largeTitle))
+                        .accessibilityIdentifier("titreFilm")
                     
                     CaracteristiqueFilmView(film: film)
                     
@@ -68,10 +73,12 @@ struct FilmView: View {
                         
                         Text("Note : " + String(film.note ?? 0))
                             .font(customFont(style: .body))
+                            .accessibilityIdentifier("note")
                         if film.isCoupDeCoeur {
                             Spacer()
                             Text("Coup de coeur")
                                 .font(customFont(style: .body))
+                                .accessibilityIdentifier("coupDeCoeur")
                             Image(systemName: film.isCoupDeCoeur ? "heart.fill" : "heart")
                                 .foregroundColor(.rougeSombreErreur)
                         }
@@ -87,14 +94,17 @@ struct FilmView: View {
                         
                         .clipShape(.rect(cornerRadius: 10))
                         .padding()
+                        .accessibilityIdentifier("description")
                         
                     Spacer()
                     Text(film.filmAuthor ?? "")
                         .font(customFont(style: .body))
                         .padding()
+                        .accessibilityIdentifier("author")
                     Text(film.filmDistribution ?? "")
                         .font(customFont(style: .body))
                         .padding()
+                        .accessibilityIdentifier("distribution")
                 }
                 
             }
