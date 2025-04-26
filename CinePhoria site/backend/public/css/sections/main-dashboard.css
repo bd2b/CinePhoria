@@ -1,0 +1,239 @@
+.container__dashboard {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    height: calc(100vh - 200px);
+    /* Espace restant après le header */
+    width: 100%;
+    gap: 10px;
+}
+
+/* --------------------- COLONNE 1 Liste des films */
+.dashboard__listFilms {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+    width: 25%;
+    gap: 10px;
+    margin-left: 10px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+
+
+}
+
+.listFilms__simpleCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+
+    width: 95%;
+    height: 90px;
+
+    gap: 10px;
+    background: rgb(var(--secondary-color));
+    border: 1px solid rgb(var(--primary-color), 0.3);
+    border-radius: 12px;
+
+    cursor: pointer;
+}
+
+/* .listFilms__simpleCard:hover {
+    background: rgb(var(--ternary-color), 0.5);
+} */
+
+.listFilms__simpleCard.selected {
+    background: rgb(var(--ternary-color));
+    border: 3px solid rgb(var(--primary-color), 0.6);
+}
+
+
+.simpleCard__detail {
+    flex-shrink: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    box-sizing: border-box;
+
+    order: 1;
+    width: 75%;
+    height: 100%;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.simpleCard__detail-titre-p {
+    flex: none;
+    width: 100%;
+    
+    font-size: var(--subheadline-font-size);
+}
+
+.simpleCard__detail-titre-p.numConnexions {
+    color: rgba(23, 23, 23, 0.90);
+    font-size: 15px;
+    font-family: Actor;
+    line-height: 24px;
+}
+
+.simpleCard__detail-titre-p.supprimer-button {
+    font-size: 15px;
+    font-family: Actor;
+    line-height: 20px;
+    max-width: 50px;
+}
+
+/* --------------------- COLONNE 2 détail du employe */
+.dashboard__content {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    /* flex-wrap: nowrap;
+    overflow-y: auto; */
+    align-items: center;
+    gap: 10px;
+
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-right: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+
+    width: 75%;
+    height: 95%;
+    background: rgb(var(--ternary-color), 0.5);
+    /* Gray/300 */
+    border: 1px solid #DEE2E6;
+    border-radius: 12px;
+}
+
+.content__graph {
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    /* background: white; */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+#reservationChart{
+    height: 400px;;
+}
+
+.employe-images {
+    display: flex;
+    gap: 20px;
+}
+
+
+.label-affiche {
+    color: black;
+    font-size: 15px;
+    font-family: Actor;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.25px;
+}
+
+.employe-details {
+    flex: 1;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.detail-row.passwordEdit {
+    display: none;
+}
+
+
+
+.field-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.checkbox {
+    flex-direction: row;
+}
+
+.label {
+    color: rgba(23, 23, 23, 0.70);
+    font-size: 15px;
+    font-family: Actor;
+    font-weight: 400;
+    line-height: 24px;
+    letter-spacing: 0.25px;
+}
+
+.field-value {
+    padding: 12px;
+    background: white;
+    border-radius: 12px;
+    outline: 2px rgba(23, 23, 23, 0.10) solid;
+    outline-offset: -2px;
+    color: #212529;
+    font-size: 14px;
+    font-family: Actor;
+}
+
+.bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title__filter-dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .title__filter-button-drowdown-content {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    min-width: 120px;
+    border: 1px solid rgba(0,0,0,0.2);
+    z-index: 1000;
+  }
+  
+  .title__filter-button-drowdown-content a {
+    padding: 10px;
+    display: block;
+    text-decoration: none;
+    color: black;
+  }
+  .title__filter-dropdown-button.inactif + .title__filter-button-drowdown-content {
+    display: none !important;
+}
+  
+  .title__filter-button-drowdown-content a:hover {
+    background-color: #f1f1f1;
+  }
+  
+  .title__filter-button-drowdown-content.show {
+    display: block;
+  }
+
+  .title__filter-dropdown-button.inactif,
+.title__filter-dropdown-button.inactif:hover {
+    pointer-events: none;
+    opacity: 0.6; /* visuellement grisé, optionnel */
+    cursor: default;
+}
+

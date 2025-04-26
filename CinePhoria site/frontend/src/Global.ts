@@ -12,8 +12,9 @@ import { onLoadManageEmployes } from "./ViewManageEmploye.js";
 import { onLoadDashboard } from "./ViewDashboard.js";
 
 export const DEVELOPPEMENT = true;
-export const urlBackProd = "https://http://regn.freeboxos.fr:3500";
-export const urlBackDev = "http://localhost:3500";
+
+// L'url de base est l'url d'appel des fichiers statiques
+export const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
 
 const pageHandlers: Record<string, () => void> = {
     "visiteur.html": onLoadVisiteur,
@@ -30,6 +31,7 @@ const pageHandlers: Record<string, () => void> = {
 
 const pagesPublic = [ "visiteur.html", "reservation.html", "films.html" , 
     "manageFilms.html", "manageSalles.html", "manageSeances.html"]; // TODO manageXXXXX à supprimer
+
 
 /**
  * Gestion centralisée des erreurs API

@@ -32,7 +32,7 @@ export class QRCodeService {
 
   public static async generateQRCodeWithImage(
     text: string,
-    imagePath = './public/camera-qr.png',
+    imagePath = './camera-qr.png',
     width = 300,
     height = 300,
     factor = 0.15 // Taille de l'image par rapport au QR Code

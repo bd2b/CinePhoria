@@ -3,13 +3,14 @@ import { isUUID, validateEmail } from './Helpers.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
 import { ReservationForUtilisateur, SeatsForReservation, ReservationAvis, ReservationStats } from './shared-models/Reservation.js';
 import { userDataController } from './DataControllerUser.js';
-import { handleApiError } from './Global.js';
+import { handleApiError, baseUrl } from './Global.js';
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { Mail } from './shared-models/Mail.js';
 import { Seance, SeanceDisplay } from './shared-models/Seance.js';
 import { Film } from './shared-models/Film.js';
 import { Salle } from './shared-models/Salle.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
+
 
 
 /**
@@ -112,7 +113,7 @@ async function apiRequest<T>(
 async function refreshAccessToken() {
     try {
         console.log("🔄 Tentative de refresh du token...");
-        const response = await fetch('http://localhost:3500/api/refresh', {
+        const response = await fetch(`${baseUrl}/api/refresh`, {
             method: 'POST',
             // on peut mettre credentials: 'include' si le refresh nécessite le cookie
             credentials: 'include'
@@ -142,7 +143,7 @@ async function refreshAccessToken() {
 export async function loginApi(compte: string, password: string) {
     const body = { compte, password };
 
-    const response = await fetch('http://localhost:3500/api/login', {
+    const response = await fetch(`${baseUrl}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -165,7 +166,7 @@ export async function loginApi(compte: string, password: string) {
 }
 
 export async function logoutApi() {
-    const response = await fetch('http://localhost:3500/api/login/logout', {
+    const response = await fetch(`${baseUrl}/api/login/logout`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
     });
@@ -192,7 +193,7 @@ export async function setReservationApi(
     seatsReserved: string
 ): Promise<{ statut: string; utilisateurId: string; reservationId: string }> {
     const body = { email, seanceId, tarifSeats, pmrSeats, seatsReserved };
-    const endpoint = 'http://localhost:3500/api/reservation';
+    const endpoint = `${baseUrl}/api/reservation`;
 
     const responseJSON = await apiRequest<{ statut: string; utilisateurId: string; reservationId: string }>(
         endpoint,
@@ -240,7 +241,7 @@ export async function confirmUtilisateurApi(
     displayName: string
 ): Promise<{ statut: string }> {
     const body = { id, password, displayName };
-    const endpoint = 'http://localhost:3500/api/utilisateur/confirmUtilisateur';
+    const endpoint = `${baseUrl}/api/utilisateur/confirmUtilisateur`;
 
     const responseJSON = await apiRequest<{ statut: string }>(
         endpoint,
@@ -256,7 +257,7 @@ export async function confirmUtilisateurApi(
 
 export async function confirmUtilisateurApi2(id: string, password: string, displayName: string): Promise<{ statut: string }> {
     const body = { id, password, displayName };
-    const response = await fetch('http://localhost:3500/api/utilisateur/confirmUtilisateur', {
+    const response = await fetch(`${baseUrl}/api/utilisateur/confirmUtilisateur`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
@@ -281,7 +282,7 @@ export async function confirmUtilisateurApi2(id: string, password: string, displ
  */
 export async function confirmCompteApi(email: string, codeConfirm: string): Promise<{ statut: string }> {
     const body = { email, codeConfirm };
-    const endpoint = 'http://localhost:3500/api/utilisateur/confirmCompte';
+    const endpoint = `${baseUrl}/api/utilisateur/confirmCompte`;
 
     const responseJSON = await apiRequest<{ statut: string }>(
         endpoint,
@@ -307,7 +308,7 @@ export async function confirmReserveApi(
     utilisateurId: string,
     seanceId: string
 ) {
-    return apiRequest('http://localhost:3500/api/reservation/confirm', 'POST', {
+    return apiRequest(`${baseUrl}/api/reservation/confirm`, 'POST', {
         reservationId,
         utilisateurId,
         seanceId,
@@ -325,7 +326,7 @@ export async function setStateReservationApi(
     reservationId: string,
     stateReservation: ReservationState
 ): Promise<boolean> {
-    return apiRequest<boolean>('http://localhost:3500/api/reservation/setstate', 'POST', {
+    return apiRequest<boolean>(`${baseUrl}/api/reservation/setstate`, 'POST', {
         reservationId,
         stateReservation
     });
@@ -345,7 +346,7 @@ export async function setEvaluationReservationApi(
     p_isEvaluationMustBeReview: boolean
 ): Promise<boolean> {
     const isEvaluationMustBeReview = p_isEvaluationMustBeReview ? "true" : "false";
-    return apiRequest<boolean>('http://localhost:3500/api/reservation/setevaluation', 'POST', {
+    return apiRequest<boolean>(`${baseUrl}/api/reservation/setevaluation`, 'POST', {
         reservationId,
         note,
         evaluation,
@@ -363,7 +364,7 @@ export async function confirmReserveApi2(reservationId: string, utilisateurId: s
     }
 
     // Tenter la requête
-    let response = await fetch('http://localhost:3500/api/reservation/confirm', {
+    let response = await fetch(`${baseUrl}/api/reservation/confirm`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -389,7 +390,7 @@ export async function confirmReserveApi2(reservationId: string, utilisateurId: s
             }
 
             // Re-tenter la requête
-            response = await fetch('http://localhost:3500/api/reservation/confirm', {
+            response = await fetch(`${baseUrl}/api/reservation/confirm`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -425,7 +426,7 @@ export async function confirmReserveApi2(reservationId: string, utilisateurId: s
  */
 export async function cancelReserveApi(reservationId: string): Promise<{ statut: string }> {
     const body = { reservationId };
-    const endpoint = 'http://localhost:3500/api/reservation/cancel';
+    const endpoint = `${baseUrl}/api/reservation/cancel`;
 
     const responseJSON = await apiRequest<{ statut: string }>(
         endpoint,
@@ -441,7 +442,7 @@ export async function cancelReserveApi(reservationId: string): Promise<{ statut:
 export async function cancelReserveApi2(reservationId: string) {
     const body = { reservationId };
 
-    const response = await fetch(`http://localhost:3500/api/reservation/cancel`, {
+    const response = await fetch(`${baseUrl}/api/reservation/cancel`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -464,7 +465,7 @@ export async function cancelReserveApi2(reservationId: string) {
  * @returns ComptePersonne
  */
 export async function profilApi(identUtilisateur: string): Promise<ComptePersonne[]> {
-    const endpoint = `http://localhost:3500/api/utilisateur/${identUtilisateur}`;
+    const endpoint = `${baseUrl}/api/utilisateur/${identUtilisateur}`;
 
     // Appel de apiRequest pour gérer l'authentification et les erreurs
     const rawData = await apiRequest<any[]>(endpoint, 'GET', null);
@@ -479,7 +480,7 @@ export async function profilApi(identUtilisateur: string): Promise<ComptePersonn
 
 export async function profilApi2(identUtilisateur: string): Promise<ComptePersonne[]> {
     const token = localStorage.getItem('jwtAccessToken');
-    const response = await fetch(`http://localhost:3500/api/utilisateur/${identUtilisateur}`, {
+    const response = await fetch(`${baseUrl}/api/utilisateur/${identUtilisateur}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -505,7 +506,7 @@ export async function profilApi2(identUtilisateur: string): Promise<ComptePerson
  * @returns 
  */
 export async function getReservationApi(reservationId: string): Promise<ReservationForUtilisateur[]> {
-    const endpoint = `http://localhost:3500/api/reservation/id/${reservationId}`;
+    const endpoint = `${baseUrl}/api/reservation/id/${reservationId}`;
 
     const rawData = await apiRequest<any[]>(endpoint, 'GET', undefined, false); // Pas d'authentification requise
 
@@ -526,7 +527,7 @@ export async function getReservationApi(reservationId: string): Promise<Reservat
  * @returns Liste des sieges reservé constitué dans une chaine avec numero de siege separe par une ","
  */
 export async function getSeatsBookedApi(seanceId: string): Promise<{ siegesReserves: string }> {
-    const endpoint = `http://localhost:3500/api/seances/seats/${seanceId}`;
+    const endpoint = `${baseUrl}/api/seances/seats/${seanceId}`;
 
     const seatsBooked = await apiRequest<{ siegesReserves: string }>(endpoint, 'GET', undefined, false); // Pas d'authentification requise
     console.log("Liste des sieges = ", seatsBooked);
@@ -542,7 +543,7 @@ export async function getSeatsBookedApi(seanceId: string): Promise<{ siegesReser
 
 export async function getSeancesByIdApi(uuids: string[]): Promise<Seance[]> {
 
-    const endpoint = `http://localhost:3500/api/seances/seances?ids=${uuids}`;
+    const endpoint = `${baseUrl}/api/seances/seances?ids=${uuids}`;
 
     const seances = await apiRequest<Seance[]>(endpoint, 'GET', undefined, false); // Pas d'authentification requise
     console.log("Liste des séances = ", seances);
@@ -552,7 +553,7 @@ export async function getSeancesByIdApi(uuids: string[]): Promise<Seance[]> {
 
 export async function getReservationApi2(reservationId: string): Promise<ReservationForUtilisateur[]> {
 
-    const response = await fetch(`http://localhost:3500/api/reservation/id/${reservationId}`, {
+    const response = await fetch(`${baseUrl}/api/reservation/id/${reservationId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -576,7 +577,7 @@ export async function getReservationApi2(reservationId: string): Promise<Reserva
  * @returns 
  */
 export async function getPlacesReservationApi(reservationId: string): Promise<SeatsForReservation[]> {
-    const endpoint = `http://localhost:3500/api/reservation/seats/id/${reservationId}`;
+    const endpoint = `${baseUrl}/api/reservation/seats/id/${reservationId}`;
 
     const rawData = await apiRequest<any[]>(endpoint, 'GET', undefined, false); // Pas d'authentification requise
 
@@ -593,7 +594,7 @@ export async function getPlacesReservationApi(reservationId: string): Promise<Se
 
 export async function getPlacesReservationApi2(reservationId: string): Promise<SeatsForReservation[]> {
 
-    const response = await fetch(`http://localhost:3500/api/reservation/seats/id/${reservationId}`, {
+    const response = await fetch(`${baseUrl}/api/reservation/seats/id/${reservationId}`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -612,7 +613,7 @@ export async function getPlacesReservationApi2(reservationId: string): Promise<S
 }
 
 export async function isLogged(): Promise<string> {
-    const endpoint = `http://localhost:3500/api/login/isLogged`;
+    const endpoint = `${baseUrl}/api/login/isLogged`;
 
     // Utilisation de apiRequest pour gérer l'authentification et les erreurs
     return await apiRequest<string>(endpoint, 'GET', undefined);
@@ -620,7 +621,7 @@ export async function isLogged(): Promise<string> {
 
 export async function isLogged2(): Promise<string> {
     const token = localStorage.getItem('jwtToken');
-    const response = await fetch(`http://localhost:3500/api/login/isLogged`, {
+    const response = await fetch(`${baseUrl}/api/login/isLogged`, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
@@ -637,7 +638,7 @@ export async function isLogged2(): Promise<string> {
 }
 
 export async function getReservationForUtilisateur(utilisateurId: string): Promise<ReservationForUtilisateur[]> {
-    const endpoint = `http://localhost:3500/api/reservation/${utilisateurId}`;
+    const endpoint = `${baseUrl}/api/reservation/${utilisateurId}`;
 
     // Utilisation de apiRequest pour gérer l'authentification et les erreurs
     const rawData = await apiRequest<any[]>(endpoint, 'GET', null);
@@ -655,7 +656,7 @@ export async function getReservationForUtilisateur(utilisateurId: string): Promi
 export async function sendMailApi(mail: Mail): Promise<{ statut: string }> {
     const body = JSON.stringify({ mailInput: mail });
     console.log(body);
-    const endpoint = 'http://localhost:3500/api/mail/sendmailcontact';
+    const endpoint = `${baseUrl}/api/mail/sendmailcontact`;
     const responseJSON = await apiRequest<{ statut: string }>(
         endpoint,
         'POST',
@@ -668,7 +669,7 @@ export async function sendMailApi(mail: Mail): Promise<{ statut: string }> {
 }
 
 export async function getReservationQRCodeApi(reservationId: string): Promise<HTMLImageElement> {
-    const endpoint = `http://localhost:3500/api/reservation/qrcodeimage/${reservationId}`;
+    const endpoint = `${baseUrl}/api/reservation/qrcodeimage/${reservationId}`;
 
     type QRCodeResponse = {
         qrCodeFile: number[];
@@ -691,7 +692,7 @@ export async function getReservationQRCodeApi(reservationId: string): Promise<HT
 
 
 export async function askResetPwdApi(email: string): Promise<void> {
-    const endpoint = `http://localhost:3500/api/utilisateur/askresetpwd`;
+    const endpoint = `${baseUrl}/api/utilisateur/askresetpwd`;
     const body = { email: email };
     console.log(body);
     const responseJSON = await apiRequest<void>(
@@ -705,7 +706,7 @@ export async function askResetPwdApi(email: string): Promise<void> {
 }
 
 export async function resetPwdApi(email: string, codeConfirm: string, newPassword: string): Promise<void> {
-    const endpoint = `http://localhost:3500/api/utilisateur/resetpwd`;
+    const endpoint = `${baseUrl}/api/utilisateur/resetpwd`;
     const body = { email: email, codeConfirm: codeConfirm, newPassword: newPassword };
     console.log(body);
     const responseJSON = await apiRequest<void>(
@@ -724,7 +725,7 @@ export async function resetPwdApi(email: string, codeConfirm: string, newPasswor
  * @returns { message, id } où 'id' est l'identifiant du film créé
  */
 export async function filmsCreateApi(film: Film): Promise<{ message: string; id: string }> {
-    const endpoint = 'http://localhost:3500/api/films';
+    const endpoint = `${baseUrl}/api/films`;
     // Requête authentifiée
     const responseJSON = await apiRequest<{ message: string; id: string }>(
         endpoint,
@@ -741,7 +742,7 @@ export async function filmsCreateApi(film: Film): Promise<{ message: string; id:
  * @returns L’objet Film correspondant
  */
 export async function filmsSelectApi(filmId: string): Promise<Film> {
-    const endpoint = `http://localhost:3500/api/films/${filmId}`;
+    const endpoint = `${baseUrl}/api/films/${filmId}`;
     const responseJSON = await apiRequest<Film>(
         endpoint,
         'GET',
@@ -758,7 +759,7 @@ export async function filmsSelectApi(filmId: string): Promise<Film> {
  * @returns { message } si la mise à jour est réussie
  */
 export async function filmsUpdateApi(filmId: string, film: Film): Promise<{ message: string }> {
-    const endpoint = `http://localhost:3500/api/films/${filmId}`;
+    const endpoint = `${baseUrl}/api/films/${filmId}`;
     const responseJSON = await apiRequest<{ message: string }>(
         endpoint,
         'PUT',
@@ -774,7 +775,7 @@ export async function filmsUpdateApi(filmId: string, film: Film): Promise<{ mess
  * @returns { message } si la suppression est réussie
  */
 export async function filmsDeleteApi(filmId: string): Promise<{ message: string }> {
-    const endpoint = `http://localhost:3500/api/films/${filmId}`;
+    const endpoint = `${baseUrl}/api/films/${filmId}`;
     const responseJSON = await apiRequest<{ message: string }>(
         endpoint,
         'DELETE',
@@ -789,7 +790,7 @@ export async function filmsDeleteApi(filmId: string): Promise<{ message: string 
 * @returns Un tableau de Film
 */
 export async function filmsSelectAllApi(): Promise<Film[]> {
-    const endpoint = 'http://localhost:3500/api/films';
+    const endpoint = `${baseUrl}/api/films`;
     // Requête authentifiée
     const responseJSON = await apiRequest<Film[]>(
         endpoint,
@@ -816,7 +817,7 @@ export async function createAfficheApi(
     formData.append('contentType', contentType);
 
     return apiRequest(
-        'http://localhost:3500/api/films/affiche',
+        `${baseUrl}/api/films/affiche`,
         'POST',
         formData,
         false // Pas d'authentification requise
@@ -828,7 +829,7 @@ export async function createAfficheApi(
  */
 export async function getAfficheApi(filmId: string) {
     return apiRequest(
-        `http://localhost:3500/api/films/affiche/${filmId}`,
+        `${baseUrl}/api/films/affiche/${filmId}`,
         'GET',
         undefined,
         false // Pas d'authentification requise
@@ -840,7 +841,7 @@ export async function getAfficheApi(filmId: string) {
  */
 export async function getAllAffichesApi() {
     return apiRequest(
-        'http://localhost:3500/api/films/affiche',
+        `${baseUrl}/api/films/affiche`,
         'GET',
         undefined,
         false // Pas d'authentification requise
@@ -862,7 +863,7 @@ export async function updateAfficheApi(
     if (contentType) formData.append('contentType', contentType);
 
     return apiRequest(
-        `http://localhost:3500/api/films/affiche/${filmId}`,
+        `${baseUrl}/api/films/affiche/${filmId}`,
         'PUT',
         formData,
         false // Pas d'authentification requise
@@ -874,7 +875,7 @@ export async function updateAfficheApi(
  */
 export async function deleteAfficheApi(filmId: string) {
     return apiRequest(
-        `http://localhost:3500/api/films/affiche/${filmId}`,
+        `${baseUrl}/api/films/affiche/${filmId}`,
         'DELETE',
         undefined,
         false // Pas d'authentification requise
@@ -889,7 +890,7 @@ export async function deleteAfficheApi(filmId: string) {
  * @returns { message, id } où 'id' est l'identifiant du salle créé
  */
 export async function sallesCreateApi(salle: Salle): Promise<{ message: string; id: string }> {
-    const endpoint = 'http://localhost:3500/api/salles';
+    const endpoint = `${baseUrl}/api/salles`;
     // Requête authentifiée
     const responseJSON = await apiRequest<{ message: string; id: string }>(
         endpoint,
@@ -906,7 +907,7 @@ export async function sallesCreateApi(salle: Salle): Promise<{ message: string; 
  * @returns L’objet Salle correspondant
  */
 export async function sallesSelectApi(salleId: string): Promise<Salle> {
-    const endpoint = `http://localhost:3500/api/salles/${salleId}`;
+    const endpoint = `${baseUrl}/api/salles/${salleId}`;
     const responseJSON = await apiRequest<Salle>(
         endpoint,
         'GET',
@@ -922,7 +923,7 @@ export async function sallesSelectApi(salleId: string): Promise<Salle> {
  * @returns un tableau de salles
  */
 export async function sallesSelectCinemaApi(nameCinema: string): Promise<Salle[]> {
-    const endpoint = `http://localhost:3500/api/salles/cinema/${nameCinema}`;
+    const endpoint = `${baseUrl}/api/salles/cinema/${nameCinema}`;
     const responseJSON = await apiRequest<Salle[]>(
         endpoint,
         'GET',
@@ -939,7 +940,7 @@ export async function sallesSelectCinemaApi(nameCinema: string): Promise<Salle[]
  * @returns { message } si la mise à jour est réussie
  */
 export async function sallesUpdateApi(salleId: string, salle: Salle): Promise<{ message: string }> {
-    const endpoint = `http://localhost:3500/api/salles/${salleId}`;
+    const endpoint = `${baseUrl}/api/salles/${salleId}`;
     const responseJSON = await apiRequest<{ message: string }>(
         endpoint,
         'PUT',
@@ -955,7 +956,7 @@ export async function sallesUpdateApi(salleId: string, salle: Salle): Promise<{ 
  * @returns { message } si la suppression est réussie
  */
 export async function sallesDeleteApi(salleId: string): Promise<{ message: string }> {
-    const endpoint = `http://localhost:3500/api/salles/${salleId}`;
+    const endpoint = `${baseUrl}/api/salles/${salleId}`;
     const responseJSON = await apiRequest<{ message: string }>(
         endpoint,
         'DELETE',
@@ -970,7 +971,7 @@ export async function sallesDeleteApi(salleId: string): Promise<{ message: strin
 * @returns Un tableau de Salle
 */
 export async function sallesSelectAllApi(): Promise<Salle[]> {
-    const endpoint = 'http://localhost:3500/api/salles';
+    const endpoint = `${baseUrl}/api/salles`;
     // Requête authentifiée
     const responseJSON = await apiRequest<Salle[]>(
         endpoint,
@@ -987,7 +988,7 @@ export async function sallesSelectAllApi(): Promise<Salle[]> {
  * @returns { message, id } où 'id' est l'identifiant du seanceseule créé
  */
 export async function seancesseulesCreateApi(seanceseule: SeanceSeule): Promise<{ message: string; id: string }> {
-    const endpoint = 'http://localhost:3500/api/seancesseules';
+    const endpoint = `${baseUrl}/api/seancesseules`;
     // Requête authentifiée
     const responseJSON = await apiRequest<{ message: string; id: string }>(
         endpoint,
@@ -1004,7 +1005,7 @@ export async function seancesseulesCreateApi(seanceseule: SeanceSeule): Promise<
  * @returns L’objet SeanceSeule correspondant
  */
 export async function seancesseulesSelectApi(seanceseuleId: string): Promise<SeanceSeule> {
-    const endpoint = `http://localhost:3500/api/seancesseules/${seanceseuleId}`;
+    const endpoint = `${baseUrl}/api/seancesseules/${seanceseuleId}`;
     const responseJSON = await apiRequest<SeanceSeule>(
         endpoint,
         'GET',
@@ -1021,7 +1022,7 @@ export async function seancesseulesSelectApi(seanceseuleId: string): Promise<Sea
  * @returns { message } si la mise à jour est réussie
  */
 export async function seancesseulesUpdateApi(seanceseuleId: string, seanceseule: SeanceSeule): Promise<{ message: string }> {
-    const endpoint = `http://localhost:3500/api/seancesseules/${seanceseuleId}`;
+    const endpoint = `${baseUrl}/api/seancesseules/${seanceseuleId}`;
     const responseJSON = await apiRequest<{ message: string }>(
         endpoint,
         'PUT',
@@ -1037,7 +1038,7 @@ export async function seancesseulesUpdateApi(seanceseuleId: string, seanceseule:
  * @returns { message } si la suppression est réussie
  */
 export async function seancesseulesDeleteApi(seanceseuleId: string): Promise<{ message: string }> {
-    const endpoint = `http://localhost:3500/api/seancesseules/${seanceseuleId}`;
+    const endpoint = `${baseUrl}/api/seancesseules/${seanceseuleId}`;
     const responseJSON = await apiRequest<{ message: string }>(
         endpoint,
         'DELETE',
@@ -1052,7 +1053,7 @@ export async function seancesseulesDeleteApi(seanceseuleId: string): Promise<{ m
 * @returns Un tableau de SeanceSeule
 */
 export async function seancesseulesSelectAllApi(): Promise<SeanceSeule[]> {
-    const endpoint = 'http://localhost:3500/api/seancesseules';
+    const endpoint = `${baseUrl}/api/seancesseules`;
     // Requête authentifiée
     const responseJSON = await apiRequest<SeanceSeule[]>(
         endpoint,
@@ -1066,12 +1067,12 @@ export async function seancesseulesSelectAllApi(): Promise<SeanceSeule[]> {
 /**
 * Récupération de tous les seancesdisplay en fonction d'une liste de cinema 
 * (GET /api/seances/display/filter?)
-* http://localhost:3500/api/seances/display/filter?cinemasList="Paris"
+* ${baseUrl}/api/seances/display/filter?cinemasList="Paris"
 * @returns Un tableau de SeanceSeule
 */
 export async function seancesDisplayByCinemaApi(cinemas: string[]): Promise<SeanceDisplay[]> {
     const filter = cinemas.map(s => `"${s}"`).join(',');
-    const endpoint = `http://localhost:3500/api/seances/display/filter?cinemasList=${filter}`;
+    const endpoint = `${baseUrl}/api/seances/display/filter?cinemasList=${filter}`;
     // Requête authentifiée
     const responseJSON = await apiRequest<SeanceDisplay[]>(
         endpoint,
@@ -1085,12 +1086,12 @@ export async function seancesDisplayByCinemaApi(cinemas: string[]): Promise<Sean
 /**
 * Récupération de toutes les reservations en fonction d'une liste de cinema 
 * (GET /api/reservation/cinema/filter?)
-* http://localhost:3500/api/reservation/cinema/filter?cinemasList="Paris"
+* ${baseUrl}/api/reservation/cinema/filter?cinemasList="Paris"
 * @returns Un tableau de ReservationForUtilisateur
 */
 export async function reservationsByCinemaApi(cinemas: string[]): Promise<ReservationForUtilisateur[]> {
     const filter = cinemas.map(s => `"${s}"`).join(',');
-    const endpoint = `http://localhost:3500/api/reservation/cinema/filter?cinemasList=${filter}`;
+    const endpoint = `${baseUrl}/api/reservation/cinema/filter?cinemasList=${filter}`;
     // Requête authentifiée
     const responseJSON = await apiRequest<ReservationForUtilisateur[]>(
         endpoint,
@@ -1110,7 +1111,7 @@ export async function reservationsByCinemaApi(cinemas: string[]): Promise<Reserv
  */
 export async function reservationAvisUpdateApi(reservationId: string, reservationAvis: ReservationAvis): Promise<{ message: string }> {
     console.log(JSON.stringify(reservationAvis));
-    const endpoint = `http://localhost:3500/api/reservation/avis/${reservationId}`;
+    const endpoint = `${baseUrl}/api/reservation/avis/${reservationId}`;
     const responseJSON = await apiRequest<{ message: string }>(
         endpoint,
         'PUT',
@@ -1125,7 +1126,7 @@ export async function reservationAvisUpdateApi(reservationId: string, reservatio
 * @returns Un tableau d'employes
 */
 export async function employesSelectAllApi(): Promise<ComptePersonne[]> {
-    const endpoint = 'http://localhost:3500/api/utilisateur/getemployes';
+    const endpoint = `${baseUrl}/api/utilisateur/getemployes`;
     // Requête authentifiée
     const responseJSON = await apiRequest<ComptePersonne[]>(
         endpoint,
@@ -1142,7 +1143,7 @@ export async function employesSelectAllApi(): Promise<ComptePersonne[]> {
  * @returns L’objet ComptePersonne correspondant
  */
 export async function getEmployeByMatriculeApi(matricule: number): Promise<ComptePersonne> {
-    const endpoint = `http://localhost:3500/api/utilisateur/getemploye/${matricule}`;
+    const endpoint = `${baseUrl}/api/utilisateur/getemploye/${matricule}`;
     const responseJSON = await apiRequest<ComptePersonne>(
         endpoint,
         'GET',
@@ -1158,7 +1159,7 @@ export async function getEmployeByMatriculeApi(matricule: number): Promise<Compt
  * @returns { message, id } où 'id' est l'identifiant du seanceseule créé
  */
 export async function employeCreateApi(employe: ComptePersonne, password: string = ""): Promise<{ message: string; id: string }> {
-    const endpoint = 'http://localhost:3500/api/utilisateur/createEmploye';
+    const endpoint = `${baseUrl}/api/utilisateur/createEmploye`;
     const formData = new FormData();
     formData.append('email', employe.email);
     formData.append('password', password);
@@ -1190,7 +1191,7 @@ export async function employeCreateApi(employe: ComptePersonne, password: string
  * @returns { message } si la mise à jour est réussie
  */
 export async function employeUpdateApi(employe: ComptePersonne, password: string): Promise<{ message: string }> {
-    const endpoint = `http://localhost:3500/api/utilisateur/updateemploye`;
+    const endpoint = `${baseUrl}/api/utilisateur/updateemploye`;
 
     const formData = new FormData();
     formData.append('email', employe.email);
@@ -1223,7 +1224,7 @@ employeDeleteApi
  * @returns { message } si la suppression est réussie
  */
 export async function employeDeleteApi(matricule: number): Promise<{ message: string }> {
-    const endpoint = `http://localhost:3500/api/utilisateur/deleteemploye/${matricule}`;
+    const endpoint = `${baseUrl}/api/utilisateur/deleteemploye/${matricule}`;
     const responseJSON = await apiRequest<{ message: string }>(
         endpoint,
         'DELETE',
@@ -1238,7 +1239,7 @@ export async function employeDeleteApi(matricule: number): Promise<{ message: st
 * @returns Un tableau d'employes
 */
 export async function getReservationStatsApi(): Promise<ReservationStats[]> {
-    const endpoint = 'http://localhost:3500/api/reservation/getreservationstats';
+    const endpoint = `${baseUrl}/api/reservation/getreservationstats`;
     // Requête authentifiée
     const responseJSON = await apiRequest<ReservationStats[]>(
         endpoint,

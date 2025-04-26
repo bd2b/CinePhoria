@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sections/main-manageseances.css">
+
+    <script type="module" src="dist/main.js" defer></script>
+    <title>CinePhoria</title>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="header__nav">
+            <div class="nav__logo ">
+                <a href="./visiteur.html">
+                    <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
+            </div>
+            <div class="nav__actions">
+
+            </div>
+            <div class="nav__mobile-menu" id="navMobileMenu">
+                <img src="assets/menu.svg" alt="Menu">
+            </div>
+
+            <div class="mobile-menu" id="mobileMenu">
+                <button class="mobile-menu__close" id="mobileMenuClose">&times;</button>
+                <nav class="mobile-menu__nav">
+
+                </nav>
+            </div>
+        </nav>
+    </header>
+    <main class="main main__container">
+        <div class="container__title">
+            <div class="title__left">
+                <h1 class="title__left-h1" id="titleLeft">Gérer les séances</h1>
+            </div>
+            <div class="title__filters title__filters-films">
+                <!-- Cinéma -->
+                <div class="title__filter-dropdown titre__filter-dropdown-cinema">
+                    <button class="title__filter-dropdown-button titre__filter-dropdown-complexe">
+                        Tous les complexes <span class="chevron">▼</span>
+                    </button>
+                    <div class="title__filter-button-drowdown-content">
+                        <a href="#" data-cinema="Tous les complexes">Tous les complexes</a>
+                        <a href="#" data-cinema="Paris">Paris</a>
+                        <a href="#" data-cinema="Bordeaux">Bordeaux</a>
+                        <a href="#" data-cinema="Nantes">Nantes</a>
+                        <a href="#" data-cinema="Lille">Lille</a>
+                        <a href="#" data-cinema="Toulouse">Toulouse</a>
+                        <a href="#" data-cinema="Charleroi" >Charleroi</a>
+                        <a href="#" data-cinema="Liège" >Liège</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Conteneur des seances -->
+        <div class="container__seances">
+            <!-- Le script insère la table dans ce div -->
+            <div id="seances-table-container"></div>
+        </div>
+    </div>
+    </div>
+</main>
+<footer class="footer" id="footer">
+</footer>

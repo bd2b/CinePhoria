@@ -8,6 +8,10 @@ const cors_1 = __importDefault(require("cors"));
 const configLog_1 = __importDefault(require("./config/configLog"));
 const sanitiseQueryMiddleware_1 = __importDefault(require("./middlewares/sanitiseQueryMiddleware"));
 const express_fileupload_1 = __importDefault(require("express-fileupload"));
+const http_1 = __importDefault(require("http"));
+const https_1 = __importDefault(require("https"));
+const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config({ path: './.env' });
 const mode = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
@@ -16,16 +20,51 @@ console.log(`🛠️ Mode actuel : ${mode}`);
 const config_1 = require("./config/config");
 (0, config_1.connectDBMongo)();
 const app = (0, express_1.default)();
-// Middleware de protection contre les injections
-app.use(sanitiseQueryMiddleware_1.default); // Appliquer à toutes les routes
-const PORT = process.env.PORT || 3000;
-// ✅ Configuration CORS pour accepter localhost:3000
+// 🔵 CORS doit venir immédiatement après l'initialisation d'app
 app.use((0, cors_1.default)({
-    origin: 'http://127.0.0.1:3000', // Autorise uniquement le frontend
-    credentials: true, // Permet les cookies et sessions si besoin
+    origin: (origin, callback) => {
+        if (!origin) {
+            // Les requêtes sans Origin sont acceptées
+            callback(null, true);
+        }
+        else if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+            // Accepté pour développement
+            configLog_1.default.info("Origine 222= " + origin);
+            callback(null, true);
+        }
+        else if (origin.startsWith('https://cinephoria.bd2db.com')) {
+            callback(null, true);
+        }
+        else {
+            //  callback(null, true);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
     methods: "GET,POST,PUT,DELETE,OPTIONS",
     allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
 }));
+// Middleware de protection contre les injections
+app.use(sanitiseQueryMiddleware_1.default); // Appliquer à toutes les routes
+// ✅ Configuration CORS pour accepter localhost:3000
+// app.use(cors({
+//   origin: 'http://localhost:3500', // Autorise uniquement le frontend
+//   credentials: true, // Permet les cookies et sessions si besoin
+//   methods: "GET,POST,PUT,DELETE,OPTIONS",
+//   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+// }));
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin || origin.startsWith('http://localhost')) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true,
+//   methods: "GET,POST,PUT,DELETE,OPTIONS",
+//   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+// }));
 // ✅ Middleware pour tester l'origine (DEBUG)
 // app.use((req, res, next) => {
 //   console.log("Requête depuis :", req.headers.origin);
@@ -59,7 +98,42 @@ app.use('/api/reservation', reservationRoutes_1.default);
 app.use('/api/utilisateur', utilisateurRoutes_1.default);
 app.use('/api/mail', mailRoutes_1.default);
 app.use('/api/login', publicLoginRoutes_1.default);
-app.listen(PORT, () => {
-    configLog_1.default.info(`Backend démarré sur le port ${PORT}`);
-});
+// Route pour servir les fichiers statics
+const frontPath = (mode === 'développement')
+    ? path_1.default.join(__dirname, '../../frontend/public/')
+    : path_1.default.join(__dirname, '../public');
+console.log(`🔍 Fichiers front servis depuis : ${frontPath}`);
+app.use(express_1.default.static(frontPath));
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(frontPath));
+// });
+const httpsPort = 3500;
+const httpPort = 3000;
+if (mode === 'production') {
+    const sslKeyPath = process.env.SSL_KEY_PATH || '/usr/src/app/ssl/private.key';
+    const sslCertPath = process.env.SSL_CERT_PATH || '/usr/src/app/ssl/certificate.crt';
+    const privateKey = fs_1.default.readFileSync(sslKeyPath, 'utf8');
+    const certificate = fs_1.default.readFileSync(sslCertPath, 'utf8');
+    const credentials = { key: privateKey, cert: certificate };
+    const httpsServer = https_1.default.createServer(credentials, app);
+    httpsServer.listen(httpsPort, () => {
+        console.log(`✅ Serveur HTTPS (production) démarré sur le port ${httpsPort}`);
+    });
+    const httpServer = http_1.default.createServer((req, res) => {
+        const host = req.headers['host']?.split(':')[0] || 'localhost';
+        res.writeHead(301, { Location: `https://${host}:${httpsPort}${req.url}` });
+        res.end();
+    });
+    httpServer.listen(httpPort, () => {
+        console.log(`🚀 Serveur HTTP (redirection vers HTTPS) démarré sur le port ${httpPort}`);
+    });
+}
+else {
+    app.listen(httpsPort, () => {
+        console.log(`🛠️ Serveur HTTP (développement) démarré sur le port ${httpsPort}`);
+    });
+}
+// app.listen(PORT, () => {
+//   logger.info(`Backend démarré sur le port ${PORT}`);
+// });
 configLog_1.default.info('Serveur TypeScript en cours d’exécution...');
