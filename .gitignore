@@ -11,6 +11,9 @@
 # Script systems
 **/*.sh
 
+# Certificat
+**/*.pem
+
 # Xcode specific files
 CinePhoria mobile/MonCinePhoria.xcodeproj/project.xcworkspace/xcuserdata/*/UserInterfaceState.xcuserstate
 xcuserdata/               # Exclut les préférences utilisateur

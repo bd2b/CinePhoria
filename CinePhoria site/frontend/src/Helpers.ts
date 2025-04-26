@@ -1,3 +1,4 @@
+import { baseUrl } from "./Global.js";
 export const listCinemasConst = ["Paris","Bordeaux","Nantes","Lille","Toulouse","Charleroi","Liège"];
 // Fonction pour obtenir la valeur d'un cookie
 export function getCookie(name: string): string | undefined {
@@ -189,8 +190,8 @@ export function validateEmail(email: string): boolean {
  */
 
 export function imageFilm (value: string): string {
-    const prefixAPI = 'http://localhost:3500/api/films/affichefile/';
-    const prefixDist = 'http://127.0.0.1:3000/frontend/public/assets/static/';
+    const prefixAPI = `${baseUrl}/api/films/affichefile/`;
+    const prefixDist = `${baseUrl}/assets/static/`;
     const uuidPossible = value.slice(0,36);
     return (isUUID(uuidPossible) ? prefixAPI : prefixDist) + value;
 }

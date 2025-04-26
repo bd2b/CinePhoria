@@ -36,7 +36,7 @@ router.get('/id/:reservationid', ReservationController.getReservationById);
 /** 
  * Filtre pour selectionner les séances futures au format Display
  * d'un ou plusieurs cinemas
- * http://localhost:3000/api/reservation/filter?cinemasList="Liege","Toulouse"
+ * api/reservation/filter?cinemasList="Liege","Toulouse"
  */
 router.get('/cinema/filter', (req, res) => { 
     ReservationController.getReservationsByCinemas(req, res)

@@ -1,33 +1,74 @@
 import express from 'express';
 import cors from 'cors';
-import logger  from './config/configLog';
+import logger from './config/configLog';
 import sanitizeQueryMiddleware from './middlewares/sanitiseQueryMiddleware';
 import fileUpload from 'express-fileupload';
 
+import http from 'http';
+import https from 'https';
+import fs from 'fs';
+import path from 'path';
 
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
 
 const mode = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
 console.log(`🛠️ Mode actuel : ${mode}`);
+
+
 // Connexion à la base MongoDB
 import { connectDBMongo } from './config/config';
 connectDBMongo()
 
 const app = express();
 
-// Middleware de protection contre les injections
- app.use(sanitizeQueryMiddleware); // Appliquer à toutes les routes
-
-const PORT = process.env.PORT || 3000;
-
-// ✅ Configuration CORS pour accepter localhost:3000
+// 🔵 CORS doit venir immédiatement après l'initialisation d'app
 app.use(cors({
-  origin: 'http://127.0.0.1:3000', // Autorise uniquement le frontend
-  credentials: true, // Permet les cookies et sessions si besoin
+  origin: (origin, callback) => {
+
+    if (!origin) {
+      // Les requêtes sans Origin sont acceptées
+      callback(null, true);
+    } else if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+      // Accepté pour développement
+      logger.info("Origine 222= " + origin)
+      callback(null, true);
+    } else if (origin.startsWith('https://cinephoria.bd2db.com')) {
+      callback(null, true);
+    } else {
+      //  callback(null, true);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
   methods: "GET,POST,PUT,DELETE,OPTIONS",
   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
 }));
+
+// Middleware de protection contre les injections
+app.use(sanitizeQueryMiddleware); // Appliquer à toutes les routes
+
+
+// ✅ Configuration CORS pour accepter localhost:3000
+// app.use(cors({
+//   origin: 'http://localhost:3500', // Autorise uniquement le frontend
+//   credentials: true, // Permet les cookies et sessions si besoin
+//   methods: "GET,POST,PUT,DELETE,OPTIONS",
+//   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+// }));
+
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin || origin.startsWith('http://localhost')) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true,
+//   methods: "GET,POST,PUT,DELETE,OPTIONS",
+//   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+// }));
 
 // ✅ Middleware pour tester l'origine (DEBUG)
 // app.use((req, res, next) => {
@@ -49,11 +90,11 @@ app.use(express.json());
 
 import filmRoutes from './routes/filmRoutes';
 import cinemaRoutes from './routes/cinemaRoutes';
-import salleRoutes from'./routes/salleRoute';
+import salleRoutes from './routes/salleRoute';
 import seanceRoutes from './routes/seanceRoutes';
 import seanceseuleRoutes from './routes/seanceseuleRoutes'
 import reservationRoutes from './routes/reservationRoutes';
-import utilisateurRoutes from'./routes/utilisateurRoutes';
+import utilisateurRoutes from './routes/utilisateurRoutes';
 
 import mailRoutes from './routes/mailRoutes';
 import loginRoutes from './routes/publicLoginRoutes';
@@ -70,10 +111,56 @@ app.use('/api/mail', mailRoutes);
 
 app.use('/api/login', loginRoutes);
 
+// Route pour servir les fichiers statics
+const frontPath = (mode === 'développement')
+  ? path.join(__dirname, '../../frontend/public/')
+  : path.join(__dirname, '../public');
+
+console.log(`🔍 Fichiers front servis depuis : ${frontPath}`);
+
+app.use(express.static(frontPath));
+
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(frontPath));
+// });
+
+const httpsPort = 3500;
+const httpPort = 3000;
+
+if (mode === 'production') {
+  const sslKeyPath = process.env.SSL_KEY_PATH || '/usr/src/app/ssl/private.key';
+  const sslCertPath = process.env.SSL_CERT_PATH || '/usr/src/app/ssl/certificate.crt';
+
+  const privateKey = fs.readFileSync(sslKeyPath, 'utf8');
+  const certificate = fs.readFileSync(sslCertPath, 'utf8');
+  const credentials = { key: privateKey, cert: certificate };
+
+  const httpsServer = https.createServer(credentials, app);
+  httpsServer.listen(httpsPort, () => {
+    console.log(`✅ Serveur HTTPS (production) démarré sur le port ${httpsPort}`);
+  });
+
+  const httpServer = http.createServer((req, res) => {
+    const host = req.headers['host']?.split(':')[0] || 'localhost';
+    res.writeHead(301, { Location: `https://${host}:${httpsPort}${req.url}` });
+    res.end();
+  });
+  httpServer.listen(httpPort, () => {
+    console.log(`🚀 Serveur HTTP (redirection vers HTTPS) démarré sur le port ${httpPort}`);
+  });
+} else {
+  app.listen(httpsPort, () => {
+    console.log(`🛠️ Serveur HTTP (développement) démarré sur le port ${httpsPort}`);
+  });
+}
 
 
-app.listen(PORT, () => {
-  logger.info(`Backend démarré sur le port ${PORT}`);
-});
+
+
+
+// app.listen(PORT, () => {
+//   logger.info(`Backend démarré sur le port ${PORT}`);
+// });
+
 
 logger.info('Serveur TypeScript en cours d’exécution...');  

@@ -1,0 +1,168 @@
+.header {
+    display: flex;
+    padding: 0 10px; 
+    gap: 20px;
+    height: 100px;
+    
+    align-items: center;
+    background: linear-gradient(90deg, #F8F8FF 0%, #999999 100%); 
+}
+
+.header__nav {
+    width: 100%;
+    height:100%;
+
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.nav__logo-img {
+    width: 300px;
+    height: auto;
+}
+
+.nav__actions {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 10px;
+    height: 100%;
+    }
+
+.nav__actions-button {
+    padding: 10px;
+    max-height: 55px;
+    font-size: var(--body-font-size);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 300ms;
+}
+
+.nav__actions-button--link {
+    background-color: transparent;
+    color: rgb(var(--primary-color));
+    text-decoration: none;
+    text-align: center;
+
+}
+
+.nav__actions-button--signin {
+    padding: 10px 20px;
+    background-color: rgb(var(--primary-color));
+    color: rgb(var(--secondary-color));
+    
+}
+
+.nav__actions-button--link:hover {
+    background-color: rgb(var(--ternary-color), 0.6);
+
+}
+
+.nav__actions-button--signin:hover {
+    background-color: rgb(var(--primary-color), 0.8);
+}
+.nav__mobile-menu {
+    display: none;
+}
+
+.mobile-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    height: 100vh;
+    background-color: rgb(var(--secondary-color));
+    box-shadow: -2px 0 8px rgb(var(--primary-color), 0.1);
+    z-index: 1000;
+    transition: right 0.3s ease;
+    background: rgb(var(--background-color)); 
+}
+
+.mobile-menu__nav {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin-top: 20px;
+    
+}
+
+.mobile-menu__close {
+position: absolute;
+top: 20px;
+right: 20px;
+background: none;
+border: none;
+font-size: 30px;
+cursor: pointer;
+}
+
+.mobile-menu--open {
+    right: 0;
+}
+
+/* ============================= */
+/* STYLES GÉNÉRIQUES SOUS-MENU   */
+/* ============================= */
+
+.submenu-level2-item {
+    /* Type=Level 2, State=Default */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 0px;
+  
+    width: 140px;
+    height: 46px;
+    background: #F8F8FF; /* Blanc cassé */
+  
+    /* Pour aligner le lien <a> */
+    gap: 0px;
+    border-bottom: 1px solid #eee; /* Ligne séparatrice ou non, à votre convenance */
+  }
+  
+  .submenu-level2-item a {
+    /* Frame 1 / l’intérieur, ex: 16px de padding si besoin */
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    width: 114px;
+    height: 46px;
+  
+    font-family: 'Actor', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 14px;
+    color: #000000;
+  
+    text-decoration: none; /* Pas de soulignement */
+  }
+  
+  /* Survol (Hover) */
+  .submenu-level2-item:hover {
+    /* Type=Level 2, State=Hover */
+    background: #F8F8FF; /* inchangé */
+    cursor: pointer;
+  }
+  
+  .submenu-level2-item:hover::before {
+    /* "Rectangle 1" -> barre de 4px #2C3E50 au survol */
+    content: '';
+    display: block;
+    width: 4px;
+    height: 46px;
+    background: #2C3E50;
+    margin-right: -4px; 
+  }

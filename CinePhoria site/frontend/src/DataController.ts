@@ -23,6 +23,7 @@ import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { Cinema } from './shared-models/Cinema.js';
 import { getSeancesByIdApi } from './NetworkController.js';
+import { baseUrl } from './Global.js';
 
 
 export class DataController {
@@ -293,7 +294,7 @@ export class DataController {
         console.log("DataC: ChargerDepuisAPI")
         try {
             // 1) Chargement de toutes les séances
-            const response = await fetch(`http://localhost:3500/api/seances/filter?cinemasList="all"`);
+            const response = await fetch(`${baseUrl}/api/seances/filter?cinemasList="all"`);
             const rawData = await response.json();
 
             if (!Array.isArray(rawData)) {
@@ -305,7 +306,7 @@ export class DataController {
             console.log(`Pour l'ensembles des cinemas, chargement depuis l'API : ${this.seances.length} séances, ${this.films.length} films`);
 
             // 2) On recupere les tarifs
-            const responseTarif = await fetch(`http://localhost:3500/api/seances/tarif`);
+            const responseTarif = await fetch(`${baseUrl}/api/seances/tarif`);
             const rawDataTarif = await responseTarif.json();
 
             if (!Array.isArray(rawDataTarif)) {
@@ -317,7 +318,7 @@ export class DataController {
             console.log(`Pour l'ensemble des tarifs : chargement depuis l'API : ${this._tarifQualite.length} tarifs`);
 
             // 3) Chargement de tous les cinemas (pour le pied de page)
-            const responseCinema = await fetch('http://localhost:3500/api/cinemas');
+            const responseCinema = await fetch(`${baseUrl}/api/cinemas`);
             const rawDataCinema = await responseCinema.json();
 
             if (!Array.isArray(rawDataCinema)) {

@@ -32,7 +32,7 @@ class QRCodeService {
         configLog_1.default.info("2");
         return canvas.toBuffer();
     }
-    static async generateQRCodeWithImage(text, imagePath = './public/camera-qr.png', width = 300, height = 300, factor = 0.15 // Taille de l'image par rapport au QR Code
+    static async generateQRCodeWithImage(text, imagePath = './camera-qr.png', width = 300, height = 300, factor = 0.15 // Taille de l'image par rapport au QR Code
     ) {
         const canvas = (0, canvas_1.createCanvas)(width, height);
         const ctx = canvas.getContext('2d');

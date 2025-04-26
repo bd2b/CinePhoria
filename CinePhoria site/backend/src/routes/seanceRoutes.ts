@@ -22,7 +22,7 @@ router.get('/display', SeanceController.getAllSeancesDisplay);
 
 /** 
  * Filtre pour selectionner les séances future d'un ou plusieurs cinemas
- * http://localhost:3000/api/seances/filter?cinemasList="Liege","Toulouse"
+ * /api/seances/filter?cinemasList="Liege","Toulouse"
  */
 router.get('/filter', (req, res) => { 
     SeanceController.getSeanceByCinemas(req, res)
@@ -31,7 +31,7 @@ router.get('/filter', (req, res) => {
 /** 
  * Filtre pour selectionner les séances futures au format Display
  * d'un ou plusieurs cinemas
- * http://localhost:3000/api/seances/display/filter?cinemasList="Liege","Toulouse"
+ * /api/seances/display/filter?cinemasList="Liege","Toulouse"
  */
 router.get('/display/filter', (req, res) => { 
     SeanceController.getSeanceDisplayByCinemas(req, res)

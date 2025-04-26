@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sections/main-mesreservations.css">
+    <link rel="stylesheet" href="css/sections/reservation-panel.css">
+
+    <script type="module" src="dist/main.js" defer></script>
+
+    <title>CinePhoria</title>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="header__nav">
+            <div class="nav__logo ">
+                <a href="./visiteur.html">
+                    <img src="assets/camera-cinephoria1.gif" alt="Logo" class="nav__logo-img"></a>
+            </div>
+            <nav class="nav__actions">
+                <button class="nav__actions-button nav__actions-button--link">Réservation</button>
+                <button class="nav__actions-button nav__actions-button--link">Films</button>
+                <button class="nav__actions-button nav__actions-button--link">Contact</button>
+                <button class="nav__actions-button nav__actions-button--signin">Connexion</button>
+            </nav>
+            <div class="nav__mobile-menu" id="navMobileMenu">
+                <img src="assets/menu.svg" alt="Menu">
+            </div>
+
+            <div class="mobile-menu" id="mobileMenu">
+                <button class="mobile-menu__close" id="mobileMenuClose">&times;</button>
+                <nav class="mobile-menu__nav">
+                    <button class="nav__actions-button nav__actions-button--link">Réservation</button>
+                    <button class="nav__actions-button nav__actions-button--link">Films</button>
+                    <button class="nav__actions-button nav__actions-button--link">Contact</button>
+                    <button class="nav__actions-button nav__actions-button--signin">Connexion</button>
+                </nav>
+            </div>
+        </nav>
+    </header>
+    <main class="main">
+        <div class="main__container">
+            <div class="container__title"> <!--- Titre -->
+                <div class="title__left">
+                    <h1 class="title__left-h1" id="titleLeft">Mes réservations</h1>
+                </div>
+            </div>
+            <!-- Conteneur des réservations -->
+            <div class="container__mesreservations">
+                <!-- Le script insère la table dans ce div -->
+                <div id="mesreservations-table-container"></div>
+            </div>
+        </div>
+        </div>
+    </main>
+    <footer class="footer" id="footer">
+    </footer>
+
+
+    <!-- MODALES -->
+
+    <!-- A) Modal détailReservation -->
+    <div id="modal-detailReservation" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-detailReservation">&times;</span>
+            <h2>Détail de la réservation</h2>
+            <p id="detailReservationContent">...</p>
+        </div>
+    </div>
+
+    <!-- B) Modal evaluationReservation -->
+    <div id="modal-evaluationReservation" class="modal">
+        <div class="modal-content">
+            
+        </div>
+    </div>
+
+    <!-- C) Modal suppressionReservation -->
+    <div id="modal-suppressionReservation" class="modal">
+        <div class="modal-content">
+            
+        </div>
+    </div>
+
+</body>
