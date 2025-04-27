@@ -2,7 +2,7 @@
 DEVELOPPEMENT=false
 
 # Version majeure.mineure et build
-MAJEURE=0
+MAJEURE=1
 MINEURE=0
 BUILD=1
 

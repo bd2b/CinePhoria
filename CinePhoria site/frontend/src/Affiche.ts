@@ -1,5 +1,5 @@
 // src/models/Affiche.ts
-import mongoose, { Schema, Document } from 'mongoose/lib/mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface AfficheDocument extends Document {
     filmId: string;

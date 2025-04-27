@@ -48,8 +48,8 @@ BEGIN
         ELSE u3
       END;
 
-      -- Cyclique doneEvaluated / doneUnevaluated
-      SET state = IF(MOD(r, 2) = 0, 'doneUnevaluated', 'doneEvaluated');
+      -- Cyclique DoneEvaluated / DoneUnevaluated
+      SET state = IF(MOD(r, 2) = 0, 'DoneUnevaluated', 'DoneEvaluated');
       SET pmr = MOD(r, 2);
       SET must_review = MOD(r + 1, 3); -- pour se décaller de l'état.
       SET friandise = IF(MOD(r, 5) = 0, 1, 0);
@@ -76,9 +76,9 @@ BEGIN
          timeStampCreate, seatsReserved, imageQRCode)
       VALUES
         (res_id, current_user_var, s_id, state, pmr,
-         IF(state = 'doneEvaluated', @evaluation, NULL),
-  --       must_review, IF(state = 'doneEvaluated', @note, NULL),
-         must_review, IF(state = 'doneEvaluated', @note, NULL),
+         IF(state = 'DoneEvaluated', @evaluation, NULL),
+  --       must_review, IF(state = 'DoneEvaluated', @note, NULL),
+         must_review, IF(state = 'DoneEvaluated', @note, NULL),
          friandise, FLOOR(RAND()*10),
          DATE_SUB(s_date, INTERVAL 1 DAY), '', '');
 

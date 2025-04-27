@@ -193,6 +193,9 @@ export function updateTableMesReservations(reservations) {
                 tdComment.style.backgroundColor = '#f0f0f0';
                 tdComment.title = 'Votre commentaire sera publié après relecture';
             }
+            else {
+                tdComment.title = 'Votre commentaire a été validé. Vous pouvez le modifier, il sera republié après relecture';
+            }
             tdComment.addEventListener('click', () => {
                 onClickEvaluationReservation(resa, true);
             });

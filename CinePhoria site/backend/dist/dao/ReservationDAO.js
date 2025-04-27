@@ -257,7 +257,7 @@ class ReservationDAO {
                     SELECT s.Filmid AS filmId, AVG(r.note) AS avgNote
                     FROM Reservation r
                     JOIN Seance s ON r.Seanceid = s.id
-                    WHERE r.stateReservation = 'doneEvaluated'
+                    WHERE r.stateReservation = 'DoneEvaluated'
                           AND r.isEvaluationMustBeReview = 0
                           AND r.note IS NOT NULL
                           AND s.Filmid = (

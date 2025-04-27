@@ -323,10 +323,6 @@ export class ReservationController {
 
       const seances = await ReservationDAO.getReservationsByCinemas(cinemasList)
 
-      if (seances.length === 0) {
-        return res.status(404).json({ message: `Reservation non trouvées pour ${cinemasList}` });
-      }
-
       res.json(seances);
     } catch (error: any) {
       res.status(500).json({ error: error.message });

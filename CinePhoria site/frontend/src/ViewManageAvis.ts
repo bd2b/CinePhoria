@@ -2,7 +2,7 @@ import { DataControllerIntranet } from './DataControllerIntranet.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { syncTableColumnWidths,formatterJJMM, formatDateLocalYYYYMMDD } from './Helpers.js';
-import { ReservationForUtilisateur, ReservationAvis } from './shared-models/Reservation.js';
+import { ReservationForUtilisateur, ReservationAvis, ReservationState } from './shared-models/Reservation.js';
 
 // Filtre du jour
 let filtreJour = '';
@@ -43,7 +43,7 @@ async function rafraichirTableauAvis(): Promise<void> {
     // Charger les avis
     let avis = await DataControllerIntranet.getReservationForUtilisateurFilter();
 
-    avis = avis.filter((a) => (a.statereservation === 'doneEvaluated' && a.isEvaluationMustBeReview ));
+    avis = avis.filter((a) => (a.statereservation === ReservationState.DoneEvaluated && a.isEvaluationMustBeReview ));
 
     if (filtreJour) {
         avis = avis.filter((s) =>

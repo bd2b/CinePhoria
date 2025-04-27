@@ -1,5 +1,5 @@
 // src/models/Affiche.ts
-import mongoose, { Schema } from 'mongoose/lib/mongoose';
+import mongoose, { Schema } from 'mongoose';
 const AfficheSchema = new Schema({
     filmId: { type: String, required: true, unique: true },
     resolution: { type: Number, required: true },

@@ -274,9 +274,6 @@ class ReservationController {
                 return res.status(400).json({ message: `cinemasList doit être une chaîne de caractères : ${cinemasList}` });
             }
             const seances = await ReservationDAO_1.ReservationDAO.getReservationsByCinemas(cinemasList);
-            if (seances.length === 0) {
-                return res.status(404).json({ message: `Reservation non trouvées pour ${cinemasList}` });
-            }
             res.json(seances);
         }
         catch (error) {
