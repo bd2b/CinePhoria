@@ -1,7 +1,6 @@
-import mysql from 'mysql2/promise';
 import { SeanceSeule } from "../shared-models/SeanceSeule";
 
-import { dbConfig } from "../config/config";
+import { dbConfig , dbPool} from "../config/config";
 import logger from '../config/configLog';
 
 import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
@@ -11,10 +10,10 @@ export class SeanceSeuleDAO {
 
     static async findAll(): Promise<SeanceSeule[]> {
 
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         logger.info('Exécution de la requête : SELECT * FROM Seance');
         const [rows] = await connection.execute('SELECT * FROM Seance');
-        await connection.end();
+        connection.release();
     
         // On convertit chaque record en SeanceSeule
         return (rows as any[]).map(row => new SeanceSeule(row));
@@ -23,7 +22,7 @@ export class SeanceSeuleDAO {
 
     // Create
     static async createSeanceSeule(seanceseule: SeanceSeule): Promise<string> {
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         try {
             // On génére un id (UUID) côté back si il n'est pas fourni
             const newId = seanceseule.id || generateUUID();
@@ -49,10 +48,10 @@ export class SeanceSeuleDAO {
                     
                 ]
             );
-            await connection.end();
+            connection.release();
             return newId;
         } catch (err) {
-            await connection.end();
+            connection.release();
             logger.error('Erreur creation salleseule:', err);
             throw err;
         }
@@ -62,7 +61,7 @@ export class SeanceSeuleDAO {
     static async updateSeanceSeule(id: string, salleseule: SeanceSeule): Promise<boolean> {
         // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
         
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         try {
             logger.info(`Mise à jour de la seanceseule ${id}`);
             const [result] = await connection.execute(
@@ -85,12 +84,12 @@ export class SeanceSeuleDAO {
 
                 ]
             );
-            await connection.end();
+            connection.release();
             // result => un objet du type ResultSetHeader
             const rowsAffected = (result as any).affectedRows || 0;
             return rowsAffected > 0;
         } catch (err) {
-            await connection.end();
+            connection.release();
             logger.error('Erreur update seanceseule:', err);
             throw err;
         }
@@ -98,28 +97,28 @@ export class SeanceSeuleDAO {
 
     // Delete
     static async deleteSeanceSeule(id: string): Promise<boolean> {
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         try {
             logger.info(`Suppression de la seanceseule ${id}`);
             const [result] = await connection.execute(
                 'DELETE FROM Seance WHERE id = ?',
                 [id]
             );
-            await connection.end();
+            connection.release();
             const rowsAffected = (result as any).affectedRows || 0;
             return rowsAffected > 0;
         } catch (err) {
-            await connection.end();
+            connection.release();
             logger.error('Erreur delete seanceseule:', err);
             throw Error('Impossible de supprimer la seanceseule');
         }
     }
 
     static async findById(id: string): Promise<SeanceSeule | null> {
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         logger.info('Connexion réussie à la base de données');
         const [rows] = await connection.execute('SELECT * FROM Seance WHERE id = ?', [id]);
-        await connection.end();
+        connection.release();
     
         const data = (rows as any[])[0];
         return data ? new SeanceSeule(data) : null;

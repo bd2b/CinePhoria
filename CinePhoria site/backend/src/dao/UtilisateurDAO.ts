@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcrypt';
 import mysql, { FieldPacket } from 'mysql2/promise';
-import { dbConfig, nombreTentativeLoginKO } from '../config/config';
+import { dbConfig, nombreTentativeLoginKO , dbPool} from '../config/config';
 import logger from '../config/configLog';
 import { UtilisateurCompte, ComptePersonne } from '../shared-models/Utilisateur';
 
@@ -45,7 +45,7 @@ export class UtilisateurDAO {
     displayName: string
   ): Promise<string> {  // Retour uniquement de la chaîne de caractères
     const passwordHashed = await hashPassword(password);
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
 
     try {
       // Exécution de la procédure stockée avec @result
@@ -76,12 +76,12 @@ export class UtilisateurDAO {
       logger.error('Erreur dans CreateUtilisateur', error);
       throw new Error('Erreur lors de l’exécution de la procédure stockée.');
     } finally {
-      await connection.end();
+      connection.release();
     }
   };
 
   static async changePWD(email: string, newPWD: string): Promise<void> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     const passwordHashed = await hashPassword(newPWD);
     try {
       const result = connection.query(
@@ -99,7 +99,7 @@ export class UtilisateurDAO {
       logger.error('Erreur dans CreateUtilisateur', error);
       throw new Error('Erreur lors de l’exécution de la procédure stockée.');
     } finally {
-      await connection.end();
+      connection.release();
     }
   }
 
@@ -108,7 +108,7 @@ export class UtilisateurDAO {
   static async getCodeConfirm(
     email: string, typeConfirm: string
   ): Promise<{ codeConfirm: string, numTry: number, dateCreateCode: Date }[]> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       const [rows] = await connection.query(
         `SELECT codeConfirm , numTry, dateCreateCode
@@ -137,14 +137,14 @@ export class UtilisateurDAO {
       logger.error('Erreur dans select getCodeConfirm', error);
       throw new Error('Erreur dans select getCodeConfirm.');
     } finally {
-      await connection.end();
+      connection.release();
     };
   }
 
   static async createCodeConfirm(
     email: string, typeConfirm: string
   ): Promise<string> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       // Exécution de la procédure stockée avec @result
       const results = await connection.query(
@@ -175,7 +175,7 @@ export class UtilisateurDAO {
       throw new Error('Erreur dans createCodeConfirm.');
     }
     finally {
-      await connection.end();
+      connection.release();
     };
 
   }
@@ -183,7 +183,7 @@ export class UtilisateurDAO {
   static async verifyCodeConfirm(
     email: string, typeConfirm: string, codeConfirm: string
   ): Promise<string> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       // Exécution de la procédure stockée avec @result
       const results = await connection.query(
@@ -214,7 +214,7 @@ export class UtilisateurDAO {
       throw new Error('Erreur dans verifyCodeConfirm.');
     }
     finally {
-      await connection.end();
+      connection.release();
     };
 
   }
@@ -226,7 +226,7 @@ export class UtilisateurDAO {
   ): Promise<string> {
     const passwordHashed = await hashPassword(password);
     logger.info("Je hash : " + password + " = " + passwordHashed);
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       // Exécution de la procédure stockée avec @result
       const results = await connection.query(
@@ -255,7 +255,7 @@ export class UtilisateurDAO {
       logger.error('Erreur dans CreateUtilisateur', error);
       throw new Error('Erreur lors de l’exécution de la procédure stockée.');
     } finally {
-      await connection.end();
+      connection.release();
     }
   }
 
@@ -263,7 +263,7 @@ export class UtilisateurDAO {
     email: string,
     codeConfirm: string
   ): Promise<string> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       // Exécution de la procédure stockée avec @result
       const results = await connection.query(
@@ -292,16 +292,16 @@ export class UtilisateurDAO {
       logger.error('Erreur dans ConfirmCompte', error);
       throw new Error('Erreur lors de l’exécution de la procédure stockée.');
     } finally {
-      await connection.end();
+      connection.release();
     }
   }
 
 
   static async findById(id: string): Promise<UtilisateurCompte | null> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info('Connexion réussie à la base de données');
     const [rows] = await connection.execute('SELECT id, Compte.email as email, displayName, dateDerniereConnexion, datePassword, oldPasswordsArray FROM Utilisateur INNER JOIN Compte ON Compte.email = Utilisateur.email WHERE id = ? ;', [id]);
-    await connection.end();
+    connection.release();
 
     const data = (rows as any[])[0];
     return data ? data as UtilisateurCompte : null;
@@ -313,7 +313,7 @@ export class UtilisateurDAO {
    * @returns 
    */
   static async findByIdent(ident: string): Promise<ComptePersonne[] | []> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info('Connexion réussie à la base de données');
     let requete = ""
     if (validateEmail(ident)) {
@@ -327,17 +327,17 @@ export class UtilisateurDAO {
       logger.info("Recherche par matricule = " + ident);
     }
     const [rows] = await connection.execute(requete, [ident]);
-    await connection.end();
+    connection.release();
 
     const data = (rows as any[]);
     return data ? data as ComptePersonne[] : [];
   }
 
   static async findByMail(email: string): Promise<UtilisateurCompte | null> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info('Connexion réussie à la base de données');
     const [rows] = await connection.execute('SELECT id, Compte.email as email, displayName, dateDerniereConnexion, datePassword, oldPasswordsArray FROM Utilisateur INNER JOIN Compte ON Compte.email = Utilisateur.email WHERE Utilisateur.email = ? ;', [email]);
-    await connection.end();
+    connection.release();
 
     const data = (rows as any[])[0];
     return data ? data as UtilisateurCompte : null;
@@ -348,7 +348,7 @@ export class UtilisateurDAO {
     password: string
   ): Promise<string> {
     logger.info("debut dao login", compte, password);
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
 
     try {
       // Étape 1 : Récupérer les informations du compte
@@ -416,7 +416,7 @@ export class UtilisateurDAO {
       logger.error('Erreur dans login', error);
       throw new Error('Erreur lors de l’exécution de la procédure stockée.');
     } finally {
-      await connection.end();
+      connection.release();
     }
   }
 
@@ -430,7 +430,7 @@ export class UtilisateurDAO {
     listCinemas: string | undefined
   ): Promise<string> {  // Retour uniquement de la chaîne de caractères
     const passwordHashed = await hashPassword(password);
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     const isAdministrateurNumber = isAdministrateur === "true" ? 1 : 0;
     const matriculeNumber = parseInt(matricule, 10);
     const listCinemasString = listCinemas || '';
@@ -467,7 +467,7 @@ export class UtilisateurDAO {
       logger.error('Erreur dans CreateUtilisateur', error);
       throw new Error('Erreur lors de l’exécution de la procédure stockée.');
     } finally {
-      await connection.end();
+      connection.release();
     }
   };
 
@@ -485,7 +485,7 @@ export class UtilisateurDAO {
     const passwordHashed = (password === "") ? "" : (await hashPassword(password))!;
 
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     const isAdministrateurNumber = isAdministrateur === "true" ? 1 : 0;
 
     try {
@@ -533,12 +533,12 @@ export class UtilisateurDAO {
 
       // Valider la transaction
       await connection.commit();
-      await connection.end();
+      connection.release();
       return true;
     } catch (err) {
       // Annuler la transaction en cas d'erreur
       await connection.rollback();
-      await connection.end();
+      connection.release();
       logger.error('Erreur update employe:', err);
       throw err;
     }
@@ -552,12 +552,12 @@ export class UtilisateurDAO {
    * @returns 
    */
   static async getEmployesComptes(): Promise<ComptePersonne[] | []> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info('Connexion réussie à la base de données');
     let requete = 'SELECT * FROM ViewComptePersonne WHERE matricule IS NOT NULL;';
 
     const [rows] = await connection.execute(requete);
-    await connection.end();
+    connection.release();
 
     const data = (rows as any[]);
     return data ? data as ComptePersonne[] : [];
@@ -565,11 +565,11 @@ export class UtilisateurDAO {
 
 
   static async getEmployeByMatricule(matricule: string): Promise<ComptePersonne | null> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info('Connexion réussie à la base de données');
     const requete = 'SELECT * FROM ViewComptePersonne WHERE matricule = ?;';
     const [rows] = await connection.execute((requete), [matricule]);
-    await connection.end();
+    connection.release();
 
     const data = (rows as any[])[0];
     return data ? data as ComptePersonne : null;
@@ -577,7 +577,7 @@ export class UtilisateurDAO {
 
   // Delete
   static async deleteEmployeByMatricule(matricule: number): Promise<boolean> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       // Récupération de l'email
       const requete = 'select email from Employe where matricule = ?;';
@@ -624,7 +624,7 @@ export class UtilisateurDAO {
       logger.error('Erreur delete Employe:', err);
       throw Error(`Impossible de supprimer Employer : ${err}`);
     } finally {
-      await connection.end();
+      connection.release();
     }
   }
 

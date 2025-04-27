@@ -1,5 +1,5 @@
-import mysql from 'mysql2/promise';
-import { dbConfig } from '../config/config';
+
+import { dbConfig , dbPool } from '../config/config';
 import logger from '../config/configLog';
 import { ReservationForUtilisateur, SeatsForReservation, Reservation, ReservationAvis, ReservationStats } from "../shared-models/Reservation";
 
@@ -11,7 +11,7 @@ export class ReservationDAO {
     pmrSeats: number,
     seatsReserved: string
   ): Promise<string> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       //    Exécution de la procédure stockée avec @result
       const [results] = await connection.query(
@@ -36,12 +36,12 @@ export class ReservationDAO {
       logger.info('Erreur dans checkAvailabilityAndReserve:', error);
       throw new Error('Erreur lors de l’exécution de la procédure stockée.');
     } finally {
-      await connection.end();
+      connection.release();
     }
   }
 
   static async confirmReserve(p_reservationId: string, p_utilisateurId: string, p_seanceId: string): Promise<string> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
 
     logger.info("Confirm R U S " + p_reservationId + " " + p_utilisateurId + " " + p_seanceId);
 
@@ -93,12 +93,12 @@ export class ReservationDAO {
       logger.error("Erreur SQL:", error);
       return "Erreur: Problème interne du serveur.";
     } finally {
-      await connection.end();
+      connection.release();
     }
   }
 
   static async cancelReserve(p_reservationId: string): Promise<string> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
 
     logger.info("Cancel reservation : " + p_reservationId);
 
@@ -150,7 +150,7 @@ export class ReservationDAO {
   }
 
   static async reserveForUtilisateur(p_utilisateurId: string): Promise<ReservationForUtilisateur[]> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       // Étape 1 : Récupérer les informations des reservations dans la base pour l'utilisateur donné
       const [rows] = await connection.execute(
@@ -160,7 +160,7 @@ export class ReservationDAO {
         [p_utilisateurId]
       );
       logger.info(`SELECT * FROM ViewUtilisateurReservation WHERE utilisateurId = ${p_utilisateurId}`);
-      await connection.end();
+      connection.release();
 
       // Map des lignes pour les convertir en instances de Seance
       return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
@@ -171,7 +171,7 @@ export class ReservationDAO {
   }
 
   static async getReservationById(p_reservationId: string): Promise<ReservationForUtilisateur[]> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation
     const [rows] = await connection.execute(
       `SELECT *
@@ -180,14 +180,14 @@ export class ReservationDAO {
       [p_reservationId]
     );
     logger.info(`SELECT * FROM ViewUtilisateurReservation WHERE reservationId = ${p_reservationId}`);
-    await connection.end();
+    connection.release();
 
     // Map des lignes pour les convertir en instances de Seance
     return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
   }
 
   static async getReservationsByCinemas(nameCinemaList: string): Promise<ReservationForUtilisateur[]> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     let requete: string = '';
     logger.info("Selecteur de cinema = " + nameCinemaList);
     if (nameCinemaList === '"all"') {
@@ -205,14 +205,14 @@ export class ReservationDAO {
     logger.info(`Exécution de la requête : ${requete}`);
 
     const [rows] = await connection.execute(requete);
-    await connection.end();
+    connection.release();
 
     // Map des lignes pour les convertir en instances de Seance
     return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
   }
 
   static async setReservationStateById(p_reservationId: string, p_stateReservation: string): Promise<boolean> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       const [result] = await connection.execute(
         `UPDATE Reservation 
@@ -230,20 +230,21 @@ export class ReservationDAO {
       logger.error(`Erreur lors de la mise à jour de la réservation ${p_reservationId}:`, error);
       return false;
     } finally {
-      await connection.end();
+      connection.release();
     }
   }
 
   static async setReservationEvaluationById(p_reservationId: string, p_note: number, p_evaluation: string, p_isEvaluationMustBeReview: boolean): Promise<boolean> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
+      const isEvaluationMustBeReview = p_isEvaluationMustBeReview ? 1 : 0
       const [result] = await connection.execute(
         `UPDATE Reservation 
           SET note = ?,
           evaluation = ?,
           isEvaluationMustBeReview = ?
           WHERE id = ?`,
-        [p_note, p_evaluation, p_isEvaluationMustBeReview, p_reservationId]
+        [p_note, p_evaluation, isEvaluationMustBeReview, p_reservationId]
       );
 
       logger.info(`UPDATE Reservation SET note = ${p_note}, evaluation = ${p_evaluation}, isEvaluationMustBeReview = ${(p_isEvaluationMustBeReview ? 1 : 0)} WHERE id = ${p_reservationId}`);
@@ -255,13 +256,13 @@ export class ReservationDAO {
       logger.error(`Erreur lors de la mise à jour de la réservation ${p_reservationId}:`, error);
       return false;
     } finally {
-      await connection.end();
+      connection.release();
     }
   }
 
 
   static async getSeatsForReservation(p_reservationId: string): Promise<SeatsForReservation[]> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation
     const [rows] = await connection.execute(
       `SELECT 
@@ -277,7 +278,7 @@ export class ReservationDAO {
       [p_reservationId]
     );
     logger.info(`SELECT * FROM ViewUtilisateurReservation WHERE reservationId = ${p_reservationId}`);
-    await connection.end();
+    connection.release();
 
     // Map des lignes pour les convertir en liste de places avec tarif
     return (rows as any[]).map((row) => new SeatsForReservation(row));
@@ -289,7 +290,7 @@ export class ReservationDAO {
   // Update
   static async updateReservationAvis(id: string, reservationAvis: ReservationAvis): Promise<boolean> {
     // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       // Début de la transaction
       await connection.beginTransaction();
@@ -352,16 +353,16 @@ export class ReservationDAO {
       logger.error('Erreur update ReservationAvis:', err);
       throw err;
     } finally {
-      await connection.end();
+      connection.release();
     }
   }
 
   static async getReservationStatsAll(): Promise<ReservationStats[]> {
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info('Exécution de la requête : SELECT * FROM ViewFilmReservationDate');
     const [rows] = await connection.execute('SELECT * FROM ViewFilmReservationDate');
-    await connection.end();
+    connection.release();
 
     // On convertit chaque record en SeanceSeule
     return (rows as any[]).map(row => new ReservationStats(row));

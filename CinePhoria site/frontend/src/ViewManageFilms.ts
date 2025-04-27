@@ -87,7 +87,7 @@ function buildFilmCard(film: Film): HTMLDivElement {
     divCard.classList.add('listFilms__simpleCard');
 
     const img = document.createElement('img');
-    img.src = imageFilm(film.imageFilm128 ?? '');
+    img.src = imageFilm(film.imageFilm1024 ?? '');
     // img.src = `assets/static/${film.imageFilm128 ?? ''}`;
     img.alt = 'Affiche';
     img.classList.add('simpleCard__affiche-img');

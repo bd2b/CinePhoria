@@ -14,9 +14,10 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config({ path: './.env' });
+configLog_1.default.info("Valeurs env après chargement :" + process.env.MAJEURE + process.env.MINEURE + process.env.BUILD);
 // Connexion à la base MongoDB
 const config_1 = require("./config/config");
-console.log(`🛠️ Mode actuel : ${config_1.modeExec}`);
+console.log(`🛠️ Mode actuel : ${config_1.modeExec} avec version ${JSON.stringify(config_1.versionCourante)}`);
 (0, config_1.connectDBMongo)();
 const app = (0, express_1.default)();
 // 🔵 CORS doit venir immédiatement après l'initialisation d'app

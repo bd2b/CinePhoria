@@ -7,9 +7,17 @@
 
 import logger from '../config/configLog';
 import mongoose from 'mongoose';
+import mysql from 'mysql2/promise'; 
 
 // Exporter le mode d'exécution
 export const modeExec = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
+
+// Exporter la version
+export const versionCourante = {
+  majeure: parseInt(process.env.MAJEURE || "0", 10),
+  mineure: parseInt(process.env.MINEURE || "0", 10),
+  build: parseInt(process.env.BUILD || "0", 10)
+}
 
 // Exporter la configuration de la base de données
 export const dbConfig = {
@@ -43,9 +51,9 @@ logger.info('Configuration DB chargée :' + JSON.stringify(maskeddbConfig));
 export const jwtTK = process.env.JWT_SECRET || 'secretjws';
 // copie de l'objet pour masquer la valeur
 const masquedjwtTK = "*".repeat(jwtTK.length); // Remplace la valeur par des étoiles
-logger.info('Configuration secret JWS :'+ masquedjwtTK);
+logger.info('Configuration secret JWS :' + masquedjwtTK);
 
-export const nombreTentativeLoginKO = parseInt(process.env.MAX_TENTATIVE_LOGIN_KO_BEFORE_BLOCKED || '3',10);
+export const nombreTentativeLoginKO = parseInt(process.env.MAX_TENTATIVE_LOGIN_KO_BEFORE_BLOCKED || '3', 10);
 
 export const ConfigMongo = {
   mongoUri: process.env.MONGO_URI || '',
@@ -53,13 +61,25 @@ export const ConfigMongo = {
 
 export const connectDBMongo = async () => {
   try {
-      await mongoose.connect(ConfigMongo.mongoUri);
-      logger.info('MongoDB connecté.');
+    await mongoose.connect(ConfigMongo.mongoUri);
+    logger.info('MongoDB connecté.');
   } catch (error) {
-      logger.error('Erreur connexion MongoDB :', error);
+    logger.error('Erreur connexion MongoDB :', error);
   }
 };
-// Autres configs (port, secrets JWT, etc.)
-// export const SERVER_PORT = process.env.SERVER_PORT || 3000;
-// 
+
+
+
+// Ajout de la nouvelle exportation dbPool
+export const dbPool = mysql.createPool({
+  host: dbConfig.host,
+  user: dbConfig.user,
+  password: dbConfig.password,
+  database: dbConfig.database,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  multipleStatements: dbConfig.multipleStatements,
+  timezone: dbConfig.timezone,
+});
 

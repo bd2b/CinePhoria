@@ -10,7 +10,7 @@ const nodemailer_1 = __importDefault(require("nodemailer"));
 const configLog_1 = __importDefault(require("../config/configLog"));
 const Mail_1 = require("../models/Mail");
 let isBouchon = true;
-if (config_1.modeExec === 'développement')
+if (config_1.modeExec === 'production')
     isBouchon = false;
 configLog_1.default.info(isBouchon ? "ENVOI DE MAIL bouchonne" : "ENVOI DE MAIL en service");
 // Ce contrôleur effectue l'envoi de mail en s'appuyant sur la configuration
@@ -43,10 +43,12 @@ class MailNetwork {
             };
             configLog_1.default.info("mailOptions = " + JSON.stringify(mailOptions));
             if (isBouchon) {
+                configLog_1.default.info("Appel bouchonne");
                 return 'OK : appel bouchonné';
             }
             else {
                 // Envoi via nodemailer
+                configLog_1.default.info("Appel non bouchonne");
                 const info = await transporter.sendMail(mailOptions);
                 // Retour d’info
                 return `OK : Envoi réussi, messageId = ${info.messageId}`;

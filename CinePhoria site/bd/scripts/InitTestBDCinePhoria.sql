@@ -659,7 +659,7 @@ VALUES
           WHEN 0 THEN SET v_qualite = '3D';
           WHEN 1 THEN SET v_qualite = '4K';
           WHEN 2 THEN SET v_qualite = '4DX';
-          WHEN 3 THEN SET v_qualite = '';
+          WHEN 3 THEN SET v_qualite = '4K';
         END CASE;
 
         -- 4) Boucle sur les 4 salles

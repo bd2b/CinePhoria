@@ -11,15 +11,16 @@ import path from 'path';
 
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
+logger.info("Valeurs env après chargement :" + process.env.MAJEURE + process.env.MINEURE + process.env.BUILD);
 
 
 
 
 
 // Connexion à la base MongoDB
-import { connectDBMongo , modeExec} from './config/config';
+import { connectDBMongo , modeExec , versionCourante} from './config/config';
 
-console.log(`🛠️ Mode actuel : ${modeExec}`);
+console.log(`🛠️ Mode actuel : ${modeExec} avec version ${JSON.stringify(versionCourante)}`);
 
 connectDBMongo()
 

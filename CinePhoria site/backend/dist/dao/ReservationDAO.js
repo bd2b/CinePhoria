@@ -4,13 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReservationDAO = void 0;
-const promise_1 = __importDefault(require("mysql2/promise"));
 const config_1 = require("../config/config");
 const configLog_1 = __importDefault(require("../config/configLog"));
 const Reservation_1 = require("../shared-models/Reservation");
 class ReservationDAO {
     static async checkAvailabilityAndReserve(email, seanceId, tarifSeats, pmrSeats, seatsReserved) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
             //    Exécution de la procédure stockée avec @result
             const [results] = await connection.query(`CALL CheckAvailabilityAndReserve(?, ?, ?, ?, ?, @result);
@@ -31,11 +30,11 @@ class ReservationDAO {
             throw new Error('Erreur lors de l’exécution de la procédure stockée.');
         }
         finally {
-            await connection.end();
+            connection.release();
         }
     }
     static async confirmReserve(p_reservationId, p_utilisateurId, p_seanceId) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         configLog_1.default.info("Confirm R U S " + p_reservationId + " " + p_utilisateurId + " " + p_seanceId);
         try {
             // Étape 1 : Vérification de l'existence de la réservation
@@ -72,11 +71,11 @@ class ReservationDAO {
             return "Erreur: Problème interne du serveur.";
         }
         finally {
-            await connection.end();
+            connection.release();
         }
     }
     static async cancelReserve(p_reservationId) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         configLog_1.default.info("Cancel reservation : " + p_reservationId);
         // // Étape 1 : Récupérer les informations de la reservation dans la base
         // const [rows] = await connection.execute(
@@ -117,14 +116,14 @@ class ReservationDAO {
         return resultValue;
     }
     static async reserveForUtilisateur(p_utilisateurId) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
             // Étape 1 : Récupérer les informations des reservations dans la base pour l'utilisateur donné
             const [rows] = await connection.execute(`SELECT *
      FROM ViewUtilisateurReservation 
      WHERE utilisateurId = ?`, [p_utilisateurId]);
             configLog_1.default.info(`SELECT * FROM ViewUtilisateurReservation WHERE utilisateurId = ${p_utilisateurId}`);
-            await connection.end();
+            connection.release();
             // Map des lignes pour les convertir en instances de Seance
             return rows.map((row) => new Reservation_1.ReservationForUtilisateur(row));
         }
@@ -134,18 +133,18 @@ class ReservationDAO {
         }
     }
     static async getReservationById(p_reservationId) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation
         const [rows] = await connection.execute(`SELECT *
      FROM ViewUtilisateurReservation 
      WHERE reservationId = ? LIMIT 1`, [p_reservationId]);
         configLog_1.default.info(`SELECT * FROM ViewUtilisateurReservation WHERE reservationId = ${p_reservationId}`);
-        await connection.end();
+        connection.release();
         // Map des lignes pour les convertir en instances de Seance
         return rows.map((row) => new Reservation_1.ReservationForUtilisateur(row));
     }
     static async getReservationsByCinemas(nameCinemaList) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         let requete = '';
         configLog_1.default.info("Selecteur de cinema = " + nameCinemaList);
         if (nameCinemaList === '"all"') {
@@ -163,12 +162,12 @@ class ReservationDAO {
         }
         configLog_1.default.info(`Exécution de la requête : ${requete}`);
         const [rows] = await connection.execute(requete);
-        await connection.end();
+        connection.release();
         // Map des lignes pour les convertir en instances de Seance
         return rows.map((row) => new Reservation_1.ReservationForUtilisateur(row));
     }
     static async setReservationStateById(p_reservationId, p_stateReservation) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
             const [result] = await connection.execute(`UPDATE Reservation 
             SET stateReservation = ?
@@ -183,17 +182,18 @@ class ReservationDAO {
             return false;
         }
         finally {
-            await connection.end();
+            connection.release();
         }
     }
     static async setReservationEvaluationById(p_reservationId, p_note, p_evaluation, p_isEvaluationMustBeReview) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
+            const isEvaluationMustBeReview = p_isEvaluationMustBeReview ? 1 : 0;
             const [result] = await connection.execute(`UPDATE Reservation 
           SET note = ?,
           evaluation = ?,
           isEvaluationMustBeReview = ?
-          WHERE id = ?`, [p_note, p_evaluation, p_isEvaluationMustBeReview, p_reservationId]);
+          WHERE id = ?`, [p_note, p_evaluation, isEvaluationMustBeReview, p_reservationId]);
             configLog_1.default.info(`UPDATE Reservation SET note = ${p_note}, evaluation = ${p_evaluation}, isEvaluationMustBeReview = ${(p_isEvaluationMustBeReview ? 1 : 0)} WHERE id = ${p_reservationId}`);
             // Vérification du succès de l'update
             const updateResult = result; // Type générique pour accéder aux propriétés MySQL
@@ -204,11 +204,11 @@ class ReservationDAO {
             return false;
         }
         finally {
-            await connection.end();
+            connection.release();
         }
     }
     static async getSeatsForReservation(p_reservationId) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation
         const [rows] = await connection.execute(`SELECT 
       SeatsForTarif.numberSeats as numberSeats,
@@ -221,14 +221,14 @@ class ReservationDAO {
 
     WHERE Reservation.id = ?`, [p_reservationId]);
         configLog_1.default.info(`SELECT * FROM ViewUtilisateurReservation WHERE reservationId = ${p_reservationId}`);
-        await connection.end();
+        connection.release();
         // Map des lignes pour les convertir en liste de places avec tarif
         return rows.map((row) => new Reservation_1.SeatsForReservation(row));
     }
     // Update
     static async updateReservationAvis(id, reservationAvis) {
         // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
             // Début de la transaction
             await connection.beginTransaction();
@@ -286,14 +286,14 @@ class ReservationDAO {
             throw err;
         }
         finally {
-            await connection.end();
+            connection.release();
         }
     }
     static async getReservationStatsAll() {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         configLog_1.default.info('Exécution de la requête : SELECT * FROM ViewFilmReservationDate');
         const [rows] = await connection.execute('SELECT * FROM ViewFilmReservationDate');
-        await connection.end();
+        connection.release();
         // On convertit chaque record en SeanceSeule
         return rows.map(row => new Reservation_1.ReservationStats(row));
     }

@@ -1249,3 +1249,19 @@ export async function getReservationStatsApi(): Promise<ReservationStats[]> {
     );
     return responseJSON;
 }
+
+/**
+* Récupération de du numero de version
+* @returns un ( { majeure: number, mineure: number, build: number } )
+*/
+export async function getVersionApi(): Promise<{ majeure: number, mineure: number, build: number }> {
+    const endpoint = `${baseUrl}/api/login/version`;
+    // Requête authentifiée
+    const responseJSON = await apiRequest<{ majeure: number, mineure: number, build: number }>(
+        endpoint,
+        'GET',
+        undefined,
+        false
+    );
+    return responseJSON;
+}

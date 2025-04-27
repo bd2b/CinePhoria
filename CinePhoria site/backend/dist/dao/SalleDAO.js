@@ -4,22 +4,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SalleDAO = void 0;
-const promise_1 = __importDefault(require("mysql2/promise"));
 const Salle_1 = require("../shared-models/Salle");
 const config_1 = require("../config/config");
 const configLog_1 = __importDefault(require("../config/configLog"));
 class SalleDAO {
     static async findAll() {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         configLog_1.default.info('Exécution de la requête : SELECT * FROM Salle');
         const [rows] = await connection.execute('SELECT * FROM Salle');
-        await connection.end();
+        connection.release();
         // On convertit chaque record en Salle
         return rows.map(row => new Salle_1.Salle(row));
     }
     // Create
     static async createSalle(salle) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
             // On génére un id (UUID) côté back si il n'est pas fourni
             const newId = salle.id || generateUUID();
@@ -37,11 +36,11 @@ class SalleDAO {
                 salle.fMax || 0,
                 salle.seatsAbsents || ""
             ]);
-            await connection.end();
+            connection.release();
             return newId;
         }
         catch (err) {
-            await connection.end();
+            connection.release();
             configLog_1.default.error('Erreur creation salle:', err);
             throw err;
         }
@@ -49,7 +48,7 @@ class SalleDAO {
     // Update
     static async updateSalle(id, salle) {
         // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
             configLog_1.default.info(`Mise à jour de la salle ${id} ${salle.nameSalle}`);
             const [result] = await connection.execute(`UPDATE Salle SET
@@ -64,46 +63,46 @@ class SalleDAO {
                 salle.seatsAbsents || "",
                 id
             ]);
-            await connection.end();
+            connection.release();
             // result => un objet du type ResultSetHeader
             const rowsAffected = result.affectedRows || 0;
             return rowsAffected > 0;
         }
         catch (err) {
-            await connection.end();
+            connection.release();
             configLog_1.default.error('Erreur update salle:', err);
             throw err;
         }
     }
     // Delete
     static async deleteSalle(id) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
             configLog_1.default.info(`Suppression de la salle ${id}`);
             const [result] = await connection.execute('DELETE FROM Salle WHERE id = ?', [id]);
-            await connection.end();
+            connection.release();
             const rowsAffected = result.affectedRows || 0;
             return rowsAffected > 0;
         }
         catch (err) {
-            await connection.end();
+            connection.release();
             configLog_1.default.error('Erreur delete salle:', err);
             throw Error('Impossible de supprimer la salle');
         }
     }
     static async findById(id) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         configLog_1.default.info('Connexion réussie à la base de données');
         const [rows] = await connection.execute('SELECT * FROM Salle WHERE id = ?', [id]);
-        await connection.end();
+        connection.release();
         const data = rows[0];
         return data ? new Salle_1.Salle(data) : null;
     }
     static async findByCinema(nameCinema) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         configLog_1.default.info('Connexion réussie à la base de données');
         const [rows] = await connection.execute('SELECT * FROM Salle WHERE nameCinema = ?', [nameCinema]);
-        await connection.end();
+        connection.release();
         const data = rows;
         return data;
     }
