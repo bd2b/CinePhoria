@@ -1,12 +1,14 @@
 // services/MailNetwork.ts
 
 import { Mail } from '../shared-models/Mail';
-import { mailConfig } from '../config/config';
+import { mailConfig , modeExec } from '../config/config';
 import nodemailer from 'nodemailer';
 import logger from '../config/configLog'
 import { mailToSend } from '../models/Mail';
 
-const isBouchon = true;
+let isBouchon = true;
+if (modeExec === 'développement') isBouchon = false;
+
 logger.info ( isBouchon ? "ENVOI DE MAIL bouchonne" : "ENVOI DE MAIL en service");
 // Ce contrôleur effectue l'envoi de mail en s'appuyant sur la configuration
 export class MailNetwork {

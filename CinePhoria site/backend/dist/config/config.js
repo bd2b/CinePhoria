@@ -8,9 +8,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectDBMongo = exports.ConfigMongo = exports.nombreTentativeLoginKO = exports.jwtTK = exports.mailConfig = exports.dbConfig = void 0;
+exports.connectDBMongo = exports.ConfigMongo = exports.nombreTentativeLoginKO = exports.jwtTK = exports.mailConfig = exports.dbConfig = exports.modeExec = void 0;
 const configLog_1 = __importDefault(require("../config/configLog"));
 const mongoose_1 = __importDefault(require("mongoose"));
+// Exporter le mode d'exécution
+exports.modeExec = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
 // Exporter la configuration de la base de données
 exports.dbConfig = {
     host: process.env.DB_HOST || 'localhost',

@@ -8,6 +8,7 @@ exports.QRCodeService = void 0;
 const canvas_1 = require("canvas");
 const qrcode_1 = __importDefault(require("qrcode"));
 const configLog_1 = __importDefault(require("../config/configLog"));
+const path_1 = __importDefault(require("path"));
 class QRCodeService {
     static drawImage(qrCanvas, centerImage, factor) {
         const h = qrCanvas.height;
@@ -32,7 +33,7 @@ class QRCodeService {
         configLog_1.default.info("2");
         return canvas.toBuffer();
     }
-    static async generateQRCodeWithImage(text, imagePath = './camera-qr.png', width = 300, height = 300, factor = 0.15 // Taille de l'image par rapport au QR Code
+    static async generateQRCodeWithImage(text, imagePath = '', width = 300, height = 300, factor = 0.15 // Taille de l'image par rapport au QR Code
     ) {
         const canvas = (0, canvas_1.createCanvas)(width, height);
         const ctx = canvas.getContext('2d');
@@ -62,7 +63,15 @@ class QRCodeService {
             }
         });
         // Charger l'image à insérer au centre
-        const centerImage = await (0, canvas_1.loadImage)(imagePath);
+        let imagePathVar = imagePath;
+        if (imagePathVar === '') {
+            imagePathVar = path_1.default.join(__dirname, './camera-qr.png');
+            configLog_1.default.info("Chargement de l'image depuis : " + imagePathVar);
+        }
+        const centerImage = await (0, canvas_1.loadImage)(imagePathVar);
+        if (centerImage) {
+            configLog_1.default.info("Pas d'acces à l'image");
+        }
         // Définir la taille et la position de l'image centrale
         const imgSize = width * factor;
         const imgX = (width - imgSize) / 2;

@@ -172,12 +172,22 @@ export function onClickContact() {
 
     const mail = new Mail(mailVal, titreVal, descVal, "false");
     const resultat = await sendMailApi(mail);
-    console.log("Resultat envoi mail = " + resultat);
+    console.log("Resultat envoi mail = " + resultat.statut);
 
-    alert(`Demande envoyée !
-Mail : ${mailVal || 'Pas de mail'}
-Titre : ${titreVal}
-Description : ${descVal}`);
+    if (resultat.statut.startsWith("OK")) {
+
+      alert(`
+        Votre demande a bien été envoyée !
+
+        Mail : ${mailVal || 'Pas de mail'}
+        Titre : ${titreVal}
+        Description : ${descVal}`);
+    } else {
+      alert(`
+        Nous n'avons pas pu envoyer votre demande.
+        Merci de la renouveler ultérieurement.
+        `);
+    }
 
     // Fermer
     closeModal();
