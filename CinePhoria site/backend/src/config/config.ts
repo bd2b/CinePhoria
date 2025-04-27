@@ -8,6 +8,9 @@
 import logger from '../config/configLog';
 import mongoose from 'mongoose';
 
+// Exporter le mode d'exécution
+export const modeExec = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
+
 // Exporter la configuration de la base de données
 export const dbConfig = {
   host: process.env.DB_HOST || 'localhost',

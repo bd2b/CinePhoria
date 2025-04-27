@@ -261,7 +261,7 @@ function afficherListeFilms() {
         // Créer l'image
         const img = document.createElement('img');
         img.classList.add('listFilms__simpleCard-img');
-        img.src = imageFilm(film.imageFilm128);
+        img.src = imageFilm(film.imageFilm1024);
         img.alt = (_a = film.titleFilm) !== null && _a !== void 0 ? _a : 'Affiche';
         // Titre
         const pTitre = document.createElement('p');

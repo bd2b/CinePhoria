@@ -13,6 +13,8 @@
 
 # Certificat
 **/*.pem
+**/*.crt
+**/*.key
 
 # Xcode specific files
 CinePhoria mobile/MonCinePhoria.xcodeproj/project.xcworkspace/xcuserdata/*/UserInterfaceState.xcuserstate
