@@ -1385,10 +1385,10 @@ BEGIN
     select count(*) into v_numberPlaces from SeatsForTarif WHERE ReservationId = p_reservationId;
     
     -- Mise à jour des places disponibles
-    UPDATE SEANCE
+    UPDATE Seance
     SET numFreeSeats = NumFreeSeats + v_numberPlaces,
 			numFreePMR = numFreePMR + v_numberPMR
-    WHERE seance.id = v_seanceId;
+    WHERE Seance.id = v_seanceId;
     
     -- Mise à jour de la reservation
     UPDATE Reservation

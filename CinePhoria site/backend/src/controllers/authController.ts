@@ -12,6 +12,8 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret-key
 const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION || '15m'; // ex. 15 minutes
 const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION || '7d'; // ex. 7 jours
 
+import { versionCourante } from '../config/config';
+
 
 export class AuthController {
 
@@ -113,37 +115,13 @@ export class AuthController {
     return; // S'assure que la fonction respecte `Promise<void>`
 }
 
+// Renvoi la version issue du .env
+static  async getVersion(req: Request, res: Response): Promise<void> {
+
+  res.json( versionCourante );
+
+  return;
+
 }
 
-export class AuthController2 {
-  static async login(req: Request, res: Response): Promise<void> {
-    const { compte, password } = req.body;
-
-    // Vérification des identifiants
-    const resultText = await UtilisateurDAO.login(compte, password)
-    // Exemple simple (remplacez par une vérification réelle des identifiants)
-    if (resultText !== 'OK') {
-      if (resultText === 'KO : Compte bloqué') {
-        res.status(401).json({ message: ' Votre compte est bloqué suite un trop grand nombre de tentative de connexion' });
-
-      } else {
-        res.status(401).json({ message: ' Erreur de mail ou de mot de passe' });
-      }
-      return;
-    }
-    const token = jwt.sign({ compte }, JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
-
-  }
-
-  static confirmUser(req: Request, res: Response): void {
-    const { utilisateurId, displayName, password } = req.body;
-  }
-
-  static async isLogged(req: Request, res: Response): Promise<string> {
-
-    const user = (req as any).user;
-    if (user) return user
-    throw new Error("Jeton mal formé")
-  }
 }

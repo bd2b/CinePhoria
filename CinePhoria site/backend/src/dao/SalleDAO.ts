@@ -1,7 +1,6 @@
-import mysql from 'mysql2/promise';
 import { Salle } from "../shared-models/Salle";
 
-import { dbConfig } from "../config/config";
+import { dbConfig , dbPool } from "../config/config";
 import logger from '../config/configLog';
 
 import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
@@ -11,10 +10,10 @@ export class SalleDAO {
 
     static async findAll(): Promise<Salle[]> {
 
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         logger.info('Exécution de la requête : SELECT * FROM Salle');
         const [rows] = await connection.execute('SELECT * FROM Salle');
-        await connection.end();
+        connection.release();
 
         // On convertit chaque record en Salle
         return (rows as any[]).map(row => new Salle(row));
@@ -23,7 +22,7 @@ export class SalleDAO {
 
     // Create
     static async createSalle(salle: Salle): Promise<string> {
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         try {
             // On génére un id (UUID) côté back si il n'est pas fourni
             const newId = salle.id || generateUUID();
@@ -46,10 +45,10 @@ export class SalleDAO {
 
                 ]
             );
-            await connection.end();
+            connection.release();
             return newId;
         } catch (err) {
-            await connection.end();
+            connection.release();
             logger.error('Erreur creation salle:', err);
             throw err;
         }
@@ -59,7 +58,7 @@ export class SalleDAO {
     static async updateSalle(id: string, salle: Salle): Promise<boolean> {
         // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
 
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         try {
             logger.info(`Mise à jour de la salle ${id} ${salle.nameSalle}`);
             const [result] = await connection.execute(
@@ -78,12 +77,12 @@ export class SalleDAO {
 
                 ]
             );
-            await connection.end();
+            connection.release();
             // result => un objet du type ResultSetHeader
             const rowsAffected = (result as any).affectedRows || 0;
             return rowsAffected > 0;
         } catch (err) {
-            await connection.end();
+            connection.release();
             logger.error('Erreur update salle:', err);
             throw err;
         }
@@ -91,38 +90,38 @@ export class SalleDAO {
 
     // Delete
     static async deleteSalle(id: string): Promise<boolean> {
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         try {
             logger.info(`Suppression de la salle ${id}`);
             const [result] = await connection.execute(
                 'DELETE FROM Salle WHERE id = ?',
                 [id]
             );
-            await connection.end();
+            connection.release();
             const rowsAffected = (result as any).affectedRows || 0;
             return rowsAffected > 0;
         } catch (err) {
-            await connection.end();
+            connection.release();
             logger.error('Erreur delete salle:', err);
             throw Error('Impossible de supprimer la salle');
         }
     }
 
     static async findById(id: string): Promise<Salle | null> {
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         logger.info('Connexion réussie à la base de données');
         const [rows] = await connection.execute('SELECT * FROM Salle WHERE id = ?', [id]);
-        await connection.end();
+        connection.release();
 
         const data = (rows as any[])[0];
         return data ? new Salle(data) : null;
     }
 
     static async findByCinema(nameCinema: string): Promise<Salle[] | null> {
-        const connection = await mysql.createConnection(dbConfig);
+        const connection = await dbPool.getConnection();
         logger.info('Connexion réussie à la base de données');
         const [rows] = await connection.execute('SELECT * FROM Salle WHERE nameCinema = ?', [nameCinema]);
-        await connection.end();
+        connection.release();
 
         const data = (rows as any[]);
         return data ;

@@ -151,33 +151,67 @@ export function onClickContact() {
     });
     // 10) Bouton Annuler
     annulerBtn === null || annulerBtn === void 0 ? void 0 : annulerBtn.addEventListener('click', closeModal);
+    // // 11) Bouton Envoyer la demande
+    // envoyerBtn?.addEventListener('click', async () => {
+    //   // Tout est déjà validé dans checkFormValidity
+    //   // => On affiche une alert ou on appelle un code d’envoi
+    //   const mailVal = mailInput?.value.trim() || '';
+    //   const titreVal = titreInput?.value.trim() || '';
+    //   const descVal = descInput?.value.trim() || '';
+    //   const mail = new Mail(mailVal, titreVal, descVal, "false");
+    //   const resultat = await sendMailApi(mail);
+    //   console.log("Resultat envoi mail = " + resultat.statut);
+    //   if (resultat.statut.startsWith("OK")) {
+    //     alert(`
+    //       Votre demande a bien été envoyée !
+    //       Mail : ${mailVal || 'Pas de mail'}
+    //       Titre : ${titreVal}
+    //       Description : ${descVal}`);
+    //   } else {
+    //     alert(`
+    //       Nous n'avons pas pu envoyer votre demande.
+    //       Merci de la renouveler ultérieurement.
+    //       `);
+    //   }
     // 11) Bouton Envoyer la demande
     envoyerBtn === null || envoyerBtn === void 0 ? void 0 : envoyerBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
-        // Tout est déjà validé dans checkFormValidity
-        // => On affiche une alert ou on appelle un code d’envoi
+        setButtonDisabled(true);
+        envoyerBtn.classList.add('loading');
         const mailVal = (mailInput === null || mailInput === void 0 ? void 0 : mailInput.value.trim()) || '';
         const titreVal = (titreInput === null || titreInput === void 0 ? void 0 : titreInput.value.trim()) || '';
         const descVal = (descInput === null || descInput === void 0 ? void 0 : descInput.value.trim()) || '';
         const mail = new Mail(mailVal, titreVal, descVal, "false");
-        const resultat = yield sendMailApi(mail);
-        console.log("Resultat envoi mail = " + resultat.statut);
-        if (resultat.statut.startsWith("OK")) {
-            alert(`
+        try {
+            const resultat = yield sendMailApi(mail);
+            // await new Promise(resolve => setTimeout(resolve, 2000));
+            console.log("Resultat envoi mail = " + resultat.statut);
+            if (resultat.statut.startsWith("OK")) {
+                alert(`
         Votre demande a bien été envoyée !
 
         Mail : ${mailVal || 'Pas de mail'}
         Titre : ${titreVal}
         Description : ${descVal}`);
-        }
-        else {
-            alert(`
+            }
+            else {
+                alert(`
         Nous n'avons pas pu envoyer votre demande.
-        Merci de la renouveler ultérieurement.
-        `);
+        Merci de la renouveler ultérieurement.`);
+            }
         }
-        // Fermer
-        closeModal();
+        catch (error) {
+            alert(`Erreur réseau ou serveur, veuillez réessayer.`);
+            console.error("Erreur lors de l'envoi du mail", error);
+        }
+        finally {
+            envoyerBtn.classList.remove('loading');
+            setButtonDisabled(false);
+            closeModal();
+        }
     }));
+    //   // Fermer
+    //   closeModal();
+    // });
     // 12) Initial check
     checkFormValidity();
 }

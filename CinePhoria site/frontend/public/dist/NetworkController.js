@@ -1009,3 +1009,15 @@ export function getReservationStatsApi() {
         return responseJSON;
     });
 }
+/**
+* Récupération de du numero de version
+* @returns un ( { majeure: number, mineure: number, build: number } )
+*/
+export function getVersionApi() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `${baseUrl}/api/login/version`;
+        // Requête authentifiée
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, false);
+        return responseJSON;
+    });
+}

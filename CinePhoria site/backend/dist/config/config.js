@@ -8,11 +8,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.connectDBMongo = exports.ConfigMongo = exports.nombreTentativeLoginKO = exports.jwtTK = exports.mailConfig = exports.dbConfig = exports.modeExec = void 0;
+exports.dbPool = exports.connectDBMongo = exports.ConfigMongo = exports.nombreTentativeLoginKO = exports.jwtTK = exports.mailConfig = exports.dbConfig = exports.versionCourante = exports.modeExec = void 0;
 const configLog_1 = __importDefault(require("../config/configLog"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const promise_1 = __importDefault(require("mysql2/promise"));
 // Exporter le mode d'exécution
 exports.modeExec = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
+// Exporter la version
+exports.versionCourante = {
+    majeure: parseInt(process.env.MAJEURE || "0", 10),
+    mineure: parseInt(process.env.MINEURE || "0", 10),
+    build: parseInt(process.env.BUILD || "0", 10)
+};
 // Exporter la configuration de la base de données
 exports.dbConfig = {
     host: process.env.DB_HOST || 'localhost',
@@ -55,6 +62,15 @@ const connectDBMongo = async () => {
     }
 };
 exports.connectDBMongo = connectDBMongo;
-// Autres configs (port, secrets JWT, etc.)
-// export const SERVER_PORT = process.env.SERVER_PORT || 3000;
-// 
+// Ajout de la nouvelle exportation dbPool
+exports.dbPool = promise_1.default.createPool({
+    host: exports.dbConfig.host,
+    user: exports.dbConfig.user,
+    password: exports.dbConfig.password,
+    database: exports.dbConfig.database,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    multipleStatements: exports.dbConfig.multipleStatements,
+    timezone: exports.dbConfig.timezone,
+});

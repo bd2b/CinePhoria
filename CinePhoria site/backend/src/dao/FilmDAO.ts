@@ -1,7 +1,6 @@
-import mysql from 'mysql2/promise';
 import { Film } from "../shared-models/Film";
 
-import { dbConfig } from "../config/config";
+import { dbConfig, dbPool } from "../config/config";
 import logger from '../config/configLog';
 
 import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
@@ -10,10 +9,10 @@ import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
 export class FilmDAO {
   static async findAll(): Promise<Film[]> {
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info('Exécution de la requête : SELECT * FROM Film');
     const [rows] = await connection.execute('SELECT * FROM Film');
-    await connection.end();
+    connection.release();
 
     // On convertit chaque record en Film
     return (rows as any[]).map(row => new Film(row));
@@ -21,10 +20,10 @@ export class FilmDAO {
   }
 
   static async findById(id: string): Promise<Film | null> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info('Connexion réussie à la base de données');
     const [rows] = await connection.execute('SELECT * FROM Film WHERE id = ?', [id]);
-    await connection.end();
+    connection.release();
 
     const data = (rows as any[])[0];
     return data ? new Film(data) : null;
@@ -32,10 +31,10 @@ export class FilmDAO {
 
   static async findSortiesDeLaSemaine(): Promise<Film[]> {
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info('Exécution de la requête : SELECT * FROM viewfilmssortiesdelasemaine');
     const [rows] = await connection.execute('SELECT * FROM viewfilmssortiesdelasemaine');
-    await connection.end();
+    connection.release();
 
     // On convertit chaque record en Film
     return (rows as any[]).map(row => new Film(row));
@@ -44,7 +43,7 @@ export class FilmDAO {
 
   // Create
   static async createFilm(film: Film): Promise<string> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       // On génére un id (UUID) côté back si il n'est pas fourni
       const newId = film.id || generateUUID(); 
@@ -75,10 +74,10 @@ export class FilmDAO {
           film.imageFilm1024 || null,
         ]
       );
-      await connection.end();
+      connection.release();
       return newId;
     } catch (err) {
-      await connection.end();
+      connection.release();
       logger.error('Erreur creation film:', err);
       throw err;
     }
@@ -88,7 +87,7 @@ export class FilmDAO {
   static async updateFilm(id: string, film: Film): Promise<boolean> {
     // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
     const dateSortie = formatDateLocalYYYYMMDD(new Date(film.dateSortieCinePhoria || ''));
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       logger.info(`Mise à jour du film ${id}`);
       const [result] = await connection.execute(
@@ -128,12 +127,12 @@ export class FilmDAO {
           id
         ]
       );
-      await connection.end();
+      connection.release();
       // result => un objet du type ResultSetHeader
       const rowsAffected = (result as any).affectedRows || 0;
       return rowsAffected > 0;
     } catch (err) {
-      await connection.end();
+      connection.release();
       logger.error('Erreur update film:', err);
       throw err;
     }
@@ -141,18 +140,18 @@ export class FilmDAO {
 
   // Delete
   static async deleteFilm(id: string): Promise<boolean> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     try {
       logger.info(`Suppression du film ${id}`);
       const [result] = await connection.execute(
         'DELETE FROM Film WHERE id = ?',
         [id]
       );
-      await connection.end();
+      connection.release();
       const rowsAffected = (result as any).affectedRows || 0;
       return rowsAffected > 0;
     } catch (err) {
-      await connection.end();
+      connection.release();
       logger.error('Erreur delete film:', err);
       throw err;
     }

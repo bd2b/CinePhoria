@@ -2,16 +2,16 @@ import mysql from 'mysql2/promise';
 import { Seance, SeanceDisplay, TarifQualite } from "../shared-models/Seance";
 import logger from '../config/configLog';
 
-import { dbConfig } from "../config/config"
+import { dbConfig , dbPool } from "../config/config"
 
 
 export class SeanceDAO {
   static async findAll(): Promise<Seance[]> {
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info('Exécution de la requête : SELECT * FROM ViewFilmsSeancesSalle');
     const [rows] = await connection.execute('SELECT * FROM ViewFilmsSeancesSalle');
-    await connection.end();
+    connection.release();
 
     // On convertit chaque record en Seance
     return (rows as any[]).map(row => new Seance(row));
@@ -20,7 +20,7 @@ export class SeanceDAO {
 
   static async findAllForDisplay(): Promise<SeanceDisplay[]> {
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     const requeteSelect = `
     SELECT 
       seanceId, titleFilm, nameSalle, nameCinema, 
@@ -32,7 +32,7 @@ export class SeanceDAO {
     `
     logger.info(`Exécution de la requête : ${requeteSelect}`);
     const [rows] = await connection.execute(requeteSelect);
-    await connection.end();
+    connection.release();
 
     // On convertit chaque record en Seance
     return (rows as any[]).map(row => new SeanceDisplay(row));
@@ -42,10 +42,10 @@ export class SeanceDAO {
 
   static async findByIds(seanceids: string): Promise<Seance[]> {
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     logger.info(`Exécution de la requête : SELECT * FROM ViewFilmsSeancesSalle where seanceId in (${seanceids})`);
     const [rows] = await connection.execute(`SELECT * FROM ViewFilmsSeancesSalle where seanceId in (${seanceids})`);
-    await connection.end();
+    connection.release();
 
     // On convertit chaque record en Seance et on renvoie le premier et seul élément
     return (rows as any[]).map(row => new Seance(row));
@@ -53,7 +53,7 @@ export class SeanceDAO {
   }
 
   static async findByCinemas(nameCinemaList: string): Promise<Seance[]> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     let requete: string = '';
     logger.info("Selecteur de cinema = " + nameCinemaList);
     if (nameCinemaList === '"all"') {
@@ -64,14 +64,14 @@ export class SeanceDAO {
     logger.info(`Exécution de la requête : ${requete}`);
 
     const [rows] = await connection.execute(requete);
-    await connection.end();
+    connection.release();
 
     // Map des lignes pour les convertir en instances de Seance
     return (rows as any[]).map((row) => new Seance(row));
   }
 
   static async findDisplayByCinemas(nameCinemaList: string): Promise<SeanceDisplay[]> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     let requete: string = '';
     logger.info("Selecteur de cinema = " + nameCinemaList);
     if (nameCinemaList === '"all"') {
@@ -96,19 +96,19 @@ export class SeanceDAO {
     logger.info(`Exécution de la requête : ${requete}`);
 
     const [rows] = await connection.execute(requete);
-    await connection.end();
+    connection.release();
 
     // Map des lignes pour les convertir en instances de Seance
     return (rows as any[]).map((row) => new SeanceDisplay(row));
   }
 
   static async findTarifs(): Promise<TarifQualite[]> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     const requete = `SELECT * FROM TarifQualite`;
     logger.info(`Exécution de la requête : ${requete}`);
 
     const [rows] = await connection.execute(requete);
-    await connection.end();
+    connection.release();
 
     // Map des lignes pour les convertir en instances de Seance
     return (rows as any[]).map((row) => new TarifQualite(row));
@@ -116,7 +116,7 @@ export class SeanceDAO {
   }
 
   static async getSeatsBooked(p_seanceId: string): Promise<string> {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await dbPool.getConnection();
     // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation
     const [rows] = await connection.execute(
       `SELECT siegesReserves
@@ -125,7 +125,7 @@ export class SeanceDAO {
       [p_seanceId]
     );
     logger.info(`SELECT siegesReserves FROM ViewSeanceSiegesReserves WHERE seanceId = ${p_seanceId}`);
-    await connection.end();
+    connection.release();
 
     // Map des lignes pour les convertir en instances de string
     return (rows as any[]).map((row) => row as string)[0];

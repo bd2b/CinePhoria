@@ -25,4 +25,6 @@ router.get('/refresh', authController_1.AuthController.refresh);
 router.get('/refresh-token-status', authMiddleware_1.authenticateJWT, (req, res) => {
     res.json({ message: "Refresh Token valide" });
 });
+// api de recupération de la version et du build
+router.get('/version', authController_1.AuthController.getVersion);
 exports.default = router;

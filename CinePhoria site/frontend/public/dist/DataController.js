@@ -31,10 +31,11 @@ import { ReservationState } from './shared-models/Reservation.js';
 import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
 import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { Cinema } from './shared-models/Cinema.js';
-import { getSeancesByIdApi } from './NetworkController.js';
+import { getSeancesByIdApi, getVersionApi } from './NetworkController.js';
 import { baseUrl } from './Global.js';
 export class DataController {
     constructor() {
+        this.version = { majeure: 0, mineure: 0, build: 0 };
         this._reservationState = ReservationState.PendingChoiceSeance;
         // Ensemble des données chargées systématiquement
         this._allSeances = [];
@@ -374,6 +375,7 @@ export class DataController {
         return __awaiter(this, void 0, void 0, function* () {
             var _a;
             const snapshotGlobal = {
+                version: this.version,
                 reservationState: this._reservationState,
                 filterNameCinema: this._filterNameCinema,
                 selectedNameCinema: this._selectedNameCinema,
@@ -468,6 +470,7 @@ export class DataController {
             }
             try {
                 const parsed = JSON.parse(saved);
+                this.version = parsed.version || { majeure: 0, mineure: 0, build: 0 };
                 this._reservationState = parsed.reservationState || ReservationState.PendingChoiceSeance;
                 this._filterNameCinema = parsed.filterNameCinema || undefined;
                 this._selectedNameCinema = parsed.selectedNameCinema || undefined;
@@ -576,6 +579,19 @@ export class DataController {
             console.log("DataC: Init");
             // 1) Charger depuis localStorage
             yield this.chargerComplet();
+            // 1 bis) Vérifier qu'il n'y pas de version majeure provoquant un rafrachissement du cache
+            const newVersion = yield getVersionApi();
+            console.log("Version actuelle = ", JSON.stringify(newVersion));
+            if (this.version && newVersion.majeure !== this.version.majeure) {
+                console.log("DataC: nouvelle version majeure -> rechargement depuis l’API");
+                yield this.chargerDepuisAPI();
+                this.version = newVersion;
+                yield this.sauverComplet();
+                return;
+            }
+            else {
+                console.log("Pas de nouvelle version majeure");
+            }
             // 2) Vérifier la validité du cache via cookie
             let mustReload = true;
             const dateAccessString = getCookie(DataController.nomCookieDateAccess);

@@ -1,6 +1,11 @@
 # Nommage de l'environnement
 DEVELOPPEMENT=false
 
+# Version majeure.mineure et build
+MAJEURE=0
+MINEURE=0
+BUILD=1
+
 # Configuration du port
 PORT=3500
 

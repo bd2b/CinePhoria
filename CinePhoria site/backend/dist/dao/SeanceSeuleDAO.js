@@ -4,22 +4,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SeanceSeuleDAO = void 0;
-const promise_1 = __importDefault(require("mysql2/promise"));
 const SeanceSeule_1 = require("../shared-models/SeanceSeule");
 const config_1 = require("../config/config");
 const configLog_1 = __importDefault(require("../config/configLog"));
 class SeanceSeuleDAO {
     static async findAll() {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         configLog_1.default.info('Exécution de la requête : SELECT * FROM Seance');
         const [rows] = await connection.execute('SELECT * FROM Seance');
-        await connection.end();
+        connection.release();
         // On convertit chaque record en SeanceSeule
         return rows.map(row => new SeanceSeule_1.SeanceSeule(row));
     }
     // Create
     static async createSeanceSeule(seanceseule) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
             // On génére un id (UUID) côté back si il n'est pas fourni
             const newId = seanceseule.id || generateUUID();
@@ -40,11 +39,11 @@ class SeanceSeuleDAO {
                 seanceseule.numFreePMR || "",
                 seanceseule.alertAvailibility || ""
             ]);
-            await connection.end();
+            connection.release();
             return newId;
         }
         catch (err) {
-            await connection.end();
+            connection.release();
             configLog_1.default.error('Erreur creation salleseule:', err);
             throw err;
         }
@@ -52,7 +51,7 @@ class SeanceSeuleDAO {
     // Update
     static async updateSeanceSeule(id, salleseule) {
         // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
             configLog_1.default.info(`Mise à jour de la seanceseule ${id}`);
             const [result] = await connection.execute(`UPDATE Seance SET
@@ -71,38 +70,38 @@ class SeanceSeuleDAO {
                 salleseule.alertAvailibility || "",
                 id
             ]);
-            await connection.end();
+            connection.release();
             // result => un objet du type ResultSetHeader
             const rowsAffected = result.affectedRows || 0;
             return rowsAffected > 0;
         }
         catch (err) {
-            await connection.end();
+            connection.release();
             configLog_1.default.error('Erreur update seanceseule:', err);
             throw err;
         }
     }
     // Delete
     static async deleteSeanceSeule(id) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         try {
             configLog_1.default.info(`Suppression de la seanceseule ${id}`);
             const [result] = await connection.execute('DELETE FROM Seance WHERE id = ?', [id]);
-            await connection.end();
+            connection.release();
             const rowsAffected = result.affectedRows || 0;
             return rowsAffected > 0;
         }
         catch (err) {
-            await connection.end();
+            connection.release();
             configLog_1.default.error('Erreur delete seanceseule:', err);
             throw Error('Impossible de supprimer la seanceseule');
         }
     }
     static async findById(id) {
-        const connection = await promise_1.default.createConnection(config_1.dbConfig);
+        const connection = await config_1.dbPool.getConnection();
         configLog_1.default.info('Connexion réussie à la base de données');
         const [rows] = await connection.execute('SELECT * FROM Seance WHERE id = ?', [id]);
-        await connection.end();
+        connection.release();
         const data = rows[0];
         return data ? new SeanceSeule_1.SeanceSeule(data) : null;
     }

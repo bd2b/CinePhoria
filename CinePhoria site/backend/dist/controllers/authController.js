@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AuthController2 = exports.AuthController = void 0;
+exports.AuthController = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const UtilisateurDAO_1 = require("../dao/UtilisateurDAO");
 const configLog_1 = __importDefault(require("../config/configLog"));
@@ -13,6 +13,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret-key
 // Durée de vie
 const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION || '15m'; // ex. 15 minutes
 const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION || '7d'; // ex. 7 jours
+const config_1 = require("../config/config");
 class AuthController {
     /**
      * POST /api/login
@@ -93,34 +94,10 @@ class AuthController {
         res.json({ message: 'Logout effectué, refresh token révoqué' });
         return; // S'assure que la fonction respecte `Promise<void>`
     }
+    // Renvoi la version issue du .env
+    static async getVersion(req, res) {
+        res.json(config_1.versionCourante);
+        return;
+    }
 }
 exports.AuthController = AuthController;
-class AuthController2 {
-    static async login(req, res) {
-        const { compte, password } = req.body;
-        // Vérification des identifiants
-        const resultText = await UtilisateurDAO_1.UtilisateurDAO.login(compte, password);
-        // Exemple simple (remplacez par une vérification réelle des identifiants)
-        if (resultText !== 'OK') {
-            if (resultText === 'KO : Compte bloqué') {
-                res.status(401).json({ message: ' Votre compte est bloqué suite un trop grand nombre de tentative de connexion' });
-            }
-            else {
-                res.status(401).json({ message: ' Erreur de mail ou de mot de passe' });
-            }
-            return;
-        }
-        const token = jsonwebtoken_1.default.sign({ compte }, JWT_SECRET, { expiresIn: '1h' });
-        res.json({ token });
-    }
-    static confirmUser(req, res) {
-        const { utilisateurId, displayName, password } = req.body;
-    }
-    static async isLogged(req, res) {
-        const user = req.user;
-        if (user)
-            return user;
-        throw new Error("Jeton mal formé");
-    }
-}
-exports.AuthController2 = AuthController2;
