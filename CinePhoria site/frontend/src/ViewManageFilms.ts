@@ -347,7 +347,7 @@ async function onClickCancelEdit() {
  */
 function initListen(init: boolean) {
     const requiredNamedField = ['titleFilm', 'genreArray', 'duration', 'linkBO', 'note',
-        'filmDescription', 'filmAuthor', 'filmDistribution'];
+        'filmDescription', 'filmAuthor', 'filmDistribution', 'filmPitch'];
     requiredNamedField.forEach(id => {
         const el = document.getElementById(id);
         if (el instanceof HTMLInputElement || el instanceof HTMLDivElement) {
@@ -658,6 +658,7 @@ function isFormModified(): boolean {
     if (isDifferent('filmDistribution', filmSelectedList.filmDistribution)) return true;
     if (isDifferent('linkBO', filmSelectedList.linkBO)) return true;
     if (isDifferent('filmDescription', filmSelectedList.filmDescription)) return true;
+    if (isDifferent('filmPitch', filmSelectedList.filmPitch)) return true;
 
     const catBtn = document.getElementById('title__filter-dropdown-button-genre');
     if (catBtn?.innerText.trim().split('▼')[0].trim() !== (filmSelectedList.categorySeeing || 'TP')) return true;

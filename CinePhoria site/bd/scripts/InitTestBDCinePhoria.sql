@@ -743,31 +743,7 @@ VALUES
   END sp_generate_seances;
   
 
--- INSERT INTO Reservation
---   (Id, 
---   Utilisateurid, 
---   seanceid, 
---   stateReservation, 
---   numberPMR, 
---   evaluation, 
---   isEvaluationMustBeReview, 
---   note, 
---   isPromoFriandise, 
---   numberSeatsRestingBeforPromoFriandise,
---   imageQRCode )             
--- VALUES 
- --  (UUIDReservation1, UUIDUtilisateur1 , UUIDSeance1, "future", 0, null, 0, null, 0, 5,"imageQRCode.jpg"),
---  (UUIDReservation2, UUIDUtilisateur1 , UUIDSeance2, "doneUnevaluated", 0, null, 0, null, 0, 5, null),
---   (UUIDReservation3, UUIDUtilisateur1 , UUIDSeance3, "doneEvaluated", 1, "Film très bon. A voir absolument", 1, 4.5, 0, 2, null),
-  
---   (UUIDReservation4, UUIDUtilisateur2 , UUIDSeance1, "future", 0, null, 0, null, 0, 5, "imageQRCode.jpg"),
---   (UUIDReservation5, UUIDUtilisateur2 , UUIDSeance2, "doneUnevaluated", 0, null, 0, null, 0, 5, null),
---   (UUIDReservation6, UUIDUtilisateur2 , UUIDSeance3, "doneEvaluated", 1, "Film très bon. A voir absolument", 1, 4.5, 0, 2, null),
-  
---   (UUIDReservation7, UUIDUtilisateur3 , UUIDSeance1, "future", 0, null, 0, null, 1, 0, "imageQRCode.jpg"),
---   (UUIDReservation8, UUIDUtilisateur3 , UUIDSeance2, "doneUnevaluated", 0, null, 0, null, 0, 5, null),
---  (UUIDReservation9, UUIDUtilisateur3 , UUIDSeance3, "doneEvaluated", 0, "Bof Bof", 1, 3.5, 0, 2, null)
---  ;
+
 
 
 

@@ -11,6 +11,7 @@ import { DataControllerIntranet } from './DataControllerIntranet.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { syncTableColumnWidths, formatterJJMM, formatDateLocalYYYYMMDD } from './Helpers.js';
+import { ReservationState } from './shared-models/Reservation.js';
 // Filtre du jour
 let filtreJour = '';
 /**
@@ -45,7 +46,7 @@ function rafraichirTableauAvis() {
         container.innerHTML = '';
         // Charger les avis
         let avis = yield DataControllerIntranet.getReservationForUtilisateurFilter();
-        avis = avis.filter((a) => (a.statereservation === 'doneEvaluated' && a.isEvaluationMustBeReview));
+        avis = avis.filter((a) => (a.statereservation === ReservationState.DoneEvaluated && a.isEvaluationMustBeReview));
         if (filtreJour) {
             avis = avis.filter((s) => s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false);
         }
