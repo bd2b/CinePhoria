@@ -75,7 +75,7 @@ export class QRCodeService {
     // Charger l'image à insérer au centre
     let imagePathVar = imagePath
     if (imagePathVar === '') {
-      imagePathVar = path.join(__dirname, '../assets/camera-qr.png');
+      imagePathVar = path.join(__dirname, './camera-qr.png');
       logger.info("Chargement de l'image depuis : " + imagePathVar);
     }
     const centerImage = await loadImage(imagePathVar);

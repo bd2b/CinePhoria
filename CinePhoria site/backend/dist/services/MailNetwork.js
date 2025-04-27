@@ -9,7 +9,9 @@ const config_1 = require("../config/config");
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const configLog_1 = __importDefault(require("../config/configLog"));
 const Mail_1 = require("../models/Mail");
-const isBouchon = true;
+let isBouchon = true;
+if (config_1.modeExec === 'développement')
+    isBouchon = false;
 configLog_1.default.info(isBouchon ? "ENVOI DE MAIL bouchonne" : "ENVOI DE MAIL en service");
 // Ce contrôleur effectue l'envoi de mail en s'appuyant sur la configuration
 class MailNetwork {

@@ -14,10 +14,9 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config({ path: './.env' });
-const mode = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
-console.log(`🛠️ Mode actuel : ${mode}`);
 // Connexion à la base MongoDB
 const config_1 = require("./config/config");
+console.log(`🛠️ Mode actuel : ${config_1.modeExec}`);
 (0, config_1.connectDBMongo)();
 const app = (0, express_1.default)();
 // 🔵 CORS doit venir immédiatement après l'initialisation d'app
@@ -99,17 +98,21 @@ app.use('/api/utilisateur', utilisateurRoutes_1.default);
 app.use('/api/mail', mailRoutes_1.default);
 app.use('/api/login', publicLoginRoutes_1.default);
 // Route pour servir les fichiers statics
-const frontPath = (mode === 'développement')
+const frontPath = (config_1.modeExec === 'développement')
     ? path_1.default.join(__dirname, '../../frontend/public/')
     : path_1.default.join(__dirname, '../public');
 console.log(`🔍 Fichiers front servis depuis : ${frontPath}`);
+// Rediriger la racine vers visiteur.html
+app.get('/', (req, res) => {
+    res.redirect('/visiteur.html');
+});
 app.use(express_1.default.static(frontPath));
 // app.get('*', (req, res) => {
 //   res.sendFile(path.join(frontPath));
 // });
 const httpsPort = 3500;
 const httpPort = 3000;
-if (mode === 'production') {
+if (config_1.modeExec === 'production') {
     const sslKeyPath = process.env.SSL_KEY_PATH || '/usr/src/app/ssl/private.key';
     const sslCertPath = process.env.SSL_CERT_PATH || '/usr/src/app/ssl/certificate.crt';
     const privateKey = fs_1.default.readFileSync(sslKeyPath, 'utf8');

@@ -160,11 +160,21 @@ export function onClickContact() {
         const descVal = (descInput === null || descInput === void 0 ? void 0 : descInput.value.trim()) || '';
         const mail = new Mail(mailVal, titreVal, descVal, "false");
         const resultat = yield sendMailApi(mail);
-        console.log("Resultat envoi mail = " + resultat);
-        alert(`Demande envoyée !
-Mail : ${mailVal || 'Pas de mail'}
-Titre : ${titreVal}
-Description : ${descVal}`);
+        console.log("Resultat envoi mail = " + resultat.statut);
+        if (resultat.statut.startsWith("OK")) {
+            alert(`
+        Votre demande a bien été envoyée !
+
+        Mail : ${mailVal || 'Pas de mail'}
+        Titre : ${titreVal}
+        Description : ${descVal}`);
+        }
+        else {
+            alert(`
+        Nous n'avons pas pu envoyer votre demande.
+        Merci de la renouveler ultérieurement.
+        `);
+        }
         // Fermer
         closeModal();
     }));
