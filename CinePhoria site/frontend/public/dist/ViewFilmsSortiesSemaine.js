@@ -27,16 +27,20 @@ export function onLoadVisiteur() {
         try {
             let films = dataController.filmsSortiesRecentes;
             if (films.length === 0) {
+                // On affiche les films du catalogue
+                const titleVisiteur = document.querySelector('.title__left-h1');
+                if (titleVisiteur)
+                    titleVisiteur.textContent = "Films du catalogue";
                 const card = document.createElement('div');
                 card.classList.add('filmsreservation__film');
-                card.innerHTML = `
-          <div class="film__cardreservation"> <!-- Card pour chaque film-->
-            <div class="cardreservation__description">
-                <h2 class="cardreservation__description-title">Pas de film sortie la semaine précédente : affichage de tous les films présent au catalogue</h2>
-            </div>
-          </div>
-        `;
-                container.appendChild(card);
+                // card.innerHTML = `
+                //     <div class="film__cardreservation"> <!-- Card pour chaque film-->
+                //       <div class="cardreservation__description">
+                //           <h2 class="cardreservation__description-title">Pas de film sortie la semaine précédente : affichage de tous les films présent au catalogue</h2>
+                //       </div>
+                //     </div>
+                //   `;
+                // container.appendChild(card);
                 // Chargement de tous les films
                 films = dataController.films;
             }

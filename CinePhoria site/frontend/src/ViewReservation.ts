@@ -306,7 +306,7 @@ function afficherListeFilms(): void {
     // Créer l'image
     const img = document.createElement('img');
     img.classList.add('listFilms__simpleCard-img');
-    img.src = imageFilm(film.imageFilm128!);
+    img.src = imageFilm(film.imageFilm1024!);
     img.alt = film.titleFilm ?? 'Affiche';
 
     // Titre

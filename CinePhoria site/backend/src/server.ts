@@ -12,12 +12,15 @@ import path from 'path';
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env' });
 
-const mode = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
-console.log(`🛠️ Mode actuel : ${mode}`);
+
+
 
 
 // Connexion à la base MongoDB
-import { connectDBMongo } from './config/config';
+import { connectDBMongo , modeExec} from './config/config';
+
+console.log(`🛠️ Mode actuel : ${modeExec}`);
+
 connectDBMongo()
 
 const app = express();
@@ -112,11 +115,16 @@ app.use('/api/mail', mailRoutes);
 app.use('/api/login', loginRoutes);
 
 // Route pour servir les fichiers statics
-const frontPath = (mode === 'développement')
+const frontPath = (modeExec === 'développement')
   ? path.join(__dirname, '../../frontend/public/')
   : path.join(__dirname, '../public');
 
 console.log(`🔍 Fichiers front servis depuis : ${frontPath}`);
+
+// Rediriger la racine vers visiteur.html
+app.get('/', (req, res) => {
+  res.redirect('/visiteur.html');
+});
 
 app.use(express.static(frontPath));
 
@@ -127,7 +135,7 @@ app.use(express.static(frontPath));
 const httpsPort = 3500;
 const httpPort = 3000;
 
-if (mode === 'production') {
+if (modeExec === 'production') {
   const sslKeyPath = process.env.SSL_KEY_PATH || '/usr/src/app/ssl/private.key';
   const sslCertPath = process.env.SSL_CERT_PATH || '/usr/src/app/ssl/certificate.crt';
 

@@ -2,6 +2,8 @@
 import { createCanvas, loadImage } from 'canvas';
 import QRCode from 'qrcode';
 import logger from '../config/configLog'
+import { modeExec } from '../config/config';
+import path from 'path';
 
 export class QRCodeService {
   private static drawImage(qrCanvas: HTMLCanvasElement, centerImage: HTMLImageElement, factor: number): void {
@@ -32,11 +34,12 @@ export class QRCodeService {
 
   public static async generateQRCodeWithImage(
     text: string,
-    imagePath = './camera-qr.png',
+    imagePath = '',
     width = 300,
     height = 300,
     factor = 0.15 // Taille de l'image par rapport au QR Code
   ): Promise<Buffer> {
+    
     const canvas = createCanvas(width, height);
     const ctx = canvas.getContext('2d');
 
@@ -70,7 +73,13 @@ export class QRCodeService {
     });
 
     // Charger l'image à insérer au centre
-    const centerImage = await loadImage(imagePath);
+    let imagePathVar = imagePath
+    if (imagePathVar === '') {
+      imagePathVar = path.join(__dirname, '../assets/camera-qr.png');
+      logger.info("Chargement de l'image depuis : " + imagePathVar);
+    }
+    const centerImage = await loadImage(imagePathVar);
+    if (centerImage) { logger.info("Pas d'acces à l'image") }
 
     // Définir la taille et la position de l'image centrale
     const imgSize = width * factor;
