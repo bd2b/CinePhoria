@@ -300,16 +300,6 @@ async function onClickEditOrSave() {
         const btnEdit = document.getElementById("title__right-button-Modifier") as HTMLButtonElement | null;
         if (btnEdit) btnEdit.textContent = "Enregistrer";
     } else {
-        // => on est en train d'éditer => on veut enregistrer
-        if (isCreatingMode && filmSelectedList) {
-            // En mode création les valeurs d'image se déduisent du filmId
-            filmSelectedList.imageFilm1024 = filmSelectedList?.id + "1024";
-            filmSelectedList.imageFilm128 = filmSelectedList?.id + "128";
-            // La date de sortie est le prochain mercredi
-            filmSelectedList.dateSortieCinePhoria = formatDateLocalYYYYMMDD(dateProchainMercredi());
-
-
-        }
         await onSaveFilm();
     }
 }
@@ -374,32 +364,55 @@ async function onSaveFilm() {
     if (!film) return;
 
     try {
+        let message = "";
         if (isCreatingMode) {
             // Creation
             console.log("Film created => id=", film.id);
 
+            // La date de sortie est le prochain mercredi
+            film.dateSortieCinePhoria = formatDateLocalYYYYMMDD(dateProchainMercredi());
+
             if (selectedFile128) {
+                film.imageFilm128 = film?.id + "128";
                 await createAfficheApi(film.imageFilm128!, selectedFile128, 128, selectedFile128.type);
             }
             if (selectedFile1024) {
+                film.imageFilm1024 = film?.id + "1024";
                 await createAfficheApi(film.imageFilm1024!, selectedFile1024, 1024, selectedFile1024.type);
             }
-            alert("Film créé avec succès");
+            message = "Film créé avec succès";
 
         } else {
             // Modification
             console.log("Film updated => id=", film.id);
 
             if (selectedFile128) {
-                await updateAfficheApi(film.imageFilm128!, selectedFile128, 128, selectedFile128.type);
+                if (/^\d+-128\.jpg$/.test(film.imageFilm128!)) {
+                    // On avait un fichier jpg initialisé par le script d'initialisation
+                    // donc si on met un nouveau fichier il faut créer une affiche dans mongo
+                    film.imageFilm128 = film?.id + "128";
+                    await createAfficheApi(film.imageFilm128!, selectedFile128, 128, selectedFile128.type);
+                } else {
+                    await updateAfficheApi(film.imageFilm128!, selectedFile128, 128, selectedFile128.type);
+                }
             }
+
             if (selectedFile1024) {
-                await updateAfficheApi(film.imageFilm1024!, selectedFile1024, 1024, selectedFile1024.type);
+                if (/^\d+-1024\.jpg$/.test(film.imageFilm1024!)) {
+                    // On avait un fichier jpg initialisé par le script d'initialisation
+                    // donc si on met un nouveau fichier il faut créer une affiche dans mongo
+                    film.imageFilm1024 = film?.id + "1024";
+                    await createAfficheApi(film.imageFilm1024!, selectedFile1024, 1024, selectedFile1024.type);
+                } else {
+                    await updateAfficheApi(film.imageFilm1024!, selectedFile1024, 1024, selectedFile1024.type);
+                }
+
             }
-            alert("Film mis à jour avec succès");
+            message = "Film mis à jour avec succès";
         }
         const result = await DataControllerIntranet.createOrUpdateFilm(film);
         if (!result) throw new Error("Erreur: dans la création ou mise à jour de film")
+        alert(message);
 
         // On refresh la liste
         await rafraichirListeFilms();
