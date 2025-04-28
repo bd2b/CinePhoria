@@ -278,14 +278,6 @@ function onClickEditOrSave() {
                 btnEdit.textContent = "Enregistrer";
         }
         else {
-            // => on est en train d'éditer => on veut enregistrer
-            if (isCreatingMode && filmSelectedList) {
-                // En mode création les valeurs d'image se déduisent du filmId
-                filmSelectedList.imageFilm1024 = (filmSelectedList === null || filmSelectedList === void 0 ? void 0 : filmSelectedList.id) + "1024";
-                filmSelectedList.imageFilm128 = (filmSelectedList === null || filmSelectedList === void 0 ? void 0 : filmSelectedList.id) + "128";
-                // La date de sortie est le prochain mercredi
-                filmSelectedList.dateSortieCinePhoria = formatDateLocalYYYYMMDD(dateProchainMercredi());
-            }
             yield onSaveFilm();
         }
     });
@@ -350,31 +342,53 @@ function onSaveFilm() {
         if (!film)
             return;
         try {
+            let message = "";
             if (isCreatingMode) {
                 // Creation
                 console.log("Film created => id=", film.id);
+                // La date de sortie est le prochain mercredi
+                film.dateSortieCinePhoria = formatDateLocalYYYYMMDD(dateProchainMercredi());
                 if (selectedFile128) {
+                    film.imageFilm128 = (film === null || film === void 0 ? void 0 : film.id) + "128";
                     yield createAfficheApi(film.imageFilm128, selectedFile128, 128, selectedFile128.type);
                 }
                 if (selectedFile1024) {
+                    film.imageFilm1024 = (film === null || film === void 0 ? void 0 : film.id) + "1024";
                     yield createAfficheApi(film.imageFilm1024, selectedFile1024, 1024, selectedFile1024.type);
                 }
-                alert("Film créé avec succès");
+                message = "Film créé avec succès";
             }
             else {
                 // Modification
                 console.log("Film updated => id=", film.id);
                 if (selectedFile128) {
-                    yield updateAfficheApi(film.imageFilm128, selectedFile128, 128, selectedFile128.type);
+                    if (/^\d+-128\.jpg$/.test(film.imageFilm128)) {
+                        // On avait un fichier jpg initialisé par le script d'initialisation
+                        // donc si on met un nouveau fichier il faut créer une affiche dans mongo
+                        film.imageFilm128 = (film === null || film === void 0 ? void 0 : film.id) + "128";
+                        yield createAfficheApi(film.imageFilm128, selectedFile128, 128, selectedFile128.type);
+                    }
+                    else {
+                        yield updateAfficheApi(film.imageFilm128, selectedFile128, 128, selectedFile128.type);
+                    }
                 }
                 if (selectedFile1024) {
-                    yield updateAfficheApi(film.imageFilm1024, selectedFile1024, 1024, selectedFile1024.type);
+                    if (/^\d+-1024\.jpg$/.test(film.imageFilm1024)) {
+                        // On avait un fichier jpg initialisé par le script d'initialisation
+                        // donc si on met un nouveau fichier il faut créer une affiche dans mongo
+                        film.imageFilm1024 = (film === null || film === void 0 ? void 0 : film.id) + "1024";
+                        yield createAfficheApi(film.imageFilm1024, selectedFile1024, 1024, selectedFile1024.type);
+                    }
+                    else {
+                        yield updateAfficheApi(film.imageFilm1024, selectedFile1024, 1024, selectedFile1024.type);
+                    }
                 }
-                alert("Film mis à jour avec succès");
+                message = "Film mis à jour avec succès";
             }
             const result = yield DataControllerIntranet.createOrUpdateFilm(film);
             if (!result)
                 throw new Error("Erreur: dans la création ou mise à jour de film");
+            alert(message);
             // On refresh la liste
             yield rafraichirListeFilms();
         }

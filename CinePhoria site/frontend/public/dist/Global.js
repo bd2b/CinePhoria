@@ -19,9 +19,10 @@ import { onLoadManageSeances } from "./ViewManageSeances.js";
 import { onLoadManageAvis } from "./ViewManageAvis.js";
 import { onLoadManageEmployes } from "./ViewManageEmploye.js";
 import { onLoadDashboard } from "./ViewDashboard.js";
-export const DEVELOPPEMENT = true;
 // L'url de base est l'url d'appel des fichiers statiques
 export const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
+if (window.location.hostname.toUpperCase() !== 'CINEPHORIA.BD2DB.COM')
+    document.title = document.title + " - dev";
 const pageHandlers = {
     "visiteur.html": onLoadVisiteur,
     "reservation.html": onLoadReservation,
