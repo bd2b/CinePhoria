@@ -13,7 +13,7 @@ export async function chargerCinemaSites() {
       <div class="container__legal">
           <a href="#" class="container__legal-a">Mentions légales</a>
           <a href="#" class="container__legal-a">Politique de confidentialité</a>
-          <a href="#" class="container__legal-a">&copy; 2024 - Tous droits réservés</a>
+          <a href="#" class="container__legal-a">&copy; 2024 - Tous droits réservés - 1.0(4)</a>
       </div>
       
       <div class="container__sites" id="container__sites">  
