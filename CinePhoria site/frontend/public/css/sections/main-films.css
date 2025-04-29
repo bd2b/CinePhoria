@@ -308,6 +308,11 @@ border-radius: 10px;
   }
   
   /* Table principale */
+
+  .tabseance__commande-table {
+    width: 100% !important;
+  }
+
   /* En-tête opaque */
 .tabseance__commande-table thead th {
     position: sticky;
@@ -315,13 +320,16 @@ border-radius: 10px;
     z-index: 2;
     background-color: rgba(var(--ternary-color), 0.8); /* plus opaque */
     /* Autres styles inchangés */
-    text-align: left;
+    text-align: center;
     padding: 10px 15px;
     border-bottom: 2px solid #dee2e6;
     font-weight: bold;
     color: #000;
   }
   
+  .tabseance__commande-table tbody tr {
+    text-align: center;
+  }
   /* Survol (hover) d'une ligne */
   .tabseance__commande-table tbody tr:hover {
     background-color: rgba(0,0,0,0.05);

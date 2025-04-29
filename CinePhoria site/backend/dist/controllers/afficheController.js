@@ -128,11 +128,10 @@ class AfficheController {
                     updateData.contentType = mimeType;
                 }
             }
-            let updated = await afficheDAO.update(filmId, updateData);
+            const updated = await afficheDAO.update(filmId, updateData);
             if (!updated) {
-                // On va creer l'affiche car il est possible que le film ait une image statique
-                // que l'on doit substituer par une image mongo
-                updated = await afficheDAO.create(updateData);
+                res.status(404).json({ message: `Aucune affiche trouvée pour filmId : ${filmId}` });
+                return;
             }
             res.status(200).json(updated);
         }

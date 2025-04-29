@@ -1,23 +1,22 @@
 # Nommage de l'environnement
-DEVELOPPEMENT=true
+DEVELOPPEMENT=false
 
 # Version majeure.mineure et build
 MAJEURE=1
 MINEURE=0
-BUILD=4
-
+BUILD=3
 
 # Configuration du port
 PORT=3500
 
 # Configuration de la connexion MySQL
-DB_HOST=localhost
-DB_DATABASE=CinePhoriaTest
-DB_USER=bruno
+DB_HOST=mysql
+DB_DATABASE=cinephoria
+DB_USER=cineadmin
 DB_PASSWORD=studi2025
 
 # Configuration de la connexion mongoDB
-MONGO_URI=mongodb://localhost:27017/cinephoria
+MONGO_URI=mongodb://mongo:27017/cinephoria
 
 
 # Configuration des deux secrets JWT
@@ -25,6 +24,7 @@ JWT_ACCESS_SECRET=formationSTUDI
 ACCESS_TOKEN_EXPIRATION='100m' # 15 minutes à remetre à 15 en prod
 JWT_REFRESH_SECRET=formationSTUDI
 REFRESH_TOKEN_EXPIRATION='7d' # 7 jours
+
 
 # Nombre de tentatives de login en echec avant blocage du compte
 MAX_TENTATIVE_LOGIN_KO_BEFORE_BLOCKED=5

@@ -307,6 +307,7 @@ border-radius: 10px;
     border-radius: 5px;
   }
   
+  
   /* Table principale */
   /* En-tête opaque */
 .tabseance__commande-table thead th {
@@ -335,6 +336,7 @@ border-radius: 10px;
   
   /* Le conteneur scroll global */
   .table-scroll {
+    display: none;
     max-height: 200px; /* ou 300px */
     overflow-y: auto;
     position: relative;
@@ -345,6 +347,9 @@ border-radius: 10px;
     background-color: #fff; 
   }
   
+  .tabseance__commande-table {
+    width: 100% !important;
+  }
   
 /* -------------------- Responsive */
 
