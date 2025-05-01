@@ -19,6 +19,9 @@ struct CardsReservationView: View {
     @State private var qrCodeCache: [UUID: UIImage] = [:]
     // Cache des images qui permet de ne pas charger plusieurs fois l'image entre CardView et ViewFilm
     @State private var imageCache: [UUID: AnyView] = [:]
+    // Cache pour les détails de places
+    @State private var seatsForReservationCache: [UUID: [SeatsForReservation]] = [:]
+    
     // Variable pour initialiser le cache des qrCode
     @State private var didInitializeCache = false
     
@@ -90,7 +93,8 @@ struct CardsReservationView: View {
                             geometry: geometry,
                             viewModel: viewModel,
                             imageCache: $imageCache,
-                            qrCodeCache: $qrCodeCache
+                            qrCodeCache: $qrCodeCache,
+                            seatsForReservationCache: $seatsForReservationCache
                         )
                         .tag(index)
                         .padding(10)
@@ -118,7 +122,9 @@ struct CardsReservationView: View {
                     )
                 } else {
                     if viewModel.isSeatsViewShowing {
-                        SeatsView(reservation: dataController.reservations[currentPage])
+                        SeatsView(reservation: dataController.reservations[currentPage],
+                                  seatsForReservation: seatsForReservationCache[dataController.reservations[currentPage].reservationId]!
+                        )
                     } else {
                         if viewModel.isQRCodeViewShowing {
                             QRCodeView(
@@ -129,10 +135,10 @@ struct CardsReservationView: View {
                             )
                         } else {
                             if viewModel.isEvaluationViewShowing {
-                                EvaluationView(dataController: dataController, currentPage: currentPage, isNewEvaluation: true)
+                                EvaluationView(dataController: dataController, isEvaluationMustBeR: dataController.reservations[currentPage].isEvaluationMustBeReview, currentPage: currentPage, isNewEvaluation: true)
                             } else {
                                 if viewModel.isEvaluationChangeViewShowing {
-                                    EvaluationView(dataController: dataController, currentPage: currentPage, isNewEvaluation: false)
+                                    EvaluationView(dataController: dataController, isEvaluationMustBeR: dataController.reservations[currentPage].isEvaluationMustBeReview, currentPage: currentPage, isNewEvaluation: false)
                                 }
                             }
                         }
@@ -242,8 +248,11 @@ struct CardReservationView: View {
     
     @Binding var imageCache: [UUID: AnyView]
     @Binding var qrCodeCache: [UUID: UIImage]
+    @Binding var seatsForReservationCache: [UUID: [SeatsForReservation]]
+    
     @State private var imageView: AnyView? = nil
     @State private var qrCodeImage: UIImage? = nil
+    @State private var seatsForReservation: [SeatsForReservation]? = nil
 
     
     var body: some View {
@@ -414,6 +423,19 @@ struct CardReservationView: View {
                     }
                 } else {
                     qrCodeImage = qrCodeCache[reservation.reservationId]
+                }
+            }
+            Task {
+                if seatsForReservationCache[reservation.reservationId] == nil {
+                    
+                        // La reservation est dans le futur
+                        if let seatsForR = await dataController.loadOrFetchSeatsForReservation(for: reservationIndex) {
+                            seatsForReservationCache[reservation.reservationId] = seatsForR
+                            seatsForReservation = seatsForR
+                        }
+                    
+                } else {
+                    seatsForReservation = seatsForReservationCache[reservation.reservationId]
                 }
             }
         }

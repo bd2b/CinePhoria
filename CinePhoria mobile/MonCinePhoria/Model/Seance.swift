@@ -13,11 +13,6 @@ import SwiftUI
 let fontSeance = "DS-DIGI"
 let helper = DateFormatterHelper.shared
 
-
-
-
-
-
 enum QualityFilm: String, Codable {
     case troisD =   "3D"
     case quatreK =  "4K"
@@ -39,7 +34,8 @@ enum BO : String, Codable {
     case vo = "VO"
 }
 
-//export class SeanceSeule {
+// les données de séances sont intégrés à reservation
+
 //    id!: string;
 //    filmId?: string;
 //    salleId?: string;

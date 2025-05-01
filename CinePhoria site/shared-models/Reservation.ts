@@ -127,7 +127,7 @@ export class SeatsForReservation {
   nameTarif?:string;
   price?:number;
   
-  constructor(data: Partial<ReservationForUtilisateur>) {
+  constructor(data: Partial<SeatsForReservation>) {
     Object.assign(this, data);
   }
 };

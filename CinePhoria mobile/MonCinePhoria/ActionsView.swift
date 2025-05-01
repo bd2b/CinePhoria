@@ -1,6 +1,6 @@
 //
-//	ActionsView.swift
-//	MonCinePhoria
+//    ActionsView.swift
+//    MonCinePhoria
 //
 //  Cree par Bruno DELEBARRE-DEBAY on 24/11/2024.
 //  bd2db
@@ -156,16 +156,19 @@ struct ActionsView: View {
 
 
     var body: some View {
-        switch reservation.stateReservation {
-        case .ReserveConfirmed:
-            FutureView(qrCode: qrCodeImage)
-        case .DoneUnevaluated:
-            ToEvaluateView()
-        case .DoneEvaluated:
-            EvaluatedView(evaluation: reservation.evaluation, note: reservation.note)
-        default:
-            ToEvaluateView()
+        Group {
+            switch reservation.stateReservation {
+            case .ReserveConfirmed:
+                FutureView(qrCode: qrCodeImage)
+            case .DoneUnevaluated:
+                ToEvaluateView()
+            case .DoneEvaluated:
+                EvaluatedView(evaluation: reservation.evaluation, note: reservation.note)
+            default:
+                ToEvaluateView()
+            }
         }
+        .id(reservation.stateReservation)
     }
 }
     
