@@ -13,10 +13,26 @@ import SwiftUI
 
 
 struct SeatsForTarif: Codable {
+    var id: String
+    var TarifQualiteId: String
+    var ReservationId: String
     var numberSeats: Int
     var nameTarif: String
     var price: Double
 }
+
+struct SeatsForReservation: Codable {
+    
+   var numberSeats: Int
+   var nameTarif: String
+   var price: Double
+}
+
+//ID!: string;             // de type auto increment
+// TarifQualiteid?: string;
+// ReservationId?: string;
+// numberSeats?: number;
+// Price?: number;
 
 enum ReservationState: String, Codable, CaseIterable  {
   case PendingChoiceSeance = "PendingChoiceSeance"    // Choix de seance en cours , le panel choix est affiché
@@ -35,7 +51,6 @@ enum ReservationState: String, Codable, CaseIterable  {
 }
 
 let decoder = JSONDecoder()
-
 let formatter = DateFormatter()
 
 class Reservation: Identifiable, Codable, ObservableObject , Comparable {
@@ -49,7 +64,7 @@ class Reservation: Identifiable, Codable, ObservableObject , Comparable {
     
     var utilisateurId: UUID
     var reservationId: UUID
-    var stateReservation: ReservationState
+    @Published  var stateReservation: ReservationState
     var timeStampCreate: Date
     var seatsReserved: String
     var displayName: String
@@ -85,12 +100,15 @@ class Reservation: Identifiable, Codable, ObservableObject , Comparable {
     var filmPitch: String?
     var qrCodeData: [UInt8]?
     
+    var seatsForReservation: [SeatsForReservation]?
+    
     // Clés de codage pour les propriétés persistées
     enum CodingKeys: String, CodingKey {
-  case utilisateurId, reservationId, stateReservation, timeStampCreate, seatsReserved, displayName,
-    dateJour, titleFilm, nameCinema, isEvaluationMustBeReview, note, evaluation, totalSeats, totalPrice, numberPMR, filmId,
-    seanceId, email, isPromoFriandise, numberSeatsRestingBeforPromoFriandise,
-    imageFilm1024, imageFilm128, hourBeginHHSMM, hourEndHHSMM, nameSalle, qualite, bo, genreArray, categorySeeing, isCoupDeCoeur, noteFilm, duration, filmAuthor, filmDescription, filmDistribution, filmPitch, qrCodeData
+        case utilisateurId, reservationId, stateReservation, timeStampCreate, seatsReserved, displayName,
+             dateJour, titleFilm, nameCinema, isEvaluationMustBeReview, note, evaluation, totalSeats, totalPrice, numberPMR, filmId,
+             seanceId, email, isPromoFriandise, numberSeatsRestingBeforPromoFriandise,
+             imageFilm1024, imageFilm128, hourBeginHHSMM, hourEndHHSMM, nameSalle, qualite, bo, genreArray, categorySeeing, isCoupDeCoeur,
+             noteFilm, duration, filmAuthor, filmDescription, filmDistribution, filmPitch, qrCodeData, seatsForReservation
     }
     
     init (
@@ -233,7 +251,7 @@ class Reservation: Identifiable, Codable, ObservableObject , Comparable {
             filmDistribution = try container.decode(String.self, forKey: .filmDistribution)
             filmPitch = try container.decode(String.self, forKey: .filmPitch)
             qrCodeData = try container.decodeIfPresent([UInt8].self, forKey: .qrCodeData)
-            
+            seatsForReservation = try container.decodeIfPresent([SeatsForReservation].self, forKey: .seatsForReservation)
         }
         
         func encode(to encoder: Encoder) throws {
@@ -276,7 +294,7 @@ class Reservation: Identifiable, Codable, ObservableObject , Comparable {
             try container.encode(filmDistribution, forKey: .filmDistribution)
             try container.encode(filmPitch, forKey: .filmPitch)
             try container.encode(qrCodeData, forKey: .qrCodeData)
-            
+            try container.encode(seatsForReservation, forKey: .seatsForReservation)
         }
 }
 

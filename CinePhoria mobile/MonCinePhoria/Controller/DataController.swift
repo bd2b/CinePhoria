@@ -1,6 +1,6 @@
 //
-//	DataController.swift
-//	MonCinePhoria
+//    DataController.swift
+//    MonCinePhoria
 //
 //  Cree par Bruno DELEBARRE-DEBAY on 23/11/2024.
 //  bd2db
@@ -152,12 +152,12 @@ import Foundation
         do {
             try await loginApi(compte: user, password: pwd)
             self.userMail = user
-            
+
             await loadReservations(for: user)
             UserDefaults.standard.rememberMe = rememberMe
             if rememberMe {
                 do {
-                    print("SetValue: \(user), \(pwd)")
+                    print("SetValue: \(user), *******")
                     try setValue(pwd, for: user, and: "com.db2db.MonCinePhoria")
                     UserDefaults.standard.lastUserLogin = user
                 } catch {
@@ -166,36 +166,17 @@ import Foundation
             }
             return true
         } catch {
+            // 🔌 Vérification locale en mode hors-ligne
+            if let localPassword = getPassword(for: user), localPassword == pwd {
+                print("Connexion locale autorisée pour \(user)")
+                self.userMail = user
+                await loadReservationsFromLocal()
+                return true
+            }
             print("Erreur de connexion 1: \(error)")
             numberErrorLogin += 1
             return false
         }
-    }
-    
-    func login2(user: String, pwd: String, rememberMe: Bool) -> Bool {
-        
-        let userAuthorized = [ "admin", "user@example.com", "vide@example.com", "error@example.com", "inedit"]
-        
-        let loginSuccess =  userAuthorized.contains(user) && pwd == "password"
-        
-        if !loginSuccess { numberErrorLogin += 1 }
-        
-        if loginSuccess {
-            self.userMail = user
-            UserDefaults.standard.rememberMe = rememberMe
-        }
-        
-        if rememberMe && loginSuccess{
-            do {
-                print ("SetValue: \(user), \(pwd)")
-                try setValue(pwd, for: user, and: "com.db2db.MonCinePhoria")
-                UserDefaults.standard.lastUserLogin = user
-            } catch {
-                print("erreur sur setValue: \(error)")
-            }
-        }
-        return loginSuccess
-        
     }
     
     func forgottenPassword (mail: String) {
@@ -205,7 +186,7 @@ import Foundation
     func loadReservations(for userMail: String) async {
    
         do {
-            reservations = try await getReservationForUtilisateur(email: userMail + "-")
+            reservations = try await getReservationForUtilisateur(email: userMail)
             saveReservationsToLocal()
             
             isLoadingReservations = false;

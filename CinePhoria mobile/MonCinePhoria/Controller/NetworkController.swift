@@ -125,7 +125,8 @@ func apiRequest<T: Decodable>(
     endpoint: String,
     method: String = "GET",
     body: Encodable? = nil,
-    requiresAuth: Bool = true
+    requiresAuth: Bool = true,
+    debugTrace: Bool = false
 ) async throws -> T {
     var token = UserDefaults.standard.string(forKey: "jwtAccessToken")
     
@@ -151,8 +152,9 @@ func apiRequest<T: Decodable>(
     }
     
     var (data, response) = try await URLSession.shared.data(for: request)
-    if let jsonString = String(data: data, encoding: .utf8) {
-   //     print("🔎 Réponse JSON brute :\n\(jsonString)")
+    
+    if debugTrace, let jsonString = String(data: data, encoding: .utf8) {
+       print("🔎 Réponse JSON brute :\n\(jsonString)")
     }
     
     guard let httpResponse = response as? HTTPURLResponse else {
@@ -289,6 +291,67 @@ func getReservationQRCodeImage(reservationId: UUID) async throws -> UIImage {
     return image
 }
 
+func getSeatsForReservation(reservationId: String) async throws -> [SeatsForReservation] {
+    let endpoint = "\(domainUrl)/api/reservation/seats/id/\(reservationId)"
+    let seatsForReservation: [SeatsForReservation] = try await apiRequest(
+        endpoint: endpoint,
+        method: "GET",
+        requiresAuth: true
+    )
+    return seatsForReservation
+}
+
+func setStateReservation(
+    reservationId: String,
+    stateReservation: ReservationState
+) async throws -> Bool {
+    let endpoint = "\(domainUrl)/api/reservation/setstate"
+    let json: [String: String] = try await apiRequest(
+        endpoint: endpoint,
+        method: "POST",
+        body: ["reservationId": reservationId, "stateReservation": stateReservation.rawValue],
+        requiresAuth: true,
+        debugTrace: true
+    )
+
+    if let message = json["message"], !message.starts(with: "Erreur") {
+        return true
+    } else {
+        print("Erreur : \(json)")
+        return false
+    }
+}
+
+
+func setEvaluationReservation(
+    reservationId: String,
+    note: Double,
+    evaluation: String,
+    isEvaluationMustBeReview: Bool
+) async throws -> Bool {
+        let isEvaluationMustBeReviewStr = isEvaluationMustBeReview ? "true" : "false"
+        let noteRounded = Double(String(format: "%.1f", note)) ?? note
+        let endpoint = "\(domainUrl)/api/reservation/setevaluation"
+        let json: [String: String ] = try await apiRequest(
+            endpoint: endpoint,
+            method: "POST",
+            body: [
+                    "reservationId": AnyEncodable(reservationId),
+                    "note": AnyEncodable(noteRounded),
+                    "evaluation": AnyEncodable(evaluation),
+                    "isEvaluationMustBeReview": AnyEncodable(isEvaluationMustBeReviewStr)
+            ],
+            requiresAuth: true,
+            debugTrace: true
+            )
+    if let message = json["message"], !message.starts(with: "Erreur") {
+        return true
+    } else {
+        print("Erreur : \(json)")
+        return false
+    }
+    }
+
 
 
   
@@ -344,6 +407,28 @@ extension DataController {
                 return image
             } catch {
                 print("Erreur chargement QRCode pour \(reservation.reservationId): \(error)")
+                return nil
+            }
+        }
+    }
+    
+    func loadOrFetchSeatsForReservation(for index: Int) async -> [SeatsForReservation]? {
+        guard index >= 0 && index < reservations.count else { return nil }
+        let reservation = reservations[index]
+        
+        if let seatsForReservation = reservation.seatsForReservation {
+            print("Recupération des SeatsForReservation via reservation")
+            return seatsForReservation
+        } else {
+            do {
+                print("Recupération des SeatsForReservation via serveur")
+                let seatsForReservation = try await getSeatsForReservation(reservationId: reservation.reservationId.uuidString)
+                reservations[index].seatsForReservation = seatsForReservation
+                saveReservationsToLocal()
+                
+                return seatsForReservation
+            } catch {
+                print("Erreur chargement seatsForReservation pour \(reservation.reservationId): \(error)")
                 return nil
             }
         }
