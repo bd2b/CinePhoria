@@ -27,8 +27,12 @@ router.post('/setevaluation', authenticateJWT, ReservationController.setReservat
 // Recupérer les stats de reservations
 router.get('/getreservationstats', authenticateJWT ,ReservationController.getReservationStatsAll);
 
+
 // Recupérer les reservations d'un utilisateur
 router.get('/:utilisateurId', authenticateJWT ,ReservationController.getReservationForUtilisateur);
+
+// Recupérer les reservations d'un utilisateur pour le mobile
+router.get('/mobile/:email', authenticateJWT ,ReservationController.getReservationForUtilisateurMobile);
 
 // GET /api/reservation/id/:reservationid'
 router.get('/id/:reservationid', ReservationController.getReservationById);

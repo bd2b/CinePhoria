@@ -314,10 +314,10 @@ CREATE VIEW ViewUtilisateurReservation AS
 SELECT 
     Utilisateurid AS utilisateurId,
     Reservation.id AS reservationId,
-    Reservation.stateReservation AS statereservation,
-    Reservation.timeStampCreate AS timestampcreate,
+    Reservation.stateReservation AS stateReservation,
+    Reservation.timeStampCreate AS timeStampCreate,
     Reservation.seatsReserved AS seatsReserved,
-    Utilisateur.displayName AS displayname,
+    Utilisateur.displayName AS displayName,
     Seance.dateJour AS dateJour,
     Film.titleFilm AS titleFilm,
     Cinema.nameCinema AS nameCinema,
@@ -329,7 +329,9 @@ SELECT
     Reservation.numberPMR as numberPMR,
     Film.id as filmId,
     Seance.id as seanceId,
-    Utilisateur.email as email
+    Utilisateur.email as email,
+    Reservation.isPromoFriandise as isPromoFriandise,
+    Reservation.numberSeatsRestingBeforPromoFriandise as numberSeatsRestingBeforPromoFriandise
 FROM Utilisateur
 JOIN Reservation ON Reservation.Utilisateurid = Utilisateur.id
 JOIN SeatsForTarif ON SeatsForTarif.ReservationId = Reservation.id 
@@ -340,6 +342,56 @@ JOIN Salle ON Salle.id = Seance.Salleid
 JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
 -- WHERE Utilisateur.email = "claire@mail.fr"
 GROUP BY Reservation.id, Seance.dateJour, Film.titleFilm, Cinema.nameCinema, Reservation.note, Reservation.evaluation;
+
+CREATE VIEW ViewUtilisateurReservationMobile AS
+SELECT 
+    Utilisateurid AS utilisateurId,
+    Reservation.id AS reservationId,
+    Reservation.stateReservation AS stateReservation,
+    Reservation.timeStampCreate AS timeStampCreate,
+    Reservation.seatsReserved AS seatsReserved,
+    Utilisateur.displayName AS displayName,
+    Seance.dateJour AS dateJour,
+    Film.titleFilm AS titleFilm,
+    Cinema.nameCinema AS nameCinema,
+    Reservation.isEvaluationMustBeReview AS isEvaluationMustBeReview,
+    Reservation.note AS note,
+    Reservation.evaluation as evaluation,
+    SUM(SeatsForTarif.numberSeats) AS totalSeats,
+    SUM(TarifQualite.price * SeatsForTarif.numberSeats) AS totalPrice,
+    Reservation.numberPMR as numberPMR,
+    Film.id as filmId,
+    Seance.id as seanceId,
+    Utilisateur.email as email,
+    Reservation.isPromoFriandise as isPromoFriandise,
+    Reservation.numberSeatsRestingBeforPromoFriandise as numberSeatsRestingBeforPromoFriandise,
+    Film.imageFilm1024 as imageFilm1024,
+    Film.imageFilm128 as imageFilm128,
+    Seance.hourBeginHHSMM as hourBeginHHSMM,
+    Seance.hourEndHHSMM as hourEndHHSMM,
+    Salle.nameSalle as nameSalle,
+    Seance.qualite as qualite,
+    Seance.bo	as bo,
+    Film.genreArray as genreArray,
+    Film.categorySeeing as categorySeeing,
+    Film.isCoupDeCoeur as isCoupDeCoeur,
+    Film.note as noteFilm,
+    Film.duration as duration,
+    Film.filmAuthor	as filmAuthor,
+    Film.filmDescription as filmDescription,
+    Film.filmDistribution as filmDistribution,
+    Film.filmPitch as filmPitch
+FROM Utilisateur
+JOIN Reservation ON Reservation.Utilisateurid = Utilisateur.id
+JOIN SeatsForTarif ON SeatsForTarif.ReservationId = Reservation.id 
+JOIN TarifQualite ON SeatsForTarif.TarifQualiteid = TarifQualite.id
+JOIN Seance ON Reservation.Seanceid = Seance.id
+JOIN Film ON Seance.Filmid = Film.id
+JOIN Salle ON Salle.id = Seance.Salleid
+JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
+-- WHERE Utilisateur.email = "claire@mail.fr"
+GROUP BY Reservation.id, Seance.dateJour, Film.titleFilm, Cinema.nameCinema, Reservation.note, Reservation.evaluation;
+
 -- Vue des sieges occupés par séance
 CREATE VIEW ViewSeanceSiegesReserves AS
 SELECT 

@@ -212,24 +212,6 @@ export function confirmUtilisateurApi(id, password, displayName) {
         return responseJSON;
     });
 }
-export function confirmUtilisateurApi2(id, password, displayName) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const body = { id, password, displayName };
-        const response = yield fetch(`${baseUrl}/api/utilisateur/confirmUtilisateur`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-        });
-        if (!response.ok) {
-            const errData = yield response.json();
-            throw new Error(errData.message || 'Erreur inconnue');
-        }
-        // Examen de la reponse
-        const responseJSON = yield response.json();
-        console.log("Message retour", responseJSON);
-        return responseJSON;
-    });
-}
 /**
  * Validation de l'email
  * @param email
@@ -296,65 +278,6 @@ export function setEvaluationReservationApi(reservationId, note, evaluation, p_i
         });
     });
 }
-// TODO: mettre en place les deux jetons (nécessite SSL)
-export function confirmReserveApi2(reservationId, utilisateurId, seanceId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const body = { reservationId, utilisateurId, seanceId };
-        let token = localStorage.getItem('jwtAccessToken');
-        if (!token) {
-            throw new Error('Vous devez être connecté');
-        }
-        // Tenter la requête
-        let response = yield fetch(`${baseUrl}/api/reservation/confirm`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(body),
-            credentials: 'include' // inclure les cookies => envoie le refreshToken
-        });
-        if (response.ok) {
-            const data = yield response.json();
-            return data; // OK direct
-        }
-        // Sinon, si 401 ou 403 => peut-être token expiré => tenter refresh
-        if (response.status === 401 || response.status === 403) {
-            try {
-                yield refreshAccessToken();
-                // Récupérer le nouveau token
-                token = localStorage.getItem('jwtAccessToken');
-                if (!token) {
-                    throw new Error('refreshAccessToken a échoué');
-                }
-                // Re-tenter la requête
-                response = yield fetch(`${baseUrl}/api/reservation/confirm`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(body),
-                    credentials: 'include'
-                });
-                if (!response.ok) {
-                    const errData = yield response.json();
-                    throw new Error(errData.message || 'Erreur inconnue après refresh');
-                }
-                const data2 = yield response.json();
-                return data2;
-            }
-            catch (err) {
-                throw new Error(`Echec du refresh token : ${err}`);
-            }
-        }
-        else {
-            // Autre erreur
-            const errData = yield response.json();
-            throw new Error(errData.message || 'Erreur inconnue');
-        }
-    });
-}
 /**
  * Annulation de la reservation
  * @param reservationId
@@ -366,26 +289,6 @@ export function cancelReserveApi(reservationId) {
         const endpoint = `${baseUrl}/api/reservation/cancel`;
         const responseJSON = yield apiRequest(endpoint, 'POST', body, false // Pas d'authentification requise
         );
-        console.log("Message retour", responseJSON);
-        return responseJSON;
-    });
-}
-export function cancelReserveApi2(reservationId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const body = { reservationId };
-        const response = yield fetch(`${baseUrl}/api/reservation/cancel`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-        });
-        if (!response.ok) {
-            const errData = yield response.json();
-            throw new Error(errData.message || 'Erreur inconnue');
-        }
-        // Examen de la reponse
-        const responseJSON = yield response.json();
         console.log("Message retour", responseJSON);
         return responseJSON;
     });
@@ -405,26 +308,6 @@ export function profilApi(identUtilisateur) {
         }
         // Convertir les données brutes en instances de ComptePersonne
         return rawData.map((d) => new ComptePersonne(d));
-    });
-}
-export function profilApi2(identUtilisateur) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = localStorage.getItem('jwtAccessToken');
-        const response = yield fetch(`${baseUrl}/api/utilisateur/${identUtilisateur}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        const rawData = yield response.json();
-        if (!Array.isArray(rawData)) {
-            throw new Error('La réponse de l’API n’est pas un tableau.');
-        }
-        // Convertir les données brutes en instances de Compte Personne
-        const comptesUtilisateur = rawData.map((d) => new ComptePersonne(d));
-        console.log("compte = ", comptesUtilisateur);
-        return comptesUtilisateur;
     });
 }
 /**
@@ -471,24 +354,6 @@ export function getSeancesByIdApi(uuids) {
         return seances;
     });
 }
-export function getReservationApi2(reservationId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield fetch(`${baseUrl}/api/reservation/id/${reservationId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        const rawData = yield response.json();
-        if (!Array.isArray(rawData)) {
-            throw new Error('La réponse de l’API n’est pas un tableau.');
-        }
-        // Convertir les données brutes en instances de Seance
-        const reservations = rawData.map((d) => new ReservationForUtilisateur(d));
-        console.log("reservations = ", reservations);
-        return reservations;
-    });
-}
 /**
  * Récupérer les places d'une reservation provisoire, api publique
  * @param reservationId
@@ -507,47 +372,11 @@ export function getPlacesReservationApi(reservationId) {
         return places;
     });
 }
-export function getPlacesReservationApi2(reservationId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const response = yield fetch(`${baseUrl}/api/reservation/seats/id/${reservationId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        const rawData = yield response.json();
-        if (!Array.isArray(rawData)) {
-            throw new Error('La réponse de l’API n’est pas un tableau.');
-        }
-        // Convertir les données brutes en instances de Seance
-        const places = rawData.map((d) => new SeatsForReservation(d));
-        console.log("places = ", places);
-        return places;
-    });
-}
 export function isLogged() {
     return __awaiter(this, void 0, void 0, function* () {
         const endpoint = `${baseUrl}/api/login/isLogged`;
         // Utilisation de apiRequest pour gérer l'authentification et les erreurs
         return yield apiRequest(endpoint, 'GET', undefined);
-    });
-}
-export function isLogged2() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const token = localStorage.getItem('jwtToken');
-        const response = yield fetch(`${baseUrl}/api/login/isLogged`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
-        });
-        if (!response.ok) {
-            const errData = yield response.json();
-            throw new Error(errData.message || 'Erreur inconnue');
-        }
-        // La réponse est le compte
-        return response;
     });
 }
 export function getReservationForUtilisateur(utilisateurId) {

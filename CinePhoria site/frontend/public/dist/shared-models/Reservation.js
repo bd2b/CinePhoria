@@ -33,6 +33,12 @@ export class ReservationForUtilisateur {
     }
 }
 ;
+export class ReservationForUtilisateurMobile {
+    constructor(data) {
+        Object.assign(this, data);
+    }
+}
+;
 export class SeatsForReservation {
     constructor(data) {
         Object.assign(this, data);

@@ -40,7 +40,7 @@ export async function onLoadMesReservations() {
             // On charge les reservations de cet utilisateur
             let reservations = await getReservationForUtilisateur(utilisateurId);
             // On filtre les reservations non annulées ou non effacées 
-            reservations = reservations.filter((r) => { return ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.statereservation as ReservationState) }
+            reservations = reservations.filter((r) => { return ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.stateReservation as ReservationState) }
             );
             console.log(reservations);
             if (reservations.length === 0) {
@@ -140,7 +140,7 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
 
         console.log("-------" + resa.dateJour + "-" + seance.hourBeginHHSMM);
         // Statut dynamique
-        let statutResa = resa.statereservation as ReservationState;
+        let statutResa = resa.stateReservation as ReservationState;
 
         if (statutResa === ReservationState.ReserveConfirmed) {
             // ACtualisation du statut de la réservation si l'heure de la reservation est dans le passé

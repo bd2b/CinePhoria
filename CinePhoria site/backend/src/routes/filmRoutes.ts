@@ -36,6 +36,9 @@ router.get('/', authenticateJWT , FilmController.getAllFilms);
 logger.info('Declaration route POST /api/films');
 router.post('/', authenticateJWT, FilmController.createFilm);
 
+logger.info('Declaration route /api/films/utilisateur/:utilisateurid');
+router.get('/:id', authenticateJWT , FilmController.getFilmByUtilisateurId);
+
 logger.info('Declaration route /api/films/:id');
 router.get('/:id', authenticateJWT , FilmController.getFilmById);
 

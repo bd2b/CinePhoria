@@ -46,7 +46,7 @@ function rafraichirTableauAvis() {
         container.innerHTML = '';
         // Charger les avis
         let avis = yield DataControllerIntranet.getReservationForUtilisateurFilter();
-        avis = avis.filter((a) => (a.statereservation === ReservationState.DoneEvaluated && a.isEvaluationMustBeReview));
+        avis = avis.filter((a) => (a.stateReservation === ReservationState.DoneEvaluated && a.isEvaluationMustBeReview));
         if (filtreJour) {
             avis = avis.filter((s) => s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false);
         }
@@ -217,7 +217,7 @@ export function updateTableAvis(reservationsForUtilisateur) {
             tr.appendChild(tdTitre);
             // 3) Utilisateur
             const tdUtilisateur = document.createElement('td');
-            tdUtilisateur.textContent = reservationUtilisateur.displayname || '';
+            tdUtilisateur.textContent = reservationUtilisateur.displayName || '';
             tr.appendChild(tdUtilisateur);
             // 4) Note
             const tdNote = document.createElement('td');

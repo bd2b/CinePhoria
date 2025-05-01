@@ -29,6 +29,24 @@ export class FilmDAO {
     return data ? new Film(data) : null;
   }
 
+  
+
+  static async findByUtilisateurId(utilisateurId: string): Promise<Film | null> {
+    const connection = await dbPool.getConnection();
+    logger.info('Connexion réussie à la base de données');
+    const [rows] = await connection.execute(`
+      SELECT DISTINCT f.*
+      FROM Reservation r
+      JOIN Seance s ON r.Seanceid = s.id
+      JOIN Film f ON s.Filmid = f.id
+      WHERE r.Utilisateurid = ? 
+      AND r.stateReservation in ( "ReserveConfirmed" , "DoneUnevaluated" , "DoneEvaluated")`, [utilisateurId]);
+    connection.release();
+
+    const data = (rows as any[])[0];
+    return data ? new Film(data) : null;
+  }
+
   static async findSortiesDeLaSemaine(): Promise<Film[]> {
 
     const connection = await dbPool.getConnection();

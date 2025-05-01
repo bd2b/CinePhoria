@@ -312,6 +312,35 @@ export class ReservationController {
       }
     }
   }
+  static async getReservationForUtilisateurMobile(req: Request, res: Response): Promise<void> {
+    try {
+      // Récupération de l'ID utilisateur
+      const email = req.params.email?.trim();
+
+      if (!email) {
+        res.status(400).json({ message: `Le mail de l'utilisateur est requis.` });
+        return;
+      }
+
+      // Récupération des réservations
+      const reservations = await ReservationDAO.reserveForUtilisateurMobile(email);
+
+      if (!reservations || reservations.length === 0) {
+        res.status(404).json({ message: `Aucune réservation mobile trouvée pour ${email}` });
+        return;
+      }
+
+      res.status(200).json(reservations);
+
+
+    } catch (error: any) {
+      logger.error(`Erreur lors de la récupération des réservations mobile: ${error.message}`);
+
+      if (!res.headersSent) { // ✅ Vérifie si une réponse a déjà été envoyée
+        res.status(500).json({ error: "Erreur interne du serveur." });
+      }
+    }
+  }
 
   static async getReservationsByCinemas(req: Request, res: Response) {
     try {

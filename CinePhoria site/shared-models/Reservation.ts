@@ -54,10 +54,10 @@ export type TarifForSeats = Record<string, number>;
 export class ReservationForUtilisateur {
   utilisateurId!:string;
   reservationId!:string;
-  statereservation?:string;
-  timestampcreate?:Date;
+  stateReservation?:string;
+  timeStampCreate?:Date;
   seatsReserved?:string;
-  displayname?:string;
+  displayName?:string;
   dateJour?: string;
   titleFilm?:string;
   nameCinema?:string;
@@ -70,10 +70,56 @@ export class ReservationForUtilisateur {
   filmId?:string;
   seanceId?:string;
   email?:string;
+
   constructor(data: Partial<ReservationForUtilisateur>) {
     Object.assign(this, data);
   }
 };
+
+export class ReservationForUtilisateurMobile {
+  utilisateurId!:string;
+  reservationId!:string;
+  stateReservation?:string;
+  timeStampCreate?:Date;
+  seatsReserved?:string;
+  displayName?:string;  
+  dateJour?: string;
+  titleFilm?:string;
+  nameCinema?:string;
+  isEvaluationMustBeReview?:boolean;
+  note?:number;
+  evaluation?:string;
+  totalSeats?:number;
+  totalPrice?:number;
+  numberPMR?:number;
+  filmId?:string;
+  seanceId?:string;
+  email?:string;
+  isPromoFriandise?: boolean;
+  numberSeatsRestingBeforPromoFriandise?: number;
+  imageFilm1024?: string;
+  imageFilm128?: string;
+  hourBeginHHSMM?: string;
+  hourEndHHSMM?: string;
+  nameSalle?: string;
+  qualite?: string;
+  bo?: string;
+  genreArray?: string;
+  categorySeeing?: string;
+  isCoupDeCoeur?: boolean;
+  noteFilm?: number;
+  duration?: string;
+  filmAuthor?: string;
+  filmDescription?: string;
+  filmDistribution?: string;
+  filmPitch?: string
+  
+  constructor(data: Partial<ReservationForUtilisateurMobile>) {
+    Object.assign(this, data);
+  }
+};
+
+
 
 export class SeatsForReservation {
   

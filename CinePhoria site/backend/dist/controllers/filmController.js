@@ -30,6 +30,18 @@ class FilmController {
             res.status(500).json({ error: error.message });
         }
     }
+    static async getFilmByUtilisateurId(req, res) {
+        try {
+            const films = await FilmDAO_1.FilmDAO.findByUtilisateurId(req.params.utilisateurId);
+            //   if (!film) {
+            //     return res.status(404).json({ message: 'Film non trouvé' });
+            //   }
+            res.json(films);
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
     static async getSortiesDeLaSemaine(req, res) {
         try {
             const films = await FilmDAO_1.FilmDAO.findSortiesDeLaSemaine();

@@ -313,8 +313,8 @@ export class DataControllerIntranet {
             var _a, _b, _c, _d, _e, _f;
             const nomFilmA = ((_a = a.titleFilm) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || '';
             const nomFilmB = ((_b = b.titleFilm) === null || _b === void 0 ? void 0 : _b.toLowerCase()) || '';
-            const displaynameA = ((_c = a.displayname) === null || _c === void 0 ? void 0 : _c.toLowerCase()) || '';
-            const displaynameB = ((_d = b.displayname) === null || _d === void 0 ? void 0 : _d.toLowerCase()) || '';
+            const displaynameA = ((_c = a.displayName) === null || _c === void 0 ? void 0 : _c.toLowerCase()) || '';
+            const displaynameB = ((_d = b.displayName) === null || _d === void 0 ? void 0 : _d.toLowerCase()) || '';
             const dateSeanceA = ((_e = a.dateJour) === null || _e === void 0 ? void 0 : _e.toLowerCase()) || '';
             const dateSeanceB = ((_f = b.dateJour) === null || _f === void 0 ? void 0 : _f.toLowerCase()) || '';
             if (dateSeanceA < dateSeanceB)

@@ -100,17 +100,17 @@ struct EvaluationView: View {
 }
 
 
-#Preview {
-    @Previewable @State var dataController = DataController()
-    EvaluationView(dataController: dataController, currentPage: 0, isNewEvaluation: true)
-}
-
-#Preview {
-    @Previewable @State var dataController = DataController()
-    EvaluationView(dataController: dataController, currentPage: 1, isNewEvaluation: false)
-}
-#Preview {
-    @Previewable @State var dataController = DataController()
-    EvaluationView(dataController: dataController, currentPage: 2, isNewEvaluation: false)
-    
-}
+//#Preview {
+//    @Previewable @State var dataController = DataController()
+//    EvaluationView(dataController: dataController, currentPage: 0, isNewEvaluation: true)
+//}
+//
+//#Preview {
+//    @Previewable @State var dataController = DataController()
+//    EvaluationView(dataController: dataController, currentPage: 1, isNewEvaluation: false)
+//}
+//#Preview {
+//    @Previewable @State var dataController = DataController()
+//    EvaluationView(dataController: dataController, currentPage: 2, isNewEvaluation: false)
+//    
+// }

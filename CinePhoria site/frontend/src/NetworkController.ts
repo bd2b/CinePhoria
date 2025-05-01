@@ -255,25 +255,6 @@ export async function confirmUtilisateurApi(
 }
 
 
-export async function confirmUtilisateurApi2(id: string, password: string, displayName: string): Promise<{ statut: string }> {
-    const body = { id, password, displayName };
-    const response = await fetch(`${baseUrl}/api/utilisateur/confirmUtilisateur`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-    });
-    if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || 'Erreur inconnue');
-    }
-
-    // Examen de la reponse
-    const responseJSON = await response.json();
-    console.log("Message retour", responseJSON);
-    return responseJSON;
-
-}
-
 /**
  * Validation de l'email
  * @param email 
@@ -355,70 +336,6 @@ export async function setEvaluationReservationApi(
 }
 
 
-// TODO: mettre en place les deux jetons (nécessite SSL)
-export async function confirmReserveApi2(reservationId: string, utilisateurId: string, seanceId: string) {
-    const body = { reservationId, utilisateurId, seanceId };
-    let token = localStorage.getItem('jwtAccessToken');
-    if (!token) {
-        throw new Error('Vous devez être connecté');
-    }
-
-    // Tenter la requête
-    let response = await fetch(`${baseUrl}/api/reservation/confirm`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(body),
-        credentials: 'include' // inclure les cookies => envoie le refreshToken
-    });
-
-    if (response.ok) {
-        const data = await response.json();
-        return data; // OK direct
-    }
-
-    // Sinon, si 401 ou 403 => peut-être token expiré => tenter refresh
-    if (response.status === 401 || response.status === 403) {
-        try {
-            await refreshAccessToken();
-            // Récupérer le nouveau token
-            token = localStorage.getItem('jwtAccessToken');
-            if (!token) {
-                throw new Error('refreshAccessToken a échoué');
-            }
-
-            // Re-tenter la requête
-            response = await fetch(`${baseUrl}/api/reservation/confirm`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(body),
-                credentials: 'include'
-            });
-
-            if (!response.ok) {
-                const errData = await response.json();
-                throw new Error(errData.message || 'Erreur inconnue après refresh');
-            }
-
-            const data2 = await response.json();
-            return data2;
-
-        } catch (err) {
-            throw new Error(`Echec du refresh token : ${err}`);
-        }
-    } else {
-        // Autre erreur
-        const errData = await response.json();
-        throw new Error(errData.message || 'Erreur inconnue');
-    }
-}
-
-
 /**
  * Annulation de la reservation
  * @param reservationId 
@@ -439,26 +356,7 @@ export async function cancelReserveApi(reservationId: string): Promise<{ statut:
     return responseJSON;
 }
 
-export async function cancelReserveApi2(reservationId: string) {
-    const body = { reservationId };
 
-    const response = await fetch(`${baseUrl}/api/reservation/cancel`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(body)
-    });
-    if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || 'Erreur inconnue');
-    }
-
-    // Examen de la reponse
-    const responseJSON = await response.json();
-    console.log("Message retour", responseJSON);
-    return responseJSON;
-}
 /**
  * Récupération du profil de l'utilisateur
  * @param identUtilisateur 
@@ -478,26 +376,7 @@ export async function profilApi(identUtilisateur: string): Promise<ComptePersonn
     return rawData.map((d) => new ComptePersonne(d));
 }
 
-export async function profilApi2(identUtilisateur: string): Promise<ComptePersonne[]> {
-    const token = localStorage.getItem('jwtAccessToken');
-    const response = await fetch(`${baseUrl}/api/utilisateur/${identUtilisateur}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-    });
 
-    const rawData = await response.json();
-
-    if (!Array.isArray(rawData)) {
-        throw new Error('La réponse de l’API n’est pas un tableau.');
-    }
-    // Convertir les données brutes en instances de Compte Personne
-    const comptesUtilisateur = rawData.map((d: any) => new ComptePersonne(d));
-    console.log("compte = ", comptesUtilisateur)
-    return comptesUtilisateur;
-}
 
 
 /**
@@ -551,25 +430,7 @@ export async function getSeancesByIdApi(uuids: string[]): Promise<Seance[]> {
     return seances;
 }
 
-export async function getReservationApi2(reservationId: string): Promise<ReservationForUtilisateur[]> {
 
-    const response = await fetch(`${baseUrl}/api/reservation/id/${reservationId}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    });
-
-    const rawData = await response.json();
-
-    if (!Array.isArray(rawData)) {
-        throw new Error('La réponse de l’API n’est pas un tableau.');
-    }
-    // Convertir les données brutes en instances de Seance
-    const reservations = rawData.map((d: any) => new ReservationForUtilisateur(d));
-    console.log("reservations = ", reservations)
-    return reservations;
-}
 
 /**
  * Récupérer les places d'une reservation provisoire, api publique
@@ -592,25 +453,6 @@ export async function getPlacesReservationApi(reservationId: string): Promise<Se
     return places;
 }
 
-export async function getPlacesReservationApi2(reservationId: string): Promise<SeatsForReservation[]> {
-
-    const response = await fetch(`${baseUrl}/api/reservation/seats/id/${reservationId}`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    });
-
-    const rawData = await response.json();
-
-    if (!Array.isArray(rawData)) {
-        throw new Error('La réponse de l’API n’est pas un tableau.');
-    }
-    // Convertir les données brutes en instances de Seance
-    const places = rawData.map((d: any) => new SeatsForReservation(d));
-    console.log("places = ", places)
-    return places;
-}
 
 export async function isLogged(): Promise<string> {
     const endpoint = `${baseUrl}/api/login/isLogged`;
@@ -619,23 +461,7 @@ export async function isLogged(): Promise<string> {
     return await apiRequest<string>(endpoint, 'GET', undefined);
 }
 
-export async function isLogged2(): Promise<string> {
-    const token = localStorage.getItem('jwtToken');
-    const response = await fetch(`${baseUrl}/api/login/isLogged`, {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        }
-    });
 
-    if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.message || 'Erreur inconnue');
-    }
-    // La réponse est le compte
-    return (response as unknown) as string;
-}
 
 export async function getReservationForUtilisateur(utilisateurId: string): Promise<ReservationForUtilisateur[]> {
     const endpoint = `${baseUrl}/api/reservation/${utilisateurId}`;

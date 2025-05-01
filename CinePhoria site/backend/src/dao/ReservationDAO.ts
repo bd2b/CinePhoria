@@ -1,7 +1,8 @@
 
 import { dbConfig , dbPool } from '../config/config';
 import logger from '../config/configLog';
-import { ReservationForUtilisateur, SeatsForReservation, Reservation, ReservationAvis, ReservationStats } from "../shared-models/Reservation";
+import { ReservationForUtilisateur, SeatsForReservation, Reservation, ReservationAvis, ReservationStats, 
+          ReservationForUtilisateurMobile } from "../shared-models/Reservation";
 
 export class ReservationDAO {
   static async checkAvailabilityAndReserve(
@@ -166,6 +167,27 @@ export class ReservationDAO {
       return (rows as any[]).map((row) => new ReservationForUtilisateur(row));
     } catch (error) {
       logger.info("Erreur dans reserveForUtilisateur")
+      return []
+    }
+  }
+
+  static async reserveForUtilisateurMobile(p_email: string): Promise<ReservationForUtilisateurMobile[]> {
+    const connection = await dbPool.getConnection();
+    try {
+      // Étape 1 : Récupérer les informations des reservations dans la base pour l'utilisateur donné
+      const [rows] = await connection.execute(
+        `SELECT *
+     FROM ViewUtilisateurReservationMobile 
+     WHERE email = ?`,
+        [p_email]
+      );
+      logger.info(`SELECT * FROM ViewUtilisateurReservationMobile WHERE utilisateurId = ${p_email}`);
+      connection.release();
+
+      // Map des lignes pour les convertir en instances de Seance
+      return (rows as any[]).map((row) => new ReservationForUtilisateurMobile(row));
+    } catch (error) {
+      logger.info("Erreur dans reserveForUtilisateurMobile")
       return []
     }
   }

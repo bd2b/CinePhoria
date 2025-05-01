@@ -12,10 +12,10 @@ import SwiftUI
 struct SeatsView: View {
     var reservation: Reservation
     
-    var totalPrice: Double {
-        reservation.seats.reduce(0) { $0 + $1.price * Double($1.numberSeats) }
-    }
-    var totalSeats: Int { reservation.seats.reduce(0) { $0 + $1.numberSeats } }
+//    var totalPrice: Double {
+//        reservation.seats.reduce(0) { $0 + $1.price * Double($1.numberSeats) }
+//    }
+//    var totalSeats: Int { reservation.seats.reduce(0) { $0 + $1.numberSeats } }
     
     @Environment(\.dismiss) private var dismiss
     
@@ -31,7 +31,7 @@ struct SeatsView: View {
                 Text("^[\(reservation.numberPMR) places](inflect: true)")
                     .font(customFont(style: .body))
                 HStack (spacing:0) {
-                    Text("^[\(totalSeats) places](inflect: true)")
+                    Text("^[\(reservation.totalSeats) places](inflect: true)")
                         .font(customFont(style: .body))
                     Text(" dont ")
                         .font(customFont(style: .body))
@@ -42,18 +42,18 @@ struct SeatsView: View {
                 }
             } else if reservation.numberPMR == 1 {
                 HStack (spacing:0) {
-                    if totalSeats == 1 {
+                    if reservation.totalSeats == 1 {
                         Text("1 place Personne Mobilité Réduite")
                             .font(customFont(style: .body))
                     } else {
-                        Text("^[\(totalSeats) places](inflect: true)")
+                        Text("^[\(reservation.totalSeats) places](inflect: true)")
                             .font(customFont(style: .body))
                         Text(" dont 1 Personne Mobilité Réduite")
                             .font(customFont(style: .body))
                     }
                 }
             } else {
-                Text("^[\(totalSeats) places](inflect: true)")
+                Text("^[\(reservation.totalSeats) places](inflect: true)")
                     .font(customFont(style: .body))
             }
             Divider()
@@ -65,26 +65,26 @@ struct SeatsView: View {
             //                .padding(.bottom, 10)
             
             // Liste des tarifs
-            ForEach(reservation.seats, id: \.nameTarif) { seat in
-                HStack {
-                    Text(seat.nameTarif)
-                        .font(customFont(style: .headline))
-                    Spacer()
-                    Text("\(seat.numberSeats) x \(seat.price, specifier: "%.2f") €")
-                        .font(customFont(style: .subheadline))
-                }
-            }
+//            ForEach(reservation.seats, id: \.nameTarif) { seat in
+//                HStack {
+//                    Text(seat.nameTarif)
+//                        .font(customFont(style: .headline))
+//                    Spacer()
+//                    Text("\(seat.numberSeats) x \(seat.price, specifier: "%.2f") €")
+//                        .font(customFont(style: .subheadline))
+//                }
+//            }
             
             Divider()
             
             // Montant total
-            HStack {
-                Spacer()
-                Text("\(totalPrice, specifier: "%.2f") €")
-                    .font(customFont(style: .title2))
-                    .bold()
-                    .accessibilityIdentifier("TotalPrice")
-            }
+//            HStack {
+//                Spacer()
+//                Text("\(totalPrice, specifier: "%.2f") €")
+//                    .font(customFont(style: .title2))
+//                    .bold()
+//                    .accessibilityIdentifier("TotalPrice")
+//            }
         }
         .padding(EdgeInsets(top: 10, leading: 20, bottom: 0, trailing: 20))
         Spacer()
@@ -107,6 +107,6 @@ struct SeatsView: View {
     
 }
 
-#Preview {
-    SeatsView(reservation: Reservation.samplesReservation[3])
-}
+//#Preview {
+//    SeatsView(reservation: Reservation.samplesReservation[3])
+//}

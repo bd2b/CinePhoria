@@ -1,6 +1,6 @@
 //
-//	CardsReservationView.swift
-//	MonCinePhoria
+//    CardsReservationView.swift
+//    MonCinePhoria
 //
 //  Cree par Bruno DELEBARRE-DEBAY on 24/11/2024.
 //  bd2db
@@ -15,6 +15,12 @@ struct CardsReservationView: View {
     @State private var currentPage: Int = 0
     @State private var isShowingAlert: Bool = false
     @StateObject private var viewModel = CardsReservationViewModel()
+    // Cache des QR codes pour éviter de les charger plusieurs fois entre CardView et QRCodeView
+    @State private var qrCodeCache: [UUID: UIImage] = [:]
+    // Cache des images qui permet de ne pas charger plusieurs fois l'image entre CardView et ViewFilm
+    @State private var imageCache: [UUID: AnyView] = [:]
+    // Variable pour initialiser le cache des qrCode
+    @State private var didInitializeCache = false
     
     var body: some View {
         GeometryReader { geometry in
@@ -31,7 +37,7 @@ struct CardsReservationView: View {
                                 .font(customFont(style: .largeTitle))
                                 .multilineTextAlignment(.leading)
                             Spacer()
-                            Text(dataController.userName ?? "")
+                            Text(dataController.reservations[0].displayName)
                                 .font(customFont(style: .body))
                             Spacer()
                             Button(action: {
@@ -66,7 +72,7 @@ struct CardsReservationView: View {
                                 .font(customFont(style: .largeTitle))
                                 .multilineTextAlignment(.leading)
                             Spacer()
-                            Text(dataController.userName ?? "")
+                            Text(dataController.reservations[0].displayName)
                                 .font(customFont(style: .body))
                         }
                     }
@@ -78,11 +84,15 @@ struct CardsReservationView: View {
                 // Cartes avec TabView
                 TabView(selection: $currentPage) {
                     ForEach(0..<dataController.reservations.count, id: \.self) { index in
-                        CardReservationView(dataController: dataController,
-                                            reservationIndex: index,
-                                            geometry: geometry,
-                                            viewModel: viewModel)
-                        .tag(index) // Associe chaque vue à un index
+                        CardReservationView(
+                            dataController: dataController,
+                            reservationIndex: index,
+                            geometry: geometry,
+                            viewModel: viewModel,
+                            imageCache: $imageCache,
+                            qrCodeCache: $qrCodeCache
+                        )
+                        .tag(index)
                         .padding(10)
                     }
                 }
@@ -102,16 +112,21 @@ struct CardsReservationView: View {
                 viewModel.resetModals()
             }) {
                 if viewModel.isFilmViewShowing {
-                    FilmView(film: dataController.reservations[currentPage].film)
+                    FilmView(
+                        reservation: dataController.reservations[currentPage],
+                        imageFilmView: imageCache[dataController.reservations[currentPage].reservationId]
+                    )
                 } else {
                     if viewModel.isSeatsViewShowing {
                         SeatsView(reservation: dataController.reservations[currentPage])
                     } else {
                         if viewModel.isQRCodeViewShowing {
-                            QRCodeView(isPromoFriandise:
-                                 dataController.reservations[currentPage].isPromoFriandise,
+                            QRCodeView(
+                                qrCodeImage: qrCodeCache[dataController.reservations[currentPage].reservationId], reservation: dataController.reservations[currentPage],
+                                isPromoFriandise: dataController.reservations[currentPage].isPromoFriandise,
                                 numberSeatsRestingBeforPromoFriandise: dataController.reservations[currentPage].numberSeatsRestingBeforPromoFriandise,
-                                promoFriandiseDiscount: dataController.promoFriandiseDiscount)
+                                promoFriandiseDiscount: dataController.promoFriandiseDiscount
+                            )
                         } else {
                             if viewModel.isEvaluationViewShowing {
                                 EvaluationView(dataController: dataController, currentPage: currentPage, isNewEvaluation: true)
@@ -145,6 +160,21 @@ struct CardsReservationView: View {
                
             }
             .font(customFont(style: .body))
+        }
+        .onAppear {
+//            if !didInitializeCache {
+//                for reservation in dataController.reservations {
+//                    if qrCodeCache[reservation.reservationId] == nil,
+//                       let data = reservation.qrCodeData,
+//                       let image = UIImage(data: Data(data)) {
+//                        qrCodeCache[reservation.reservationId] = image
+//                    } else {
+//                        // On va chercher le qrCode
+//                        
+//                    }
+//                }
+//                didInitializeCache = true
+//            }
         }
     }
 }
@@ -210,15 +240,22 @@ struct CardReservationView: View {
     
     @ObservedObject var viewModel: CardsReservationViewModel // Partagé avec la vue parent
     
+    @Binding var imageCache: [UUID: AnyView]
+    @Binding var qrCodeCache: [UUID: UIImage]
+    @State private var imageView: AnyView? = nil
+    @State private var qrCodeImage: UIImage? = nil
+
     
     var body: some View {
-        if geometry.size.width > geometry.size.height {
-            
-            // Mode paysage : disposition horizontale
-            HStack (spacing: 30) {
-                if let imageFilm = reservation.film.imageFilm {
-                    imageFilm.image1024()
-                        .resizable()
+        // Declare imageView once at the start of body
+        
+        
+        Group {
+            if geometry.size.width > geometry.size.height {
+                
+                // Mode paysage : disposition horizontale
+                HStack (spacing: 30) {
+                    imageView
                         .scaledToFit()
                         .frame(width: geometry.size.width * 0.2, height: geometry.size.height * 0.6)
                         .cornerRadius(10)
@@ -229,69 +266,71 @@ struct CardReservationView: View {
                             }
                         }
                         .accessibilityIdentifier("ReservationImage")
-                }
-               // Spacer()
-                VStack(alignment: .leading, spacing: 10) {
-                    if colorScheme == .dark {
-                        Text(reservation.film.titleFilm)
-                            .font(customFont(style: .title))
-                            .bold()
-                            .foregroundColor(.white)
-                        .accessibilityIdentifier("ReservationTitle")
-                    } else {
-                        Text(reservation.film.titleFilm)
-                            .font(customFont(style: .title))
-                            .bold()
-                            .foregroundColor(.bleuNuitPrimaire)
-                        .accessibilityIdentifier("ReservationTitle")
-                    }
                     
-                    
-                    HStack (spacing: 40){
+                    // Spacer()
+                    VStack(alignment: .leading, spacing: 10) {
+                        if colorScheme == .dark {
+                            Text(reservation.titleFilm)
+                                .font(customFont(style: .title))
+                                .bold()
+                                .foregroundColor(.white)
+                                .accessibilityIdentifier("ReservationTitle")
+                        } else {
+                            Text(reservation.titleFilm)
+                                .font(customFont(style: .title))
+                                .bold()
+                                .foregroundColor(.bleuNuitPrimaire)
+                                .accessibilityIdentifier("ReservationTitle")
+                        }
                         
-                        SeanceView(seance: reservation.seance)
-                            .onTapGesture {
-                                DispatchQueue.main.async {
-                                    viewModel.isSeatsViewShowing = true
-                                }
-                            }
-                        .accessibilityIdentifier("SeanceView")
                         
-                        ActionsView(reservation: reservation)
-                            .onTapGesture {
-                                DispatchQueue.main.async {
-                                    switch reservation.stateReservation {
-                                    case .future:
-                                        viewModel.isQRCodeViewShowing = true
-                                    case .doneUnevaluated:
-                                        viewModel.isEvaluationViewShowing = true
-                                    case .doneEvaluated:
-                                        viewModel.isEvaluationChangeViewShowing = true
+                        HStack (spacing: 40){
+                            
+                            SeanceView(reservation: dataController.reservations[reservationIndex])
+                                .onTapGesture {
+                                    DispatchQueue.main.async {
+                                        viewModel.isSeatsViewShowing = true
                                     }
                                 }
-                            }
-                        .accessibilityIdentifier("ActionsView")
+                                .accessibilityIdentifier("SeanceView")
+                            
+                            ActionsView(reservation: reservation, qrCodeImage: $qrCodeImage)
+                                .onTapGesture {
+                                    DispatchQueue.main.async {
+                                        switch reservation.stateReservation {
+                                        case .ReserveConfirmed:
+                                            viewModel.isQRCodeViewShowing = true
+                                        case .DoneUnevaluated:
+                                            viewModel.isEvaluationViewShowing = true
+                                        case .DoneEvaluated:
+                                            viewModel.isEvaluationChangeViewShowing = true
+                                        default:
+                                            viewModel.isQRCodeViewShowing = true
+                                        }
+                                    }
+                                }
+                                .accessibilityIdentifier("ActionsView")
+                        }
                     }
+                    .padding(.horizontal, 20)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .padding(.horizontal, 20)
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.horizontal, 20)
-            .background(
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(.blancCasseSecondaire)
-                    .shadow(radius: 5)
-            )
-          //  .padding(.horizontal, 20)
-            .padding(.bottom, 20)
-            
-            
-        } else {
-            // Mode portrait : disposition verticale
-            VStack {
-                if let imageFilm = reservation.film.imageFilm {
-                    imageFilm.image1024()
-                        .resizable()
+                .background(
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(.blancCasseSecondaire)
+                        .shadow(radius: 5)
+                )
+                //  .padding(.horizontal, 20)
+                .padding(.bottom, 20)
+                
+                
+            } else {
+                // Mode portrait : disposition verticale
+                VStack {
+                    imageView
+                    
+                    //   .resizable()
                         .scaledToFit()
                         .frame(height: geometry.size.height * 0.37)
                         .cornerRadius(10)
@@ -300,70 +339,96 @@ struct CardReservationView: View {
                             DispatchQueue.main.async {
                                 viewModel.isFilmViewShowing = true
                             }
+                            
+                            
                         }
                         .accessibilityIdentifier("ReservationImage")
-                }
-                
-                if colorScheme == .dark {
-                    Text(reservation.film.titleFilm)
-                        .font(customFont(style: .title))
-                        .bold()
-                        .foregroundColor(.white)
-                        .accessibilityIdentifier("ReservationTitle")
-                } else {
-                    Text(reservation.film.titleFilm)
-                        .font(customFont(style: .title))
-                        .bold()
-                        .foregroundColor(.bleuNuitPrimaire)
-                        .accessibilityIdentifier("ReservationTitle")
-                }
-                
-                HStack {
-                    SeanceView(seance: reservation.seance)
-                        .onTapGesture {
-                            DispatchQueue.main.async {
-                                viewModel.isSeatsViewShowing = true
-                            }
-                        }
-                        .accessibilityIdentifier("SeanceView")
-
-                    ActionsView(reservation: reservation)
-                        .onTapGesture {
-                            DispatchQueue.main.async {
-                                
-                                switch reservation.stateReservation {
-                                case .future:
-                                    viewModel.isQRCodeViewShowing = true
-                                case .doneUnevaluated:
-                                    viewModel.isEvaluationViewShowing = true
-                                case .doneEvaluated:
-                                    viewModel.isEvaluationChangeViewShowing = true
+                    
+                    if colorScheme == .dark {
+                        Text(reservation.titleFilm)
+                            .font(customFont(style: .title))
+                            .bold()
+                            .foregroundColor(.white)
+                            .accessibilityIdentifier("ReservationTitle")
+                    } else {
+                        Text(reservation.titleFilm)
+                            .font(customFont(style: .title))
+                            .bold()
+                            .foregroundColor(.bleuNuitPrimaire)
+                            .accessibilityIdentifier("ReservationTitle")
+                    }
+                    
+                    HStack {
+                        SeanceView(reservation: dataController.reservations[reservationIndex])
+                            .onTapGesture {
+                                DispatchQueue.main.async {
+                                    viewModel.isSeatsViewShowing = true
                                 }
                             }
-                        }
-                        .accessibilityIdentifier("ActionsView")
+                            .accessibilityIdentifier("SeanceView")
+                        
+                        ActionsView(reservation: reservation, qrCodeImage: $qrCodeImage)
+                            .onTapGesture {
+                                DispatchQueue.main.async {
+                                    
+                                    switch reservation.stateReservation {
+                                    case .ReserveConfirmed:
+                                        viewModel.isQRCodeViewShowing = true
+                                    case .DoneUnevaluated:
+                                        viewModel.isEvaluationViewShowing = true
+                                    case .DoneEvaluated:
+                                        viewModel.isEvaluationChangeViewShowing = true
+                                    default:
+                                        viewModel.isQRCodeViewShowing = true
+                                    }
+                                }
+                            }
+                            .accessibilityIdentifier("ActionsView")
+                    }
+                    
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(
+                        RoundedRectangle(cornerRadius: 15)
+                            .fill(.blancCasseSecondaire)
+                            .shadow(radius: 5)
+                    )
+                    .padding(.bottom , 30)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(.blancCasseSecondaire)
-                    .shadow(radius: 5)
-            )
-            .padding(.bottom , 30)
         }
+        
+        .onAppear {
+            if imageCache[reservation.reservationId] == nil {
+                let view = AnyView(loadOrFetchImage(for: reservation, userEmail: dataController.userMail!))
+                imageCache[reservation.reservationId] = view
+            }
+            imageView = imageCache[reservation.reservationId]
+            Task {
+                if qrCodeCache[reservation.reservationId] == nil {
+                    if reservation.stateReservation == .ReserveConfirmed {
+                        // La reservation est dans le futur
+                        if let img = await dataController.loadOrFetchQRCode(for: reservationIndex) {
+                            qrCodeCache[reservation.reservationId] = img
+                            qrCodeImage = img
+                        }
+                    }
+                } else {
+                    qrCodeImage = qrCodeCache[reservation.reservationId]
+                }
+            }
+        }
+        
     }
 }
 
-
-#Preview {
-    let dataController = DataController()
-
-    // Initialisation des données
-    dataController.reservations = reservationsDatabase["admin"] ?? []
-    dataController.isLoggedIn = true
-    dataController.isLoadingReservations = false
-    dataController.userName = "admin"
-
-    return CardsReservationView(dataController: dataController)
-}
+//#Preview {
+//    let dataController = DataController()
+//
+//    // Initialisation des données
+//    dataController.reservations = reservationsDatabase["admin"] ?? []
+//    dataController.isLoggedIn = true
+//    dataController.isLoadingReservations = false
+//    dataController.userMail = "admin"
+//
+//    return CardsReservationView(dataController: dataController)
+//}

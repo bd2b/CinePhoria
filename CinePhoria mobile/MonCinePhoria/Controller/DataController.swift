@@ -84,7 +84,10 @@
 
 import Foundation
 
+
+
 @Observable class DataController: ObservableObject {
+    
     var reservations: [Reservation] = []
     
     var isLoggedIn: Bool = false // État de connexion
@@ -101,23 +104,9 @@ import Foundation
         }
     }
     var rememberMe: Bool = UserDefaults.standard.rememberMe
-    var userName: String?
-    {
-        didSet {
-            if let userName = userName {
-                loadReservations(for: userName)
-            }
-        }
-    }
+    var userMail: String?
     
     var promoFriandiseDiscount: Double = 5.0
-    
-    init() {
-        //       self.reservations = Reservation.samplesReservation
-        // generateJSON(from: Reservation.samplesReservation, to: "Reservations.json")
-        
-        
-    }
     
     /// Suppression des données
     func deleteData () {
@@ -126,11 +115,11 @@ import Foundation
         rememberMe = false
         UserDefaults.standard.rememberMe = false
         
-        if let userName = userName {
+        if let userMail = userMail {
             do {
-                try deleteValue(for: userName , and: "com.db2db.MonCinePhoria")
+                try deleteValue(for: userMail , and: "com.db2db.MonCinePhoria")
                 UserDefaults.standard.removeObject(forKey: UserDefaults.Keys.lastUserLogin)
-                self.userName = nil
+                self.userMail = nil
             } catch {
                 print(error.localizedDescription)
             }
@@ -159,7 +148,31 @@ import Foundation
         return nil
     }
     
-    func login(user: String, pwd: String, rememberMe: Bool) -> Bool {
+    func login(user: String, pwd: String, rememberMe: Bool) async throws -> Bool {
+        do {
+            try await loginApi(compte: user, password: pwd)
+            self.userMail = user
+            
+            await loadReservations(for: user)
+            UserDefaults.standard.rememberMe = rememberMe
+            if rememberMe {
+                do {
+                    print("SetValue: \(user), \(pwd)")
+                    try setValue(pwd, for: user, and: "com.db2db.MonCinePhoria")
+                    UserDefaults.standard.lastUserLogin = user
+                } catch {
+                    print("erreur sur setValue: \(error)")
+                }
+            }
+            return true
+        } catch {
+            print("Erreur de connexion 1: \(error)")
+            numberErrorLogin += 1
+            return false
+        }
+    }
+    
+    func login2(user: String, pwd: String, rememberMe: Bool) -> Bool {
         
         let userAuthorized = [ "admin", "user@example.com", "vide@example.com", "error@example.com", "inedit"]
         
@@ -168,7 +181,7 @@ import Foundation
         if !loginSuccess { numberErrorLogin += 1 }
         
         if loginSuccess {
-            self.userName = user
+            self.userMail = user
             UserDefaults.standard.rememberMe = rememberMe
         }
         
@@ -189,57 +202,61 @@ import Foundation
         print("Mode passe oublié pour \(mail)")
     }
     
-    func loadReservations(for userName: String) {
-        
-        fetchReservations(for: userName) { result in
-            switch result {
-            case .success(let reservations):
-                // Trier les réservations par date de séance (de la plus ancienne à la plus récente)
-                let sortedReservations = reservations.sorted { $0.seance.date > $1.seance.date }
-                var totalSeatsReserved = 0
+    func loadReservations(for userMail: String) async {
+   
+        do {
+            reservations = try await getReservationForUtilisateur(email: userMail + "-")
+            saveReservationsToLocal()
+            
+            isLoadingReservations = false;
+            
+            // Trier les réservations par date de séance (de la plus ancienne à la plus récente)
+            let sortedReservations = reservations.sorted { $0 > $1 }
+            var totalSeatsReserved = 0
 
-                // Parcourir les réservations récupérées
-                for reservation in sortedReservations {
-                    print(reservation.film.titleFilm)
-                    // Calculer le total de places pour cette réservation
-                    let seatsInReservation = reservation.seats.reduce(0) { $0 + $1.numberSeats }
+            // Parcourir les réservations récupérées pour calculer la promotion friandise
+            for reservation in sortedReservations {
+                print(reservation.titleFilm)
+                // Calculer le total de places pour cette réservation
+                let seatsInReservation = reservation.totalSeats
 
-                    // Initialiser le drapeau pour la promo
-                    var isPromo = false
+                // Initialiser le drapeau pour la promo
+                var isPromo = false
 
-                    // Vérifier pour chaque place dans la réservation si elle déclenche une promo
-                    for i in 1...seatsInReservation {
-                        let beforeCurrentSeat = totalSeatsReserved + i       // Places avant cette réservation
-                        let afterCurrentSeat = totalSeatsReserved + seatsInReservation - i + 1 // Places après cette réservation
+                // Vérifier pour chaque place dans la réservation si elle déclenche une promo
+                for i in 1...seatsInReservation {
+                    let beforeCurrentSeat = totalSeatsReserved + i       // Places avant cette réservation
+                    let afterCurrentSeat = totalSeatsReserved + seatsInReservation - i + 1 // Places après cette réservation
 
-                        if beforeCurrentSeat % 10 == 0 || afterCurrentSeat % 10 == 0 {
-                            isPromo = true
-                            break
-                        }
-                    }
-
-                    // Ajouter au total global
-                    totalSeatsReserved += seatsInReservation
-
-                    // Définir les valeurs de promo et places restantes
-                    if isPromo {
-                        reservation.isPromoFriandise = true
-                        reservation.numberSeatsRestingBeforPromoFriandise = nil
-                    } else {
-                        reservation.isPromoFriandise = false
-                        reservation.numberSeatsRestingBeforPromoFriandise = 10 - (totalSeatsReserved % 10)
+                    if beforeCurrentSeat % 10 == 0 || afterCurrentSeat % 10 == 0 {
+                        isPromo = true
+                        break
                     }
                 }
-            
-                // Mettre à jour les réservations
-                self.reservations = sortedReservations.reversed()
-            case .failure(let error):
-                print("Erreur réseau, utilisation des données locales : \(error)")
+
+                // Ajouter au total global
+                totalSeatsReserved += seatsInReservation
+
+                // Définir les valeurs de promo et places restantes
+                if isPromo {
+                    reservation.isPromoFriandise = true
+                    reservation.numberSeatsRestingBeforPromoFriandise = nil
+                } else {
+                    reservation.isPromoFriandise = false
+                    reservation.numberSeatsRestingBeforPromoFriandise = 10 - (totalSeatsReserved % 10)
+                }
             }
+        
+            // Mettre à jour les réservations
+            self.reservations = sortedReservations.reversed()
+        } catch {
+            // On va utiliser les données locales
+            print("Erreur de recupération des reservations : \(error)")
+            loadReservationsFromLocal()
+            isLoadingReservations = false;
         }
-        
-        
     }
+    
 }
     
 extension UserDefaults {

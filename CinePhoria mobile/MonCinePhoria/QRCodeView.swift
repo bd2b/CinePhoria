@@ -1,6 +1,6 @@
 //
-//	QRCodeView.swift
-//	MonCinePhoria
+//    QRCodeView.swift
+//    MonCinePhoria
 //
 //  Cree par Bruno DELEBARRE-DEBAY on 25/11/2024.
 //  bd2db
@@ -12,17 +12,30 @@ import UIKit
 
 struct QRCodeView: View {
     @State private var originalBrightness: CGFloat = UIScreen.main.brightness
+    var qrCodeImage: UIImage?
+    var reservation: Reservation
     var isPromoFriandise: Bool = true
     var numberSeatsRestingBeforPromoFriandise: Int?
     var promoFriandiseDiscount: Double
+    
+    var qrImage: Image? {
+        if let qrCodeImage {
+            return Image(uiImage: qrCodeImage)
+        }
+        return nil
+    }
     
     var body: some View {
         VStack {
             Text("Votre QR Code")
                 .font(customFont(style: .largeTitle))
-            Image(.qrCode)
-                .resizable()
-                .scaledToFit()
+            if let qrImage = qrImage {
+                qrImage
+                    .resizable()
+                    .scaledToFit()
+            } else {
+                ProgressView("Chargement du QR Code...")
+            }
             // Message d'incentive
             if isPromoFriandise {
                 // Si c'est une réservation promo
@@ -105,6 +118,6 @@ struct BouncingView: View {
     }
 }
 
-#Preview {
-    QRCodeView(promoFriandiseDiscount: 5.0)
-}
+//#Preview {
+//    QRCodeView(promoFriandiseDiscount: 5.0)
+//}

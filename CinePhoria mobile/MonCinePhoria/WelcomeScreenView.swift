@@ -97,7 +97,7 @@ struct WelcomeItemView: View {
     }
 }
 
-#Preview {
-    WelcomeScreenView(showWelcomeScreen: .constant(true))
-}
+//#Preview {
+//    WelcomeScreenView(showWelcomeScreen: .constant(true))
+//}
 
