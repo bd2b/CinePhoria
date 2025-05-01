@@ -22,11 +22,12 @@ function authenticateOrigin(req, res, next) {
     const isAllowedOrigin = origin && allowedOrigins.includes(origin);
     const isAllowedReferer = referer && allowedOrigins.some(allowed => referer.startsWith(allowed));
     const isMobileApp = userAgent.includes('Mobile') && (referer === undefined || referer === null);
-    if (isAllowedOrigin || isAllowedReferer || isMobileApp) {
-        next();
-    }
-    else {
-        configLog_1.default.warn(`Requête refusée : origine non autorisée. origin=${origin} referer=${referer}`);
-        res.status(403).json({ message: 'Accès interdit : origine non autorisée.' });
-    }
+    configLog_1.default.info(`AuthOrigin: origin=${isAllowedOrigin}, referer=${isAllowedReferer}, ua=${isMobileApp}`);
+    next();
+    // if (isAllowedOrigin || isAllowedReferer || isMobileApp) {
+    //     next();
+    // } else {
+    //     logger.warn(`Requête refusée : origine non autorisée. origin=${origin} referer=${referer}`);
+    //     res.status(403).json({ message: 'Accès interdit : origine non autorisée.' });
+    // }
 }
