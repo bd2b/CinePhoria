@@ -324,8 +324,8 @@ export class DataControllerIntranet {
         return s.sort((a, b) => {
             const nomFilmA = a.titleFilm?.toLowerCase() || '';
             const nomFilmB = b.titleFilm?.toLowerCase() || '';
-            const displaynameA = a.displayname?.toLowerCase() || '';
-            const displaynameB = b.displayname?.toLowerCase() || '';
+            const displaynameA = a.displayName?.toLowerCase() || '';
+            const displaynameB = b.displayName?.toLowerCase() || '';
             const dateSeanceA = a.dateJour?.toLowerCase() || '';
             const dateSeanceB = b.dateJour?.toLowerCase() || '';
 

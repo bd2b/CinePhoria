@@ -46,7 +46,7 @@ struct NoReservationView: View {
     }
 }
 
-#Preview {
-    @Previewable @State var dataController = DataController()
-    NoReservationView(dataController: dataController)
-}
+//#Preview {
+//    @Previewable @State var dataController = DataController()
+//    NoReservationView(dataController: dataController)
+//}

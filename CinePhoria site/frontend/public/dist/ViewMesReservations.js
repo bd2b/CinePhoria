@@ -41,7 +41,7 @@ export function onLoadMesReservations() {
                 // On charge les reservations de cet utilisateur
                 let reservations = yield getReservationForUtilisateur(utilisateurId);
                 // On filtre les reservations non annulées ou non effacées 
-                reservations = reservations.filter((r) => { return ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.statereservation); });
+                reservations = reservations.filter((r) => { return ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.stateReservation); });
                 console.log(reservations);
                 if (reservations.length === 0) {
                     const container = document.getElementById('mesreservations-table-container');
@@ -130,7 +130,7 @@ export function updateTableMesReservations(reservations) {
         tr.appendChild(tdComplexe);
         console.log("-------" + resa.dateJour + "-" + seance.hourBeginHHSMM);
         // Statut dynamique
-        let statutResa = resa.statereservation;
+        let statutResa = resa.stateReservation;
         if (statutResa === ReservationState.ReserveConfirmed) {
             // ACtualisation du statut de la réservation si l'heure de la reservation est dans le passé
             const dateVar = new Date(resa.dateJour);

@@ -132,6 +132,23 @@ class ReservationDAO {
             return [];
         }
     }
+    static async reserveForUtilisateurMobile(p_email) {
+        const connection = await config_1.dbPool.getConnection();
+        try {
+            // Étape 1 : Récupérer les informations des reservations dans la base pour l'utilisateur donné
+            const [rows] = await connection.execute(`SELECT *
+     FROM ViewUtilisateurReservationMobile 
+     WHERE email = ?`, [p_email]);
+            configLog_1.default.info(`SELECT * FROM ViewUtilisateurReservationMobile WHERE utilisateurId = ${p_email}`);
+            connection.release();
+            // Map des lignes pour les convertir en instances de Seance
+            return rows.map((row) => new Reservation_1.ReservationForUtilisateurMobile(row));
+        }
+        catch (error) {
+            configLog_1.default.info("Erreur dans reserveForUtilisateurMobile");
+            return [];
+        }
+    }
     static async getReservationById(p_reservationId) {
         const connection = await config_1.dbPool.getConnection();
         // Étape 1 : Récupérer les informations des reservations dans la base selon l'id de reservation

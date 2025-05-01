@@ -48,8 +48,8 @@ struct ContentView: View {
     }
 }
 
-#Preview {
-    @Previewable @State var dataController = DataController()
-    ContentView(dataController: dataController)
-        .environment(dataController)
-}
+//#Preview {
+//    @Previewable @State var dataController = DataController()
+//    ContentView(dataController: dataController)
+//        .environment(dataController)
+//}

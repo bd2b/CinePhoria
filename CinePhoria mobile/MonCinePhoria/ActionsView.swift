@@ -10,28 +10,60 @@
 import SwiftUI
 
 struct FutureView: View {
+    var qrCode: UIImage?
     var body: some View {
         VStack {
-            Text("QRCode à présenter à votre entrée")
-                .font(customFont(style: .title3))
-                .foregroundStyle(.bleuNuitPrimaire)
-                .multilineTextAlignment(.center)
-                .accessibilityIdentifier("QRCode")
+            
+            if let qrCode {
+                Image(uiImage: qrCode)
+                    .resizable()
+                    .scaledToFit()
+                 //   .frame(width: 100, height: 100)
+                    .accessibilityIdentifier("QRCode")
+            } else {
+                Text("QRCode non disponible")
+                    .font(customFont(style: .caption))
+                    .foregroundStyle(.gray)
+                    .accessibilityIdentifier("No QRCode")
+            }
         }
         .frame(width: 150, height: 150)
-        .padding(10)
-        .background(
-            LinearGradient(
-                gradient: Gradient(colors: [.white, .grisPerleFond]),
-                startPoint: .top,
-                endPoint: .bottom
+                .padding(10)
+                .background(
+                    LinearGradient(
+                        gradient: Gradient(colors: [.white, .grisPerleFond]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                        
+                        )
+                    
+                    .clipShape(.rect(cornerRadius: 12))
+                    .overlay(
+                        CustomCornerRadiusShape(radius: 12, corners: [.allCorners])
+                            .stroke(.grisPerleFond, lineWidth: 2)
+                        )
                     )
-        )
-        .clipShape(.rect(cornerRadius: 12)) // Coins arrondis
-        .overlay( // Ajoute une bordure visible avec coins arrondis
-            CustomCornerRadiusShape(radius: 12, corners: [ .allCorners])
-                .stroke(.grisPerleFond, lineWidth: 2)
-            )
+            
+//            Text("QRCode à présenter à votre entrée")
+//                .font(customFont(style: .title3))
+//                .foregroundStyle(.bleuNuitPrimaire)
+//                .multilineTextAlignment(.center)
+//                .accessibilityIdentifier("QRCode")
+//        }
+//        .frame(width: 150, height: 150)
+//        .padding(10)
+//        .background(
+//            LinearGradient(
+//                gradient: Gradient(colors: [.white, .grisPerleFond]),
+//                startPoint: .top,
+//                endPoint: .bottom
+//                    )
+//        )
+//        .clipShape(.rect(cornerRadius: 12)) // Coins arrondis
+//        .overlay( // Ajoute une bordure visible avec coins arrondis
+//            CustomCornerRadiusShape(radius: 12, corners: [ .allCorners])
+//                .stroke(.grisPerleFond, lineWidth: 2)
+//            )
     }
 }
 
@@ -120,32 +152,36 @@ struct EvaluatedView: View {
 struct ActionsView: View {
     
     @ObservedObject var reservation: Reservation
+    @Binding var qrCodeImage: UIImage?
+
 
     var body: some View {
         switch reservation.stateReservation {
-        case .future:
-            FutureView()
-        case .doneUnevaluated:
+        case .ReserveConfirmed:
+            FutureView(qrCode: qrCodeImage)
+        case .DoneUnevaluated:
             ToEvaluateView()
-        case .doneEvaluated:
+        case .DoneEvaluated:
             EvaluatedView(evaluation: reservation.evaluation, note: reservation.note)
+        default:
+            ToEvaluateView()
         }
     }
 }
     
 
-
-#Preview {
-    ActionsView(reservation: Reservation.samplesReservation[0])
-}
-
-#Preview {
-    ActionsView(reservation: Reservation.samplesReservation[1])
-}
-
-#Preview {
-    ActionsView(reservation: Reservation.samplesReservation[2])
-}
-#Preview {
-    ActionsView(reservation: Reservation.samplesReservation[3])
-}
+//
+//#Preview {
+//    ActionsView(reservation: Reservation.samplesReservation[0])
+//}
+//
+//#Preview {
+//    ActionsView(reservation: Reservation.samplesReservation[1])
+//}
+//
+//#Preview {
+//    ActionsView(reservation: Reservation.samplesReservation[2])
+//}
+//#Preview {
+//    ActionsView(reservation: Reservation.samplesReservation[3])
+//}

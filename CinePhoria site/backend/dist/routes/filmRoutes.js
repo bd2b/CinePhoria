@@ -27,6 +27,8 @@ configLog_1.default.info('Declaration route GET /api/films/');
 router.get('/', authMiddleware_1.authenticateJWT, filmController_1.FilmController.getAllFilms);
 configLog_1.default.info('Declaration route POST /api/films');
 router.post('/', authMiddleware_1.authenticateJWT, filmController_1.FilmController.createFilm);
+configLog_1.default.info('Declaration route /api/films/utilisateur/:utilisateurid');
+router.get('/:id', authMiddleware_1.authenticateJWT, filmController_1.FilmController.getFilmByUtilisateurId);
 configLog_1.default.info('Declaration route /api/films/:id');
 router.get('/:id', authMiddleware_1.authenticateJWT, filmController_1.FilmController.getFilmById);
 configLog_1.default.info('Declaration route PUT /api/films/:id');

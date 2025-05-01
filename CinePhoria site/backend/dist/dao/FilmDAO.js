@@ -25,6 +25,20 @@ class FilmDAO {
         const data = rows[0];
         return data ? new Film_1.Film(data) : null;
     }
+    static async findByUtilisateurId(utilisateurId) {
+        const connection = await config_1.dbPool.getConnection();
+        configLog_1.default.info('Connexion réussie à la base de données');
+        const [rows] = await connection.execute(`
+      SELECT DISTINCT f.*
+      FROM Reservation r
+      JOIN Seance s ON r.Seanceid = s.id
+      JOIN Film f ON s.Filmid = f.id
+      WHERE r.Utilisateurid = ? 
+      AND r.stateReservation in ( "ReserveConfirmed" , "DoneUnevaluated" , "DoneEvaluated")`, [utilisateurId]);
+        connection.release();
+        const data = rows[0];
+        return data ? new Film_1.Film(data) : null;
+    }
     static async findSortiesDeLaSemaine() {
         const connection = await config_1.dbPool.getConnection();
         configLog_1.default.info('Exécution de la requête : SELECT * FROM viewfilmssortiesdelasemaine');

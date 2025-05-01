@@ -43,7 +43,7 @@ async function rafraichirTableauAvis(): Promise<void> {
     // Charger les avis
     let avis = await DataControllerIntranet.getReservationForUtilisateurFilter();
 
-    avis = avis.filter((a) => (a.statereservation === ReservationState.DoneEvaluated && a.isEvaluationMustBeReview ));
+    avis = avis.filter((a) => (a.stateReservation === ReservationState.DoneEvaluated && a.isEvaluationMustBeReview ));
 
     if (filtreJour) {
         avis = avis.filter((s) =>
@@ -234,7 +234,7 @@ export async function updateTableAvis(reservationsForUtilisateur: ReservationFor
 
         // 3) Utilisateur
         const tdUtilisateur = document.createElement('td');
-        tdUtilisateur.textContent = reservationUtilisateur.displayname || '';
+        tdUtilisateur.textContent = reservationUtilisateur.displayName || '';
         tr.appendChild(tdUtilisateur);
 
         // 4) Note

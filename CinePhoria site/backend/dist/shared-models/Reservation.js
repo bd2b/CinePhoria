@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ReservationStats = exports.SeatsForReservation = exports.ReservationForUtilisateur = exports.SeatsForTarif = exports.ReservationState = exports.tabReservationState = exports.Reservation = void 0;
+exports.ReservationStats = exports.SeatsForReservation = exports.ReservationForUtilisateurMobile = exports.ReservationForUtilisateur = exports.SeatsForTarif = exports.ReservationState = exports.tabReservationState = exports.Reservation = void 0;
 class Reservation {
     constructor(data) {
         Object.assign(this, data);
@@ -38,6 +38,13 @@ class ReservationForUtilisateur {
     }
 }
 exports.ReservationForUtilisateur = ReservationForUtilisateur;
+;
+class ReservationForUtilisateurMobile {
+    constructor(data) {
+        Object.assign(this, data);
+    }
+}
+exports.ReservationForUtilisateurMobile = ReservationForUtilisateurMobile;
 ;
 class SeatsForReservation {
     constructor(data) {

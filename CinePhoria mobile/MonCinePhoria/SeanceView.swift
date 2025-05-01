@@ -12,28 +12,28 @@ import SwiftUI
 
 
 struct SeanceView: View {
-    var seance: Seance
+    var reservation: Reservation
     @Environment(\.colorScheme) var colorScheme
     var body: some View {
         
         VStack {
-            Text(seance.hourBeginHHSMM)
+            Text(reservation.hourBeginHHSMM)
                 .font(customFont(style: .title, fontName: "LCD14"))
                 .foregroundColor(.bleuNuitPrimaire)
-            Text("(fin: \(seance.hourEndHHSMM))")
+            Text("(fin: \(reservation.hourEndHHSMM))")
                 .font(customFont(style: .caption))
                 .foregroundColor(.bleuNuitPrimaire)
             
             HStack (spacing:15) {
                 VStack (spacing: 0){
-                    Text(helper.monthString(from: seance.date))
+                    Text(helper.monthString(from: reservation.dateJour))
                         .font(.caption)
                         .frame(width: 40, height: 15)
                         .foregroundStyle(.white)
                         .background(.doréAccentuation)
                         .clipShape(CustomCornerRadiusShape(radius: 10, corners: [.topLeft, .topRight]))
                     
-                    Text(helper.dayOfMonth(from: seance.date))
+                    Text(helper.dayOfMonth(from: reservation.dateJour))
                         .font(.title3).bold()
                         .foregroundColor(.bleuNuitPrimaire)
                         .frame(width: 40, height: 25)
@@ -48,7 +48,7 @@ struct SeanceView: View {
                 }
                 .frame(width: 40, height: 40)
                 
-                Text(seance.location)
+                Text(reservation.nameSalle)
                     .font(customFont(style: .title3))
                     .padding(.horizontal, 10)
                     .frame( height: 40)
@@ -60,16 +60,16 @@ struct SeanceView: View {
             
             HStack {
                 if colorScheme == .light {
-                    seance.qualite.image()
-                        .resizable()
-                        .frame(width: 40, height: 40)
+                    Text(reservation.qualite)
+//                        .resizable()
+                       // .frame(width: 40, height: 40)
                 } else {
-                    seance.qualite.image()
-                        .resizable()
-                        .frame(width: 40, height: 40)
-                        .colorInvert()
+                    Text(reservation.qualite)
+                        
+                      //  .frame(width: 40, height: 40)
+                       // .colorInvert()
                 }
-                Text(seance.bo.rawValue)
+                Text(reservation.bo)
                     .font(customFont(style: .title3))
                     .frame(width: 40, height: 32)
                     .background(
@@ -105,6 +105,6 @@ struct SeanceView: View {
     
 }
 
-#Preview {
-    SeanceView(seance: Seance.samples[0])
-}
+//#Preview {
+//    SeanceView(seance: Seance.samples[0])
+//}

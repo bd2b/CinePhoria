@@ -1,6 +1,6 @@
 //
-//	FilmView.swift
-//	MonCinePhoria
+//    FilmView.swift
+//    MonCinePhoria
 //
 //  Cree par Bruno DELEBARRE-DEBAY on 23/11/2024.
 //  bd2db
@@ -10,17 +10,19 @@
 import SwiftUI
 
 struct CaracteristiqueFilmView: View {
-    var film: Film
+
+    var reservation: Reservation
+    
     var body: some View {
         HStack  {
-            Text(film.genre ?? "Indeterminé")
+            Text(reservation.genreArray)
                 .font(customFont(style: .body))
                 .accessibilityIdentifier("genre")
                 
             Spacer()
             HStack {
                 Spacer()
-                Text(film.categorySeeing.rawValue)
+                Text(reservation.categorySeeing)
                     .font(customFont(style: .body))
                     .frame(minHeight: 30, maxHeight: 30)
                     .padding(.horizontal)
@@ -35,7 +37,7 @@ struct CaracteristiqueFilmView: View {
                     .accessibilityIdentifier("categorie")
                 
                 
-                Text(film.duration ?? "Non connu")
+                Text(String(reservation.duration))
                     .font(customFont(style: .body))
                     .accessibilityIdentifier("duration")
             }
@@ -46,40 +48,51 @@ struct CaracteristiqueFilmView: View {
 
 
 struct FilmView: View {
-    var film: Film
+    var reservation: Reservation
+    var imageFilmView: AnyView? = nil
     
     var body: some View {
         VStack (alignment: .leading) {
             ScrollView  {
                 HStack {
-                    if let imageFilm = film.imageFilm {
-                        imageFilm.image1024()
-                            .resizable()
+                    
+                    Group {
+                        if let image = imageFilmView {
+                            image
+                        } else {
+                            AnyView(getImageFilm(value: reservation.imageFilm1024))
+                        }
+                    }
+                        
+                        .scaledToFit()
+                        .accessibilityIdentifier("imageFilm")
+                            
+//                            .resizable()
                             .scaledToFit()
                             .accessibilityIdentifier("imageFilm")
-                    }
+                    
                 }
                 .frame(maxWidth: .infinity, maxHeight: 300)
                 .padding(.vertical)
                 
                 VStack  {
-                    Text(film.titleFilm)
+                    Text(reservation.titleFilm)
                         .font(customFont(style: .largeTitle))
                         .accessibilityIdentifier("titreFilm")
                     
-                    CaracteristiqueFilmView(film: film)
+                    CaracteristiqueFilmView(reservation: reservation)
                     
                     HStack {
                         
-                        Text("Note : " + String(film.note ?? 0))
+                        Text("Note : " + String(reservation.note ?? 0))
                             .font(customFont(style: .body))
                             .accessibilityIdentifier("note")
-                        if film.isCoupDeCoeur {
+                        if reservation.isCoupDeCoeur {
                             Spacer()
                             Text("Coup de coeur")
                                 .font(customFont(style: .body))
                                 .accessibilityIdentifier("coupDeCoeur")
-                            Image(systemName: film.isCoupDeCoeur ? "heart.fill" : "heart")
+                            Image(systemName: reservation.isCoupDeCoeur ? "heart.fill" : "heart")
                                 .foregroundColor(.rougeSombreErreur)
                         }
                         
@@ -87,7 +100,7 @@ struct FilmView: View {
                         
                     }
                     .padding()
-                    Text( film.filmDescription ?? "")
+                    Text( reservation.filmDescription )
                         .font(customFont(style: .body))
                         .padding()
                         .background(.blancCasseSecondaire)
@@ -97,11 +110,11 @@ struct FilmView: View {
                         .accessibilityIdentifier("description")
                         
                     Spacer()
-                    Text(film.filmAuthor ?? "")
+                    Text(reservation.filmAuthor )
                         .font(customFont(style: .body))
                         .padding()
                         .accessibilityIdentifier("author")
-                    Text(film.filmDistribution ?? "")
+                    Text(reservation.filmDistribution )
                         .font(customFont(style: .body))
                         .padding()
                         .accessibilityIdentifier("distribution")
@@ -125,12 +138,12 @@ struct FilmView: View {
             
             
         }
-        .navigationTitle(film.titleFilm)
+        .navigationTitle(reservation.titleFilm)
         
     }
        
 }
 
-#Preview {
-    FilmView(film: filmsData.first!)
-}
+//#Preview {
+//    FilmView(film: filmsData.first!)
+//}

@@ -82,7 +82,7 @@ async function createQRCode(reservationId) {
             throw new Error(`Aucune seance trouvée pour ${reservationId}`);
         }
         // Génération du text du QRCode
-        let textQRCode = reservations[0].displayname + ",";
+        let textQRCode = reservations[0].displayName + ",";
         textQRCode += seances[0].nameCinema + ",";
         textQRCode += seances[0].nameSalle + ",";
         textQRCode += reservations[0].titleFilm + ",";

@@ -1,6 +1,6 @@
 //
-//	LoginView.swift
-//	MonCinePhoria
+//    LoginView.swift
+//    MonCinePhoria
 //
 //  Cree par Bruno DELEBARRE-DEBAY on 26/11/2024.
 //  bd2db
@@ -14,12 +14,12 @@ struct LoginView: View {
  
     @Bindable var dataController: DataController
 
-    @State private var username: String = ""
+    @State private var userMail: String = ""
     @State private var password: String = ""
     
     @State private var loginError: String?
     @State private var isShowingAlert: Bool = false
-    
+    @State private var isLoading: Bool = false
     
 
     var body: some View {
@@ -48,10 +48,12 @@ struct LoginView: View {
                                 .font(customFont(style: .caption))
                                 .disabled(true)
                         }
-                        TextField("Votre email", text: $username)
+                        TextField("Votre email", text: $userMail)
                             .font(customFont(style: .body))
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .autocapitalization(.none)
+                            .disableAutocorrection(true)
+                            .keyboardType(.emailAddress)
                     }
                     // Champ sécurisé pour le mot de passe
                     SecureField("Mot de passe", text: $password)
@@ -91,10 +93,10 @@ struct LoginView: View {
                         }) {
                             Text("Mot de passe oublié ?")
                                 .font(customFont(style: .body))
-                                .foregroundColor( isValidEmail(username) ? .doréAccentuation : .gray)
+                                .foregroundColor( isValidEmail(userMail) ? .doréAccentuation : .gray)
                                 
                         }
-                        .disabled(!isValidEmail(username))
+                        .disabled(!isValidEmail(userMail))
                     }
                 }
                 .padding(EdgeInsets(top: 0, leading: 20, bottom: 20, trailing: 20))
@@ -108,7 +110,7 @@ struct LoginView: View {
                 .font(customFont(style: .body))
                 Button("OK") {
                     isShowingAlert = false
-                    dataController.forgottenPassword(mail: username)
+                    dataController.forgottenPassword(mail: userMail)
                 }
                
             }
@@ -116,9 +118,9 @@ struct LoginView: View {
         .onAppear()
         {
             if dataController.rememberMe,
-               let username = dataController.getLastUser(),
-               let password = dataController.getPassword(for: username) {
-                self.username = username
+               let userMail = dataController.getLastUser(),
+               let password = dataController.getPassword(for: userMail) {
+                self.userMail = userMail
                 self.password = password
                 
             }
@@ -126,26 +128,48 @@ struct LoginView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .ignoresSafeArea()
         .background(.blancCasseSecondaire)
+        .overlay(
+            Group {
+                if isLoading {
+                    ProgressView("Connexion en cours...")
+                        .progressViewStyle(CircularProgressViewStyle())
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.black.opacity(0.4))
+                }
+            }
+        )
+        .onChange(of: dataController.isLoggedIn) { isLogged in
+            if isLogged {
+                isLoading = false
+            }
+        }
         
     }
         
 
     private func login() {
-        // Exemple de validation de connexion (remplacez par votre logique réelle)
-        if dataController.login(user: username, pwd: password, rememberMe: dataController.rememberMe)  {
-            dataController.isLoggedIn = true // Met à jour l'état de connexion
-        } else {
-            if loginError == nil {
-                loginError = "Nom d'utilisateur ou mot de passe incorrect."
-            } 
+        Task {
+            isLoading = true
+            defer { isLoading = false }
+            do {
+                if try await dataController.login(user: userMail, pwd: password, rememberMe: dataController.rememberMe) {
+                    dataController.isLoggedIn = true
+                } else {
+                    if loginError == nil {
+                        loginError = "Nom d'utilisateur ou mot de passe incorrect."
+                    }
+                }
+            } catch {
+                loginError = "Erreur lors de la tentative de connexion : \(error.localizedDescription)"
+            }
         }
     }
 }
 
 
 
-#Preview {
-    @Previewable @State var dataController = DataController()
-    LoginView(dataController: dataController)
-        
-}
+//#Preview {
+//    @Previewable @State var dataController = DataController()
+//    LoginView(dataController: dataController)
+//        
+//}
