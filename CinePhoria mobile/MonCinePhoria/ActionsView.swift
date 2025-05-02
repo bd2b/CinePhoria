@@ -100,46 +100,48 @@ struct EvaluatedView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Text("Votre évaluation")
-                .font(customFont(style: .headline))
-                .frame(width: 150, height: 40)
-                .foregroundStyle(.doréAccentuation)
-                .accessibilityIdentifier("Evaluated")
-
-            VStack(spacing: 0) {
-                if let evaluation = evaluation {
-                    ScrollView {
-                        Text(evaluation)
-                            .multilineTextAlignment(.center)
-                            .font(customFont(style: .caption2))
+            Group {
+                Text("Votre évaluation")
+                    .font(customFont(style: .headline))
+                    .frame(width: 150, height: 40)
+                    .foregroundStyle(.doréAccentuation)
+                    .accessibilityIdentifier("Evaluated")
+                
+                VStack(spacing: 0) {
+                    if let evaluation = evaluation {
+                        ScrollView {
+                            Text(evaluation)
+                                .multilineTextAlignment(.center)
+                                .font(customFont(style: .caption2))
                             
-                            .bold()
-                            .padding(10)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .accessibilityIdentifier("EvaluationValue")
+                                .bold()
+                                .padding(10)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .accessibilityIdentifier("EvaluationValue")
+                        }
+                        .frame(width: 150, height: 100) // Limite la hauteur
                     }
-                    .frame(width: 150, height: 100) // Limite la hauteur
+                    if let note = note {
+                        Text("Note: \(String(note))")
+                            .font(customFont(style: .caption))
+                            .multilineTextAlignment(.leading)
+                            .frame(width: 150, height: 20)
+                            .foregroundStyle(.white)
+                            .background(.doréAccentuation)
+                            .accessibilityIdentifier("NoteValue")
+                    }
                 }
-                if let note = note {
-                    Text("Note: \(String(note))")
-                        .font(customFont(style: .caption))
-                        .multilineTextAlignment(.leading)
-                        .frame(width: 150, height: 20)
-                        .foregroundStyle(.white)
-                        .background(.doréAccentuation)
-                        .accessibilityIdentifier("NoteValue")
-                }
+                .clipShape(CustomCornerRadiusShape(radius: 10, corners: [.bottomLeft, .bottomRight])) // Coins arrondis
+                .overlay(
+                    CustomCornerRadiusShape(radius: 10, corners: [.bottomLeft, .bottomRight])
+                        .stroke(.grisPerleFond, lineWidth: 0.5)
+                )
+//                .background(
+//                    RoundedRectangle(cornerRadius: 10)
+//                        .fill(.argentéTertiaire.opacity(0.2))
+//                        .offset(y: 4)
+//                )
             }
-            .clipShape(CustomCornerRadiusShape(radius: 10, corners: [.bottomLeft, .bottomRight])) // Coins arrondis
-            .overlay(
-                CustomCornerRadiusShape(radius: 10, corners: [.bottomLeft, .bottomRight])
-                    .stroke(.grisPerleFond, lineWidth: 0.5)
-            )
-            .background(
-                RoundedRectangle(cornerRadius: 10)
-                    .fill(.argentéTertiaire.opacity(0.2))
-                    .offset(y: 4)
-            )
         }
         .frame(width: 150, height: 150)
     }

@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
 const configLog_1 = __importDefault(require("./config/configLog"));
 const sanitiseQueryMiddleware_1 = __importDefault(require("./middlewares/sanitiseQueryMiddleware"));
 const express_fileupload_1 = __importDefault(require("express-fileupload"));
@@ -21,29 +20,26 @@ console.log(`🛠️ Mode actuel : ${config_1.modeExec} avec version ${JSON.stri
 (0, config_1.connectDBMongo)();
 const app = (0, express_1.default)();
 // 🔵 CORS doit venir immédiatement après l'initialisation d'app
-app.use((0, cors_1.default)({
-    origin: (origin, callback) => {
-        if (!origin) {
-            // Les requêtes sans Origin sont acceptées
-            callback(null, true);
-        }
-        else if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
-            // Accepté pour développement
-            configLog_1.default.info("Origine 222= " + origin);
-            callback(null, true);
-        }
-        else if (origin.startsWith('https://cinephoria.bd2db.com')) {
-            callback(null, true);
-        }
-        else {
-            //  callback(null, true);
-            callback(new Error('Not allowed by CORS'));
-        }
-    },
-    credentials: true,
-    methods: "GET,POST,PUT,DELETE,OPTIONS",
-    allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-}));
+// app.use(cors({
+//   origin: (origin, callback) => {
+//     if (!origin) {
+//       // Les requêtes sans Origin sont acceptées
+//       callback(null, true);
+//     } else if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+//       // Accepté pour développement
+//       logger.info("Origine 222= " + origin)
+//       callback(null, true);
+//     } else if (origin.startsWith('https://cinephoria.bd2db.com')) {
+//       callback(null, true);
+//     } else {
+//       //  callback(null, true);
+//       // ----- callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true,
+//   methods: "GET,POST,PUT,DELETE,OPTIONS",
+//   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+// }));
 // Middleware de protection contre les injections
 app.use(sanitiseQueryMiddleware_1.default); // Appliquer à toutes les routes
 // ✅ Configuration CORS pour accepter localhost:3000

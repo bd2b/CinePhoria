@@ -27,27 +27,27 @@ connectDBMongo()
 const app = express();
 
 // 🔵 CORS doit venir immédiatement après l'initialisation d'app
-app.use(cors({
-  origin: (origin, callback) => {
+// app.use(cors({
+//   origin: (origin, callback) => {
 
-    if (!origin) {
-      // Les requêtes sans Origin sont acceptées
-      callback(null, true);
-    } else if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
-      // Accepté pour développement
-      logger.info("Origine 222= " + origin)
-      callback(null, true);
-    } else if (origin.startsWith('https://cinephoria.bd2db.com')) {
-      callback(null, true);
-    } else {
-      //  callback(null, true);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: "GET,POST,PUT,DELETE,OPTIONS",
-  allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-}));
+//     if (!origin) {
+//       // Les requêtes sans Origin sont acceptées
+//       callback(null, true);
+//     } else if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
+//       // Accepté pour développement
+//       logger.info("Origine 222= " + origin)
+//       callback(null, true);
+//     } else if (origin.startsWith('https://cinephoria.bd2db.com')) {
+//       callback(null, true);
+//     } else {
+//       //  callback(null, true);
+//       // ----- callback(new Error('Not allowed by CORS'));
+//     }
+//   },
+//   credentials: true,
+//   methods: "GET,POST,PUT,DELETE,OPTIONS",
+//   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+// }));
 
 // Middleware de protection contre les injections
 app.use(sanitizeQueryMiddleware); // Appliquer à toutes les routes

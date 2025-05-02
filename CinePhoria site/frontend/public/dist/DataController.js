@@ -247,6 +247,9 @@ export class DataController {
     chargerDepuisAPI() {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("DataC: ChargerDepuisAPI");
+            const loader = document.getElementById('progressIndicator');
+            if (loader)
+                loader.style.display = 'block';
             try {
                 // 1) Chargement de toutes les séances
                 const response = yield fetch(`${baseUrl}/api/seances/filter?cinemasList="all"`);
@@ -281,6 +284,10 @@ export class DataController {
             catch (error) {
                 console.error('Erreur lors du chargement des données de séances : ', error);
             }
+            finally {
+                if (loader)
+                    loader.style.display = 'none';
+            }
         });
     }
     /**
@@ -311,8 +318,8 @@ export class DataController {
                     dateSortieCinePhoria: seance.dateSortieCinePhoria,
                     categorySeeing: seance.categorySeeing,
                     note: seance.note ? parseFloat(seance.note) : undefined, // Convertir en number si présent
-                    isCoupDeCoeur: seance.isCoupDeCoeur === '1', // Convertir en boolean
-                    isActiveForNewSeances: seance.isActiveForNewSeances === '1',
+                    isCoupDeCoeur: seance.isCoupDeCoeur, // Convertir en boolean
+                    isActiveForNewSeances: seance.isActiveForNewSeances,
                     filmDescription: seance.filmDescription,
                     filmAuthor: seance.filmAuthor,
                     filmDistribution: seance.filmDistribution,

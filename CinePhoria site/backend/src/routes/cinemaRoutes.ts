@@ -7,6 +7,6 @@ const router = Router();
 
 // /api/films
 logger.info('Declaration route /api/cinemas/');
- router.get('/', authenticateOrigin, CinemaController.getAllCinemas);
+router.get('/', CinemaController.getAllCinemas);
 
 export default router;

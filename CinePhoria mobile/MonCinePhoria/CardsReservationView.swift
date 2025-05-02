@@ -338,8 +338,6 @@ struct CardReservationView: View {
                 // Mode portrait : disposition verticale
                 VStack {
                     imageView
-                    
-                    //   .resizable()
                         .scaledToFit()
                         .frame(height: geometry.size.height * 0.37)
                         .cornerRadius(10)
@@ -395,14 +393,21 @@ struct CardReservationView: View {
                             .accessibilityIdentifier("ActionsView")
                     }
                     
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(
-                        RoundedRectangle(cornerRadius: 15)
-                            .fill(.blancCasseSecondaire)
-                            .shadow(radius: 5)
-                    )
-                    .padding(.bottom , 30)
+//                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+//                    .background(
+//                        RoundedRectangle(cornerRadius: 15)
+//                            .fill(.blancCasseSecondaire)
+//                            .shadow(radius: 5)
+//                    )
+//                    .padding(.bottom , 30)
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(.blancCasseSecondaire)
+                        .shadow(radius: 5)
+                )
+                .padding(10)
             }
         }
         

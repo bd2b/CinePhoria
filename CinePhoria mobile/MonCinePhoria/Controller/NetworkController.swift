@@ -25,6 +25,9 @@ struct AnyEncodable: Encodable {
 let domainUrl = "https://cinephoria.bd2db.com"
 let urlCinephoria = URL(string:"https://cinephoria.bd2db.com")
 
+//let domainUrl = "http://127.0.0.1:3500"
+//let urlCinephoria = URL(string:"http://127.0.0.1:3500")
+
 func getVersion() {
     let urlVersion = URL(string: domainUrl + "/api/login/version")
     let task = URLSession .shared.dataTask(with: urlVersion!) { (data, response, error) in
@@ -322,6 +325,13 @@ func setStateReservation(
     }
 }
 
+struct EvaluationBody: Encodable {
+    let reservationId: String
+    let note: Double
+    let evaluation: String
+    let isEvaluationMustBeReview: String
+}
+
 
 func setEvaluationReservation(
     reservationId: String,
@@ -332,18 +342,21 @@ func setEvaluationReservation(
         let isEvaluationMustBeReviewStr = isEvaluationMustBeReview ? "true" : "false"
         let noteRounded = Double(String(format: "%.1f", note)) ?? note
         let endpoint = "\(domainUrl)/api/reservation/setevaluation"
-        let json: [String: String ] = try await apiRequest(
-            endpoint: endpoint,
-            method: "POST",
-            body: [
-                    "reservationId": AnyEncodable(reservationId),
-                    "note": AnyEncodable(noteRounded),
-                    "evaluation": AnyEncodable(evaluation),
-                    "isEvaluationMustBeReview": AnyEncodable(isEvaluationMustBeReviewStr)
-            ],
-            requiresAuth: true,
-            debugTrace: true
-            )
+        let body = EvaluationBody(
+            reservationId: reservationId,
+            note: noteRounded,
+            evaluation: evaluation,
+            isEvaluationMustBeReview: isEvaluationMustBeReviewStr
+        )
+
+    let json: [String: String] = try await apiRequest(
+        endpoint: endpoint,
+        method: "POST",
+        body: body,
+        requiresAuth: true,
+        debugTrace: true
+    )
+    
     if let message = json["message"], !message.starts(with: "Erreur") {
         return true
     } else {

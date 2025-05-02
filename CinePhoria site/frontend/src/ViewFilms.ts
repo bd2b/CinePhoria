@@ -1,6 +1,6 @@
 // ViewFilm.ts
 import { dataController } from './DataController.js';
-import { formatDateLocalYYYYMMDD, setCookie , imageFilm } from './Helpers.js';
+import { formatDateLocalYYYYMMDD, setCookie, imageFilm } from './Helpers.js';
 import { Film } from './shared-models/Film.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { Seance } from './shared-models/Seance.js';
@@ -323,6 +323,23 @@ async function afficherDetailFilm(film: Film): Promise<void> {
         imgAffiche.alt = film.titleFilm ?? 'Affiche';
     }
 
+    // const noteP = containerDetail.querySelector('.evaluation__note-p') as HTMLParagraphElement | null;
+    // if (noteP) {
+    //     noteP.textContent = `Avis : ${film.note} / 5`;
+    // }
+
+    // const coupdecoeurD = containerDetail.querySelector('.evaluation__coupdecoeur') as HTMLDivElement | null;
+    // if (coupdecoeurD) {
+    //     if (film.isCoupDeCoeur) {
+    //         coupdecoeurD.style.visibility = 'visible'; // affiche
+    //     } else {
+    //         coupdecoeurD.style.visibility = 'hidden'; // masque
+    //     }
+
+    // }
+
+
+
     // Titre
     const titleP = containerDetail.querySelector('.right__title-p') as HTMLParagraphElement | null;
     if (titleP) titleP.textContent = film.titleFilm ?? '';
@@ -376,11 +393,10 @@ async function afficherDetailFilm(film: Film): Promise<void> {
                 alert('Veuillez sélectionner une séance dans la liste.');
             } else {
                 if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
-                    "ReserveToConfirm"].includes(dataController.reservationState) && 
-                    isUUID(dataController.selectedReservationUUID || '') && 
-                    isUUID(dataController.selectedSeanceUUID  || '') )
-                          { // Autre reservation en cours
-                            alert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle")
+                    "ReserveToConfirm"].includes(dataController.reservationState) &&
+                    isUUID(dataController.selectedReservationUUID || '') &&
+                    isUUID(dataController.selectedSeanceUUID || '')) { // Autre reservation en cours
+                    alert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle")
                 } else {
                     // Afficher un message
                     const { Jour, Cinema, Horaire, Qualite, Tarifs, SeanceId } = lastSelectedSeanceData;

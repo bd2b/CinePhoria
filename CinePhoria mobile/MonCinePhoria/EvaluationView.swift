@@ -161,11 +161,11 @@ struct EvaluationView: View {
         
         Task {
             do {
-                setReservation = try await setStateReservation(
+                setState = try await setStateReservation(
                     reservationId: dataController.reservations[currentPage].reservationId.uuidString,
                     stateReservation: dataController.reservations[currentPage].stateReservation
                 )
-                setState = try await setEvaluationReservation(
+                setReservation = try await setEvaluationReservation(
                     reservationId: dataController.reservations[currentPage].reservationId.uuidString,
                     note: dataController.reservations[currentPage].note ?? 2.5,
                     evaluation: dataController.reservations[currentPage].evaluation ?? " ",
