@@ -19,8 +19,8 @@ export class Seance {
   filmDistribution?: string;
   dateSortieCinePhoria?: string;
   note?: string; 
-  isCoupDeCoeur?: string;
-  isActiveForNewSeances?: string;
+  isCoupDeCoeur?: boolean;
+  isActiveForNewSeances?: boolean;
   categorySeeing?: string;    
   linkBO?: string; 
   imageFilm128?: string;

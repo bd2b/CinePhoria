@@ -309,6 +309,18 @@ function afficherDetailFilm(film) {
             imgAffiche.src = `${imageFilm((_a = film.imageFilm1024) !== null && _a !== void 0 ? _a : '')}`;
             imgAffiche.alt = (_b = film.titleFilm) !== null && _b !== void 0 ? _b : 'Affiche';
         }
+        // const noteP = containerDetail.querySelector('.evaluation__note-p') as HTMLParagraphElement | null;
+        // if (noteP) {
+        //     noteP.textContent = `Avis : ${film.note} / 5`;
+        // }
+        // const coupdecoeurD = containerDetail.querySelector('.evaluation__coupdecoeur') as HTMLDivElement | null;
+        // if (coupdecoeurD) {
+        //     if (film.isCoupDeCoeur) {
+        //         coupdecoeurD.style.visibility = 'visible'; // affiche
+        //     } else {
+        //         coupdecoeurD.style.visibility = 'hidden'; // masque
+        //     }
+        // }
         // Titre
         const titleP = containerDetail.querySelector('.right__title-p');
         if (titleP)

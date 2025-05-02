@@ -294,7 +294,10 @@ export class DataController {
     // On charge l'ensemble des données de toutes les séances, on filtrera en local
     public async chargerDepuisAPI(): Promise<void> {
         console.log("DataC: ChargerDepuisAPI")
+        const loader = document.getElementById('progressIndicator');
+            if (loader) loader.style.display = 'block';
         try {
+            
             // 1) Chargement de toutes les séances
             const response = await fetch(`${baseUrl}/api/seances/filter?cinemasList="all"`);
             const rawData = await response.json();
@@ -336,7 +339,9 @@ export class DataController {
 
         } catch (error) {
             console.error('Erreur lors du chargement des données de séances : ', error);
-        }
+        } finally {
+            if (loader) loader.style.display = 'none';
+          }
     }
     /**
      * Extraction des films du tableau seance (filtré sur filterNameCinema) ayant une séance entre deux dates,
@@ -366,8 +371,8 @@ export class DataController {
                     dateSortieCinePhoria: seance.dateSortieCinePhoria,
                     categorySeeing: seance.categorySeeing,
                     note: seance.note ? parseFloat(seance.note) : undefined, // Convertir en number si présent
-                    isCoupDeCoeur: seance.isCoupDeCoeur === '1', // Convertir en boolean
-                    isActiveForNewSeances: seance.isActiveForNewSeances === '1',
+                    isCoupDeCoeur: seance.isCoupDeCoeur, // Convertir en boolean
+                    isActiveForNewSeances: seance.isActiveForNewSeances,
                     filmDescription: seance.filmDescription,
                     filmAuthor: seance.filmAuthor,
                     filmDistribution: seance.filmDistribution,

@@ -23,30 +23,37 @@ extension DataController {
         encoder.outputFormatting = .prettyPrinted
         do {
             let jsonData = try encoder.encode(self.reservations)
-            if let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                let fileURL = documentDirectory.appendingPathComponent(nameFileReservations)
+            
+            if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                let userDir = dir.appendingPathComponent(userMail!)
+                
+                // Creer le repertoire si il n'existe pas
+                try? FileManager.default.createDirectory(at: userDir, withIntermediateDirectories: true)
+                
+                let fileReservationsPath = userDir.appendingPathComponent(nameFileReservations)
                 
                 // Supprimer le fichier existant si nécessaire
-                if FileManager.default.fileExists(atPath: fileURL.path) {
-                    try FileManager.default.removeItem(at: fileURL)
+                if FileManager.default.fileExists(atPath: fileReservationsPath.path()) {
+                    try FileManager.default.removeItem(at: fileReservationsPath)
                 }
-                
-                // Écrire les nouvelles données
-                try jsonData.write(to: fileURL)
-                print("Réservations sauvegardées localement : \(fileURL)")
+                try jsonData.write(to: fileReservationsPath)
+                print("Réservations sauvegardées localement : \(fileReservationsPath)")
+            
             }
         } catch {
             print("Erreur lors de la sauvegarde des réservations : \(error)")
         }
     }
     
+
     
     /// Charge les réservations depuis le fichier local JSON
     func loadReservationsFromLocal() {
-        if let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = documentDirectory.appendingPathComponent(nameFileReservations)
+        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let userDir = dir.appendingPathComponent(userMail!)
+            let fileReservationsPath = dir.appendingPathComponent(nameFileReservations)
             do {
-                let jsonData = try Data(contentsOf: fileURL)
+                let jsonData = try Data(contentsOf: fileReservationsPath)
                 let decoder = JSONDecoder()
                 reservations = try decoder.decode([Reservation].self, from: jsonData)
                 print("Réservations chargées depuis le fichier local.")
@@ -58,13 +65,14 @@ extension DataController {
     
     /// Supprime la copie locale
     func deleteReservationsToLocal() {
-        if let documentDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-            let fileURL = documentDirectory.appendingPathComponent(nameFileReservations)
+        if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let userDir = dir.appendingPathComponent(userMail!)
+        //    let fileURL = documentDirectory.appendingPathComponent(nameFileReservations)
             
-            // Supprimer le fichier existant si nécessaire
-            if FileManager.default.fileExists(atPath: fileURL.path) {
+            // Supprimer le repertoire existant si nécessaire
+            if FileManager.default.fileExists(atPath: userDir.path) {
                 do {
-                    try FileManager.default.removeItem(at: fileURL)
+                    try FileManager.default.removeItem(at: userDir)
                 } catch {
                     print("Erreur lors de la suppression du fichier local : \(error)")
                 }

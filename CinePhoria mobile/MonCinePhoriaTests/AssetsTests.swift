@@ -69,7 +69,7 @@ struct AssetsTests {
     func LoadReservationTests(login: String) async throws {
         
         
-        #expect((dataConcroller.login(user: login, pwd: "password", rememberMe: false) == true), "Login")
+        await #expect((dataConcroller.login(user: login, pwd: "password", rememberMe: false) == true), "Login")
         
         #expect((dataConcroller.reservations.count >= 0), "Chargement Reservations réussi")
         

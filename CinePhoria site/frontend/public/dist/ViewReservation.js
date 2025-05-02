@@ -315,7 +315,16 @@ export function afficherDetailsFilm() {
       <div class="twocolumns__left">
         <img src="${imageFilm((_a = film.imageFilm1024) !== null && _a !== void 0 ? _a : '')}" alt="Affiche" class="twocolumns__left-img">
         <button class="twocolumns__left-button-bo" id="openModal">Bande Annonce</button>
+        <div class="evaluation__note">
+            <p class="evaluation__note-p">Avis : ${film.note} / 5</p>
+        </div>
+        <div class="evaluation__coupdecoeur"  style="visibility: ${film.isCoupDeCoeur ? 'visible' : 'hidden'}">
+            <p class="evaluation__coupdecoeur-p">Coup de coeur</p>
+            <img src="assets/heart.svg" alt="Coeur" class="evaluation__coupdecoeur-img">
+        </div>
+                
       </div>
+      
       <div class="twocolumns__right">
         <p class="right__title-p">${film.titleFilm}</p>
         <div class="right__caractFilm">

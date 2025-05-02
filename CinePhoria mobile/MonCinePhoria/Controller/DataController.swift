@@ -117,6 +117,7 @@ import Foundation
         
         if let userMail = userMail {
             do {
+                deleteReservationsToLocal()
                 try deleteValue(for: userMail , and: "com.db2db.MonCinePhoria")
                 UserDefaults.standard.removeObject(forKey: UserDefaults.Keys.lastUserLogin)
                 self.userMail = nil
@@ -124,7 +125,7 @@ import Foundation
                 print(error.localizedDescription)
             }
         }
-        deleteReservationsToLocal()
+        
     }
     
     /// Réinitialisation complete = suppression des données + présentation de l'écran d'accueil

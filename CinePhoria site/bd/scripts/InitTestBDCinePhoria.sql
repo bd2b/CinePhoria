@@ -31,6 +31,7 @@ DECLARE UUIDFilm12 VARCHAR(100) DEFAULT UUID();
 DECLARE UUIDFilm13 VARCHAR(100) DEFAULT UUID();
 DECLARE UUIDFilm14 VARCHAR(100) DEFAULT UUID();
 DECLARE UUIDFilm15 VARCHAR(100) DEFAULT UUID();
+DECLARE UUIDFilm16 VARCHAR(100) DEFAULT UUID();
 DECLARE UUIDReservation1 VARCHAR(100) DEFAULT UUID();
 DECLARE UUIDReservation2 VARCHAR(100) DEFAULT UUID();
 DECLARE UUIDReservation3 VARCHAR(100) DEFAULT UUID();
@@ -231,7 +232,7 @@ INSERT INTO Film
 VALUES
   (UUIDFilm1,
   "Mourir peut attendre",
-  "Un super film",
+  "Daniel Bond ou James Craig ..",
   "2h43",
   "Action, Espionnage, Thriller",
   "Bond a quitté les services secrets et coule des jours heureux en Jamaïque. Mais sa tranquillité est de courte durée car son vieil ami Felix Leiter de la CIA débarque pour solliciter son aide : il s'agit de sauver un scientifique qui vient d'être kidnappé. Mais la mission se révèle bien plus dangereuse que prévu et Bond se retrouve aux trousses d'un mystérieux ennemi détenant de redoutables armes technologiques…",
@@ -248,7 +249,7 @@ VALUES
   ), 
   (UUIDFilm2, 
   "Joker", 
-  "Ne pas manquer",
+  "Avec lady Gaga ah !",
   "2h19" , 
   "Action, Drame, Romance", 
   "A quelques jours de son procès pour les crimes commis sous les traits du Joker, Arthur Fleck rencontre le grand amour et se trouve entraîné dans une folie à deux.", 
@@ -265,7 +266,7 @@ VALUES
   ),
   (UUIDFilm3,
   "Matrix",
-  "La référence !",
+  "La référence",
 "2h15",
 "Action, Science Fiction",
 "Programmeur anonyme dans un service administratif le jour, Thomas Anderson devient Neo la nuit venue. Sous ce pseudonyme, il est l'un des pirates les plus recherchés du cyber-espace. A cheval entre deux mondes, Neo est assailli par d'étranges songes et des messages cryptés provenant d'un certain Morpheus. Celui-ci l'exhorte à aller au-delà des apparences et à trouver la réponse à la question qui hante constamment ses pensées : qu'est-ce que la Matrice ? Nul ne le sait, et aucun homme n'est encore parvenu à en percer les defenses. Mais Morpheus est persuadé que Neo est l'Elu, le libérateur mythique de l'humanité annoncé selon la prophétie. Ensemble, ils se lancent dans une lutte sans retour contre la Matrice et ses terribles agents...",
@@ -297,7 +298,7 @@ VALUES
   "4-1024.jpg"),
   (UUIDFilm5,
   "Pulp Fiction",
-  "Culte",
+  "Cultissime",
 "2h29",
 "Policier, Drame",
 "L'odyssée sanglante et burlesque de petits malfrats dans la jungle de Hollywood à travers trois histoires qui s'entremêlent.",
@@ -329,7 +330,7 @@ VALUES
   "6-1024.jpg"),
   (UUIDFilm7,
   "Battleship",
-  "De l'action, que d'action ...",
+  "Trop d'action tue l'action ...",
 "2h10",
 "Action, Science Fiction, Thriller",
 "Océan Pacifique… Au large d’Hawaï, l’US Navy déploie toute sa puissance. Mais bientôt, une forme étrange et menaçante émerge à la surface des eaux, suivie par des dizaines d’autres dotées d’une puissance de destruction inimaginable. Qui sont-ils ? Que faisaient-ils, cachés depuis si longtemps au fond de l’océan ? À bord de l’USS John Paul Jones, le jeune officier Hopper, l’Amiral Shane, le sous-officier Raikes vont découvrir que l’océan n’est pas toujours aussi pacifique qu’il y paraît. La bataille pour sauver notre planète débute en mer.",
@@ -393,7 +394,7 @@ VALUES
   "10-1024.jpg"),
   (UUIDFilm11,
   "Dune",
-  "Version culte",
+  "1ère version culte",
 "2h17",
 "Action, Aventure, Science-fiction",
 "Dans un futur lointain, l'univers connu est gouverné par l'empereur Padishah Shaddam IV. La substance la plus précieuse de l'empire est l'épice, une drogue qui prolonge la vie et élargit la conscience. L'épice permet également à la Guilde spatiale de plier l'espace-temps à l'aide de ses navigateurs ayant muté sous l’effet d’une exposition constante à l’épice, rendant possible un voyage interstellaire sûr et instantané.",
@@ -470,7 +471,23 @@ VALUES
   "TP", 
   "https://www.youtube.com/embed/NDslM1QXcQg",
   "15-128.jpg",
-  "15-1024.jpg")
+  "15-1024.jpg"),
+  (UUIDFilm16,
+  "Asterix et Obelix Le combat des chefs",
+  "À peine sorti, déjà un classique",
+"0h30",
+"Action, Comédie",
+"Le druide Panoramix perd la boule et la recette de la potion magique. Une amnésie qui tombe mal : Abraracourcix, chef des Gaulois, vient d'être défié par Aplusbégalix. En cas de défaite, son village gaulois passera sous la coupe des envahisseurs.",
+"De Alain Chabat et Benoit Ouillon",
+"Astérix,Obélix, Panoramix",
+"2025-05-01",
+ 4.0, 
+  "0", 
+  "1", 
+  "TP", 
+  "https://www.youtube.com/embed/f4YqWtOyxyk",
+  "16-128.jpg",
+  "16-1024.jpg")
   ;
 
 
@@ -581,6 +598,7 @@ VALUES
 ('UUIDFilm13', UUIDFilm13),
 ('UUIDFilm14', UUIDFilm14),
 ('UUIDFilm15', UUIDFilm15),
+('UUIDFilm16', UUIDFilm16),
 ('UUIDSalle1P', UUIDSalle1P ),
 ('UUIDSalle2P', UUIDSalle2P ),
 ('UUIDSalle3P', UUIDSalle3P ),
@@ -692,7 +710,7 @@ VALUES
 
 		 -- (c) Récupérer la valeur pour le film
          -- Calculer un v_film_idx dépendant de (v_week_index, v_cinema_counter, v_salle_counter)
-		  SET v_film_idx = ((v_week_index + v_cinema_counter + v_salle_counter - 1) MOD 15) + 1;
+		  SET v_film_idx = ((v_week_index + v_cinema_counter + v_salle_counter - 1) MOD 16) + 1;
           
           SET v_film_varName = CONCAT('UUIDFilm', v_film_idx);
          

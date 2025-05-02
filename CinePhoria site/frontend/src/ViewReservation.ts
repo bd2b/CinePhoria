@@ -374,7 +374,16 @@ export function afficherDetailsFilm(): void {
       <div class="twocolumns__left">
         <img src="${imageFilm(film.imageFilm1024 ?? '')}" alt="Affiche" class="twocolumns__left-img">
         <button class="twocolumns__left-button-bo" id="openModal">Bande Annonce</button>
+        <div class="evaluation__note">
+            <p class="evaluation__note-p">Avis : ${film.note} / 5</p>
+        </div>
+        <div class="evaluation__coupdecoeur"  style="visibility: ${film.isCoupDeCoeur ? 'visible' :'hidden'}">
+            <p class="evaluation__coupdecoeur-p">Coup de coeur</p>
+            <img src="assets/heart.svg" alt="Coeur" class="evaluation__coupdecoeur-img">
+        </div>
+                
       </div>
+      
       <div class="twocolumns__right">
         <p class="right__title-p">${film.titleFilm}</p>
         <div class="right__caractFilm">
@@ -604,7 +613,7 @@ async function afficherSeancesDuJour(dateSelectionnee: Date): Promise<void> {
   seancesFilmDuJour.forEach(seance => {
     if (parseInt(seance.numFreeSeats ?? "10", 10) > 0) {
       // Générer la card
-      
+
       const card = seanceCardView(seance, dateSelectionnee);
       card.classList.remove("seances__cardseance-selected");
 
@@ -698,7 +707,7 @@ export function seanceCardView(seance: Seance, dateSelectionne: Date, id: string
   pDay.textContent = String(dateSelectionne.getDate());
 
   // === Bandeau "Plus que X disponibles" ===
-  
+
   const numFreeSeats = parseInt(seance.numFreeSeats ?? "10", 10);
   if (isAlertShowing) {
     const bandeau = document.createElement('div');
