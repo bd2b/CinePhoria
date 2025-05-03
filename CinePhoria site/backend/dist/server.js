@@ -83,6 +83,7 @@ const seanceRoutes_1 = __importDefault(require("./routes/seanceRoutes"));
 const seanceseuleRoutes_1 = __importDefault(require("./routes/seanceseuleRoutes"));
 const reservationRoutes_1 = __importDefault(require("./routes/reservationRoutes"));
 const utilisateurRoutes_1 = __importDefault(require("./routes/utilisateurRoutes"));
+const incidentRoutes_1 = __importDefault(require("./routes/incidentRoutes"));
 const mailRoutes_1 = __importDefault(require("./routes/mailRoutes"));
 const publicLoginRoutes_1 = __importDefault(require("./routes/publicLoginRoutes"));
 app.use('/api/films', filmRoutes_1.default);
@@ -92,6 +93,7 @@ app.use('/api/seances', seanceRoutes_1.default);
 app.use('/api/seancesseules', seanceseuleRoutes_1.default);
 app.use('/api/reservation', reservationRoutes_1.default);
 app.use('/api/utilisateur', utilisateurRoutes_1.default);
+app.use('/api/incidents', incidentRoutes_1.default);
 app.use('/api/mail', mailRoutes_1.default);
 app.use('/api/login', publicLoginRoutes_1.default);
 // Route pour servir les fichiers statics

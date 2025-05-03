@@ -38,7 +38,7 @@ struct ContentView: View {
                 else if dataController.isModelEmpty {
                     NoDataView(dataController: dataController)
                 } else {
-                    MainView()
+                    MainView(dataController: dataController)
                 }
             } else {
                 LoginView(dataController: dataController)

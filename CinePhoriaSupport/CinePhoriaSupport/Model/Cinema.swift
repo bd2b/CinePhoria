@@ -10,9 +10,12 @@
 import Foundation
 import SwiftData
 
+
 @Model
-class Cinema {
+class Cinema: Identifiable {
     @Attribute(.unique) var nameCinema: String
+    var id: String { nameCinema }
+    
     var adresse: String
     var ville: String
     var postalcode: String // ex: F-75010
@@ -22,7 +25,7 @@ class Cinema {
     var ligne2: String
     
     
-    var salles: [Salle] = []
+    @Relationship var salles: [Salle]?
     
     init(nameCinema: String, adresse: String, ville: String, postalcode: String,
          emailCinema: String, telCinema: String, ligne1: String, ligne2: String) {

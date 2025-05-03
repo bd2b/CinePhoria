@@ -18,7 +18,7 @@ class Employe {
     var lastnameEmploye: String
     var firstnameEmploye: String
 
-    var incidents: [Incident] = []
+    @Relationship var incidents: [Incident]?
 
     init(matricule: String, email: String, isAdministrateur: Bool,
          lastnameEmploye: String, firstnameEmploye: String) {

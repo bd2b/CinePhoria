@@ -99,6 +99,7 @@ import seanceRoutes from './routes/seanceRoutes';
 import seanceseuleRoutes from './routes/seanceseuleRoutes'
 import reservationRoutes from './routes/reservationRoutes';
 import utilisateurRoutes from './routes/utilisateurRoutes';
+import incidentRoutes from './routes/incidentRoutes'
 
 import mailRoutes from './routes/mailRoutes';
 import loginRoutes from './routes/publicLoginRoutes';
@@ -110,6 +111,7 @@ app.use('/api/seances', seanceRoutes);
 app.use('/api/seancesseules', seanceseuleRoutes);
 app.use('/api/reservation', reservationRoutes);
 app.use('/api/utilisateur', utilisateurRoutes);
+app.use('/api/incidents', incidentRoutes);
 
 app.use('/api/mail', mailRoutes);
 
