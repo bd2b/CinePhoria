@@ -25,6 +25,9 @@ struct AnyEncodable: Encodable {
 let domainUrl = "https://cinephoria.bd2db.com"
 let urlCinephoria = URL(string:"https://cinephoria.bd2db.com")
 
+//let domainUrl = "http://127.0.0.1:3500/"
+//let urlCinephoria = URL(string:"http://127.0.0.1:3500/")
+
 func getVersion() {
     guard let url = URL(string: domainUrl + "/api/login/version") else {
         print("❌ URL invalide")
@@ -226,4 +229,16 @@ func fetchAllSalles() async throws -> [SalleDTO] {
 func fetchAllEmployes() async throws -> [EmployeDTO] {
     let url = "\(domainUrl)/api/utilisateur/getemployes"
     return try await apiRequest(endpoint: url, debugTrace: true)
+}
+
+func fetchAllIncidents() async throws -> [IncidentDTO] {
+    let url = "\(domainUrl)/api/incidents"
+    return try await apiRequest(endpoint: url, debugTrace: true)
+}
+
+// MARK: Recherche utilisateur
+
+func fetchUtilisateur(login: String) async throws -> [UtilisateurDTO] {
+    let url = "\(domainUrl)/api/utilisateur/\(login)"
+    return try await apiRequest(endpoint: url, requiresAuth: true, debugTrace: true)
 }

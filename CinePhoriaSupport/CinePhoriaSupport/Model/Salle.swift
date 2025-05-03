@@ -11,7 +11,7 @@ import Foundation
 import SwiftData
 
 @Model
-class Salle {
+class Salle: Identifiable {
     @Attribute(.unique) var id: String
     var nameSalle: String
     var capacity: Int
@@ -20,10 +20,8 @@ class Salle {
     var fMax: Int
     var seatsAbsents: String
 
-    
-    var incidents: [Incident] = []
-
-    var cinema: Cinema?
+    @Relationship var cinema: Cinema?
+    @Relationship var incidents: [Incident]?
 
     init(id: String, nameSalle: String, capacity: Int, numPMR: Int, rMax: Int = 20, fMax: Int = 10, seatsAbsents: String = "") {
         self.id = id
@@ -45,6 +43,9 @@ struct SalleDTO: Codable {
     let rMax: Int
     let fMax: Int
     let seatsAbsents: String
+    
+    // Pour le lien vers Cinema
+    let nameCinema: String
 }
 
 extension Salle {
