@@ -72,6 +72,25 @@ export function onLoadVisiteur() {
                     }));
                 }
                 ;
+                // Modale sur affiche de film
+                const imageEl = card.querySelector('.cardreservation__image-img');
+                if (imageEl) {
+                    imageEl.style.cursor = 'pointer';
+                    imageEl.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        const modalId = `modalyoutube-${film.id}`;
+                        let modal = document.getElementById(modalId);
+                        if (!modal) {
+                            modal = document.createElement('div');
+                            modal.id = modalId;
+                            modal.className = 'modalyoutube';
+                            document.body.appendChild(modal);
+                        }
+                        if (film.linkBO)
+                            initModalBandeAnnonce(film.linkBO, modal);
+                    }));
+                }
             });
         }
         catch (error) {
@@ -79,3 +98,61 @@ export function onLoadVisiteur() {
         }
     });
 }
+/* -------------------------------------------
+   Modal Bande-Annonce
+------------------------------------------- */
+function initModalBandeAnnonce(linkBO, divModal) {
+    const modalLocalHTML = `
+        <div class="modalyoutube-content">
+            <span class="closeyoutube">&times;</span>
+            <!-- Vidéo YouTube -->
+            <iframe id="youtubeVideo" width="560" height="315" src="${linkBO}?autoplay=1" title="YouTube video player" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin" allowfullscreen>
+            </iframe>
+        </div>
+  `;
+    divModal.innerHTML = '';
+    divModal.innerHTML = modalLocalHTML;
+    /* Mise en place Activation de la modal */
+    const closeModalBtn = divModal === null || divModal === void 0 ? void 0 : divModal.querySelector('.closeyoutube');
+    if (divModal && closeModalBtn) {
+        const closeModal = () => {
+            divModal.style.display = 'none';
+            const iframe = divModal.querySelector('iframe');
+            if (iframe)
+                iframe.src = '';
+        };
+        closeModalBtn.removeEventListener('click', closeModal);
+        closeModalBtn.addEventListener('click', closeModal);
+        divModal.addEventListener('click', (event) => {
+            if (event.target === divModal)
+                closeModal();
+        });
+        divModal.style.display = 'flex';
+    }
+}
+//**Version avec bouton
+// <div class="cardreservation__reserver">
+//                 <button class="cardreservation__reserver-button">Réservez maintenant</button>
+//             </div>
+//             <div class="cardreservation__reserver cardreservation__reserver-modal">
+//                 <button class="cardreservation__bo-button">Bande Annonce</button>
+//             </div>
+// // Bouton modal du film
+// const boBtn = card.querySelector('.cardreservation__bo-button') as HTMLButtonElement | null;
+// if (boBtn) {
+//   boBtn.removeEventListener('click', async (evt) => { });
+//   boBtn.addEventListener('click', async (evt) => {
+//     evt.preventDefault();
+//     evt.stopPropagation();
+//     const modalId = `modalyoutube-${film.id}`;
+//     let modal = document.getElementById(modalId) as HTMLDivElement | null;
+//     if (!modal) {
+//         modal = document.createElement('div');
+//         modal.id = modalId;
+//         modal.className = 'modalyoutube';
+//         document.body.appendChild(modal);
+//     }
+//     if (film.linkBO) initModalBandeAnnonce(film.linkBO, modal)
+//   }); */
