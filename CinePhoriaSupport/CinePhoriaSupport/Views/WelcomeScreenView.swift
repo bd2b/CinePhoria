@@ -23,33 +23,35 @@ struct WelcomeScreenView: View {
             
             // Titre principal
             VStack(spacing: 8) {
-                Text("Bienvenue à")
+                Text("Support Cinephoria")
                     .font(customFont(style: .largeTitle))
                     .fontWeight(.bold)
                     .foregroundColor(.white)
-     //           Giffy("camera-cinephoria2")
-                        .frame( width: 200, height: 75)
+                Image("IconeApplication")
+                    .resizable()
+                        .frame(width: 128, height: 128)
+     
             }
             .padding()
 
             // Section des items
             VStack(alignment: .leading, spacing: 20) {
                 WelcomeItemView(
-                    imageName: "qrcode.viewfinder",
-                    title: "Évitez la file d'attente",
-                    description: "Scannez votre QR Code pour entrer directement dans la salle. Gagnez du temps et profitez du cinéma sans stress."
+                    imageName: "magnifyingglass",
+                    title: "Visualisez les incidents",
+                    description: "Selon les cinémas ou vous intervenez, vous trouvez les incidents en cours et organisés par salle."
                 )
 
                 WelcomeItemView(
-                    imageName: "bubble.left.and.bubble.right.fill",
-                    title: "Partagez votre avis",
-                    description: "Exprimez votre passion de cinéphile en partageant vos avis sur les films que vous avez aimés ou pas !"
+                    imageName: "plus.app.fill",
+                    title: "Creer de nouveaux incidents",
+                    description: "Selectionnez une salle et cliquez sur le bouton PLUS pour ajouter de nouveaux incidents. SI vous vous trompez alors que l'incident est toujours a l'état Nouveau, vous pouvez supprimez cet incident."
                 )
 
                 WelcomeItemView(
-                    imageName: "gift.fill",
-                    title: "Un cadeau pour vous",
-                    description: "Au bout de 10 places réservées, nous vous offrons 5 € de friandise ! Un message apparaitra en dessous de votre QRCode."
+                    imageName: "slider.horizontal.2.square.on.square",
+                    title: "Suivez la résolution des incidents",
+                    description: "Lorsque l'incident est résolu, la date de résolution est mémorisée et il reste visible sans modification possible dans la liste des incidents de la salle concernée."
                 )
             }
             .padding(.horizontal)
@@ -66,12 +68,14 @@ struct WelcomeScreenView: View {
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity)
                     .padding()
-                 //   .background(.doréAccentuation)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
             }
-            .padding()
+            .buttonStyle(PlainButtonStyle()) // important pour macOS
+            .background(.doreAccentuation)   // fond sur le bouton complet
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            .padding(.horizontal, 20)
         }
+        .padding(.bottom,20)
         .background(Color.black.edgesIgnoringSafeArea(.all))
     }
 }
@@ -85,7 +89,7 @@ struct WelcomeItemView: View {
         HStack(alignment: .top, spacing: 15) {
             Image(systemName: imageName)
                 .font(.title)
-          //      .foregroundColor(.doréAccentuation)
+                .foregroundColor(.doreAccentuation)
                 .frame(width: 40, height: 40)
             
             VStack(alignment: .leading, spacing: 5) {
@@ -100,7 +104,7 @@ struct WelcomeItemView: View {
     }
 }
 
-//#Preview {
-//    WelcomeScreenView(showWelcomeScreen: .constant(true))
-//}
+#Preview {
+    WelcomeScreenView(showWelcomeScreen: .constant(true))
+}
 

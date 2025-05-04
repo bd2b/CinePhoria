@@ -85,3 +85,47 @@
     flex-direction: column;
     align-items: center;
 }
+
+#modalLegal {
+    max-width: 800px;
+    max-height: 80vh;
+    overflow: hidden;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  }
+  
+  #modalLegalContent {
+    overflow-y: auto;
+    max-height: 70vh;
+    padding-right: 10px;
+  }
+  
+  #modalLegalContent h1 {
+    font-size: 1.5em;
+    margin-bottom: 0.5em;
+    color: #333;
+  }
+  
+  #modalLegalContent h2 {
+    font-size: 1.2em;
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    color: #555;
+  }
+  
+  #modalLegalContent p {
+    font-size: 0.95em;
+    line-height: 1.4em;
+    margin: 0.5em 0;
+    color: #444;
+  }
+  
+  #modalLegalContent ul {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+    color: #444;
+  }
+  
+  #modalLegalContent li {
+    margin-bottom: 0.4em;
+  }

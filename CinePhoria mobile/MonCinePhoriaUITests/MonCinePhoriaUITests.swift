@@ -13,6 +13,9 @@ import SwiftUI
 
 
 final class MonCinePhoriaUITests: XCTestCase {
+    
+    static let compteTest = "bgr.publi@laposte.net"
+    static let motDePasseTest = "20Mai2025!"
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -68,9 +71,9 @@ final class MonCinePhoriaUITests: XCTestCase {
             XCTAssertTrue(app.secureTextFields["Mot de passe"].exists, "Champ mot de passe non présent")
             
             app.textFields["Votre email"].clear()
-            app.typeText("admin")
+            app.typeText(MonCinePhoriaUITests.compteTest)
             app.secureTextFields["Mot de passe"].clear()
-            app.typeText("password")
+            app.typeText(MonCinePhoriaUITests.motDePasseTest)
             
             app.buttons["Se connecter"].tap()
             
@@ -330,9 +333,9 @@ final class MonCinePhoriaUITests: XCTestCase {
             XCTAssertTrue(app.secureTextFields["Mot de passe"].exists, "Champ mot de passe non présent")
             
             app.textFields["Votre email"].clear()
-            app.typeText("admin")
+            app.typeText(MonCinePhoriaUITests.compteTest)
             app.secureTextFields["Mot de passe"].clear()
-            app.typeText("password")
+            app.typeText(MonCinePhoriaUITests.motDePasseTest)
             
             app.buttons["Se connecter"].tap()
             
@@ -374,9 +377,9 @@ final class MonCinePhoriaUITests: XCTestCase {
             XCTAssertTrue(app.secureTextFields["Mot de passe"].exists, "Champ mot de passe non présent")
             
             app.textFields["Votre email"].clear()
-            app.typeText("admin")
+            app.typeText(MonCinePhoriaUITests.compteTest)
             app.secureTextFields["Mot de passe"].clear()
-            app.typeText("password")
+            app.typeText(MonCinePhoriaUITests.motDePasseTest)
             
             app.buttons["Se connecter"].tap()
             
@@ -440,8 +443,8 @@ final class MonCinePhoriaUITests: XCTestCase {
         app.launch()
         
         // Test de mémorisation du login/password
-        let login = "admin"
-        let password = "password"
+        let login = MonCinePhoriaUITests.compteTest
+        let password = MonCinePhoriaUITests.motDePasseTest
         
         if app.isElementPresent(label: "Bienvenue à", elementType: app.staticTexts) && app.isElementPresent(label: "C'est parti !", elementType: app.buttons) {
             // On est sur l'écran de bienvenue
@@ -559,8 +562,8 @@ final class MonCinePhoriaUITests: XCTestCase {
         app.launch()
         
         // Si on se trompe trois fois on efface les données mémorisée
-        let login = "admin"
-        let password = "password"
+        let login = MonCinePhoriaUITests.compteTest
+        let password = MonCinePhoriaUITests.motDePasseTest
         
         if app.isElementPresent(label: "Bienvenue à", elementType: app.staticTexts) && app.isElementPresent(label: "C'est parti !", elementType: app.buttons) {
             // On est sur l'écran de bienvenue

@@ -180,9 +180,6 @@ import Foundation
         }
     }
     
-    func forgottenPassword (mail: String) {
-        print("Mode passe oublié pour \(mail)")
-    }
     
     func loadReservations(for userMail: String) async {
    

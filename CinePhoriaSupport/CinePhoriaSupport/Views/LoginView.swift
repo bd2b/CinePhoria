@@ -24,7 +24,7 @@ struct LoginView: View {
     @State private var isLoading: Bool = false
     
     private var credentialsSection: some View {
-        VStack(spacing: 5) {
+        VStack(spacing: 10) {
             VStack {
                 if let error = loginError {
                     Text(error)
@@ -40,16 +40,33 @@ struct LoginView: View {
 
                 TextField("Votre email", text: $userMail)
                     .font(customFont(style: .body))
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .disableAutocorrection(true)
-                    .padding()
+                    .textFieldStyle(PlainTextFieldStyle()) // ✅ important
+                    .padding(.horizontal, 8)
+                    .frame(height: 44) // ✅ donne plus de hauteur à la zone cliquable ET au focus ring
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                    )
+                    .background(
+                        RoundedRectangle(cornerRadius: 6)
+                            .fill(Color(NSColor.textBackgroundColor))
+                    )
                     
             }
 
             SecureField("Mot de passe", text: $password)
                 .font(customFont(style: .body))
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding()
+                .textFieldStyle(PlainTextFieldStyle()) // ✅ important
+                .padding(.horizontal, 8)
+                .frame(height: 44) // ✅ donne plus de hauteur à la zone cliquable ET au focus ring
+                .overlay(
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                )
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color(NSColor.textBackgroundColor))
+                )
 
             HStack {
                 Toggle(isOn: $dataController.rememberMe) {
@@ -61,19 +78,37 @@ struct LoginView: View {
                 .padding()
             }
             HStack {
+//                Button(action: login) {
+//                    Text("Se connecter")
+//                        .font(customFont(style: .title3))
+//                    
+//                        .frame(maxWidth: .infinity)
+//                    
+//                        .foregroundColor(.white)
+////                        .cornerRadius(8)
+//                        .padding()
+//                        .background(.doreAccentuation)
+//                    
+//                }
+//                .buttonStyle(.bordered)
+                
+                
                 Button(action: login) {
                     Text("Se connecter")
                         .font(customFont(style: .title3))
-                    
+                        .fontWeight(.bold)
                         .frame(maxWidth: .infinity)
-                    
-                        .foregroundColor(.white)
-//                        .cornerRadius(8)
                         .padding()
-                        .background(.doreAccentuation)
-                    
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(PlainButtonStyle()) // important pour macOS
+                .background(.doreAccentuation)   // fond sur le bouton complet
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .padding(.horizontal, 40)
+                
+                
+                
+                
             }
 
             HStack {
@@ -82,7 +117,7 @@ struct LoginView: View {
                     isShowingAlert = true
                 }) {
                     Text("Mot de passe oublié ?")
-                        .font(customFont(style: .body))
+                        .font(customFont(style: .caption))
                         
                 }
             }
@@ -119,15 +154,14 @@ struct LoginView: View {
                 
             }
             .padding(EdgeInsets(top: 50, leading: 20, bottom: 20, trailing: 20))
-            .alert("Un message de réinitialisation de mot de passe va être envoyé à votre adresse mail. Si vous ne le recevez pas c'est que l'adresse mail communiquée est incorrecte ou que le mail est dans les SPAM.", isPresented: $isShowingAlert) {
-                Button("Annuler") {
+            .alert("Vous pouvez changer votre mot de passe sur le site CinePhoria, en cliquant sur le bouton 'Mot de passe oublié' dans la fenetre de connexion", isPresented: $isShowingAlert) {
+                Button("J'ai compris") {
                     isShowingAlert = false
                 }
                 .font(customFont(style: .body))
-                Button("OK") {
-                    isShowingAlert = false
-                    dataController.forgottenPassword(mail: userMail)
-                }
+               
+            
+            
             }
         }
         .onAppear()
