@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response } from 'express';
 import { UtilisateurDAO } from '../dao/UtilisateurDAO';
+import { AuthDAO } from '../dao/AuthDAO';
 import logger from '../config/configLog';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'secret-key';
@@ -13,6 +14,7 @@ const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION || '15m'; //
 const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION || '7d'; // ex. 7 jours
 
 import { versionCourante } from '../config/config';
+import { MajSite } from '../shared-models/MajSite';
 
 
 export class AuthController {
@@ -96,32 +98,66 @@ export class AuthController {
     const { refreshToken } = req.cookies;
 
     if (!refreshToken) {
-        res.status(401).json({ message: 'Aucun refresh token' });
-        return;
+      res.status(401).json({ message: 'Aucun refresh token' });
+      return;
     }
 
     // 2) Invalider le cookie côté client
     res.cookie('refreshToken', '', {
       // TODO a voir quand on sera en https
-        // httpOnly: true,
-        // secure: true,  // en prod => true si HTTPS
-        // sameSite: 'none',
-        expires: new Date(0) // date expirée
+      // httpOnly: true,
+      // secure: true,  // en prod => true si HTTPS
+      // sameSite: 'none',
+      expires: new Date(0) // date expirée
     });
 
     // 3) Réponse
     res.json({ message: 'Logout effectué, refresh token révoqué' });
 
     return; // S'assure que la fonction respecte `Promise<void>`
-}
+  }
 
-// Renvoi la version issue du .env
-static  async getVersion(req: Request, res: Response): Promise<void> {
+  // Renvoi la version issue du .env
+  static async getVersion(req: Request, res: Response) {
+    try {
+      const version = await AuthDAO.getVersion();
+      logger.info(JSON.stringify(version))
+      res.json(version);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 
-  res.json( versionCourante );
+  static async pushVersion(req:Request, res:Response) {
+    try {
+      // On récupère les données dans req.body
+      
+      const data = req.body; 
+      logger.info("Creation d'une mise a jour avec data = ", data);
 
-  return;
+      // On construit une Maj
+      const majToCreate = new MajSite(data);
+      // Appel du DAO
+      const result = await AuthDAO.pushVersion(majToCreate);
 
-}
+      // On renvoie l’ID ou un message
+      res.status(201).json({ message: result });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  }
 
+  static async simplePushVersion (message: string) {
+    const majSite = new MajSite({message: message});
+      logger.info(`Nouvelle Version =  + ${message}`)
+      await AuthDAO.pushVersion(majSite);
+  }
+
+
+
+
+
+
+
+// static async pushVersion(majSite: MajSite): Promise<string> {
 }

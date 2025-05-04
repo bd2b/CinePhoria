@@ -22,13 +22,16 @@ import { ReservationState } from './shared-models/Reservation.js';
 import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { Cinema } from './shared-models/Cinema.js';
-import { getSeancesByIdApi , getVersionApi } from './NetworkController.js';
+import { getSeancesByIdApi, getVersionApi } from './NetworkController.js';
 import { baseUrl } from './Global.js';
+import { MajSite } from './shared-models/MajSite.js';
 
 
 export class DataController {
 
-    protected version: { majeure: number, mineure: number, build: number } = {majeure: 0, mineure: 0, build: 0};
+    //  protected version: { majeure: number, mineure: number, build: number } = {majeure: 0, mineure: 0, build: 0};
+
+    protected version: MajSite = { idInt: 0, MAJEURE: 0, MINEURE: 0, BUILD: 0, dateMaj: new Date("01/01/1980") };
 
     protected _reservationState: ReservationState = ReservationState.PendingChoiceSeance;
 
@@ -52,15 +55,25 @@ export class DataController {
         return this.extractFilmsFromSeances(new Date(), dateMax);
     }
 
-    // 🏆 Variable calculée : retourne les films qui ont une date de sortie au dernier mercredi
-    get filmsSortiesRecentes(): Film[] {
+    // 🏆 Variable calculée : retourne les films qui ont une date de sortie au dernier mercredi 
+    // ou les films du catalogue trie par date de sortie
+    get filmsSortiesRecentes(): {films:  Film[], message: string} {
         const precedentMercredi = datePrecedentMercredi();
-        return this.films.filter((f) => {
+    
+        const filmsMercredi = this.films.filter((f) => {
             if (!f.dateSortieCinePhoria) return false;
             const sortieDate = new Date(f.dateSortieCinePhoria);
             return formatDateLocalYYYYMMDD(sortieDate) === formatDateLocalYYYYMMDD(precedentMercredi);
         });
-    }
+    
+        const filmsaTrier = filmsMercredi.length > 0 ? filmsMercredi : this.films;
+        const messageAssocie = filmsMercredi.length > 0 ? "Nouveaute de la semaine" : "Notre catalogue";
+    
+        const filmsListeFinal = filmsaTrier
+            .filter(f => f.dateSortieCinePhoria)
+            .sort((a, b) => new Date(b.dateSortieCinePhoria!).getTime() - new Date(a.dateSortieCinePhoria!).getTime());
+        return { films: filmsListeFinal , message: messageAssocie }
+        }
 
     // Variable calculée : retourne tous les genres des films filtrés sur le nom du cinema
     get genreSet(): Set<string> {
@@ -295,9 +308,9 @@ export class DataController {
     public async chargerDepuisAPI(): Promise<void> {
         console.log("DataC: ChargerDepuisAPI")
         const loader = document.getElementById('progressIndicator');
-            if (loader) loader.style.display = 'block';
+        if (loader) loader.style.display = 'block';
         try {
-            
+
             // 1) Chargement de toutes les séances
             const response = await fetch(`${baseUrl}/api/seances/filter?cinemasList="all"`);
             const rawData = await response.json();
@@ -341,7 +354,7 @@ export class DataController {
             console.error('Erreur lors du chargement des données de séances : ', error);
         } finally {
             if (loader) loader.style.display = 'none';
-          }
+        }
     }
     /**
      * Extraction des films du tableau seance (filtré sur filterNameCinema) ayant une séance entre deux dates,
@@ -505,7 +518,7 @@ export class DataController {
         console.log(`DataC: Sauvegarde des Cinemas => taille = ${str.length}`);
         localStorage.setItem(DataController.KEY_CINEMAS, str);
     }
-    public async sauverSeancesParCinema(cinema? :string): Promise<void> {
+    public async sauverSeancesParCinema(cinema?: string): Promise<void> {
         // On suppose que this._allSeances contient toutes les séances de tous les cinémas
         if (!this._allSeances) return;
 
@@ -659,25 +672,35 @@ export class DataController {
 
     public async init(): Promise<void> {
         console.log("DataC: Init");
-        
+
 
         // 1) Charger depuis localStorage
         await this.chargerComplet();
 
-        // 1 bis) Vérifier qu'il n'y pas de version majeure provoquant un rafrachissement du cache
-        const newVersion = await getVersionApi();
-        console.log("Version actuelle = ", JSON.stringify(newVersion));
+        // 1 bis) Vérifier si la dernier mise à jour du serveur a été prise en compte ou si on 
+        // a changer de version majeure
+        try {
+            const newVersion = await getVersionApi();
+            console.log("Version du serveur = ", JSON.stringify(newVersion));
+            console.log("Version du cache = ", JSON.stringify(this.version))
 
-        if (this.version && newVersion.majeure !== this.version.majeure) {
-            console.log("DataC: nouvelle version majeure -> rechargement depuis l’API");
-            await this.chargerDepuisAPI();
-            this.version = newVersion;
-            await this.sauverComplet();
-            return;
-        } else {
-            console.log("Pas de nouvelle version majeure");
+            const isNouvelleVersionServeur = this.version.dateMaj && newVersion.dateMaj  &&
+             this.version.dateMaj < newVersion.dateMaj ;
+            const isNouvelleVersionMajeure = this.version.MAJEURE && newVersion.MAJEURE &&
+             this.version.MAJEURE !== newVersion.MAJEURE ;
+
+            if (isNouvelleVersionServeur || isNouvelleVersionMajeure ){
+                console.log(`DataC: nouvelle version ${isNouvelleVersionServeur ? "serveur" : "majeur"} - rechargement depuis l’API`);
+                await this.chargerDepuisAPI();
+                this.version = newVersion;
+                await this.sauverComplet();
+                return;
+            } else {
+                console.log("Pas de mise à jour de cache");
+            }
+        } catch (error) {
+            console.error("Impossible de versifier la mise à jour su site = ", error)
         }
-
 
         // 2) Vérifier la validité du cache via cookie
         let mustReload = true;
@@ -704,13 +727,13 @@ export class DataController {
         }
     }
 
-    
+
     // Rafraichissement du cache pour une liste quelconque de séances
     public async updateSeances(seancesUUID: string[]): Promise<void> {
         console.log("Update séances UUID =", seancesUUID);
         try {
             const seancesAjour = await getSeancesByIdApi(seancesUUID);
-            
+
             // Structure pour regrouper les séances par cinéma
             const seancesParCinema = new Map<string, Seance[]>();
 

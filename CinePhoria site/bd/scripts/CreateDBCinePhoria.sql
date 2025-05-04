@@ -123,6 +123,14 @@ CREATE TABLE TableTrace (
   trace_time timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL, 
   message    text NOT NULL, 
   PRIMARY KEY (idInt));
+  CREATE TABLE MajSite (
+  idInt      INT AUTO_INCREMENT NOT NULL, 
+  MAJEURE Int,
+  MINEURE Int,
+  BUILD Int,
+  dateMaj timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL, 
+  message    text NOT NULL, 
+  PRIMARY KEY (idInt));
 CREATE TABLE TarifQualite (
   id        varchar(100) NOT NULL, 
   qualite   varchar(100) NOT NULL, 
