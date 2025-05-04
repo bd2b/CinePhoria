@@ -41,7 +41,7 @@ struct DetailIncidentView: View {
 
     var body: some View {
         Form {
-            Section(header: Text("Titre")) {
+            Section() {
                 TextField("Titre", text: $incident.title)
                     .font(.title3)
                     .disabled(isResolved)

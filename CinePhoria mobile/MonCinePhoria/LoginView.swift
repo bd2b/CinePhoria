@@ -103,15 +103,11 @@ struct LoginView: View {
                 
             }
             .padding(EdgeInsets(top: 50, leading: 20, bottom: 20, trailing: 20))
-            .alert("Un message de réinitialisation de mot de passe va être envoyé à votre adresse mail. Si vous ne le recevez pas c'est que l'adresse mail communiquée est incorrecte ou que le mail est dans les SPAM.", isPresented: $isShowingAlert) {
-                Button("Annuler") {
+            .alert("Vous pouvez changer votre mot de passe sur le site CinePhoria, en cliquant sur le bouton 'Mot de passe oublié' dans la fenetre de connexion", isPresented: $isShowingAlert) {
+                Button("J'ai compris") {
                     isShowingAlert = false
                 }
                 .font(customFont(style: .body))
-                Button("OK") {
-                    isShowingAlert = false
-                    dataController.forgottenPassword(mail: userMail)
-                }
                
             }
         }

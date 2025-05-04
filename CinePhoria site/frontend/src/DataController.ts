@@ -25,13 +25,14 @@ import { Cinema } from './shared-models/Cinema.js';
 import { getSeancesByIdApi, getVersionApi } from './NetworkController.js';
 import { baseUrl } from './Global.js';
 import { MajSite } from './shared-models/MajSite.js';
+import { majFooterVersion } from './ViewFooter.js';
 
 
 export class DataController {
 
     //  protected version: { majeure: number, mineure: number, build: number } = {majeure: 0, mineure: 0, build: 0};
 
-    protected version: MajSite = { idInt: 0, MAJEURE: 0, MINEURE: 0, BUILD: 0, dateMaj: new Date("01/01/1980") };
+    version: MajSite = { idInt: 0, MAJEURE: 0, MINEURE: 0, BUILD: 0, dateMaj: new Date("01/01/1980") };
 
     protected _reservationState: ReservationState = ReservationState.PendingChoiceSeance;
 
@@ -681,6 +682,7 @@ export class DataController {
         // a changer de version majeure
         try {
             const newVersion = await getVersionApi();
+            
             console.log("Version du serveur = ", JSON.stringify(newVersion));
             console.log("Version du cache = ", JSON.stringify(this.version))
 
