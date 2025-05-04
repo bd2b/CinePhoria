@@ -10,7 +10,7 @@
 import Foundation
 
 import SwiftUI
-//import Giffy
+// import Giffy
 
 struct LoginView: View {
     
@@ -42,11 +42,14 @@ struct LoginView: View {
                     .font(customFont(style: .body))
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .disableAutocorrection(true)
+                    .padding()
+                    
             }
 
             SecureField("Mot de passe", text: $password)
                 .font(customFont(style: .body))
                 .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
 
             HStack {
                 Toggle(isOn: $dataController.rememberMe) {
@@ -55,16 +58,22 @@ struct LoginView: View {
                 }
                 .toggleStyle(.switch)
                 .accessibilityIdentifier("RememberMeToggle")
+                .padding()
             }
-
-            Button(action: login) {
-                Text("Se connecter")
-                    .font(customFont(style: .title3))
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(.doreAccentuation)
-                    .foregroundColor(.white)
-                    .cornerRadius(8)
+            HStack {
+                Button(action: login) {
+                    Text("Se connecter")
+                        .font(customFont(style: .title3))
+                    
+                        .frame(maxWidth: .infinity)
+                    
+                        .foregroundColor(.white)
+//                        .cornerRadius(8)
+                        .padding()
+                        .background(.doreAccentuation)
+                    
+                }
+                .buttonStyle(.bordered)
             }
 
             HStack {
@@ -74,26 +83,31 @@ struct LoginView: View {
                 }) {
                     Text("Mot de passe oublié ?")
                         .font(customFont(style: .body))
+                        
                 }
             }
+            .padding()
         }
-        .padding(.horizontal, 20)
+        .frame(maxWidth: 400)
+        .padding(.horizontal, 30)
         .onAppear() {
             userMail = "administrateur@7art.fr"
             password = "20Mai2025!"
         }
+        
+        
     }
     
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                // Spacer()
-                //                HStack (alignment: .top){
-                //                    Giffy("camera-cinephoria-fd-blanc-login-trous trnsp")
-                //                        .frame(width: 200, height:200)
-                //
-                //                }
+            VStack(spacing: 15) {
+//                 Spacer()
+//                                HStack (alignment: .top){
+//                                    Giffy("camera-cinephoria-fd-blanc-login-trous trnsp")
+//                                      //  .frame(width: 200, height:200)
+//                
+//                                }
                 
                 Spacer()
                 VStack (spacing: 5){

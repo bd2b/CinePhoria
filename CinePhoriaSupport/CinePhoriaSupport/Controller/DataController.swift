@@ -32,8 +32,11 @@ import SwiftData
         do {
             modelContainer = try ModelContainer(
                 for: Cinema.self, Salle.self, Incident.self, Employe.self,
-                configurations: .init(isStoredInMemoryOnly: true)
-            )
+                configurations: .init(isStoredInMemoryOnly: true))
+                
+//                modelContainer = try ModelContainer(
+//                    for: Cinema.self, Salle.self, Incident.self, Employe.self)
+            
         } catch {
             fatalError("❌ Échec de l'initialisation SwiftData : \(error)")
         }
@@ -194,6 +197,7 @@ import SwiftData
             self.userMail = user
             let utilisateurDTOArray = try await fetchUtilisateur(login: user)
             utilisateurDTO = utilisateurDTOArray.first!
+            print("Cinemas autorisés : \(utilisateurDTO?.listCinemas ?? "")")
             
             
             await syncInitialData()
@@ -220,6 +224,10 @@ import SwiftData
     
     func forgottenPassword (mail: String) {
         print("Mode passe oublié pour \(mail)")
+    }
+    
+    func syncIncidentToServer(_ incident: Incident) async throws -> Bool{
+        return try await syncIncident(incident)
     }
 }
 

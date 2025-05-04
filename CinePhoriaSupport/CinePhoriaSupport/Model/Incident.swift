@@ -123,4 +123,19 @@ extension Incident {
             dateClose: dto.dateClose
         )
     }
+    
+}
+
+
+extension IncidentDTO {
+    init(from incident: Incident) {
+        self.id = incident.id
+        self.salleId = incident.salle?.id ?? ""
+        self.matricule = incident.employe?.matricule ?? ""
+        self.status = incident.status
+        self.title = incident.title
+        self.descriptionIncident = incident.descriptionIncident
+        self.dateOpen = incident.dateOpen
+        self.dateClose = incident.dateClose
+    }
 }

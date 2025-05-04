@@ -53,7 +53,7 @@ export class IncidentController {
     try {
       const id = req.params.id;
       const data = req.body;
-      logger.info(`Mise à jour de la salle ${id} avec data=`, data);
+      logger.info(`Mise à jour de l'incident' ${id} avec data=`, data);
 
       const incidentToUpdate = new Incident(data);
       const result = await IncidentDAO.updateIncident(id, incidentToUpdate);

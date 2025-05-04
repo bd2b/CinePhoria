@@ -53,7 +53,7 @@ class IncidentController {
         try {
             const id = req.params.id;
             const data = req.body;
-            configLog_1.default.info(`Mise à jour de la salle ${id} avec data=`, data);
+            configLog_1.default.info(`Mise à jour de l'incident' ${id} avec data=`, data);
             const incidentToUpdate = new Incident_1.Incident(data);
             const result = await IncidentDAO_1.IncidentDAO.updateIncident(id, incidentToUpdate);
             if (result) {
