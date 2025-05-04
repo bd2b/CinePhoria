@@ -10,6 +10,7 @@ import { Seance, SeanceDisplay } from './shared-models/Seance.js';
 import { Film } from './shared-models/Film.js';
 import { Salle } from './shared-models/Salle.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
+import { MajSite } from './shared-models/MajSite';
 
 
 
@@ -1080,10 +1081,10 @@ export async function getReservationStatsApi(): Promise<ReservationStats[]> {
 * Récupération de du numero de version
 * @returns un ( { majeure: number, mineure: number, build: number } )
 */
-export async function getVersionApi(): Promise<{ majeure: number, mineure: number, build: number }> {
+export async function getVersionApi(): Promise<MajSite> {
     const endpoint = `${baseUrl}/api/login/version`;
     // Requête authentifiée
-    const responseJSON = await apiRequest<{ majeure: number, mineure: number, build: number }>(
+    const responseJSON = await apiRequest<MajSite>(
         endpoint,
         'GET',
         undefined,

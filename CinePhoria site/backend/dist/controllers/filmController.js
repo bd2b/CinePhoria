@@ -7,6 +7,7 @@ exports.FilmController = void 0;
 const FilmDAO_1 = require("../dao/FilmDAO");
 const configLog_1 = __importDefault(require("../config/configLog"));
 const Film_1 = require("../shared-models/Film");
+const authController_1 = require("./authController");
 class FilmController {
     static async getAllFilms(req, res) {
         try {
@@ -63,6 +64,8 @@ class FilmController {
             const filmToCreate = new Film_1.Film(data);
             // Appel du DAO
             const newId = await FilmDAO_1.FilmDAO.createFilm(filmToCreate);
+            // On push une version 
+            await authController_1.AuthController.simplePushVersion(`Film cree = ${filmToCreate.titleFilm}`);
             // On renvoie l’ID ou un message
             res.status(201).json({ message: 'OK', id: newId });
         }
@@ -79,6 +82,8 @@ class FilmController {
             const filmToUpdate = new Film_1.Film(data);
             const result = await FilmDAO_1.FilmDAO.updateFilm(filmId, filmToUpdate);
             if (result) {
+                // On push une version 
+                await authController_1.AuthController.simplePushVersion(`Film mis à jour = ${filmToUpdate.titleFilm}`);
                 res.json({ message: 'OK' });
             }
             else {

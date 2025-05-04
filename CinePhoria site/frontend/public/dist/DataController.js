@@ -35,7 +35,8 @@ import { getSeancesByIdApi, getVersionApi } from './NetworkController.js';
 import { baseUrl } from './Global.js';
 export class DataController {
     constructor() {
-        this.version = { majeure: 0, mineure: 0, build: 0 };
+        //  protected version: { majeure: number, mineure: number, build: number } = {majeure: 0, mineure: 0, build: 0};
+        this.version = { idInt: 0, MAJEURE: 0, MINEURE: 0, BUILD: 0, dateMaj: new Date("01/01/1980") };
         this._reservationState = ReservationState.PendingChoiceSeance;
         // Ensemble des données chargées systématiquement
         this._allSeances = [];
@@ -58,15 +59,22 @@ export class DataController {
         dateMax.setDate((dateMax).getDate() + 90);
         return this.extractFilmsFromSeances(new Date(), dateMax);
     }
-    // 🏆 Variable calculée : retourne les films qui ont une date de sortie au dernier mercredi
+    // 🏆 Variable calculée : retourne les films qui ont une date de sortie au dernier mercredi 
+    // ou les films du catalogue trie par date de sortie
     get filmsSortiesRecentes() {
         const precedentMercredi = datePrecedentMercredi();
-        return this.films.filter((f) => {
+        const filmsMercredi = this.films.filter((f) => {
             if (!f.dateSortieCinePhoria)
                 return false;
             const sortieDate = new Date(f.dateSortieCinePhoria);
             return formatDateLocalYYYYMMDD(sortieDate) === formatDateLocalYYYYMMDD(precedentMercredi);
         });
+        const filmsaTrier = filmsMercredi.length > 0 ? filmsMercredi : this.films;
+        const messageAssocie = filmsMercredi.length > 0 ? "Nouveaute de la semaine" : "Notre catalogue";
+        const filmsListeFinal = filmsaTrier
+            .filter(f => f.dateSortieCinePhoria)
+            .sort((a, b) => new Date(b.dateSortieCinePhoria).getTime() - new Date(a.dateSortieCinePhoria).getTime());
+        return { films: filmsListeFinal, message: messageAssocie };
     }
     // Variable calculée : retourne tous les genres des films filtrés sur le nom du cinema
     get genreSet() {
@@ -586,18 +594,29 @@ export class DataController {
             console.log("DataC: Init");
             // 1) Charger depuis localStorage
             yield this.chargerComplet();
-            // 1 bis) Vérifier qu'il n'y pas de version majeure provoquant un rafrachissement du cache
-            const newVersion = yield getVersionApi();
-            console.log("Version actuelle = ", JSON.stringify(newVersion));
-            if (this.version && newVersion.majeure !== this.version.majeure) {
-                console.log("DataC: nouvelle version majeure -> rechargement depuis l’API");
-                yield this.chargerDepuisAPI();
-                this.version = newVersion;
-                yield this.sauverComplet();
-                return;
+            // 1 bis) Vérifier si la dernier mise à jour du serveur a été prise en compte ou si on 
+            // a changer de version majeure
+            try {
+                const newVersion = yield getVersionApi();
+                console.log("Version du serveur = ", JSON.stringify(newVersion));
+                console.log("Version du cache = ", JSON.stringify(this.version));
+                const isNouvelleVersionServeur = this.version.dateMaj && newVersion.dateMaj &&
+                    this.version.dateMaj < newVersion.dateMaj;
+                const isNouvelleVersionMajeure = this.version.MAJEURE && newVersion.MAJEURE &&
+                    this.version.MAJEURE !== newVersion.MAJEURE;
+                if (isNouvelleVersionServeur || isNouvelleVersionMajeure) {
+                    console.log(`DataC: nouvelle version ${isNouvelleVersionServeur ? "serveur" : "majeur"} - rechargement depuis l’API`);
+                    yield this.chargerDepuisAPI();
+                    this.version = newVersion;
+                    yield this.sauverComplet();
+                    return;
+                }
+                else {
+                    console.log("Pas de mise à jour de cache");
+                }
             }
-            else {
-                console.log("Pas de nouvelle version majeure");
+            catch (error) {
+                console.error("Impossible de versifier la mise à jour su site = ", error);
             }
             // 2) Vérifier la validité du cache via cookie
             let mustReload = true;

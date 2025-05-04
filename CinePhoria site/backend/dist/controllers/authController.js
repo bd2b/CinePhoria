@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const UtilisateurDAO_1 = require("../dao/UtilisateurDAO");
+const AuthDAO_1 = require("../dao/AuthDAO");
 const configLog_1 = __importDefault(require("../config/configLog"));
 const JWT_SECRET = process.env.JWT_SECRET || 'secret-key';
 const JWT_ACCESS_SECRET = process.env.JWT_ACCESS_SECRET || 'access-secret-key';
@@ -13,7 +14,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret-key
 // Durée de vie
 const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION || '15m'; // ex. 15 minutes
 const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION || '7d'; // ex. 7 jours
-const config_1 = require("../config/config");
+const MajSite_1 = require("../shared-models/MajSite");
 class AuthController {
     /**
      * POST /api/login
@@ -96,8 +97,35 @@ class AuthController {
     }
     // Renvoi la version issue du .env
     static async getVersion(req, res) {
-        res.json(config_1.versionCourante);
-        return;
+        try {
+            const version = await AuthDAO_1.AuthDAO.getVersion();
+            configLog_1.default.info(JSON.stringify(version));
+            res.json(version);
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+    static async pushVersion(req, res) {
+        try {
+            // On récupère les données dans req.body
+            const data = req.body;
+            configLog_1.default.info("Creation d'une mise a jour avec data = ", data);
+            // On construit une Maj
+            const majToCreate = new MajSite_1.MajSite(data);
+            // Appel du DAO
+            const result = await AuthDAO_1.AuthDAO.pushVersion(majToCreate);
+            // On renvoie l’ID ou un message
+            res.status(201).json({ message: result });
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+    static async simplePushVersion(message) {
+        const majSite = new MajSite_1.MajSite({ message: message });
+        configLog_1.default.info(`Nouvelle Version =  + ${message}`);
+        await AuthDAO_1.AuthDAO.pushVersion(majSite);
     }
 }
 exports.AuthController = AuthController;

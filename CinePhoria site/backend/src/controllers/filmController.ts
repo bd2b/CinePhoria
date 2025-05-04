@@ -2,6 +2,9 @@ import { Request, Response } from 'express';
 import { FilmDAO } from '../dao/FilmDAO';
 import logger from '../config/configLog';
 import { Film } from "../shared-models/Film";
+import { MajSite } from '../shared-models/MajSite';
+import { AuthDAO } from '../dao/AuthDAO';
+import { AuthController } from './authController';
 
 export class FilmController {
   static async getAllFilms(req: Request, res: Response) {
@@ -63,6 +66,9 @@ export class FilmController {
       // Appel du DAO
       const newId = await FilmDAO.createFilm(filmToCreate);
 
+      // On push une version 
+      await AuthController.simplePushVersion(`Film cree = ${filmToCreate.titleFilm}`)
+
       // On renvoie l’ID ou un message
       res.status(201).json({ message: 'OK', id: newId });
     } catch (error: any) {
@@ -81,6 +87,8 @@ export class FilmController {
       const result = await FilmDAO.updateFilm(filmId, filmToUpdate);
 
       if (result) {
+        // On push une version 
+        await AuthController.simplePushVersion(`Film mis à jour = ${filmToUpdate.titleFilm}`)
         res.json({ message: 'OK' });
       } else {
         res.status(404).json({ message: 'Erreur: Film non trouvé ou non mis à jour' });
