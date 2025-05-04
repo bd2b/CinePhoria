@@ -159,6 +159,11 @@ func apiRequest<T: Decodable>(
 
     if let body = body {
         request.httpBody = try JSONEncoder().encode(AnyEncodable(body))
+        
+        if debugTrace , let jsonString = String(data: request.httpBody ?? Data(), encoding: .utf8) {
+            print("🔎 Requete JSON brute :\n\(jsonString)")
+         }
+        
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
     }
     
@@ -241,4 +246,67 @@ func fetchAllIncidents() async throws -> [IncidentDTO] {
 func fetchUtilisateur(login: String) async throws -> [UtilisateurDTO] {
     let url = "\(domainUrl)/api/utilisateur/\(login)"
     return try await apiRequest(endpoint: url, requiresAuth: true, debugTrace: true)
+}
+
+// MARK: Sauvegarde incident
+func syncIncident(_ incident: Incident) async throws -> Bool {
+    if await incidentWasJustCreated(incident) {
+        return try await createIncidentOnServer(incident)
+    } else {
+        return try await updateIncidentOnServer(incident)
+    }
+}
+
+
+func incidentWasJustCreated(_ incident: Incident) async -> Bool {
+    let url = "\(domainUrl)/api/incidents/\(incident.id)"
+    do {
+        let result: IncidentDTO = try await apiRequest(endpoint: url, requiresAuth: true, debugTrace: true)
+    } catch {
+        return true
+    }
+    return false
+}
+
+func createIncidentOnServer(_ incident: Incident) async throws -> Bool {
+    print("📡 Création de l'incident : \(incident.title)")
+
+    let url = "\(domainUrl)/api/incidents"
+    let dto = IncidentDTO(from: incident)
+
+
+    let json: [String: String] = try await apiRequest(
+        endpoint: url,
+        method: "POST",
+        body: dto,
+        requiresAuth: true,
+        debugTrace: true
+    )
+
+    if let message = json["message"], !message.starts(with: "Erreur") {
+        return true
+    } else {
+        print("❌ Erreur : \(json)")
+        return false
+    }
+}
+
+func updateIncidentOnServer(_ incident: Incident) async throws -> Bool {
+    print("📡 Mise à jour de l'incident \(incident.title)")
+    let url = "\(domainUrl)/api/incidents/\(incident.id)"
+    let dto = IncidentDTO(from: incident)
+    
+    let json: [String: String] = try await apiRequest(
+        endpoint: url,
+        method: "PUT",
+        body: dto,
+        requiresAuth: true,
+        debugTrace: true
+    )
+    if let message = json["message"], !message.starts(with: "Erreur") {
+        return true
+    } else {
+        print("Erreur : \(json)")
+        return false
+    }
 }

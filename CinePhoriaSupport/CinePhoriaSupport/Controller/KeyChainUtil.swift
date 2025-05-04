@@ -21,7 +21,7 @@ public func setValue(_ value: String, for user: String, and service: String) thr
     var query: [String: Any] = [:]
     query[String(kSecClass)] = kSecClassGenericPassword
     query[String(kSecAttrService)] = service
- //   query[String(kSecAttrAccessGroup)] = service + ".Shared"
+//    query[String(kSecAttrAccessGroup)] = service + ".Shared"
     query[String(kSecAttrAccount)] = user
  //   query[String(kSecAttrAccessible)] = kSecAttrAccessibleWhenUnlocked
   

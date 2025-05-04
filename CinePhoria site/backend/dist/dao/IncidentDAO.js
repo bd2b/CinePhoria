@@ -21,24 +21,22 @@ class IncidentDAO {
     static async createIncident(incident) {
         const connection = await config_1.dbPool.getConnection();
         try {
-            // On génére un id (UUID) côté back si il n'est pas fourni
-            const newId = incident.id || generateUUID();
-            configLog_1.default.info(`Insertion dun nouveau incident : ${newId}`);
+            configLog_1.default.info(`Insertion dun nouveau incident : ${incident.id}`);
             await connection.execute(`INSERT INTO Incident
 
     (id, Salleid, matricule, status, title, description, dateOpen, dateClose)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`, [
-                newId,
+                incident.id,
                 incident.Salleid || null,
                 incident.matricule || null,
                 incident.status || null,
                 incident.title || "",
                 incident.description || "",
-                (0, HelpersCommon_1.formatDateLocalYYYYMMDD)(incident.dateOpen) || "",
-                (0, HelpersCommon_1.formatDateLocalYYYYMMDD)(incident.dateClose) || ""
+                (0, HelpersCommon_1.formatDateLocalYYYYMMDD)(new Date(incident.dateOpen)) || "",
+                incident.dateClose ? (0, HelpersCommon_1.formatDateLocalYYYYMMDD)(new Date(incident.dateClose)) || "null" : null,
             ]);
             connection.release();
-            return newId;
+            return incident.id;
         }
         catch (err) {
             connection.release();
@@ -53,16 +51,15 @@ class IncidentDAO {
         try {
             configLog_1.default.info(`Mise à jour de la incident ${id}`);
             const [result] = await connection.execute(`UPDATE Incident SET
-              Salleid, matricule, status, title, description, dateOpen, dateClose
-            
-                WHERE id=?`, [
+                    Salleid=?, matricule=?, status=?, title=?, description=?, dateOpen=?, dateClose=?
+                 WHERE id=?`, [
                 incident.Salleid || null,
                 incident.matricule || null,
                 incident.status || null,
                 incident.title || "",
                 incident.description || "",
-                (0, HelpersCommon_1.formatDateLocalYYYYMMDD)(incident.dateOpen) || "",
-                (0, HelpersCommon_1.formatDateLocalYYYYMMDD)(incident.dateClose) || "",
+                (0, HelpersCommon_1.formatDateLocalYYYYMMDD)(new Date(incident.dateOpen)) || "",
+                incident.dateClose ? (0, HelpersCommon_1.formatDateLocalYYYYMMDD)(new Date(incident.dateClose)) || "null" : null,
                 id
             ]);
             connection.release();

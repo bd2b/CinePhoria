@@ -4,7 +4,7 @@ DEVELOPPEMENT=false
 # Version majeure.mineure et build
 MAJEURE=4
 MINEURE=1
-BUILD=25
+BUILD=32
 
 # Configuration du port
 PORT=3500

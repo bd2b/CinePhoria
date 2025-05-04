@@ -1,6 +1,6 @@
 import { Incident } from "../shared-models/Incident";
 
-import { dbPool} from "../config/config";
+import { dbPool } from "../config/config";
 import logger from '../config/configLog';
 
 import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
@@ -14,38 +14,37 @@ export class IncidentDAO {
         logger.info('Exécution de la requête : SELECT * FROM Incident');
         const [rows] = await connection.execute('SELECT * FROM Incident');
         connection.release();
-    
+
         // On convertit chaque record en Incident
         return (rows as any[]).map(row => new Incident(row));
-    
-      }
+
+    }
 
     // Create
     static async createIncident(incident: Incident): Promise<string> {
         const connection = await dbPool.getConnection();
         try {
-            // On génére un id (UUID) côté back si il n'est pas fourni
-            const newId = incident.id || generateUUID();
+            
 
-            logger.info(`Insertion dun nouveau incident : ${newId}`);
+            logger.info(`Insertion dun nouveau incident : ${incident.id}`);
             await connection.execute(
                 `INSERT INTO Incident
 
     (id, Salleid, matricule, status, title, description, dateOpen, dateClose)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    newId, 
+                    incident.id,
                     incident.Salleid || null,
                     incident.matricule || null,
-                    incident.status || null ,
+                    incident.status || null,
                     incident.title || "",
                     incident.description || "",
-                    formatDateLocalYYYYMMDD(incident.dateOpen!) || "" ,
-                    formatDateLocalYYYYMMDD(incident.dateClose!) || ""   
+                    formatDateLocalYYYYMMDD(new Date(incident.dateOpen!)) || "",
+                    incident.dateClose ? formatDateLocalYYYYMMDD(new Date(incident.dateClose!)) || "null" : null,
                 ]
             );
             connection.release();
-            return newId;
+            return incident.id;
         } catch (err) {
             connection.release();
             logger.error('Erreur creation incident:', err);
@@ -56,25 +55,24 @@ export class IncidentDAO {
     // Update
     static async updateIncident(id: string, incident: Incident): Promise<boolean> {
         // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
-        
+
         const connection = await dbPool.getConnection();
+
         try {
             logger.info(`Mise à jour de la incident ${id}`);
             const [result] = await connection.execute(
-            `UPDATE Incident SET
-              Salleid, matricule, status, title, description, dateOpen, dateClose
-            
-                WHERE id=?`,
-                [    
+                `UPDATE Incident SET
+                    Salleid=?, matricule=?, status=?, title=?, description=?, dateOpen=?, dateClose=?
+                 WHERE id=?`,
+                [
                     incident.Salleid || null,
                     incident.matricule || null,
-                    incident.status || null ,
+                    incident.status || null,
                     incident.title || "",
                     incident.description || "",
-                    formatDateLocalYYYYMMDD(incident.dateOpen!) || "" ,
-                    formatDateLocalYYYYMMDD(incident.dateClose!) || ""  ,
-                    id  
-
+                    formatDateLocalYYYYMMDD(new Date(incident.dateOpen!)) || "",
+                    incident.dateClose ? formatDateLocalYYYYMMDD(new Date(incident.dateClose!)) || "null" : null,
+                    id
                 ]
             );
             connection.release();
@@ -112,11 +110,11 @@ export class IncidentDAO {
         logger.info('Connexion réussie à la base de données');
         const [rows] = await connection.execute('SELECT * FROM Incident WHERE id = ?', [id]);
         connection.release();
-    
+
         const data = (rows as any[])[0];
         return data ? new Incident(data) : null;
-      }
-    
+    }
+
 }
 
 // *** générateur d'UUID

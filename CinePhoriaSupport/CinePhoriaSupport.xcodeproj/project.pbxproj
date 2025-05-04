@@ -94,6 +94,8 @@
 			);
 			mainGroup = ED4631CD2DC3D31D00B22624;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ED4631D72DC3D31D00B22624 /* Products */;
 			projectDirPath = "";
@@ -254,7 +256,7 @@
 				CODE_SIGN_ENTITLEMENTS = CinePhoriaSupport/CinePhoriaSupport.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = Z5R7RAJTVS;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
@@ -284,7 +286,7 @@
 				CODE_SIGN_ENTITLEMENTS = CinePhoriaSupport/CinePhoriaSupport.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = Z5R7RAJTVS;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
