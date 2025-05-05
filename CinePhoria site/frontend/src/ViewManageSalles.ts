@@ -27,11 +27,14 @@ export async function onLoadManageSalles() {
     await chargerMenu(); // Header
     await chargerCinemaSites(); // Footer
 
+    // Mise à jour de la version
+    await DataControllerIntranet.majVersion();
+
     // Charger la liste des cinemas autorisés
     let compteEmploye: ComptePersonne | undefined;
     if (userDataController) {
         compteEmploye = userDataController.compte();
-        if (compteEmploye && compteEmploye.listCinemas && !compteEmploye.isAdministrateur) {
+        if (compteEmploye && compteEmploye.listCinemas) {
             listCinemaAuthTab = compteEmploye.listCinemas?.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
             listCinemaAuth = compteEmploye.listCinemas;
         }

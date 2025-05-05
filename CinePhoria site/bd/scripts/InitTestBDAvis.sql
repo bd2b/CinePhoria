@@ -24,9 +24,9 @@ BEGIN
   DECLARE current_user_var VARCHAR(100);
 
   -- Récupérer les utilisateurs concernés
-  SELECT id INTO u1 FROM Utilisateur WHERE email = 'djamila@mail.fr' LIMIT 1;
-  SELECT id INTO u2 FROM Utilisateur WHERE email = 'jean@mail.fr' LIMIT 1;
-  SELECT id INTO u3 FROM Utilisateur WHERE email = 'kevin@mail.fr' LIMIT 1;
+  SELECT id INTO u1 FROM Utilisateur WHERE email = 'djamila@7art.fr' LIMIT 1;
+  SELECT id INTO u2 FROM Utilisateur WHERE email = 'jean@7art.fr' LIMIT 1;
+  SELECT id INTO u3 FROM Utilisateur WHERE email = 'kevin@7art.fr' LIMIT 1;
 
   user_loop: WHILE d < 20 DO
     -- Récupère 10 séances aléatoires pour la date d = aujourd’hui - d

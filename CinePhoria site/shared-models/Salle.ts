@@ -19,5 +19,6 @@ export interface ListSalles {
    id: string;
    nomSalle: string;
    capacite?: number;
-   numPMR?: number
+   numPMR?: number;
+   nameCinema?: string;
 }

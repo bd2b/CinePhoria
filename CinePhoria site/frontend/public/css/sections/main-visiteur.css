@@ -50,6 +50,8 @@
     display: flex;
     padding: 0px 10px;
     gap: 20px;
+    min-height: 590px;
+
 }
 
 

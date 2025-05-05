@@ -793,6 +793,10 @@ VALUES
 --  (UUIDTarifQualite7, UUIDReservation3, 3,40.0),
 --  (UUIDTarifQualite8, UUIDReservation3, 3,40.0)
 --   ;
+
+-- Mise à jour de la table MajSite
+INSERT INTO MajSite ( MAJEURE , MINEURE , BUILD,  dateMaj , message  )
+VALUES (0,0,0,NOW(),"Initialisation de la base");
   
   END $$
 DELIMITER ;

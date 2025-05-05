@@ -7,12 +7,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi, employeUpdateApi } from './NetworkController.js';
-import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi, reservationsByCinemaApi, reservationAvisUpdateApi, employesSelectAllApi, getEmployeByMatriculeApi, employeCreateApi, employeDeleteApi, getReservationStatsApi } from './NetworkController.js';
+import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi, employeUpdateApi, getVersionApi } from './NetworkController.js';
+import { sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi, reservationsByCinemaApi, reservationAvisUpdateApi, employesSelectAllApi, getEmployeByMatriculeApi, employeCreateApi, employeDeleteApi, getReservationStatsApi, } from './NetworkController.js';
+import { majFooterVersion } from './ViewFooter.js';
 export class DataControllerIntranet {
+    static majVersion() {
+        return __awaiter(this, void 0, void 0, function* () {
+            var _a, _b, _c;
+            this.version = yield getVersionApi();
+            majFooterVersion(((_a = this.version.MAJEURE) === null || _a === void 0 ? void 0 : _a.toString(10)) || '', ((_b = this.version.MINEURE) === null || _b === void 0 ? void 0 : _b.toString(10)) || '', ((_c = this.version.BUILD) === null || _c === void 0 ? void 0 : _c.toString(10)) || '');
+        });
+    }
     static allFilms() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                // On en profite pour mettre à jour la version
+                const newVersion = yield getVersionApi();
                 const films = yield filmsSelectAllApi();
                 if (films.length > 0) {
                     this._filmMustBeFetched = false;
@@ -283,7 +293,8 @@ export class DataControllerIntranet {
                             // Si on est sur tous les cinemas, on ajoute le com du cinema dans l'intitulé de la salle
                             nomSalle: s.nameCinema + "-" + s.nameSalle,
                             capacite: s.capacity,
-                            numPMR: s.numPMR
+                            numPMR: s.numPMR,
+                            nameCinema: s.nameCinema
                         }])).values());
                 }
                 else {
@@ -469,6 +480,7 @@ export class DataControllerIntranet {
         console.log("DataCIntranet : Initialisation");
     }
 }
+DataControllerIntranet.version = { idInt: 0, MAJEURE: 0, MINEURE: 0, BUILD: 0, dateMaj: new Date("01/01/1980") };
 DataControllerIntranet._filmMustBeFetched = true;
 DataControllerIntranet._allFilms = [];
 // Gestion des salles

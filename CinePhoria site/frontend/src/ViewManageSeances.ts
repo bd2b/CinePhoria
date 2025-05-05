@@ -35,6 +35,9 @@ export async function onLoadManageSeances() {
     await chargerMenu(); // Header
     await chargerCinemaSites(); // Footer
 
+    // Mise à jour de la version
+    await DataControllerIntranet.majVersion();
+
     // Charger la liste des cinemas autorisés
     let compteEmploye: ComptePersonne | undefined;
     if (userDataController) {
@@ -110,9 +113,7 @@ async function rafraichirTableauSeances(): Promise<void> {
 
     // Mise à jour de la list des films et de salle
     listFilms = await DataControllerIntranet.getListFilmsAll();
-    listSalles = await DataControllerIntranet.getSallesByFilter();
-
-
+    listSalles = (await DataControllerIntranet.getSallesByFilter()).filter(salle => listCinemaAuthTab.includes(salle.nameCinema!));
 
 }
 

@@ -28,6 +28,8 @@ export function onLoadDashboard() {
         // Charger menu et footer
         yield chargerMenu(); // Header
         yield chargerCinemaSites(); // Footer
+        // Mise à jour de la version
+        yield DataControllerIntranet.majVersion();
         // Rafraîchir la liste de tous les reservationStats
         yield rafraichirDashboard();
     });
