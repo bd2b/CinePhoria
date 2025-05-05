@@ -30,6 +30,9 @@ export async function onLoadManageFilms() {
     await chargerMenu(); // Header
     await chargerCinemaSites(); // Footer
 
+    // Mise à jour de la version
+    await DataControllerIntranet.majVersion();
+
     // Rafraîchir la liste de tous les films
     await rafraichirListeFilms();
 

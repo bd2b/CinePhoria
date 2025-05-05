@@ -23,9 +23,14 @@ const COLORS = [
 export async function onLoadDashboard() {
     console.log("=====> chargement onLoadDashboard");
 
+     
+
     // Charger menu et footer
     await chargerMenu(); // Header
     await chargerCinemaSites(); // Footer
+
+    // Mise à jour de la version
+    await DataControllerIntranet.majVersion();
 
     // Rafraîchir la liste de tous les reservationStats
     await rafraichirDashboard();

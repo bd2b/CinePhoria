@@ -28,11 +28,13 @@ export function onLoadManageSalles() {
         // Charger menu et footer
         yield chargerMenu(); // Header
         yield chargerCinemaSites(); // Footer
+        // Mise à jour de la version
+        yield DataControllerIntranet.majVersion();
         // Charger la liste des cinemas autorisés
         let compteEmploye;
         if (userDataController) {
             compteEmploye = userDataController.compte();
-            if (compteEmploye && compteEmploye.listCinemas && !compteEmploye.isAdministrateur) {
+            if (compteEmploye && compteEmploye.listCinemas) {
                 listCinemaAuthTab = (_a = compteEmploye.listCinemas) === null || _a === void 0 ? void 0 : _a.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
                 listCinemaAuth = compteEmploye.listCinemas;
             }

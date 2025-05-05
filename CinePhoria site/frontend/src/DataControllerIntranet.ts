@@ -1,25 +1,42 @@
 import { Film, ListFilms } from './shared-models/Film.js';
-import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi, employeUpdateApi } from './NetworkController.js';
+import { filmsSelectAllApi, filmsUpdateApi, filmsCreateApi, employeUpdateApi, getVersionApi } from './NetworkController.js';
 import { Salle, ListSalles } from './shared-models/Salle.js';
 import {
     sallesSelectAllApi, sallesUpdateApi, sallesCreateApi, seancesDisplayByCinemaApi,
     seancesseulesDeleteApi, seancesseulesCreateApi, seancesseulesUpdateApi, seancesseulesSelectApi, sallesSelectCinemaApi,
     reservationsByCinemaApi, reservationAvisUpdateApi,
     employesSelectAllApi , getEmployeByMatriculeApi, employeCreateApi , employeDeleteApi,
-    getReservationStatsApi
+    getReservationStatsApi , 
 } from './NetworkController.js';
 import { Seance, SeanceDisplay } from './shared-models/Seance.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
 import { ReservationForUtilisateur, Reservation, ReservationAvis, ReservationStats } from './shared-models/Reservation.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
+import { MajSite } from './shared-models/MajSite.js';
+import { majFooterVersion } from './ViewFooter.js';
 
 export class DataControllerIntranet {
+
+    static version: MajSite = { idInt: 0, MAJEURE: 0, MINEURE: 0, BUILD: 0, dateMaj: new Date("01/01/1980") };
 
     private static _filmMustBeFetched: boolean = true;
     private static _allFilms: Film[] = [];
 
+    public static async majVersion() {
+        this.version = await getVersionApi();
+         majFooterVersion( 
+          this.version.MAJEURE?.toString(10) || '',
+          this.version.MINEURE?.toString(10) || '',
+          this.version.BUILD?.toString(10) || '' );
+    }
+
     public static async allFilms(): Promise<Film[]> {
         try {
+
+            // On en profite pour mettre à jour la version
+            const newVersion = await getVersionApi();
+
+
             const films = await filmsSelectAllApi();
             if (films.length > 0) {
                 this._filmMustBeFetched = false;
@@ -286,7 +303,8 @@ export class DataControllerIntranet {
                                 // Si on est sur tous les cinemas, on ajoute le com du cinema dans l'intitulé de la salle
                                 nomSalle: s.nameCinema! + "-" + s.nameSalle!,
                                 capacite: s.capacity!,
-                                numPMR: s.numPMR!
+                                numPMR: s.numPMR!,
+                                nameCinema : s.nameCinema!
                             }])
                     ).values()
                 );
@@ -465,5 +483,6 @@ export class DataControllerIntranet {
 
     constructor() {
         console.log("DataCIntranet : Initialisation");
+        
     }
 }

@@ -13,9 +13,15 @@ let filtreJour = '';
 export async function onLoadManageAvis(vfiltreJour: string = "", filtreCinema: string = "all") {
     console.log("=====> chargement onLoadManageAvis");
 
+    // Mise à jour de la version
+    await DataControllerIntranet.majVersion();
+
     // Charger menu et footer
     await chargerMenu(); // Header
     await chargerCinemaSites(); // Footer
+
+    // Mise à jour de la version
+    await DataControllerIntranet.majVersion();
 
     // Initialisation filtres
     await initFiltreCinema();

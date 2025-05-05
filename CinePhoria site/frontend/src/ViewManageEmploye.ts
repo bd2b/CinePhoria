@@ -34,6 +34,9 @@ export async function onLoadManageEmployes() {
     await chargerMenu(); // Header
     await chargerCinemaSites(); // Footer
 
+    // Mise à jour de la version
+    await DataControllerIntranet.majVersion();
+
     // Rafraîchir la liste de tous les employes
     await rafraichirListeEmployes();
 

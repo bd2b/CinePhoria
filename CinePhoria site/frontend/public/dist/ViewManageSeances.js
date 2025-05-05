@@ -31,6 +31,8 @@ export function onLoadManageSeances() {
         // Charger menu et footer
         yield chargerMenu(); // Header
         yield chargerCinemaSites(); // Footer
+        // Mise à jour de la version
+        yield DataControllerIntranet.majVersion();
         // Charger la liste des cinemas autorisés
         let compteEmploye;
         if (userDataController) {
@@ -93,7 +95,7 @@ function rafraichirTableauSeances() {
         syncTableColumnWidths(tableSeances);
         // Mise à jour de la list des films et de salle
         listFilms = yield DataControllerIntranet.getListFilmsAll();
-        listSalles = yield DataControllerIntranet.getSallesByFilter();
+        listSalles = (yield DataControllerIntranet.getSallesByFilter()).filter(salle => listCinemaAuthTab.includes(salle.nameCinema));
     });
 }
 /* -------------------------------------------

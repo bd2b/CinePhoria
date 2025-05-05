@@ -33,6 +33,8 @@ export function onLoadManageEmployes() {
         // Charger menu et footer
         yield chargerMenu(); // Header
         yield chargerCinemaSites(); // Footer
+        // Mise à jour de la version
+        yield DataControllerIntranet.majVersion();
         // Rafraîchir la liste de tous les employes
         yield rafraichirListeEmployes();
         // Init les 3 boutons (Ajouter, Modifier, Annuler)

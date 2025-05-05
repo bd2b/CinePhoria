@@ -128,7 +128,7 @@ export async function chargerCinemaSites() {
   }
 
 
-  footerElement.offsetHeight; // Force un reflow
+  
 console.log(" Version connu ", JSON.stringify(dataController.version))
 
   majFooterVersion( 
@@ -136,6 +136,8 @@ console.log(" Version connu ", JSON.stringify(dataController.version))
   dataController.version.MINEURE?.toString(10) || '',
   dataController.version.BUILD?.toString(10) || '' );
 
+  
+  footerElement.offsetHeight; // Force un reflow
   try {
     const cinemas = dataController.cinemas;
     const container = document.getElementById('container__sites');

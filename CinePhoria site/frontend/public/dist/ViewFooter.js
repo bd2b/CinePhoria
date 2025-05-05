@@ -125,9 +125,9 @@ export function chargerCinemaSites() {
                 modal.style.display = 'block';
             });
         }
-        footerElement.offsetHeight; // Force un reflow
         console.log(" Version connu ", JSON.stringify(dataController.version));
         majFooterVersion(((_a = dataController.version.MAJEURE) === null || _a === void 0 ? void 0 : _a.toString(10)) || '', ((_b = dataController.version.MINEURE) === null || _b === void 0 ? void 0 : _b.toString(10)) || '', ((_c = dataController.version.BUILD) === null || _c === void 0 ? void 0 : _c.toString(10)) || '');
+        footerElement.offsetHeight; // Force un reflow
         try {
             const cinemas = dataController.cinemas;
             const container = document.getElementById('container__sites');
