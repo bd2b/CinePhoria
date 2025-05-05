@@ -3,11 +3,15 @@ import { Salle, ListSalles } from './shared-models/Salle.js';
 import { Seance, SeanceDisplay, } from './shared-models/Seance.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
-import { syncTableColumnWidths, imageFilm, formatDateJJMM , parseLocalDate, 
-            formatDateJJMMStr, formatterJJMM, formatDateLocalYYYYMMDD } from './Helpers.js';
+import {
+    syncTableColumnWidths, imageFilm, formatDateJJMM, parseLocalDate,
+    formatDateJJMMStr, formatterJJMM, formatDateLocalYYYYMMDD
+} from './Helpers.js';
 import { ListFilms } from './shared-models/Film.js';
 import { SeanceSeule } from './shared-models/SeanceSeule.js';
 import { seancesseulesDeleteApi } from './NetworkController.js';
+import { userDataController } from './DataControllerUser.js';
+import { ComptePersonne } from './shared-models/Utilisateur.js';
 
 
 
@@ -16,6 +20,10 @@ let listFilms: ListFilms[];
 let listSalles: ListSalles[];
 
 let filtreJour = '';
+
+// Récupération des cinemas autorisés pour les employés non administrateurs
+let listCinemaAuthTab: string[] = []
+let listCinemaAuth: string = "";
 
 /**
  * Entrée principale du module
@@ -26,6 +34,41 @@ export async function onLoadManageSeances() {
     // Charger menu et footer
     await chargerMenu(); // Header
     await chargerCinemaSites(); // Footer
+
+    // Charger la liste des cinemas autorisés
+    let compteEmploye: ComptePersonne | undefined;
+    if (userDataController) {
+        compteEmploye = userDataController.compte();
+        if (compteEmploye && compteEmploye.listCinemas && !compteEmploye.isAdministrateur) {
+            listCinemaAuthTab = compteEmploye.listCinemas?.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+            listCinemaAuth = compteEmploye.listCinemas;
+        }
+    }
+    console.log("List Cinemas autorisés = ", listCinemaAuth, listCinemaAuthTab)
+
+    // Appliquer cette liste à la mise à jour du dropdown de Cinema
+    const dropdownCinema = document.querySelector('.titre__filter-dropdown-cinema');
+    if (dropdownCinema) {
+        const dropdownContent = dropdownCinema.querySelector('.title__filter-button-drowdown-content');
+        if (dropdownContent) {
+            dropdownContent.innerHTML = ''; // Vider l'existant
+
+            const aAll = document.createElement('a');
+            aAll.href = '#';
+            aAll.dataset.cinema = 'Tous les complexes';
+            aAll.textContent = 'Tous les complexes';
+            dropdownContent.appendChild(aAll);
+
+            listCinemaAuthTab.forEach(nomCinema => {
+                const a = document.createElement('a');
+                a.href = '#';
+                a.dataset.cinema = nomCinema;
+                a.textContent = nomCinema;
+                dropdownContent.appendChild(a);
+            });
+        }
+    }
+    
 
     // Initialisation filtres
     await initFiltreCinema();
@@ -48,11 +91,14 @@ async function rafraichirTableauSeances(): Promise<void> {
     container.innerHTML = '';
 
     // Charger les séances
-    let seances = await DataControllerIntranet.getSeancesDisplayFilter();
-    
+    //let seances = await DataControllerIntranet.getSeancesDisplayFilter();
+
+    // Charger les séances pour les cinemas autorisés
+    let seances = (await DataControllerIntranet.getSeancesDisplayFilter()).filter(seance => listCinemaAuthTab.includes(seance.nameCinema!));
+
     if (filtreJour) {
-        seances = seances.filter((s) => 
-                    s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false)
+        seances = seances.filter((s) =>
+            s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false)
     }
 
     // Construction de la page
