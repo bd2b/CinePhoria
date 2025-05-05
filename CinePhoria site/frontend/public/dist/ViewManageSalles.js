@@ -13,16 +13,31 @@ import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { sallesUpdateApi, sallesCreateApi, sallesDeleteApi } from './NetworkController.js';
 import { syncTableColumnWidths } from './Helpers.js';
+import { userDataController } from './DataControllerUser.js';
 let isDefinePlan = false;
+// Récupération des cinemas autorisés pour les employés non administrateurs
+let listCinemaAuthTab = [];
+let listCinemaAuth = "";
 /**
  * Entrée principale du module
  */
 export function onLoadManageSalles() {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a;
         console.log("=====> chargement onLoadManageSalles");
         // Charger menu et footer
         yield chargerMenu(); // Header
         yield chargerCinemaSites(); // Footer
+        // Charger la liste des cinemas autorisés
+        let compteEmploye;
+        if (userDataController) {
+            compteEmploye = userDataController.compte();
+            if (compteEmploye && compteEmploye.listCinemas && !compteEmploye.isAdministrateur) {
+                listCinemaAuthTab = (_a = compteEmploye.listCinemas) === null || _a === void 0 ? void 0 : _a.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+                listCinemaAuth = compteEmploye.listCinemas;
+            }
+        }
+        console.log("List Cinemas autorisés = ", listCinemaAuth, listCinemaAuthTab);
         // Rafraîchir le tableau des salles
         yield rafraichirTableauSalles();
     });
@@ -38,8 +53,8 @@ function rafraichirTableauSalles() {
             return;
         }
         container.innerHTML = '';
-        // Charger les films
-        const salles = yield DataControllerIntranet.allSalles();
+        // Charger les films pour les cinemas autorisés
+        const salles = (yield DataControllerIntranet.allSalles()).filter(salle => listCinemaAuthTab.includes(salle.nameCinema));
         // Construction de la page
         const tableSalles = yield updateTableSalles(salles);
         container.appendChild(tableSalles);
@@ -239,7 +254,7 @@ export function createCinemaDropdown(nameCinema, suffId) {
     dropdown.style.position = 'absolute';
     dropdown.style.zIndex = '1000';
     dropdown.style.backgroundColor = '#fff';
-    const cinemas = ['Paris', 'Bordeaux', 'Nantes', 'Lille', 'Toulouse', 'Charleroi', 'Liège'];
+    const cinemas = listCinemaAuthTab;
     cinemas.forEach(cinema => {
         const a = document.createElement('a');
         a.href = '#';
@@ -379,7 +394,7 @@ function fillFormWithSalle(typeEltParentHTML, typeEltChildHTML, suffId, salle) {
         // 1) Complexe
         const tdComplexe = document.createElement(typeEltChildHTML);
         // Dropdown avec la liste des cinemas
-        tdComplexe.appendChild(createCinemaDropdown((salle === null || salle === void 0 ? void 0 : salle.nameCinema) || 'Paris', suffId));
+        tdComplexe.appendChild(createCinemaDropdown((salle === null || salle === void 0 ? void 0 : salle.nameCinema) || listCinemaAuthTab[0], suffId));
         if (suffId === 'table') {
             tdComplexe.classList.add('form__group');
         }
@@ -506,7 +521,7 @@ function buildSalleFromForm(salleId, suffId) {
         const newSalle = new Salle({ id: salleId });
         const complexe = document.getElementById('titre__filter-dropdown-complexe' + suffId);
         if (complexe)
-            newSalle.nameCinema = ((_a = complexe.textContent) === null || _a === void 0 ? void 0 : _a.replace('▼', '').trim()) || 'Paris';
+            newSalle.nameCinema = ((_a = complexe.textContent) === null || _a === void 0 ? void 0 : _a.replace('▼', '').trim()) || listCinemaAuthTab[0];
         console.log("Nom cinema = ", newSalle.nameCinema);
         const nameSalleInput = document.getElementById('nameSalleInput' + suffId);
         if (nameSalleInput)

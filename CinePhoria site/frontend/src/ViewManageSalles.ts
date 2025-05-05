@@ -5,10 +5,17 @@ import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { sallesUpdateApi, sallesCreateApi, sallesDeleteApi } from './NetworkController.js';
 import { syncTableColumnWidths } from './Helpers.js';
+import { userDataController } from './DataControllerUser.js';
+import { ComptePersonne } from './shared-models/Utilisateur.js';
 
 
 
 let isDefinePlan = false;
+
+// Récupération des cinemas autorisés pour les employés non administrateurs
+let listCinemaAuthTab: string[] = []
+let listCinemaAuth: string = "";
+
 
 /**
  * Entrée principale du module
@@ -19,6 +26,17 @@ export async function onLoadManageSalles() {
     // Charger menu et footer
     await chargerMenu(); // Header
     await chargerCinemaSites(); // Footer
+
+    // Charger la liste des cinemas autorisés
+    let compteEmploye: ComptePersonne | undefined;
+    if (userDataController) {
+        compteEmploye = userDataController.compte();
+        if (compteEmploye && compteEmploye.listCinemas && !compteEmploye.isAdministrateur) {
+            listCinemaAuthTab = compteEmploye.listCinemas?.split(',').map(s => s.trim().replace(/^"|"$/g, ''));
+            listCinemaAuth = compteEmploye.listCinemas;
+        }
+    }
+    console.log("List Cinemas autorisés = ", listCinemaAuth, listCinemaAuthTab)
 
     // Rafraîchir le tableau des salles
     await rafraichirTableauSalles();
@@ -35,8 +53,10 @@ async function rafraichirTableauSalles(): Promise<void> {
     }
     container.innerHTML = '';
 
-    // Charger les films
-    const salles = await DataControllerIntranet.allSalles();
+    // Charger les films pour les cinemas autorisés
+    const salles = (await DataControllerIntranet.allSalles()).filter(salle => listCinemaAuthTab.includes(salle.nameCinema!));
+
+
     // Construction de la page
     const tableSalles = await updateTableSalles(salles) as HTMLTableElement;
     container.appendChild(tableSalles);
@@ -269,7 +289,8 @@ export function createCinemaDropdown(nameCinema: string, suffId: string): HTMLDi
     dropdown.style.zIndex = '1000';
     dropdown.style.backgroundColor = '#fff';
 
-    const cinemas = ['Paris', 'Bordeaux', 'Nantes', 'Lille', 'Toulouse', 'Charleroi', 'Liège'];
+    const cinemas = listCinemaAuthTab;
+    
     cinemas.forEach(cinema => {
         const a = document.createElement('a');
         a.href = '#';
@@ -437,7 +458,7 @@ async function fillFormWithSalle(typeEltParentHTML: string, typeEltChildHTML: st
     // 1) Complexe
     const tdComplexe = document.createElement(typeEltChildHTML);
     // Dropdown avec la liste des cinemas
-    tdComplexe.appendChild(createCinemaDropdown(salle?.nameCinema || 'Paris', suffId));
+    tdComplexe.appendChild(createCinemaDropdown(salle?.nameCinema || listCinemaAuthTab[0], suffId));
     if (suffId === 'table') {
         tdComplexe.classList.add('form__group');
     }
@@ -582,7 +603,7 @@ async function buildSalleFromForm(salleId: string, suffId: string): Promise<Sall
     const newSalle = new Salle({ id: salleId });
 
     const complexe = document.getElementById('titre__filter-dropdown-complexe' + suffId) as HTMLButtonElement;
-    if (complexe) newSalle.nameCinema = complexe.textContent?.replace('▼', '').trim() || 'Paris';
+    if (complexe) newSalle.nameCinema = complexe.textContent?.replace('▼', '').trim() || listCinemaAuthTab[0];
     console.log("Nom cinema = ", newSalle.nameCinema);
 
     const nameSalleInput = document.getElementById('nameSalleInput' + suffId) as HTMLInputElement;
