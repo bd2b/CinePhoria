@@ -1,5 +1,5 @@
 // ViewFilm.ts
-import { dataController } from './DataController.js';
+import { dataController , dataReady} from './DataController.js';
 import { formatDateLocalYYYYMMDD, setCookie, imageFilm } from './Helpers.js';
 import { Film } from './shared-models/Film.js';
 import { ReservationState } from './shared-models/Reservation.js';
@@ -17,8 +17,8 @@ let filtreJour = '';
 export async function onLoadFilms() {
     console.log("=====> chargement onLoadFilms");
 
-    // 1) On initialise le dataController si il est vide
-    if (dataController.allSeances.length === 0) await dataController.init()
+    await dataReady; // ✅ Attend que les données soient prêtes
+    console.log("Données chargées, traitement de la page Films...");
 
     // On charge menu et footer
     await chargerMenu(); // Header

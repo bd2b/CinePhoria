@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 // ViewFilm.ts
-import { dataController } from './DataController.js';
+import { dataController, dataReady } from './DataController.js';
 import { formatDateLocalYYYYMMDD, imageFilm } from './Helpers.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { chargerMenu } from './ViewMenu.js';
@@ -21,9 +21,8 @@ let filtreJour = '';
 export function onLoadFilms() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("=====> chargement onLoadFilms");
-        // 1) On initialise le dataController si il est vide
-        if (dataController.allSeances.length === 0)
-            yield dataController.init();
+        yield dataReady; // ✅ Attend que les données soient prêtes
+        console.log("Données chargées, traitement de la page Films...");
         // On charge menu et footer
         yield chargerMenu(); // Header
         yield chargerCinemaSites(); // Footer

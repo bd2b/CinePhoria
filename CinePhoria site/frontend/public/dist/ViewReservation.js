@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID } from './Helpers.js';
-import { dataController } from './DataController.js';
+import { dataController, dataReady } from './DataController.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { updateContentPlace } from './ViewReservationPlaces.js';
 import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReservationDisplay.js';
@@ -17,9 +17,10 @@ import { chargerCinemaSites } from './ViewFooter.js';
 import { imageFilm } from "./Helpers.js";
 export function onLoadReservation() {
     return __awaiter(this, void 0, void 0, function* () {
-        // On initialise le dataController si il est vide
-        if (dataController.allSeances.length === 0)
-            yield dataController.init();
+        // const page = window.location.pathname.split("/").pop(); // Récupère le nom de la page actuelle
+        // if (page != "reservation.html") return;
+        yield dataReady; // ✅ Attend que les données soient prêtes
+        console.log("Données chargées, traitement de la page reservations...");
         // On charge menu et footer
         yield chargerMenu(); // Header
         yield chargerCinemaSites(); // Footer
@@ -261,7 +262,12 @@ function afficherListeFilms() {
         // Créer l'image
         const img = document.createElement('img');
         img.classList.add('listFilms__simpleCard-img');
-        img.src = imageFilm(film.imageFilm1024);
+        if (film.imageFilm1024) {
+            img.src = imageFilm(film.imageFilm1024);
+        }
+        else {
+            console.log("Erreur imageFilm");
+        }
         img.alt = (_a = film.titleFilm) !== null && _a !== void 0 ? _a : 'Affiche';
         // Titre
         const pTitre = document.createElement('p');

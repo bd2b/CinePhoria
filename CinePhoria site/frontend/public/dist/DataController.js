@@ -31,8 +31,13 @@ import { ReservationState } from './shared-models/Reservation.js';
 import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
 import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { Cinema } from './shared-models/Cinema.js';
-import { getSeancesByIdApi, getVersionApi } from './NetworkController.js';
+import { getSeancesByIdApi, getVersionApi, filmsSelectAllApi } from './NetworkController.js';
 import { baseUrl } from './Global.js';
+// Promesse d'attente de la fin du chargement des données par les modules de page
+let resolveReady;
+export const dataReady = new Promise((resolve) => {
+    resolveReady = resolve;
+});
 export class DataController {
     constructor() {
         //  protected version: { majeure: number, mineure: number, build: number } = {majeure: 0, mineure: 0, build: 0};
@@ -259,6 +264,8 @@ export class DataController {
             if (loader)
                 loader.style.display = 'block';
             try {
+                // 0) Chargement de tous les films dans la variables de class allFilms de Seance
+                Seance.allFilms = yield filmsSelectAllApi();
                 // 1) Chargement de toutes les séances
                 const response = yield fetch(`${baseUrl}/api/seances/filter?cinemasList="all"`);
                 const rawData = yield response.json();
@@ -299,47 +306,25 @@ export class DataController {
         });
     }
     /**
-     * Extraction des films du tableau seance (filtré sur filterNameCinema) ayant une séance entre deux dates,
-     * @param dateInf : Date inférieur initialisée par défaut à la date du jour
-     * @param dateSup : Date supérieur initialisée par défaut à la date du jour
-     * cela donne par défaut les films qui ont une séance à aujourd'hui et possibilité de gérer une plage de date quelconque
-     */
+   * Extraction des films du tableau seance (filtré sur filterNameCinema) ayant une séance entre deux dates,
+   * @param dateInf : Date inférieur initialisée par défaut à la date du jour
+   * @param dateSup : Date supérieur initialisée par défaut à la date du jour
+   * cela donne par défaut les films qui ont une séance à aujourd'hui et possibilité de gérer une plage de date quelconque
+   */
     extractFilmsFromSeances(dateInf = new Date(), dateSup = new Date()) {
-        // Utiliser une Map pour éviter les duplications (clé : filmId)
-        const filmMap = new Map();
-        this.seances.forEach((seance) => {
-            const filmId = seance.filmId;
-            if (!filmId)
-                return; // Ignorer si filmId est absent
-            //   console.log("iteration 2" , !filmMap.has(filmId), (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) === formatDateLocalYYYYMMDD(date)))
-            //   console.log(formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')), " = " , formatDateLocalYYYYMMDD(date)) 
-            if (!filmMap.has(filmId) &&
-                (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) >= formatDateLocalYYYYMMDD(dateInf)) &&
-                (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) <= formatDateLocalYYYYMMDD(dateSup))) {
-                filmMap.set(filmId, new Film({
-                    id: filmId,
-                    titleFilm: seance.titleFilm,
-                    filmPitch: seance.filmPitch,
-                    genreArray: seance.genreArray,
-                    duration: seance.duration,
-                    linkBO: seance.linkBO,
-                    dateSortieCinePhoria: seance.dateSortieCinePhoria,
-                    categorySeeing: seance.categorySeeing,
-                    note: seance.note ? parseFloat(seance.note) : undefined, // Convertir en number si présent
-                    isCoupDeCoeur: seance.isCoupDeCoeur, // Convertir en boolean
-                    isActiveForNewSeances: seance.isActiveForNewSeances,
-                    filmDescription: seance.filmDescription,
-                    filmAuthor: seance.filmAuthor,
-                    filmDistribution: seance.filmDistribution,
-                    imageFilm128: seance.imageFilm128,
-                    imageFilm1024: seance.imageFilm1024,
-                }));
-            }
-        });
-        // Convertir la Map en tableau de films et retour
-        return Array.from(filmMap.values());
+        const filmIds = new Set(this.seances
+            .filter(seance => {
+            const dateStr = seance.dateJour;
+            if (!dateStr)
+                return false;
+            const date = new Date(dateStr);
+            return formatDateLocalYYYYMMDD(date) >= formatDateLocalYYYYMMDD(dateInf) &&
+                formatDateLocalYYYYMMDD(date) <= formatDateLocalYYYYMMDD(dateSup);
+        })
+            .map(seance => seance.filmId)
+            .filter((id) => !!id));
+        return Seance.allFilms.filter(film => film.id && filmIds.has(film.id));
     }
-    ;
     // Premier jour de projection du film
     premierJour(filmId) {
         return new Date(this.seancesFilm(filmId)[0].dateJour || '');
@@ -429,6 +414,16 @@ export class DataController {
             localStorage.setItem(DataController.KEY_CINEMAS, str);
         });
     }
+    sauverFilms() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!Seance.allFilms)
+                return;
+            const arr = Seance.allFilms; // tableau de Cinema
+            const str = JSON.stringify(arr);
+            console.log(`DataC: Sauvegarde des Films => taille = ${str.length}`);
+            localStorage.setItem(DataController.KEY_FILMS, str);
+        });
+    }
     sauverSeancesParCinema(cinema) {
         return __awaiter(this, void 0, void 0, function* () {
             // On suppose que this._allSeances contient toutes les séances de tous les cinémas
@@ -473,6 +468,7 @@ export class DataController {
             yield this.sauverEtatGlobal();
             yield this.sauverTarifs();
             yield this.sauverCinemas();
+            yield this.sauverFilms();
             yield this.sauverSeancesParCinema();
         });
     }
@@ -538,6 +534,22 @@ export class DataController {
             }
         });
     }
+    chargerFilms() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const saved = localStorage.getItem(DataController.KEY_FILMS);
+            if (!saved)
+                return;
+            try {
+                const arr = JSON.parse(saved);
+                if (Array.isArray(arr)) {
+                    Seance.allFilms = arr.map((f) => new Film(f));
+                }
+            }
+            catch (e) {
+                console.error('DataC: Erreur parsing films', e);
+            }
+        });
+    }
     chargerSeancesPourCinema(cinemaName) {
         return __awaiter(this, void 0, void 0, function* () {
             const key = `${DataController.KEY_SEANCES}_${cinemaName}`;
@@ -584,6 +596,8 @@ export class DataController {
             yield this.chargerTarifs();
             // 3) Charger la liste des cinémas
             yield this.chargerCinemas();
+            // 3) Charger la liste des films
+            yield this.chargerFilms();
             // 4) Charger toutes les séances pour tous les cinémas
             yield this.chargerSeancesTousCinemas();
             // => À la fin, this._allSeances contient l’ensemble des séances
@@ -607,6 +621,7 @@ export class DataController {
                 if (isNouvelleVersionServeur || isNouvelleVersionMajeure) {
                     console.log(`DataC: nouvelle version ${isNouvelleVersionServeur ? "serveur" : "majeur"} - rechargement depuis l’API`);
                     yield this.chargerDepuisAPI();
+                    resolveReady(); // 🔹 Signale que les données sont prêtes
                     this.version = newVersion;
                     yield this.sauverComplet();
                     return;
@@ -642,6 +657,7 @@ export class DataController {
             else {
                 console.log('[init] Données restaurées depuis localStorage');
             }
+            resolveReady(); // 🔹 Signale que les données sont prêtes
         });
     }
     // Rafraichissement du cache pour une liste quelconque de séances
@@ -706,6 +722,7 @@ DataController.nomStorage = 'storage'; // Nom du storage pour stocker toutes les
 DataController.KEY_GLOBAL = 'myAppState'; // Pour l’état global (reservationState, selectedFilm, etc.)
 DataController.KEY_TARIFS = 'myAppTarifs'; // Pour le tarifQualite
 DataController.KEY_CINEMAS = 'myAppCinemas'; // Pour la liste des Cinema
+DataController.KEY_FILMS = 'myAppFilms'; // Pour la liste des Films
 // Pour les seances, on fera KEY_SEANCES + "_" + cinemaName => "myAppSeances_Paris", etc.
 DataController.KEY_SEANCES = 'myAppSeances';
 /* ---------------------------------------

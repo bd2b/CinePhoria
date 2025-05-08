@@ -7,16 +7,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { dataController } from "./DataController.js";
+import { dataController, dataReady } from "./DataController.js";
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { imageFilm } from "./Helpers.js";
 export function onLoadVisiteur() {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(" ===>  onLoadVisiteur");
-        // On initialise le dataController si il est vide
-        if (dataController.allSeances.length === 0)
-            yield dataController.init();
+        yield dataReady; // ✅ Attend que les données soient prêtes
+        console.log("Données chargées, traitement de la page VisiteurFilms...");
         // On charge menu et footer
         yield chargerMenu(); // Header
         yield chargerCinemaSites(); // Footer

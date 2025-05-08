@@ -1,5 +1,5 @@
 import { userDataController } from "./DataControllerUser.js";
-import { dataController } from "./DataController.js";
+import { dataController , dataReady} from "./DataController.js";
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { ReservationForUtilisateur, ReservationState } from "./shared-models/Reservation.js";
@@ -18,8 +18,9 @@ export async function onLoadMesReservations() {
     // On verifie que l'on est connecté sinon on retourne sur la page visiteur
     try {
 
-        // On initialise le dataController si il est vide
-        if (dataController.allSeances.length === 0) await dataController.init()
+        await dataReady; // ✅ Attend que les données soient prêtes
+        console.log("Données chargées, traitement de la page Mes reservations...");
+        
 
         // On charge menu et footer
         await chargerMenu(); // Header

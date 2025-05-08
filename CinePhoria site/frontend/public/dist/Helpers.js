@@ -168,6 +168,7 @@ export function validateEmail(email) {
  * 813d32eb-7df7-4338-9976-bb4471a966d81024
  */
 export function imageFilm(value) {
+    console.log("Value =", value);
     const prefixAPI = `${baseUrl}/api/films/affichefile/`;
     const prefixDist = `${baseUrl}/assets/static/`;
     const uuidPossible = value.slice(0, 36);

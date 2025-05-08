@@ -20,9 +20,13 @@ let filtreJour = '';
 export function onLoadManageAvis() {
     return __awaiter(this, arguments, void 0, function* (vfiltreJour = "", filtreCinema = "all") {
         console.log("=====> chargement onLoadManageAvis");
+        // Mise à jour de la version
+        yield DataControllerIntranet.majVersion();
         // Charger menu et footer
         yield chargerMenu(); // Header
         yield chargerCinemaSites(); // Footer
+        // Mise à jour de la version
+        yield DataControllerIntranet.majVersion();
         // Initialisation filtres
         yield initFiltreCinema();
         yield initFiltreJour();

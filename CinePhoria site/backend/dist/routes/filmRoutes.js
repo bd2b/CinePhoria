@@ -24,7 +24,7 @@ router.put('/affiche/:filmId', afficheController_1.AfficheController.update);
 configLog_1.default.info('Declaration route DELETE /api/films/affiche/:filmId');
 router.delete('/affiche/:filmId', afficheController_1.AfficheController.delete);
 configLog_1.default.info('Declaration route GET /api/films/');
-router.get('/', authMiddleware_1.authenticateJWT, filmController_1.FilmController.getAllFilms);
+router.get('/', filmController_1.FilmController.getAllFilms);
 configLog_1.default.info('Declaration route POST /api/films');
 router.post('/', authMiddleware_1.authenticateJWT, filmController_1.FilmController.createFilm);
 configLog_1.default.info('Declaration route /api/films/utilisateur/:utilisateurid');
