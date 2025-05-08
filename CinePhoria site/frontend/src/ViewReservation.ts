@@ -19,7 +19,8 @@ export async function onLoadReservation() {
 
   // const page = window.location.pathname.split("/").pop(); // Récupère le nom de la page actuelle
   // if (page != "reservation.html") return;
-
+ // await new Promise(resolve => window.addEventListener('load', resolve)); // ✅ attend fin chargement complet
+  
   await dataReady; // ✅ Attend que les données soient prêtes
   console.log("Données chargées, traitement de la page reservations...");
 
@@ -82,6 +83,23 @@ export async function onLoadReservation() {
 
     console.log("Affichage de la reservation à l'état : ", dataController.reservationState);
 
+  }
+  document.querySelector("main")!.style.visibility = "visible";
+  const filters = document.querySelector(".title__filters") as HTMLElement | null;
+  if (filters) filters.style.visibility = "visible";
+  const progress = document.getElementById("progressIndicator");
+  if (progress) { 
+    
+      progress.style.removeProperty("display");
+      progress.style.display = "none";
+      progress.classList.add("hidden");
+    
+    
+    
+    // progress.style.display = "none"; 
+    console.log("Descativation progress") 
+  } else { 
+    console.error("Pas d'indicateur")
   }
 };
 

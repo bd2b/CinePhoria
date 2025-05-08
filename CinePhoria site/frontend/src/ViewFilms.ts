@@ -1,5 +1,5 @@
 // ViewFilm.ts
-import { dataController , dataReady} from './DataController.js';
+import { dataController, dataReady } from './DataController.js';
 import { formatDateLocalYYYYMMDD, setCookie, imageFilm } from './Helpers.js';
 import { Film } from './shared-models/Film.js';
 import { ReservationState } from './shared-models/Reservation.js';
@@ -15,6 +15,7 @@ import { isUUID } from './Helpers.js';
 let filtreJour = '';
 
 export async function onLoadFilms() {
+    //   await new Promise(resolve => window.addEventListener('load', resolve)); // ✅ attend fin chargement complet
     console.log("=====> chargement onLoadFilms");
 
     await dataReady; // ✅ Attend que les données soient prêtes
@@ -33,6 +34,21 @@ export async function onLoadFilms() {
     // 3) Rafraîchir la liste
     rafraichirListeFilms();
 
+    
+    document.querySelector("main")!.style.visibility = "visible";
+    const filters = document.querySelector(".title__filters") as HTMLElement | null;
+    if (filters) filters.style.visibility = "visible";
+    
+    const progress = document.getElementById("progressIndicator");
+    if (progress) {
+
+        progress.style.removeProperty("display");
+        progress.style.display = "none";
+        progress.classList.add("hidden");
+        console.log("Descativation progress")
+    } else {
+        console.error("Pas d'indicateur")
+    }
 }
 
 /* -------------------------------------------

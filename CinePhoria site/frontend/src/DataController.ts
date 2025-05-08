@@ -313,8 +313,7 @@ export class DataController {
     // On charge l'ensemble des données de toutes les séances, on filtrera en local
     public async chargerDepuisAPI(): Promise<void> {
         console.log("DataC: ChargerDepuisAPI")
-        const loader = document.getElementById('progressIndicator');
-        if (loader) loader.style.display = 'block';
+        
         try {
 
             // 0) Chargement de tous les films dans la variables de class allFilms de Seance
@@ -362,7 +361,7 @@ export class DataController {
         } catch (error) {
             console.error('Erreur lors du chargement des données de séances : ', error);
         } finally {
-            if (loader) loader.style.display = 'none';
+            
         }
     }
     /**

@@ -17,7 +17,8 @@ export async function onLoadMesReservations() {
 
     // On verifie que l'on est connecté sinon on retourne sur la page visiteur
     try {
-
+      //  await new Promise(resolve => window.addEventListener('load', resolve)); // ✅ attend fin chargement complet
+  
         await dataReady; // ✅ Attend que les données soient prêtes
         console.log("Données chargées, traitement de la page Mes reservations...");
         

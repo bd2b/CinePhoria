@@ -40,6 +40,7 @@ export function onLoadManageEmployes() {
         // Init les 3 boutons (Ajouter, Modifier, Annuler)
         initButtons();
         setFormEditable(false);
+        document.querySelector("main").style.visibility = "visible";
     });
 }
 /* ---------------------------------------------------
