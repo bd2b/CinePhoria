@@ -157,7 +157,7 @@ VALUES
   ("jean@7art.fr"			, 1, "password", "2024-12-02 08:00:00", "abcd12345"),
   ("kevin@7art.fr"			, 1, "password", "2024-12-03 08:00:00", "abcd12345"),
   ("administrateur@7art.fr"	, 1, "password", "2024-12-04 08:00:00", "abcd12345"),
-  ("employeParis@7art.fr"	, 1, "password", "2024-12-05 08:00:00", "abcd12345"),
+  ("cinephoria@free.fr"	, 1, "password", "2024-12-05 08:00:00", "abcd12345"),
   ("employeToulouse@7art.fr", 1, "password", "2024-12-06 08:00:00", "abcd12345"),
   ("employeBelgique@7art.fr", 1, "password", "2024-12-07 08:00:00", "abcd12345"),
   ("nonvalide@7art.fr"		, 0, "", null , "")
@@ -170,7 +170,7 @@ VALUES
 ("jean@7art.fr"			, "2024-12-01 15:30:00"),
 ("kevin@7art.fr"			, "2024-12-01 15:30:00"),
 ("administrateur@7art.fr"	, "2024-12-01 15:30:00"),
-("employeParis@7art.fr"	, "2024-12-01 15:30:00"),
+("cinephoria@free.fr"	, "2024-12-01 15:30:00"),
 ("employeToulouse@7art.fr", "2024-12-01 15:30:00"),
 ("employeBelgique@7art.fr", "2024-12-01 15:30:00")
 ;
@@ -183,7 +183,7 @@ INSERT INTO Employe
   firstnameEmploye) 
 VALUES 
   (202512, "administrateur@7art.fr" , 1 , "Durand" , "Charlotte"),
-  (202513, "employeParis@7art.fr" , 0 , "Martin" , "Pauline"),
+  (202513, "cinephoria@free.fr" , 1 , "Administrateur" , "Studi"),
   (202514, "employeToulouse@7art.fr" , 0 , "Noir" , "Pierre"),
   (202515, "employeBelgique@7art.fr" , 0 , "Blanc" , "André")
   ;

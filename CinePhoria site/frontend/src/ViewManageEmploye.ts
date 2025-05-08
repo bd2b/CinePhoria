@@ -44,6 +44,8 @@ export async function onLoadManageEmployes() {
     initButtons();
 
     setFormEditable(false);
+
+    document.querySelector("main")!.style.visibility = "visible";
 }
 
 /* ---------------------------------------------------

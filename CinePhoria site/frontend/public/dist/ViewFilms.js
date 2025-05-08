@@ -20,6 +20,7 @@ import { isUUID } from './Helpers.js';
 let filtreJour = '';
 export function onLoadFilms() {
     return __awaiter(this, void 0, void 0, function* () {
+        //   await new Promise(resolve => window.addEventListener('load', resolve)); // ✅ attend fin chargement complet
         console.log("=====> chargement onLoadFilms");
         yield dataReady; // ✅ Attend que les données soient prêtes
         console.log("Données chargées, traitement de la page Films...");
@@ -32,6 +33,20 @@ export function onLoadFilms() {
         yield initFiltreJour();
         // 3) Rafraîchir la liste
         rafraichirListeFilms();
+        document.querySelector("main").style.visibility = "visible";
+        const filters = document.querySelector(".title__filters");
+        if (filters)
+            filters.style.visibility = "visible";
+        const progress = document.getElementById("progressIndicator");
+        if (progress) {
+            progress.style.removeProperty("display");
+            progress.style.display = "none";
+            progress.classList.add("hidden");
+            console.log("Descativation progress");
+        }
+        else {
+            console.error("Pas d'indicateur");
+        }
     });
 }
 /* -------------------------------------------

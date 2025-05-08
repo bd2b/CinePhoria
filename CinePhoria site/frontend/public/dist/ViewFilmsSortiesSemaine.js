@@ -91,9 +91,25 @@ export function onLoadVisiteur() {
                     }));
                 }
             });
+            const progress = document.getElementById("progressIndicator");
+            if (progress)
+                progress.style.display = "none";
         }
         catch (error) {
             console.error('Erreur lors du chargement des films', error);
+        }
+        finally {
+            const progress = document.getElementById("progressIndicator");
+            if (progress) {
+                progress.style.removeProperty("display");
+                progress.style.display = "none";
+                progress.classList.add("hidden");
+                // progress.style.display = "none"; 
+                console.log("Descativation progress");
+            }
+            else {
+                console.error("Pas d'indicateur");
+            }
         }
     });
 }

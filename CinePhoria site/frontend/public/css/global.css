@@ -72,6 +72,10 @@ body {
     border-radius: 0.5em;
     z-index: 9999;
   }
+
+  #progressIndicator.hidden {
+    display: none !important;
+  }
   
   @keyframes spin {
     to { transform: translateY(-50%) rotate(360deg); }

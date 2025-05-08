@@ -190,7 +190,6 @@ export function validateEmail(email: string): boolean {
  */
 
 export function imageFilm (value: string): string {
-    console.log("Value =", value);
     const prefixAPI = `${baseUrl}/api/films/affichefile/`;
     const prefixDist = `${baseUrl}/assets/static/`;
     const uuidPossible = value.slice(0,36);

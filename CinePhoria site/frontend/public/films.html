@@ -45,6 +45,10 @@
     <script type="module" src="dist/main.js" defer></script>
 
     <title>CinePhoria</title>
+    <style>
+        main { visibility: hidden; }
+        .title__filters { visibility: hidden; }
+      </style>
 </head>
 
 <body>
@@ -75,7 +79,11 @@
             </div>
         </nav>
     </header>
+    <div id="progressIndicator" style="display: none;">
+        <p>Chargement...</p>
+      </div>
     <main class="main main__container">
+       
         <div class="container__title">
             <div class="title__left">
                 <h1 class="title__left-h1" id="titleLeft">Les Films</h1>

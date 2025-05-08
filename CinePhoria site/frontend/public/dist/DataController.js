@@ -260,9 +260,6 @@ export class DataController {
     chargerDepuisAPI() {
         return __awaiter(this, void 0, void 0, function* () {
             console.log("DataC: ChargerDepuisAPI");
-            const loader = document.getElementById('progressIndicator');
-            if (loader)
-                loader.style.display = 'block';
             try {
                 // 0) Chargement de tous les films dans la variables de class allFilms de Seance
                 Seance.allFilms = yield filmsSelectAllApi();
@@ -300,8 +297,6 @@ export class DataController {
                 console.error('Erreur lors du chargement des données de séances : ', error);
             }
             finally {
-                if (loader)
-                    loader.style.display = 'none';
             }
         });
     }

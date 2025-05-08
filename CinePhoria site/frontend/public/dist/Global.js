@@ -22,6 +22,7 @@ import { dataController } from "./DataController.js";
 // import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
 // L'url de base est l'url d'appel des fichiers statiques
 export const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
+const page = window.location.pathname.split("/").pop(); // 🔹 Ajout ici
 if (window.location.hostname.toUpperCase() !== 'CINEPHORIA.BD2DB.COM')
     document.title = document.title + " - dev";
 // const pageHandlers: Record<string, () => void> = {
@@ -36,8 +37,7 @@ if (window.location.hostname.toUpperCase() !== 'CINEPHORIA.BD2DB.COM')
 //     "manageEmployes.html" : onLoadManageEmployes,
 //     "dashboard.html" : onLoadDashboard
 // };
-const pagesPublic = ["visiteur.html", "reservation.html", "films.html",
-    "manageFilms.html", "manageSalles.html", "manageSeances.html"]; // TODO manageXXXXX à supprimer
+const pagesPublic = ["visiteur.html", "reservation.html", "films.html"]; // TODO manageXXXXX à supprimer
 /**
  * Structure de chargement dynamique des modules selon la page active.
  * Chaque fonction est appelée uniquement si la page correspond,
@@ -115,34 +115,36 @@ document.addEventListener("DOMContentLoaded", () => __awaiter(void 0, void 0, vo
     // 1) Identifier le profil qui a pu changer si lle jwt a expiré
     const profil = userDataController.profil();
     console.log("Profil charge = xxxx", profil);
-    // if (profil === ProfilUtilisateur.Visiteur) {
-    //     // Chargement de la page d'accueil
-    //     console.log("Forçage");
-    //     // Vérifier si on est déjà sur la page visiteur.html pour éviter une boucle infinie
-    //     const currentPage = window.location.pathname.split("/").pop();
-    //     if (currentPage !== "visiteur.html") {
-    //         window.location.replace("visiteur.html");
-    //     } else {
-    //         console.log("Chargement manuel de onLoadVisiteur()");
-    //         onLoadVisiteur(); // Appeler directement la fonction si déjà sur la page
-    //     }
-    // } else {
     // On charge la page
-    const page = window.location.pathname.split("/").pop(); // Récupère le nom de la page actuelle
     console.log("Chargement dynamique de xxxx", page, " ");
-    // if (page && pageHandlers[page]) {
-    //     console.log("Chargement de la fonction ", pageHandlers[page], " ",)
-    //     pageHandlers[page](); // Exécute la fonction associée à la page
-    // } else {
-    //     console.warn("⚠️ Aucune fonction associée pour cette page.");
-    // }
     if (page && pageLoaders[page]) {
-        console.log("🔹 Chargement dynamique du module pour", page);
-        yield pageLoaders[page](); // Exécution dynamique
+        const runPageLoader = () => __awaiter(void 0, void 0, void 0, function* () {
+            console.log("🕐 Exécution du rendu dynamique pour", page);
+            yield pageLoaders[page]();
+            const isPagePublique = pagesPublic.includes(page);
+            if (isPagePublique) {
+                // Mise en place de l'indicateur de progression AVANT le rendu
+                const progress = document.getElementById("progressIndicator");
+                if (progress)
+                    progress.style.display = "block";
+            }
+        });
+        if (document.readyState === 'complete') {
+            console.log("🕐 Le chargement est déjà complet, exécution immédiate de", page);
+            yield runPageLoader();
+        }
+        else {
+            window.addEventListener('load', runPageLoader);
+        }
     }
     else {
         console.warn("⚠️ Aucune fonction associée pour cette page.");
     }
     // }
 }));
-dataController.init();
+// On lance l'initialisation du dataController si on est sur une page publique
+console.log("Current Page = ", page);
+if (page && pagesPublic.includes(page)) {
+    console.log("Initialisation du DataC");
+    dataController.init();
+}
