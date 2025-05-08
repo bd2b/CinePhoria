@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const configLog_1 = __importDefault(require("./config/configLog"));
 const sanitiseQueryMiddleware_1 = __importDefault(require("./middlewares/sanitiseQueryMiddleware"));
 const express_fileupload_1 = __importDefault(require("express-fileupload"));
+const compression_1 = __importDefault(require("compression"));
 const http_1 = __importDefault(require("http"));
 const https_1 = __importDefault(require("https"));
 const fs_1 = __importDefault(require("fs"));
@@ -19,6 +20,9 @@ const config_1 = require("./config/config");
 console.log(`🛠️ Mode actuel : ${config_1.modeExec} avec version ${JSON.stringify(config_1.versionCourante)}`);
 (0, config_1.connectDBMongo)();
 const app = (0, express_1.default)();
+// ✅ Middleware pour la compression
+// 🔹 Active la compression gzip (ou brotli si le client le supporte)
+app.use((0, compression_1.default)());
 // 🔵 CORS doit venir immédiatement après l'initialisation d'app
 // app.use(cors({
 //   origin: (origin, callback) => {

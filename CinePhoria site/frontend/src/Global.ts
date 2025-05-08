@@ -1,15 +1,17 @@
-import { onLoadReservation } from "./ViewReservation.js";
-import { onLoadFilms } from "./ViewFilms.js";
-import { onLoadMesReservations } from "./ViewMesReservations.js";
-import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
+
 import { userDataController, ProfilUtilisateur } from "./DataControllerUser.js";
 import { CinephoriaErrorCode , CinephoriaError } from"./shared-models/Error.js";
-import { onLoadManageFilms } from "./ViewManageFilms.js";
-import { onLoadManageSalles } from "./ViewManageSalles.js";
-import { onLoadManageSeances } from "./ViewManageSeances.js";
-import { onLoadManageAvis } from "./ViewManageAvis.js";
-import { onLoadManageEmployes } from "./ViewManageEmploye.js";
-import { onLoadDashboard } from "./ViewDashboard.js";
+import { dataController } from "./DataController.js";
+// import { onLoadManageFilms } from "./ViewManageFilms.js";
+// import { onLoadManageSalles } from "./ViewManageSalles.js";
+// import { onLoadManageSeances } from "./ViewManageSeances.js";
+// import { onLoadManageAvis } from "./ViewManageAvis.js";
+// import { onLoadManageEmployes } from "./ViewManageEmploye.js";
+// import { onLoadDashboard } from "./ViewDashboard.js";
+// import { onLoadReservation } from "./ViewReservation.js";
+// import { onLoadFilms } from "./ViewFilms.js";
+// import { onLoadMesReservations } from "./ViewMesReservations.js";
+// import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
 
 
 
@@ -17,23 +19,43 @@ import { onLoadDashboard } from "./ViewDashboard.js";
 // L'url de base est l'url d'appel des fichiers statiques
 export const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
 
+
+
+
 if (window.location.hostname.toUpperCase() !== 'CINEPHORIA.BD2DB.COM') document.title = document.title + " - dev";
-const pageHandlers: Record<string, () => void> = {
-    "visiteur.html": onLoadVisiteur,
-    "reservation.html": onLoadReservation,
-    "mesreservations.html": onLoadMesReservations,
-    "films.html": onLoadFilms,
-    "manageFilms.html" : onLoadManageFilms,
-    "manageSalles.html" : onLoadManageSalles,
-    "manageSeances.html" : onLoadManageSeances,
-    "manageAvis.html" : onLoadManageAvis,
-    "manageEmployes.html" : onLoadManageEmployes,
-    "dashboard.html" : onLoadDashboard
-};
+// const pageHandlers: Record<string, () => void> = {
+//     "visiteur.html": onLoadVisiteur,
+//     "reservation.html": onLoadReservation,
+//     "mesreservations.html": onLoadMesReservations,
+//     "films.html": onLoadFilms,
+//     "manageFilms.html" : onLoadManageFilms,
+//     "manageSalles.html" : onLoadManageSalles,
+//     "manageSeances.html" : onLoadManageSeances,
+//     "manageAvis.html" : onLoadManageAvis,
+//     "manageEmployes.html" : onLoadManageEmployes,
+//     "dashboard.html" : onLoadDashboard
+// };
 
 const pagesPublic = [ "visiteur.html", "reservation.html", "films.html" , 
     "manageFilms.html", "manageSalles.html", "manageSeances.html"]; // TODO manageXXXXX à supprimer
 
+/**
+ * Structure de chargement dynamique des modules selon la page active.
+ * Chaque fonction est appelée uniquement si la page correspond,
+ * ce qui évite de charger tous les modules inutilement au démarrage.
+ */
+const pageLoaders: Record<string, () => Promise<void>> = {
+    "visiteur.html": async () => (await import("./ViewFilmsSortiesSemaine.js")).onLoadVisiteur(),
+    "reservation.html": async () => (await import("./ViewReservation.js")).onLoadReservation(),
+    "mesreservations.html": async () => (await import("./ViewMesReservations.js")).onLoadMesReservations(),
+    "films.html": async () => (await import("./ViewFilms.js")).onLoadFilms(),
+    "manageFilms.html": async () => (await import("./ViewManageFilms.js")).onLoadManageFilms(),
+    "manageSalles.html": async () => (await import("./ViewManageSalles.js")).onLoadManageSalles(),
+    "manageSeances.html": async () => (await import("./ViewManageSeances.js")).onLoadManageSeances(),
+    "manageAvis.html": async () => (await import("./ViewManageAvis.js")).onLoadManageAvis(),
+    "manageEmployes.html": async () => (await import("./ViewManageEmploye.js")).onLoadManageEmployes(),
+    "dashboard.html": async () => (await import("./ViewDashboard.js")).onLoadDashboard(),
+};
 
 /**
  * Gestion centralisée des erreurs API
@@ -60,7 +82,7 @@ export function handleApiError(error: any): never {
                     if (currentPage === "visiteur.html") {
                         // On relance le traitement de visiteur
                         console.log("Chargement manuel de onLoadVisiteur()");
-                        onLoadVisiteur();
+                  //      onLoadVisiteur();
                         
                     } else if (!pagesPublic.includes(currentPage || '')){
                         window.location.replace("visiteur.html");
@@ -124,12 +146,21 @@ console.log("DOM Chargement de Global");
         console.log("Chargement dynamique de xxxx", page, " ",)
         
 
-        if (page && pageHandlers[page]) {
-            console.log("Chargement de la fonction ", pageHandlers[page], " ",)
-            pageHandlers[page](); // Exécute la fonction associée à la page
+        // if (page && pageHandlers[page]) {
+        //     console.log("Chargement de la fonction ", pageHandlers[page], " ",)
+        //     pageHandlers[page](); // Exécute la fonction associée à la page
 
+        // } else {
+        //     console.warn("⚠️ Aucune fonction associée pour cette page.");
+        // }
+
+        if (page && pageLoaders[page]) {
+            console.log("🔹 Chargement dynamique du module pour", page);
+            await pageLoaders[page](); // Exécution dynamique
         } else {
             console.warn("⚠️ Aucune fonction associée pour cette page.");
         }
     // }
 });
+
+dataController.init();

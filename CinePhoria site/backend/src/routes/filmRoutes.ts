@@ -31,7 +31,7 @@ logger.info('Declaration route DELETE /api/films/affiche/:filmId');
 router.delete('/affiche/:filmId', AfficheController.delete);
 
 logger.info('Declaration route GET /api/films/');
-router.get('/', authenticateJWT , FilmController.getAllFilms);
+router.get('/',  FilmController.getAllFilms);
 
 logger.info('Declaration route POST /api/films');
 router.post('/', authenticateJWT, FilmController.createFilm);

@@ -5,7 +5,7 @@
 
 .titre__filter-dropdown-complexe {
     display: block;
-    width: 250px;
+    width: 200px;
 }
 
 .container__reservation {
@@ -284,7 +284,148 @@
 }
 
 
+/* -------------------- Responsive */
 
+@media (max-width: 1140px) {
+    .main__container {
+        min-height: auto;
+        overflow-y: scroll;
+    }
+
+    .container__title {
+        flex-direction: row;
+        height: auto;
+
+    }
+
+    .title_left {
+        height: auto;
+    }
+
+    .container__reservation {
+        flex-direction: column;
+        height: auto;
+    }
+
+    /* .title__filters-reservation {
+        flex-direction: column;
+        justify-content: center;
+       
+        height: auto;
+        padding: 10px;
+    } */
+    .container__films {
+        flex-direction: column;
+        height: auto;
+
+    }
+
+    .reservation__listFilms {
+
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        width: 100%;
+        padding-bottom: 0px;
+        margin-bottom: 0px;
+
+    }
+
+
+    .reserve__actions {
+        flex-direction: column
+    }
+
+    .listFilms__simpleCard {
+
+        width: 200px;
+
+        flex-shrink: 1;
+        justify-content: center;
+    }
+   
+    .listFilms__simpleCard-img {
+        max-width: 80px;
+        height: 80px;
+    }
+    .listFilms__simpleCard-p {
+        min-width: 100px;
+    }
+    .simpleCard__affiche-img {
+        display: none;
+    }
+
+    .evaluation__coupdecoeur-p {
+        display: none;
+    }
+
+    .twocolumns__left {
+        flex-direction: column;
+        height: auto;
+        align-items: center;
+    }
+
+    .twocolumns__right {
+        overflow-y: hidden;
+    }
+
+    .twocolumns__left-img {
+        max-width: 100px;
+        height: 80px;
+
+    }
+    
+    .twocolumns__left {
+        flex-direction: row;
+        padding: 10px;
+    }
+
+    .right__title-p {
+        align-items: center;
+        text-align: center;
+        font-size: var(--headline-font-size);
+    }
+
+    .reservation__detailFilm {
+        flex-direction: column;
+        width: auto;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        margin: 0;
+    }
+
+    .detailFilm__twocolumns {
+        flex-direction: column;
+        gap: 0px;
+    }
+
+    .right__caractFilm {
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .right__description-p {
+        visibility: hidden;
+        height: 0px;
+    }
+
+    .right__author-p {
+        visibility: hidden;
+        height: 0px;
+    }
+
+    .right__distribution {
+        visibility: hidden;
+        height: 0px;
+    }
+
+}
+
+/* @media (max-width: 760px) {
+    .evaluation__coupdecoeur-p {
+        display: none;
+    }
+} */
 
 /* --------------------- COLONNE 3 Panneau de réservation */
 /* --------------------- CHOIX DE LA SEANCE */

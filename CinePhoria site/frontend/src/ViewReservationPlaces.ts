@@ -438,9 +438,11 @@ export async function updateTableContent(qualite: string, isReadOnly: boolean = 
     // === TFOOT ===
     const tfoot = document.createElement('tfoot');
     tfoot.classList.add('commande__foot-tfoot');
+    //   <td colspan="3"></td>
     tfoot.innerHTML = `
       <tr class="foot__content-tr">
-        <td colspan="3"></td>
+      
+        <td></td> <td></td> <td></td>
         <td class="content-td content-totalprice-td" id = "content-totalprice">0 €</td>
       </tr>
     `;

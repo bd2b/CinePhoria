@@ -1,5 +1,5 @@
 import { getCookie, setCookie } from "./Helpers.js";
-import { dataController } from "./DataController.js";
+import { dataController , dataReady} from "./DataController.js";
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { imageFilm } from "./Helpers.js";
@@ -29,9 +29,9 @@ interface Film {
 export async function onLoadVisiteur() {
   console.log(" ===>  onLoadVisiteur");
 
-  // On initialise le dataController si il est vide
-  if (dataController.allSeances.length === 0) await dataController.init()
-
+  await dataReady; // ✅ Attend que les données soient prêtes
+  console.log("Données chargées, traitement de la page VisiteurFilms...");
+  
   // On charge menu et footer
   await chargerMenu(); // Header
   await chargerCinemaSites() // Footer

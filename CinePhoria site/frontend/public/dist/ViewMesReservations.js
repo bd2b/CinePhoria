@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { userDataController } from "./DataControllerUser.js";
-import { dataController } from "./DataController.js";
+import { dataController, dataReady } from "./DataController.js";
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { ReservationState } from "./shared-models/Reservation.js";
@@ -21,9 +21,8 @@ export function onLoadMesReservations() {
         console.log("=====> chargement onLoadMesReservations");
         // On verifie que l'on est connecté sinon on retourne sur la page visiteur
         try {
-            // On initialise le dataController si il est vide
-            if (dataController.allSeances.length === 0)
-                yield dataController.init();
+            yield dataReady; // ✅ Attend que les données soient prêtes
+            console.log("Données chargées, traitement de la page Mes reservations...");
             // On charge menu et footer
             yield chargerMenu(); // Header
             yield chargerCinemaSites(); // Footer

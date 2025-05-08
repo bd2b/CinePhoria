@@ -1,7 +1,7 @@
 import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID, validateEmail } from './Helpers.js';
-import { DataController, dataController } from './DataController.js';
+import { DataController, dataController , dataReady} from './DataController.js';
 
 
 import { ReservationState } from './shared-models/Reservation.js';
@@ -17,8 +17,11 @@ import { imageFilm } from "./Helpers.js";
 
 export async function onLoadReservation() {
 
-  // On initialise le dataController si il est vide
-  if (dataController.allSeances.length === 0) await dataController.init()
+  // const page = window.location.pathname.split("/").pop(); // Récupère le nom de la page actuelle
+  // if (page != "reservation.html") return;
+
+  await dataReady; // ✅ Attend que les données soient prêtes
+  console.log("Données chargées, traitement de la page reservations...");
 
   // On charge menu et footer
   await chargerMenu(); // Header
@@ -306,7 +309,11 @@ function afficherListeFilms(): void {
     // Créer l'image
     const img = document.createElement('img');
     img.classList.add('listFilms__simpleCard-img');
+    if (film.imageFilm1024) {
     img.src = imageFilm(film.imageFilm1024!);
+    } else {
+      console.log("Erreur imageFilm");
+    }
     img.alt = film.titleFilm ?? 'Affiche';
 
     // Titre

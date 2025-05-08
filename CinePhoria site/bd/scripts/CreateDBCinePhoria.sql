@@ -217,21 +217,6 @@ SELECT
   Seance.numFreeSeats,
   Seance.numFreePMR,
   Seance.alertAvailibility,
-  Film.titleFilm,
-  Film.filmPitch,
-  Film.duration, 
-  Film.genreArray,
-  Film.filmDescription, 
-  Film.filmAuthor, 
-  Film.filmDistribution,
-  Film.dateSortieCinePhoria,
-  Film.note, 
-  Film.isCoupDeCoeur,
-  Film.isActiveForNewSeances,
-  Film.categorySeeing,    
-  Film.linkBO, 
-  Film.imageFilm128,
-  Film.imageFilm1024,
   Salle.nameSalle, 
   Salle.nameCinema, 
   Salle.capacity, 
@@ -246,7 +231,6 @@ SELECT
   Cinema.telCinema 
   
 FROM Seance
-INNER JOIN Film ON Seance.Filmid = Film.id
 INNER JOIN Salle ON Seance.Salleid = Salle.id
 INNER JOIN Cinema ON Salle.nameCinema = Cinema.nameCinema
 WHERE

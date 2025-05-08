@@ -22,11 +22,16 @@ import { ReservationState } from './shared-models/Reservation.js';
 import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { Cinema } from './shared-models/Cinema.js';
-import { getSeancesByIdApi, getVersionApi } from './NetworkController.js';
+import { getSeancesByIdApi, getVersionApi , filmsSelectAllApi } from './NetworkController.js';
 import { baseUrl } from './Global.js';
 import { MajSite } from './shared-models/MajSite.js';
 import { majFooterVersion } from './ViewFooter.js';
 
+// Promesse d'attente de la fin du chargement des données par les modules de page
+let resolveReady: () => void;
+export const dataReady: Promise<void> = new Promise((resolve) => {
+    resolveReady = resolve;
+});
 
 export class DataController {
 
@@ -312,6 +317,9 @@ export class DataController {
         if (loader) loader.style.display = 'block';
         try {
 
+            // 0) Chargement de tous les films dans la variables de class allFilms de Seance
+            Seance.allFilms = await filmsSelectAllApi()
+
             // 1) Chargement de toutes les séances
             const response = await fetch(`${baseUrl}/api/seances/filter?cinemasList="all"`);
             const rawData = await response.json();
@@ -358,47 +366,27 @@ export class DataController {
         }
     }
     /**
-     * Extraction des films du tableau seance (filtré sur filterNameCinema) ayant une séance entre deux dates,
-     * @param dateInf : Date inférieur initialisée par défaut à la date du jour
-     * @param dateSup : Date supérieur initialisée par défaut à la date du jour
-     * cela donne par défaut les films qui ont une séance à aujourd'hui et possibilité de gérer une plage de date quelconque
-     */
+   * Extraction des films du tableau seance (filtré sur filterNameCinema) ayant une séance entre deux dates,
+   * @param dateInf : Date inférieur initialisée par défaut à la date du jour
+   * @param dateSup : Date supérieur initialisée par défaut à la date du jour
+   * cela donne par défaut les films qui ont une séance à aujourd'hui et possibilité de gérer une plage de date quelconque
+   */
     private extractFilmsFromSeances(dateInf: Date = new Date(), dateSup: Date = new Date()): Film[] {
-        // Utiliser une Map pour éviter les duplications (clé : filmId)
-        const filmMap = new Map<string, Film>();
-        this.seances.forEach((seance) => {
-            const filmId = seance.filmId;
-            if (!filmId) return; // Ignorer si filmId est absent
-            //   console.log("iteration 2" , !filmMap.has(filmId), (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) === formatDateLocalYYYYMMDD(date)))
-            //   console.log(formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')), " = " , formatDateLocalYYYYMMDD(date)) 
-            if (!filmMap.has(filmId) &&
-                (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) >= formatDateLocalYYYYMMDD(dateInf)) &&
-                (formatDateLocalYYYYMMDD(new Date(seance.dateJour || '')) <= formatDateLocalYYYYMMDD(dateSup))
-            ) {
-                filmMap.set(filmId, new Film({
-                    id: filmId,
-                    titleFilm: seance.titleFilm,
-                    filmPitch: seance.filmPitch,
-                    genreArray: seance.genreArray,
-                    duration: seance.duration,
-                    linkBO: seance.linkBO,
-                    dateSortieCinePhoria: seance.dateSortieCinePhoria,
-                    categorySeeing: seance.categorySeeing,
-                    note: seance.note ? parseFloat(seance.note) : undefined, // Convertir en number si présent
-                    isCoupDeCoeur: seance.isCoupDeCoeur, // Convertir en boolean
-                    isActiveForNewSeances: seance.isActiveForNewSeances,
-                    filmDescription: seance.filmDescription,
-                    filmAuthor: seance.filmAuthor,
-                    filmDistribution: seance.filmDistribution,
-                    imageFilm128: seance.imageFilm128,
-                    imageFilm1024: seance.imageFilm1024,
-                }));
-            }
-        });
+        const filmIds = new Set(
+            this.seances
+                .filter(seance => {
+                    const dateStr = seance.dateJour;
+                    if (!dateStr) return false;
+                    const date = new Date(dateStr);
+                    return formatDateLocalYYYYMMDD(date) >= formatDateLocalYYYYMMDD(dateInf) &&
+                        formatDateLocalYYYYMMDD(date) <= formatDateLocalYYYYMMDD(dateSup);
+                })
+                .map(seance => seance.filmId)
+                .filter((id): id is string => !!id)
+        );
 
-        // Convertir la Map en tableau de films et retour
-        return Array.from(filmMap.values());
-    };
+        return Seance.allFilms.filter(film => film.id && filmIds.has(film.id));
+    }
 
     // Premier jour de projection du film
     public premierJour(filmId: string): Date {
@@ -475,6 +463,8 @@ export class DataController {
     protected static KEY_GLOBAL = 'myAppState';             // Pour l’état global (reservationState, selectedFilm, etc.)
     protected static KEY_TARIFS = 'myAppTarifs';            // Pour le tarifQualite
     protected static KEY_CINEMAS = 'myAppCinemas';          // Pour la liste des Cinema
+    protected static KEY_FILMS = 'myAppFilms';                 // Pour la liste des Films
+    
     // Pour les seances, on fera KEY_SEANCES + "_" + cinemaName => "myAppSeances_Paris", etc.
     protected static KEY_SEANCES = 'myAppSeances';
 
@@ -519,6 +509,17 @@ export class DataController {
         console.log(`DataC: Sauvegarde des Cinemas => taille = ${str.length}`);
         localStorage.setItem(DataController.KEY_CINEMAS, str);
     }
+
+    public async sauverFilms(): Promise<void> {
+        if (!Seance.allFilms) return;
+
+        const arr = Seance.allFilms; // tableau de Cinema
+        const str = JSON.stringify(arr);
+        console.log(`DataC: Sauvegarde des Films => taille = ${str.length}`);
+        localStorage.setItem(DataController.KEY_FILMS, str);
+    }
+
+
     public async sauverSeancesParCinema(cinema?: string): Promise<void> {
         // On suppose que this._allSeances contient toutes les séances de tous les cinémas
         if (!this._allSeances) return;
@@ -560,6 +561,7 @@ export class DataController {
         await this.sauverEtatGlobal();
         await this.sauverTarifs();
         await this.sauverCinemas();
+        await this.sauverFilms();
         await this.sauverSeancesParCinema();
     }
 
@@ -618,6 +620,19 @@ export class DataController {
         }
     }
 
+    public async chargerFilms(): Promise<void> {
+        const saved = localStorage.getItem(DataController.KEY_FILMS);
+        if (!saved) return;
+        try {
+            const arr = JSON.parse(saved);
+            if (Array.isArray(arr)) {
+                Seance.allFilms = arr.map((f: any) => new Film(f));
+            }
+        } catch (e) {
+            console.error('DataC: Erreur parsing films', e);
+        }
+    }
+
     public async chargerSeancesPourCinema(cinemaName: string): Promise<Seance[]> {
         const key = `${DataController.KEY_SEANCES}_${cinemaName}`;
         const saved = localStorage.getItem(key);
@@ -665,6 +680,9 @@ export class DataController {
         // 3) Charger la liste des cinémas
         await this.chargerCinemas();
 
+        // 3) Charger la liste des films
+        await this.chargerFilms();
+
         // 4) Charger toutes les séances pour tous les cinémas
         await this.chargerSeancesTousCinemas();
 
@@ -694,8 +712,12 @@ export class DataController {
             if (isNouvelleVersionServeur || isNouvelleVersionMajeure ){
                 console.log(`DataC: nouvelle version ${isNouvelleVersionServeur ? "serveur" : "majeur"} - rechargement depuis l’API`);
                 await this.chargerDepuisAPI();
+
+                resolveReady(); // 🔹 Signale que les données sont prêtes
+
                 this.version = newVersion;
                 await this.sauverComplet();
+
                 return;
             } else {
                 console.log("Pas de mise à jour de cache");
@@ -727,6 +749,8 @@ export class DataController {
         } else {
             console.log('[init] Données restaurées depuis localStorage');
         }
+
+        resolveReady(); // 🔹 Signale que les données sont prêtes
     }
 
 

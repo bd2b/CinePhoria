@@ -48,6 +48,7 @@ function apiRequest(endpoint_1, method_1, body_1) {
             else {
                 finalBody = body ? JSON.stringify(body) : undefined;
                 headers['Content-Type'] = 'application/json';
+                headers['Accept-Encoding'] = 'gzip, deflate, br';
             }
             if (requiresAuth) {
                 headers['Authorization'] = `Bearer ${token}`;
@@ -495,7 +496,7 @@ export function filmsSelectAllApi() {
     return __awaiter(this, void 0, void 0, function* () {
         const endpoint = `${baseUrl}/api/films`;
         // Requête authentifiée
-        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
+        const responseJSON = yield apiRequest(endpoint, 'GET', undefined, false);
         return responseJSON;
     });
 }

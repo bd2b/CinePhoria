@@ -56,6 +56,7 @@ async function apiRequest<T>(
         } else {
             finalBody = body ? JSON.stringify(body) : undefined;
             headers['Content-Type'] = 'application/json';
+            headers['Accept-Encoding'] = 'gzip, deflate, br';
         }
 
         if (requiresAuth) {
@@ -623,7 +624,7 @@ export async function filmsSelectAllApi(): Promise<Film[]> {
         endpoint,
         'GET',
         undefined,
-        true
+        false
     );
     return responseJSON;
 }

@@ -3,6 +3,7 @@ import cors from 'cors';
 import logger from './config/configLog';
 import sanitizeQueryMiddleware from './middlewares/sanitiseQueryMiddleware';
 import fileUpload from 'express-fileupload';
+import compression from 'compression';
 
 import http from 'http';
 import https from 'https';
@@ -25,6 +26,11 @@ console.log(`🛠️ Mode actuel : ${modeExec} avec version ${JSON.stringify(ver
 connectDBMongo()
 
 const app = express();
+
+// ✅ Middleware pour la compression
+// 🔹 Active la compression gzip (ou brotli si le client le supporte)
+app.use(compression());
+
 
 // 🔵 CORS doit venir immédiatement après l'initialisation d'app
 // app.use(cors({
@@ -91,6 +97,10 @@ app.use(fileUpload({
 
 // ✅ Middleware JSON (Obligatoire pour Express)
 app.use(express.json());
+
+
+
+
 
 import filmRoutes from './routes/filmRoutes';
 import cinemaRoutes from './routes/cinemaRoutes';
