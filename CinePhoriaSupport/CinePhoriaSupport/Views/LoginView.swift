@@ -51,6 +51,7 @@ struct LoginView: View {
                         RoundedRectangle(cornerRadius: 6)
                             .fill(Color(NSColor.textBackgroundColor))
                     )
+                   
                     
             }
 
@@ -67,6 +68,7 @@ struct LoginView: View {
                     RoundedRectangle(cornerRadius: 6)
                         .fill(Color(NSColor.textBackgroundColor))
                 )
+                
 
             HStack {
                 Toggle(isOn: $dataController.rememberMe) {

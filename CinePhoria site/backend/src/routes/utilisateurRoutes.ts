@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { authenticateJWT } from '../middlewares/authMiddleware';
+import { validateBodyShape } from '../middlewares/validateBodyShape';
 import logger from '../config/configLog'
 
 import { UtilisateurController } from '../controllers/utilisateurController';
@@ -9,7 +10,21 @@ const router = Router();
 // POST /api/utilisateur
 logger.info('Declaration route /api/utilisateur/');
 router.post('/create', UtilisateurController.createUtilisateur);
-router.post('/confirmUtilisateur', UtilisateurController.confirmUtilisateur);
+
+router.post('/confirmUtilisateur',
+        validateBodyShape({
+        id: 'string',
+        password: 'string',
+        displayName: 'string'
+}), UtilisateurController.confirmUtilisateur);
+
+validateBodyShape({
+    id: 'string',
+    password: 'string',
+    displayName: 'string'
+}),
+
+
 router.post('/confirmCompte', UtilisateurController.confirmCompte);
 router.post('/askresetpwd', UtilisateurController.sendCodeReset);
 router.post('/resetpwd', UtilisateurController.validateChangePwd);

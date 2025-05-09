@@ -17,6 +17,18 @@ export class MailController {
       // Extraire les données du body
       let { mailInput } = req.body;
 
+      if (
+        !mailInput ||
+        typeof mailInput.emailDest !== 'string' ||
+        typeof mailInput.subject !== 'string' ||
+        typeof mailInput.body !== 'string' ||
+        (mailInput.emailFrom && typeof mailInput.emailFrom !== 'string') ||
+        (mailInput.isHtml && typeof mailInput.isHtml !== 'boolean')
+      ) {
+        res.status(400).json({ message: "Paramètres mailInput invalides." });
+        return;
+      }
+
       // Vérification que mailInput est bien un objet valide
       if (!mailInput || !mailInput.emailDest) {
         res.status(400).json({ message: "Parametre d'appel invalide" });

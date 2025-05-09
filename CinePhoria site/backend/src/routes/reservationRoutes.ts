@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { SeanceController } from '../controllers/seanceController';
 import { authenticateJWT } from '../middlewares/authMiddleware';
+import { validateBodyShape } from '../middlewares/validateBodyShape';
 import logger from '../config/configLog';
 
 import { ReservationController } from '../controllers/reservationController';
@@ -22,7 +23,14 @@ router.post('/cancel', ReservationController.cancelReservation);
 router.post('/setstate', authenticateJWT , ReservationController.setReservationStateById);
 
 // Modifier une évaluation
-router.post('/setevaluation', authenticateJWT, ReservationController.setReservationEvaluationById);
+router.post('/setevaluation', authenticateJWT, 
+    validateBodyShape ({ 
+        reservationId: 'string',
+        note : 'number', 
+        evaluation: 'string', 
+        isEvaluationMustBeReview: 'number'}),
+    
+    ReservationController.setReservationEvaluationById);
 
 // Recupérer les stats de reservations
 router.get('/getreservationstats', authenticateJWT ,ReservationController.getReservationStatsAll);
