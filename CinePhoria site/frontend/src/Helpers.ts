@@ -231,3 +231,125 @@ export function isPasswordValid(password: string): boolean {
     );
 }
 
+type ExpectedType = 'string' | 'number' | 'boolean' | 'nullable-string' | 'nullable-number';
+
+export function validateObjectShape(obj: any, shape: Record<string, ExpectedType>): boolean {
+    if (typeof obj !== 'object' || obj === null) return false;
+
+    for (const key in shape) {
+        const expected = shape[key];
+        const value = obj[key];
+
+        if (value === undefined || value === null) {
+            if (!expected.startsWith('nullable')) {
+                console.log(`⛔ ${key} est null/undefined mais ${expected} requis`);
+                return false;
+            }
+            continue;
+        }
+
+        const baseType = expected.replace('nullable-', '');
+        if (typeof value !== baseType) {
+            console.log(`⛔ ${key} a la valeur ${value}, mais type ${baseType} attendu`);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+import { Film } from "./shared-models/Film.js";
+/**
+ * Vérifie si un objet est un Film valide (shape des propriétés typées)
+ */
+export function sanitizeFilm(obj: any): obj is Film {
+    const result = validateObjectShape(obj, {
+        id: 'string',
+        titleFilm: 'string',
+        filmPitch: 'string',
+        genreArray: 'string',
+        duration: 'string',
+        linkBO: 'string',
+        dateSortieCinePhoria: 'string',
+        categorySeeing: 'string',
+        note: 'number',
+        isCoupDeCoeur: 'number',
+        isActiveForNewSeances: 'number',
+        filmDescription: 'string',
+        filmAuthor: 'string',
+        filmDistribution: 'string',
+        imageFilm128: 'string',
+        imageFilm1024: 'string',
+    });
+    if (!result) console.error("Anomalie sanitize Film");
+    return result;
+}
+
+import { Seance } from "./shared-models/Seance.js";
+/**
+ * Vérifie si un objet est une Seance valide (shape des propriétés typées)
+ */
+export function sanitizeSeance(obj: any): obj is Seance {
+    const result = validateObjectShape(obj, {
+        seanceId: 'string',
+        filmId: 'string',
+        salleId: 'string',
+        dateJour: 'string',
+        hourBeginHHSMM: 'string',
+        hourEndHHSMM: 'string',
+        qualite: 'string',
+        bo: 'string',
+        numFreeSeats: 'number',
+        numFreePMR: 'number',
+        alertAvailibility: 'nullable-string',
+        nameSalle: 'string',
+        nameCinema: 'string',
+        capacity: 'number',
+        numPMR: 'number',
+        rMax: 'number',
+        fMax: 'number',
+        seatsAbsents: 'string',
+        adresse: 'string',
+        ville: 'string',
+        postalcode: 'string',
+        emailCinema: 'string',
+        telCinema: 'string'
+    });
+    if (!result) console.error("Anomalie sanitize Seance");
+    return result;
+}
+
+import { Cinema } from "./shared-models/Cinema.js";
+/**
+ * Vérifie si un objet est un Cinema valide (shape des propriétés typées)
+ */
+export function sanitizeCinema(obj: any): obj is Cinema {
+    const result = validateObjectShape(obj, {
+        nameCinema: 'string',
+        adresse: 'string',
+        ville: 'string',
+        postalcode: 'string',
+        emailCinema: 'string',
+        telCinema: 'string',
+        ligne1: 'string',
+        ligne2: 'string'
+    });
+    if (!result) console.error("Anomalie sanitize Cinema");
+    return result;
+}
+
+import { TarifQualite } from "./shared-models/Seance.js";
+/**
+ * Vérifie si un objet est un TarifQualite valide (shape des propriétés typées)
+ */
+export function sanitizeTarifQualite(obj: any): obj is TarifQualite {
+    const result = validateObjectShape(obj, {
+        id: 'string',
+        qualite: 'string',
+        nameTarif: 'string',
+        price: 'number'
+    });
+    if (!result) console.error("Anomalie sanitize TarifQualite");
+    return result;
+}
+

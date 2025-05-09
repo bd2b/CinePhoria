@@ -37,7 +37,7 @@ if (window.location.hostname.toUpperCase() !== 'CINEPHORIA.BD2DB.COM')
 //     "manageEmployes.html" : onLoadManageEmployes,
 //     "dashboard.html" : onLoadDashboard
 // };
-const pagesPublic = ["visiteur.html", "reservation.html", "films.html"]; // TODO manageXXXXX à supprimer
+const pagesPublic = ["visiteur.html", "reservation.html", "films.html", "mesreservations.html"]; // TODO manageXXXXX à supprimer
 /**
  * Structure de chargement dynamique des modules selon la page active.
  * Chaque fonction est appelée uniquement si la page correspond,

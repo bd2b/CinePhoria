@@ -28,7 +28,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { Seance, TarifQualite } from './shared-models/Seance.js'; // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { Film } from './shared-models/Film.js';
 import { ReservationState } from './shared-models/Reservation.js';
-import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
+import { getCookie, setCookie, datePrecedentMercredi, sanitizeFilm, sanitizeSeance, sanitizeCinema, sanitizeTarifQualite } from './Helpers.js';
 import { ajouterJours, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { Cinema } from './shared-models/Cinema.js';
 import { getSeancesByIdApi, getVersionApi, filmsSelectAllApi } from './NetworkController.js';
@@ -262,7 +262,7 @@ export class DataController {
             console.log("DataC: ChargerDepuisAPI");
             try {
                 // 0) Chargement de tous les films dans la variables de class allFilms de Seance
-                Seance.allFilms = yield filmsSelectAllApi();
+                Seance.allFilms = (yield filmsSelectAllApi()).filter(sanitizeFilm);
                 // 1) Chargement de toutes les séances
                 const response = yield fetch(`${baseUrl}/api/seances/filter?cinemasList="all"`);
                 const rawData = yield response.json();
@@ -270,7 +270,7 @@ export class DataController {
                     throw new Error('La réponse de l’API n’est pas un tableau.');
                 }
                 // Convertir les données brutes en instances de Seance
-                this._allSeances = rawData.map((d) => new Seance(d));
+                this._allSeances = rawData.filter(sanitizeSeance).map((d) => new Seance(d));
                 console.log(`Pour l'ensembles des cinemas, chargement depuis l'API : ${this.seances.length} séances, ${this.films.length} films`);
                 // 2) On recupere les tarifs
                 const responseTarif = yield fetch(`${baseUrl}/api/seances/tarif`);
@@ -279,7 +279,7 @@ export class DataController {
                     throw new Error('La réponse de l’API n’est pas un tableau.');
                 }
                 // Convertir les données brutes en instances de Tarif
-                this._tarifQualite = rawDataTarif.map((t) => new TarifQualite(t));
+                this._tarifQualite = rawDataTarif.filter(sanitizeTarifQualite).map((t) => new TarifQualite(t));
                 console.log(`Pour l'ensemble des tarifs : chargement depuis l'API : ${this._tarifQualite.length} tarifs`);
                 // 3) Chargement de tous les cinemas (pour le pied de page)
                 const responseCinema = yield fetch(`${baseUrl}/api/cinemas`);
@@ -288,7 +288,7 @@ export class DataController {
                     throw new Error('La réponse de l’API n’est pas un tableau.');
                 }
                 // Convertir les données brutes en instances de Cinema
-                this._Cinemas = rawDataCinema.map((c) => new Cinema(c));
+                this._Cinemas = rawDataCinema.filter(sanitizeCinema).map((c) => new Cinema(c));
                 console.log(`Pour l'ensemble des cinemas, chargement depuis l'API : ${this._Cinemas.length} cinemas`);
                 // Enregistrement de la date de validité
                 setCookie(DataController.nomCookieDateAccess, (new Date()).toISOString(), 1);
@@ -505,7 +505,8 @@ export class DataController {
             try {
                 const arr = JSON.parse(saved);
                 if (Array.isArray(arr)) {
-                    this._tarifQualite = arr.map((t) => new TarifQualite(t));
+                    console.log("arr", arr),
+                        this._tarifQualite = arr.filter(sanitizeTarifQualite).map((t) => new TarifQualite(t));
                 }
             }
             catch (e) {
@@ -521,7 +522,7 @@ export class DataController {
             try {
                 const arr = JSON.parse(saved);
                 if (Array.isArray(arr)) {
-                    this._Cinemas = arr.map((c) => new Cinema(c));
+                    this._Cinemas = arr.filter(sanitizeCinema).map((c) => new Cinema(c));
                 }
             }
             catch (e) {
@@ -537,7 +538,7 @@ export class DataController {
             try {
                 const arr = JSON.parse(saved);
                 if (Array.isArray(arr)) {
-                    Seance.allFilms = arr.map((f) => new Film(f));
+                    Seance.allFilms = arr.filter(sanitizeFilm).map((f) => new Film(f));
                 }
             }
             catch (e) {
@@ -554,7 +555,7 @@ export class DataController {
             try {
                 const arr = JSON.parse(saved);
                 if (Array.isArray(arr)) {
-                    return arr.map((s) => new Seance(s));
+                    return arr.filter(sanitizeSeance).map((s) => new Seance(s));
                 }
             }
             catch (e) {

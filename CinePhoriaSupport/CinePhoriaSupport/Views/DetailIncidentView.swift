@@ -45,6 +45,7 @@ struct DetailIncidentView: View {
                 TextField("Titre", text: $incident.title)
                     .font(.title3)
                     .disabled(isResolved)
+                    
             }
 
             Section(header: Text("Statut")) {
@@ -80,6 +81,7 @@ struct DetailIncidentView: View {
                             .stroke(Color.gray.opacity(0.4))
                     )
                     .disabled(isResolved)
+                   
             }
 
             if let date = incident.dateClose {

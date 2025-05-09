@@ -19,10 +19,11 @@
 import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 import { Film } from './shared-models/Film.js';
 import { ReservationState } from './shared-models/Reservation.js';
-import { getCookie, setCookie, datePrecedentMercredi } from './Helpers.js';
+import { getCookie, setCookie, datePrecedentMercredi,
+    sanitizeFilm, sanitizeSeance, sanitizeCinema, sanitizeTarifQualite } from './Helpers.js';
 import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
 import { Cinema } from './shared-models/Cinema.js';
-import { getSeancesByIdApi, getVersionApi , filmsSelectAllApi } from './NetworkController.js';
+import { getSeancesByIdApi, getVersionApi, filmsSelectAllApi } from './NetworkController.js';
 import { baseUrl } from './Global.js';
 import { MajSite } from './shared-models/MajSite.js';
 import { majFooterVersion } from './ViewFooter.js';
@@ -32,6 +33,9 @@ let resolveReady: () => void;
 export const dataReady: Promise<void> = new Promise((resolve) => {
     resolveReady = resolve;
 });
+
+
+
 
 export class DataController {
 
@@ -63,23 +67,23 @@ export class DataController {
 
     // 🏆 Variable calculée : retourne les films qui ont une date de sortie au dernier mercredi 
     // ou les films du catalogue trie par date de sortie
-    get filmsSortiesRecentes(): {films:  Film[], message: string} {
+    get filmsSortiesRecentes(): { films: Film[], message: string } {
         const precedentMercredi = datePrecedentMercredi();
-    
+
         const filmsMercredi = this.films.filter((f) => {
             if (!f.dateSortieCinePhoria) return false;
             const sortieDate = new Date(f.dateSortieCinePhoria);
             return formatDateLocalYYYYMMDD(sortieDate) === formatDateLocalYYYYMMDD(precedentMercredi);
         });
-    
+
         const filmsaTrier = filmsMercredi.length > 0 ? filmsMercredi : this.films;
         const messageAssocie = filmsMercredi.length > 0 ? "Nouveaute de la semaine" : "Notre catalogue";
-    
+
         const filmsListeFinal = filmsaTrier
             .filter(f => f.dateSortieCinePhoria)
             .sort((a, b) => new Date(b.dateSortieCinePhoria!).getTime() - new Date(a.dateSortieCinePhoria!).getTime());
-        return { films: filmsListeFinal , message: messageAssocie }
-        }
+        return { films: filmsListeFinal, message: messageAssocie }
+    }
 
     // Variable calculée : retourne tous les genres des films filtrés sur le nom du cinema
     get genreSet(): Set<string> {
@@ -313,11 +317,11 @@ export class DataController {
     // On charge l'ensemble des données de toutes les séances, on filtrera en local
     public async chargerDepuisAPI(): Promise<void> {
         console.log("DataC: ChargerDepuisAPI")
-        
+
         try {
 
             // 0) Chargement de tous les films dans la variables de class allFilms de Seance
-            Seance.allFilms = await filmsSelectAllApi()
+            Seance.allFilms = (await filmsSelectAllApi()).filter(sanitizeFilm);
 
             // 1) Chargement de toutes les séances
             const response = await fetch(`${baseUrl}/api/seances/filter?cinemasList="all"`);
@@ -328,7 +332,7 @@ export class DataController {
             }
 
             // Convertir les données brutes en instances de Seance
-            this._allSeances = rawData.map((d: any) => new Seance(d));
+            this._allSeances = rawData.filter(sanitizeSeance).map((d: any) => new Seance(d));
             console.log(`Pour l'ensembles des cinemas, chargement depuis l'API : ${this.seances.length} séances, ${this.films.length} films`);
 
             // 2) On recupere les tarifs
@@ -340,7 +344,7 @@ export class DataController {
             }
 
             // Convertir les données brutes en instances de Tarif
-            this._tarifQualite = rawDataTarif.map((t: any) => new TarifQualite(t));
+            this._tarifQualite = rawDataTarif.filter(sanitizeTarifQualite).map((t: any) => new TarifQualite(t));
             console.log(`Pour l'ensemble des tarifs : chargement depuis l'API : ${this._tarifQualite.length} tarifs`);
 
             // 3) Chargement de tous les cinemas (pour le pied de page)
@@ -352,7 +356,7 @@ export class DataController {
             }
 
             // Convertir les données brutes en instances de Cinema
-            this._Cinemas = rawDataCinema.map((c: any) => new Cinema(c));
+            this._Cinemas = rawDataCinema.filter(sanitizeCinema).map((c: any) => new Cinema(c));
             console.log(`Pour l'ensemble des cinemas, chargement depuis l'API : ${this._Cinemas.length} cinemas`);
 
             // Enregistrement de la date de validité
@@ -361,7 +365,7 @@ export class DataController {
         } catch (error) {
             console.error('Erreur lors du chargement des données de séances : ', error);
         } finally {
-            
+
         }
     }
     /**
@@ -463,7 +467,7 @@ export class DataController {
     protected static KEY_TARIFS = 'myAppTarifs';            // Pour le tarifQualite
     protected static KEY_CINEMAS = 'myAppCinemas';          // Pour la liste des Cinema
     protected static KEY_FILMS = 'myAppFilms';                 // Pour la liste des Films
-    
+
     // Pour les seances, on fera KEY_SEANCES + "_" + cinemaName => "myAppSeances_Paris", etc.
     protected static KEY_SEANCES = 'myAppSeances';
 
@@ -599,7 +603,8 @@ export class DataController {
         try {
             const arr = JSON.parse(saved);
             if (Array.isArray(arr)) {
-                this._tarifQualite = arr.map((t: any) => new TarifQualite(t));
+                console.log("arr", arr),
+                    this._tarifQualite = arr.filter(sanitizeTarifQualite).map((t: any) => new TarifQualite(t));
             }
         } catch (e) {
             console.error('DataC: Erreur parsing tarifs', e);
@@ -612,7 +617,7 @@ export class DataController {
         try {
             const arr = JSON.parse(saved);
             if (Array.isArray(arr)) {
-                this._Cinemas = arr.map((c: any) => new Cinema(c));
+                this._Cinemas = arr.filter(sanitizeCinema).map((c: any) => new Cinema(c));
             }
         } catch (e) {
             console.error('DataC: Erreur parsing cinemas', e);
@@ -625,7 +630,7 @@ export class DataController {
         try {
             const arr = JSON.parse(saved);
             if (Array.isArray(arr)) {
-                Seance.allFilms = arr.map((f: any) => new Film(f));
+                Seance.allFilms = arr.filter(sanitizeFilm).map((f: any) => new Film(f));
             }
         } catch (e) {
             console.error('DataC: Erreur parsing films', e);
@@ -639,7 +644,7 @@ export class DataController {
         try {
             const arr = JSON.parse(saved);
             if (Array.isArray(arr)) {
-                return arr.map((s: any) => new Seance(s));
+                return arr.filter(sanitizeSeance).map((s: any) => new Seance(s));
             }
         } catch (e) {
             console.error('DataC: Erreur parsing seances pour', cinemaName, e);
@@ -699,16 +704,16 @@ export class DataController {
         // a changer de version majeure
         try {
             const newVersion = await getVersionApi();
-            
+
             console.log("Version du serveur = ", JSON.stringify(newVersion));
             console.log("Version du cache = ", JSON.stringify(this.version))
 
-            const isNouvelleVersionServeur = this.version.dateMaj && newVersion.dateMaj  &&
-             this.version.dateMaj < newVersion.dateMaj ;
+            const isNouvelleVersionServeur = this.version.dateMaj && newVersion.dateMaj &&
+                this.version.dateMaj < newVersion.dateMaj;
             const isNouvelleVersionMajeure = this.version.MAJEURE && newVersion.MAJEURE &&
-             this.version.MAJEURE !== newVersion.MAJEURE ;
+                this.version.MAJEURE !== newVersion.MAJEURE;
 
-            if (isNouvelleVersionServeur || isNouvelleVersionMajeure ){
+            if (isNouvelleVersionServeur || isNouvelleVersionMajeure) {
                 console.log(`DataC: nouvelle version ${isNouvelleVersionServeur ? "serveur" : "majeur"} - rechargement depuis l’API`);
                 await this.chargerDepuisAPI();
 
