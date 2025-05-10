@@ -505,37 +505,37 @@ VALUES
   (UUIDSalle1P,"Salle 1", "Paris", 190, 10, 20, 10, '"R13F0", "R13F1","R13F2", "R13F3","R13F4", "R13F5", "R13F6", "R13F7", "R13F8", "R13F9"'),
   (UUIDSalle2P,"Salle 2", "Paris", 96, 2,12,8,''),
   (UUIDSalle3P,"Salle 3", "Paris", 96, 2,12,8,''),
-  (UUIDSalle4P,"Salle 4", "Paris", 50, 0,5,10,''),
+  (UUIDSalle4P,"Salle 4", "Paris", 20, 0,2,10,''),
 
   (UUIDSalle1T,"Salle 1", "Toulouse",190, 10, 20, 10, '"R13F0", "R13F1","R13F2", "R13F3","R13F4", "R13F5", "R13F6", "R13F7", "R13F8", "R13F9"'),
   (UUIDSalle2T,"Salle 2", "Toulouse", 96, 2,12,8,''),
   (UUIDSalle3T,"Salle 3", "Toulouse", 96, 2,12,8,''),
-  (UUIDSalle4T,"Salle 4", "Toulouse", 50, 0,5,10,''),
+  (UUIDSalle4T,"Salle 4", "Toulouse", 20, 0,2,10,''),
 
   (UUIDSalle1N,"Salle 1", "Nantes", 190, 10, 20, 10, '"R13F0", "R13F1","R13F2", "R13F3","R13F4", "R13F5", "R13F6", "R13F7", "R13F8", "R13F9"'),
   (UUIDSalle2N,"Salle 2", "Nantes", 96, 2,12,8,''),
   (UUIDSalle3N,"Salle 3", "Nantes", 96, 2,12,8,''),
-  (UUIDSalle4N,"Salle 4", "Nantes", 50, 0,5,10,''),
+  (UUIDSalle4N,"Salle 4", "Nantes", 20, 0,2,10,''),
 
   (UUIDSalle1B,"Salle 1", "Bordeaux", 190, 10, 20, 10, '"R13F0", "R13F1","R13F2", "R13F3","R13F4", "R13F5", "R13F6", "R13F7", "R13F8", "R13F9"'),
   (UUIDSalle2B,"Salle 2", "Bordeaux", 96, 2,12,8,''),
   (UUIDSalle3B,"Salle 3", "Bordeaux", 96, 2,12,8,''),
-  (UUIDSalle4B,"Salle 4", "Bordeaux", 50, 0,5,10,''),
+  (UUIDSalle4B,"Salle 4", "Bordeaux", 20, 0,2,10,''),
 
   (UUIDSalle1L,"Salle 1", "Lille", 190, 10, 20, 10, '"R13F0", "R13F1","R13F2", "R13F3","R13F4", "R13F5", "R13F6", "R13F7", "R13F8", "R13F9"'),
   (UUIDSalle2L,"Salle 2", "Lille", 96, 2,12,8,''),
   (UUIDSalle3L,"Salle 3", "Lille", 96, 2,12,8,''),
-  (UUIDSalle4L,"Salle 4", "Lille", 50, 0,5,10,''),
+  (UUIDSalle4L,"Salle 4", "Lille", 20, 0,2,10,''),
 
   (UUIDSalle1C,"Salle 1", "Charleroi", 190, 10, 20, 10, '"R13F0", "R13F1","R13F2", "R13F3","R13F4", "R13F5", "R13F6", "R13F7", "R13F8", "R13F9"'),
   (UUIDSalle2C,"Salle 2", "Charleroi", 96, 2,12,8,''),
   (UUIDSalle3C,"Salle 3", "Charleroi", 96, 2,12,8,''),
-  (UUIDSalle4C,"Salle 4", "Charleroi", 50, 0,5,10,''),
+  (UUIDSalle4C,"Salle 4", "Charleroi", 20, 0,2,10,''),
 
   (UUIDSalle1G,"Salle 1", "Liège", 190, 10, 20, 10, '"R13F0", "R13F1","R13F2", "R13F3","R13F4", "R13F5", "R13F6", "R13F7", "R13F8", "R13F9"'),
   (UUIDSalle2G,"Salle 2", "Liège", 96, 2,12,8,''),
   (UUIDSalle3G,"Salle 3", "Liège", 96, 2,12,8,''),
-  (UUIDSalle4G,"Salle 4", "Liège", 50, 0,5,10,'')
+  (UUIDSalle4G,"Salle 4", "Liège", 20, 0,2,10,'')
  ;
   
 INSERT INTO Incident
@@ -771,8 +771,7 @@ INSERT INTO TarifQualite (
 	nameTarif,
 	price)
 VALUES 
-  ( UUIDTarifQualite1 , "" , "Plein Tarif" , 10.0) ,
-  ( UUIDTarifQualite2 , "" , "Tarif Reduit" , 8.0) ,
+  
   ( UUIDTarifQualite3 , "3D" , "Plein Tarif" , 11.0) ,
   ( UUIDTarifQualite4 , "3D" , "Tarif Reduit" , 9.0) ,
   ( UUIDTarifQualite5 , "4K" , "Plein Tarif" , 11.0) ,
@@ -794,9 +793,35 @@ VALUES
 --  (UUIDTarifQualite8, UUIDReservation3, 3,40.0)
 --   ;
 
+-- Mettre à jour les nombre de places
+UPDATE Seance s
+JOIN Salle sa ON s.Salleid = sa.id
+LEFT JOIN (
+  SELECT r.Seanceid, SUM(st.numberSeats) AS totalReserved
+  FROM Reservation r
+  JOIN SeatsForTarif st ON r.id = st.ReservationId
+  GROUP BY r.Seanceid
+) AS res ON res.Seanceid = s.id
+SET s.numFreeSeats = sa.capacity - IFNULL(res.totalReserved, 0);
+
+    
+-- Mettre à jour les nombre de places PMR
+UPDATE Seance s
+JOIN Salle sa ON s.Salleid = sa.id
+LEFT JOIN (
+  SELECT Seanceid, SUM(numberPMR) AS totalReservedPMR
+  FROM Reservation
+  GROUP BY Seanceid
+) AS res ON res.Seanceid = s.id
+SET s.numFreePMR = sa.numPMR - IFNULL(res.totalReservedPMR, 0);
+
+
+
 -- Mise à jour de la table MajSite
 INSERT INTO MajSite ( MAJEURE , MINEURE , BUILD,  dateMaj , message  )
 VALUES (0,0,0,NOW(),"Initialisation de la base");
+
+
   
   END $$
 DELIMITER ;
