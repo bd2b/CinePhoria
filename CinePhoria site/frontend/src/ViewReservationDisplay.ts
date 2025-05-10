@@ -58,8 +58,13 @@ export async function afficherDetailsReservation(reservation: ReservationForUtil
     if (!containerTable) return;
     containerTable.innerHTML = '';
     // Affichage du tableau de la reservation
-    const nodeTable = await updateTableContent("", true) as HTMLTableElement;
+    console.log("Reservation en cours +++ ",  dataController.selectedReservationUUID)
+    const nodeTable = await updateTableContent("", true, dataController.selectedReservationUUID) as HTMLTableElement;
     containerTable.appendChild(nodeTable as Node);
+    const btnFauteuils = document.querySelector('.panel__choisirSeats-button') as HTMLButtonElement;
+    // Le bouton est initialement desactivé
+    btnFauteuils.classList.add("inactif");
+    btnFauteuils.disabled = true;
 
     // Si pas de PMR on masque l'ensemble , sinon on affiche avec masquage des boutons
     if (reservation.numberPMR === undefined || reservation.numberPMR === 0) {

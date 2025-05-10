@@ -656,6 +656,18 @@ export class DataController {
             resolveReady(); // 🔹 Signale que les données sont prêtes
         });
     }
+    getSeanceFromDB(seancesUUID) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const seancesAjour = yield getSeancesByIdApi(seancesUUID);
+                return seancesAjour;
+            }
+            catch (error) {
+                console.error("Erreur dans la récupération de seances : " + error);
+            }
+            return [];
+        });
+    }
     // Rafraichissement du cache pour une liste quelconque de séances
     updateSeances(seancesUUID) {
         return __awaiter(this, void 0, void 0, function* () {

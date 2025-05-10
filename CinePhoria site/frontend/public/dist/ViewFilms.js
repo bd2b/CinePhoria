@@ -391,12 +391,17 @@ function afficherDetailFilm(film) {
                         isUUID(dataController.selectedReservationUUID || '') &&
                         isUUID(dataController.selectedSeanceUUID || '')) { // Autre reservation en cours
                         alert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle");
+                        window.location.href = 'reservation.html';
                     }
                     else {
                         // Afficher un message
                         const { Jour, Cinema, Horaire, Qualite, Tarifs, SeanceId } = lastSelectedSeanceData;
                         const seance = dataController.seances.find((s) => s.seanceId === SeanceId);
-                        if (seance) {
+                        const seanceAJour = yield dataController.getSeanceFromDB([SeanceId]);
+                        let numFreeSeatsActual = -1;
+                        if (seanceAJour[0].numFreeSeats)
+                            numFreeSeatsActual = parseInt(seanceAJour[0].numFreeSeats, 10);
+                        if (seance && numFreeSeatsActual > 0) {
                             dataController.filterNameCinema = Cinema;
                             dataController.selectedSeanceUUID = SeanceId;
                             dataController.selectedFilmUUID = seance.filmId || '';
@@ -405,6 +410,9 @@ function afficherDetailFilm(film) {
                             yield dataController.sauverEtatGlobal();
                             window.location.href = 'reservation.html';
                             alert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
+                        }
+                        else {
+                            alert('La seance est complete');
                         }
                     }
                 }
@@ -451,6 +459,32 @@ function buildTableSeances(film) {
     table.appendChild(tbody);
     // Récup seances, tri...
     let seances = dataController.seancesFilm(film.id);
+    // Filtrage : exclure séances du jour dont l'heure de début est à moins d'une heure de l'heure actuelle,
+    // et séances complètes (numFreeSeats = "0").
+    const now = new Date();
+    const today = new Date();
+    seances = seances.filter((seance) => {
+        var _a;
+        // Exclure les séances complètes
+        if (seance.numFreeSeats === "0")
+            return false;
+        // Exclure si aujourd'hui et heure < maintenant + 1h
+        if (seance.dateJour) {
+            const seanceDate = new Date(seance.dateJour);
+            if (seanceDate.getFullYear() === today.getFullYear() &&
+                seanceDate.getMonth() === today.getMonth() &&
+                seanceDate.getDate() === today.getDate()) {
+                const [hh, mm] = ((_a = seance.hourBeginHHSMM) !== null && _a !== void 0 ? _a : "00:00").split(":").map(Number);
+                const seanceTime = new Date(seanceDate);
+                seanceTime.setHours(hh, mm, 0, 0);
+                const seuil = new Date(now);
+                seuil.setHours(seuil.getHours() + 1);
+                if (seanceTime < seuil)
+                    return false;
+            }
+        }
+        return true;
+    });
     // Tri
     seances.sort((a, b) => {
         var _a, _b, _c, _d;
