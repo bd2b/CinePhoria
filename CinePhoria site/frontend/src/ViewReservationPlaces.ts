@@ -92,6 +92,7 @@ async function setReservation() {
     containerTable.innerHTML = '';
 
     if (qualiteFilm) {
+        console.log("Reservation en cours ",  dataController.selectedReservationUUID)
         const nodeTable = await updateTableContent(qualiteFilm, undefined , undefined, numMaxSeats ) as HTMLTableElement;
         containerTable.appendChild(nodeTable as Node);
     }

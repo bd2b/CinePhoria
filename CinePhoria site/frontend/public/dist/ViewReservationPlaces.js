@@ -96,6 +96,7 @@ function setReservation() {
             return;
         containerTable.innerHTML = '';
         if (qualiteFilm) {
+            console.log("Reservation en cours ", dataController.selectedReservationUUID);
             const nodeTable = yield updateTableContent(qualiteFilm, undefined, undefined, numMaxSeats);
             containerTable.appendChild(nodeTable);
         }

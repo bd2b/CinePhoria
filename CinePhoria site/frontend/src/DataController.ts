@@ -313,6 +313,7 @@ export class DataController {
         return this._selectedReservationCinema || undefined;
     }
 
+
     // Méthode asynchrone pour initialiser les données depuis l'API
     // On charge l'ensemble des données de toutes les séances, on filtrera en local
     public async chargerDepuisAPI(): Promise<void> {
@@ -757,6 +758,15 @@ export class DataController {
         resolveReady(); // 🔹 Signale que les données sont prêtes
     }
 
+    public async getSeanceFromDB (seancesUUID: string[]) : Promise<Seance[]> {
+        try {
+            const seancesAjour = await getSeancesByIdApi(seancesUUID);
+            return seancesAjour;
+        } catch (error) {
+            console.error("Erreur dans la récupération de seances : " + error);
+        }
+        return [];
+    }
 
     // Rafraichissement du cache pour une liste quelconque de séances
     public async updateSeances(seancesUUID: string[]): Promise<void> {
