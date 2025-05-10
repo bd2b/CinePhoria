@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { Seance } from '../shared-models/Seance';
+import { Seance } from '../shared-models/Seance.js';
 import { JSDOM } from 'jsdom';
 const cancelReserveApiMock = jest.fn().mockResolvedValue(undefined);
 const setStateReservationApiMock = jest.fn().mockResolvedValue(undefined);
@@ -37,7 +37,7 @@ jest.mock('../DataController', () => {
         dataReady: Promise.resolve()
     };
 });
-import { updateTableMesReservations } from '../ViewMesReservations';
+import { updateTableMesReservations } from '../ViewMesReservations.js';
 describe('updateTableMesReservations', () => {
     beforeEach(() => {
         const dom = new JSDOM('<!DOCTYPE html><body></body>');

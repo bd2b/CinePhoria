@@ -330,6 +330,7 @@ class ReservationController {
         try {
             const reservationid = req.params.reservationid;
             const data = req.body;
+            configLog_1.default.info(req.body);
             const reservationAvisToUpdate = {
                 id: reservationid,
                 evaluation: typeof data.evaluation === 'string' ? data.evaluation : '',
