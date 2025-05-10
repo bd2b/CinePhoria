@@ -209,9 +209,6 @@ export function onClickContact() {
             closeModal();
         }
     }));
-    //   // Fermer
-    //   closeModal();
-    // });
     // 12) Initial check
     checkFormValidity();
 }

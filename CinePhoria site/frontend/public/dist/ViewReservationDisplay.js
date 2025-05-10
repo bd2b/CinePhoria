@@ -9,10 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { seanceCardView, basculerPanelReserve, afficherDetailsFilm } from './ViewReservation.js';
 import { dataController } from './DataController.js';
-import { updateTableContent, confirmUtilisateur, confirmMail } from "./ViewReservationPlaces.js";
+import { updateTableContent, confirmUtilisateur, confirmMail } from './ViewReservationPlaces.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { cancelReserveApi, getReservationApi } from './NetworkController.js';
 import { login } from './Login.js';
+// import { DatasetController } from 'chart';
 export function updateDisplayReservation() {
     return __awaiter(this, void 0, void 0, function* () {
         const reservationUUID = dataController.selectedReservationUUID;

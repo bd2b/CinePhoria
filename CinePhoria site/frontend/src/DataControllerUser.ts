@@ -1,6 +1,6 @@
-import { ComptePersonne } from './shared-models/Utilisateur';
-import { profilApi } from './NetworkController';
-import { deleteCookie, getCookie, setCookie } from './Helpers';
+import { ComptePersonne } from './shared-models/Utilisateur.js';
+import { profilApi } from './NetworkController.js';
+import { deleteCookie, getCookie, setCookie } from './Helpers.js';
 
 export enum ProfilUtilisateur {
     Utilisateur = "mesreservations.html",

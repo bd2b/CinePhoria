@@ -1,8 +1,8 @@
-import { dataController } from './DataController';
-import { validateEmail } from './Helpers';
-import { userDataController } from './DataControllerUser';
-import { Mail } from './shared-models/Mail';
-import { sendMailApi } from './NetworkController';
+import { dataController } from './DataController.js';
+import { validateEmail } from './Helpers.js';
+import { userDataController } from './DataControllerUser.js';
+import { Mail } from './shared-models/Mail.js';
+import { sendMailApi } from './NetworkController.js';
 
 export function onClickContact() {
   // 1) Vérifier si un div#modal-contact existe déjà
@@ -227,10 +227,6 @@ envoyerBtn?.addEventListener('click', async () => {
     closeModal();
   }
 });
-
-  //   // Fermer
-  //   closeModal();
-  // });
 
   // 12) Initial check
   checkFormValidity();

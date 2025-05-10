@@ -11,7 +11,7 @@ import { isUUID } from './Helpers.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
 import { ReservationForUtilisateur, SeatsForReservation } from './shared-models/Reservation.js';
 import { handleApiError, baseUrl } from './Global.js';
-import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
+import { CinephoriaErrorCode, CinephoriaError } from './shared-models/Error.js';
 /**
  * Fonction générique de gestion de l'API qui gère
  * - L’authentification avec JWT

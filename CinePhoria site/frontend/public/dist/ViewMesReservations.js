@@ -7,14 +7,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { userDataController } from "./DataControllerUser.js";
-import { dataController, dataReady } from "./DataController.js";
+import { userDataController } from './DataControllerUser.js';
+import { dataController, dataReady } from './DataController.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
-import { ReservationState } from "./shared-models/Reservation.js";
-import { getReservationForUtilisateur, setStateReservationApi, setEvaluationReservationApi, cancelReserveApi, getReservationQRCodeApi } from "./NetworkController.js";
-import { seanceCardView } from "./ViewReservation.js";
-import { updateTableContent } from "./ViewReservationPlaces.js";
+import { ReservationState } from './shared-models/Reservation.js';
+import { getReservationForUtilisateur, setStateReservationApi, setEvaluationReservationApi, cancelReserveApi, getReservationQRCodeApi } from './NetworkController.js';
+import { seanceCardView } from './ViewReservation.js';
+import { updateTableContent } from './ViewReservationPlaces.js';
 export function onLoadMesReservations() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, _b;

@@ -1,11 +1,11 @@
-import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewReservation';
-import { dataController } from './DataController';
+import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewReservation.js';
+import { dataController } from './DataController.js';
 
-import { isUUID, validateEmail } from './Helpers';
-import { SeatsForReservation, TarifForSeats, ReservationState } from './shared-models/Reservation';
-import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi } from './NetworkController';
-import { userDataController, ProfilUtilisateur } from './DataControllerUser';
-import { login } from './Login';
+import { isUUID, validateEmail } from './Helpers.js';
+import { SeatsForReservation, TarifForSeats, ReservationState } from './shared-models/Reservation.js';
+import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi } from './NetworkController.js';
+import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
+import { login } from './Login.js';
 
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
@@ -278,8 +278,13 @@ async function setReservation() {
     // La validation des saisies est faites par la fonction de validation validateForm
     btnReserve.removeEventListener('click', async (evt: MouseEvent) => { });
     btnReserve.addEventListener('click', async (evt: MouseEvent) => {
+        btnReserve.classList.add('loading');
+        btnReserve.disabled = true;
+
         evt.preventDefault();
         evt.stopPropagation();
+        
+
         console.log("Statut Reservation " + dataController.reservationState);
 
         // a) Récupérer le nombre total de places et la répartition par tarif
@@ -351,6 +356,10 @@ async function setReservation() {
         } catch (error: any) {
             console.error('Erreur lors de la création de la réservation', error);
             alert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
+        }
+        finally {
+            btnReserve.classList.remove('loading');
+            btnReserve.disabled = false;
         }
     });
 

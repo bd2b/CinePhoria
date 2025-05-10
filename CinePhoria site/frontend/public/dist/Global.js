@@ -7,19 +7,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { userDataController } from "./DataControllerUser.js";
+import { userDataController } from './DataControllerUser.js';
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
-import { dataController } from "./DataController.js";
-// import { onLoadManageFilms } from "./ViewManageFilms.js";
-// import { onLoadManageSalles } from "./ViewManageSalles.js";
-// import { onLoadManageSeances } from "./ViewManageSeances.js";
-// import { onLoadManageAvis } from "./ViewManageAvis.js";
-// import { onLoadManageEmployes } from "./ViewManageEmploye.js";
-// import { onLoadDashboard } from "./ViewDashboard.js";
-// import { onLoadReservation } from "./ViewReservation.js";
-// import { onLoadFilms } from "./ViewFilms.js";
-// import { onLoadMesReservations } from "./ViewMesReservations.js";
-// import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
+import { dataController } from './DataController.js';
+// import { onLoadManageFilms } from './ViewManageFilms.js.js';
+// import { onLoadManageSalles } from './ViewManageSalles.js.js';
+// import { onLoadManageSeances } from './ViewManageSeances.js.js';
+// import { onLoadManageAvis } from './ViewManageAvis.js.js';
+// import { onLoadManageEmployes } from './ViewManageEmploye.js.js';
+// import { onLoadDashboard } from './ViewDashboard.js.js';
+// import { onLoadReservation } from './ViewReservation.js.js';
+// import { onLoadFilms } from './ViewFilms.js.js';
+// import { onLoadMesReservations } from './ViewMesReservations.js.js';
+// import { onLoadVisiteur } from './ViewFilmsSortiesSemaine.js.js';
 // L'url de base est l'url d'appel des fichiers statiques
 export const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
 const page = window.location.pathname.split("/").pop(); // 🔹 Ajout ici

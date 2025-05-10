@@ -1,12 +1,12 @@
-import { seanceCardView, basculerPanelChoix, basculerPanelReserve, afficherDetailsFilm , updateContentPage} from './ViewReservation';
-import { dataController } from './DataController';
-import { updateTableContent, confirmUtilisateur , confirmMail } from "./ViewReservationPlaces";
+import { seanceCardView, basculerPanelChoix, basculerPanelReserve, afficherDetailsFilm , updateContentPage} from './ViewReservation.js';
+import { dataController } from './DataController.js';
+import { updateTableContent, confirmUtilisateur , confirmMail } from './ViewReservationPlaces.js';
 
-import { isUUID, validateEmail } from './Helpers';
-import { TarifForSeats, ReservationForUtilisateur, ReservationState } from './shared-models/Reservation';
-import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, cancelReserveApi, getReservationApi } from './NetworkController';
-import { userDataController, ProfilUtilisateur } from './DataControllerUser';
-import { login } from './Login';
+import { isUUID, validateEmail } from './Helpers.js';
+import { TarifForSeats, ReservationForUtilisateur, ReservationState } from './shared-models/Reservation.js';
+import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, cancelReserveApi, getReservationApi } from './NetworkController.js';
+import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
+import { login } from './Login.js';
 // import { DatasetController } from 'chart';
 
 

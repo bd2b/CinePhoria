@@ -7,12 +7,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { validateEmail } from "./Helpers.js";
-import { dataController } from "./DataController.js";
-import { userDataController } from "./DataControllerUser.js";
-import { loginApi, askResetPwdApi, resetPwdApi } from "./NetworkController.js";
-import { confirmReserve } from "./ViewReservationPlaces.js";
-import { ReservationState } from "./shared-models/Reservation.js";
+import { validateEmail } from './Helpers.js';
+import { dataController } from './DataController.js';
+import { userDataController } from './DataControllerUser.js';
+import { loginApi, askResetPwdApi, resetPwdApi } from './NetworkController.js';
+import { confirmReserve } from './ViewReservationPlaces.js';
+import { ReservationState } from './shared-models/Reservation.js';
 // HTML pour la modal de connexion
 const modalLoginLocalHTML = `
   <!-- Modale loginWithEmail -->  
