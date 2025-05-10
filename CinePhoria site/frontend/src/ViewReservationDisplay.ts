@@ -58,9 +58,9 @@ export async function afficherDetailsReservation(reservation: ReservationForUtil
     if (!containerTable) return;
     containerTable.innerHTML = '';
     // Affichage du tableau de la reservation
-    console.log("Reservation en cours +++ ",  dataController.selectedReservationUUID)
     const nodeTable = await updateTableContent("", true, dataController.selectedReservationUUID) as HTMLTableElement;
     containerTable.appendChild(nodeTable as Node);
+    // On desactive le changement de fauteuil
     const btnFauteuils = document.querySelector('.panel__choisirSeats-button') as HTMLButtonElement;
     // Le bouton est initialement desactivé
     btnFauteuils.classList.add("inactif");

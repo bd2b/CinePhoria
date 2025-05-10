@@ -60,9 +60,9 @@ export function afficherDetailsReservation(reservation) {
             return;
         containerTable.innerHTML = '';
         // Affichage du tableau de la reservation
-        console.log("Reservation en cours +++ ", dataController.selectedReservationUUID);
         const nodeTable = yield updateTableContent("", true, dataController.selectedReservationUUID);
         containerTable.appendChild(nodeTable);
+        // On desactive le changement de fauteuil
         const btnFauteuils = document.querySelector('.panel__choisirSeats-button');
         // Le bouton est initialement desactivé
         btnFauteuils.classList.add("inactif");
