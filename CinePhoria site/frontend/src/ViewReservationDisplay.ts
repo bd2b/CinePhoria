@@ -77,7 +77,7 @@ export async function afficherDetailsReservation(reservation: ReservationForUtil
     // Si pas de siege reservé on masque l'ensemble , sinon on affiche les sieges
     const seatsBooked = reservation.seatsReserved || dataController.selectedListSeats || '';
     const seatsBookedDiv = document.querySelector(".commande__seats") as HTMLDivElement;
-    console.log("+++++++++++//////////")
+    
 
     if (seatsBooked == '') {
         seatsBookedDiv.style.display = 'none';

@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
+const validateBodyShape_1 = require("../middlewares/validateBodyShape");
 const configLog_1 = __importDefault(require("../config/configLog"));
 const reservationController_1 = require("../controllers/reservationController");
 const router = (0, express_1.Router)();
@@ -18,7 +19,12 @@ router.post('/cancel', reservationController_1.ReservationController.cancelReser
 // Modifier un etat de reservation
 router.post('/setstate', authMiddleware_1.authenticateJWT, reservationController_1.ReservationController.setReservationStateById);
 // Modifier une évaluation
-router.post('/setevaluation', authMiddleware_1.authenticateJWT, reservationController_1.ReservationController.setReservationEvaluationById);
+router.post('/setevaluation', authMiddleware_1.authenticateJWT, (0, validateBodyShape_1.validateBodyShape)({
+    reservationId: 'string',
+    note: 'number',
+    evaluation: 'string',
+    isEvaluationMustBeReview: 'string'
+}), reservationController_1.ReservationController.setReservationEvaluationById);
 // Recupérer les stats de reservations
 router.get('/getreservationstats', authMiddleware_1.authenticateJWT, reservationController_1.ReservationController.getReservationStatsAll);
 // Recupérer les reservations d'un utilisateur

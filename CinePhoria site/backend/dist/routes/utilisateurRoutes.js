@@ -5,14 +5,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
+const validateBodyShape_1 = require("../middlewares/validateBodyShape");
 const configLog_1 = __importDefault(require("../config/configLog"));
 const utilisateurController_1 = require("../controllers/utilisateurController");
 const router = (0, express_1.Router)();
 // POST /api/utilisateur
 configLog_1.default.info('Declaration route /api/utilisateur/');
 router.post('/create', utilisateurController_1.UtilisateurController.createUtilisateur);
-router.post('/confirmUtilisateur', utilisateurController_1.UtilisateurController.confirmUtilisateur);
-router.post('/confirmCompte', utilisateurController_1.UtilisateurController.confirmCompte);
+router.post('/confirmUtilisateur', (0, validateBodyShape_1.validateBodyShape)({
+    id: 'string',
+    password: 'string',
+    displayName: 'string'
+}), utilisateurController_1.UtilisateurController.confirmUtilisateur);
+(0, validateBodyShape_1.validateBodyShape)({
+    id: 'string',
+    password: 'string',
+    displayName: 'string'
+}),
+    router.post('/confirmCompte', utilisateurController_1.UtilisateurController.confirmCompte);
 router.post('/askresetpwd', utilisateurController_1.UtilisateurController.sendCodeReset);
 router.post('/resetpwd', utilisateurController_1.UtilisateurController.validateChangePwd);
 // (Futur) GET /api/reservation/:id
