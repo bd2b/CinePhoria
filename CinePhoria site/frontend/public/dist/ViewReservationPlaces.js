@@ -247,6 +247,8 @@ function setReservation() {
         // La validation des saisies est faites par la fonction de validation validateForm
         btnReserve.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
         btnReserve.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+            btnReserve.classList.add('loading');
+            btnReserve.disabled = true;
             evt.preventDefault();
             evt.stopPropagation();
             console.log("Statut Reservation " + dataController.reservationState);
@@ -304,6 +306,10 @@ function setReservation() {
             catch (error) {
                 console.error('Erreur lors de la création de la réservation', error);
                 alert(`Une erreur s'est produite : ${(error === null || error === void 0 ? void 0 : error.message) || 'inconnue'}`);
+            }
+            finally {
+                btnReserve.classList.remove('loading');
+                btnReserve.disabled = false;
             }
         }));
     });

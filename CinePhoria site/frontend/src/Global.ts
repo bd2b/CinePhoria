@@ -1,16 +1,16 @@
-import { userDataController, ProfilUtilisateur } from "./DataControllerUser";
-import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error";
-import { dataController } from "./DataController";
-// import { onLoadManageFilms } from "./ViewManageFilms.js";
-// import { onLoadManageSalles } from "./ViewManageSalles.js";
-// import { onLoadManageSeances } from "./ViewManageSeances.js";
-// import { onLoadManageAvis } from "./ViewManageAvis.js";
-// import { onLoadManageEmployes } from "./ViewManageEmploye.js";
-// import { onLoadDashboard } from "./ViewDashboard.js";
-// import { onLoadReservation } from "./ViewReservation.js";
-// import { onLoadFilms } from "./ViewFilms.js";
-// import { onLoadMesReservations } from "./ViewMesReservations.js";
-// import { onLoadVisiteur } from "./ViewFilmsSortiesSemaine.js";
+import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
+import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
+import { dataController } from './DataController.js';
+// import { onLoadManageFilms } from './ViewManageFilms.js.js';
+// import { onLoadManageSalles } from './ViewManageSalles.js.js';
+// import { onLoadManageSeances } from './ViewManageSeances.js.js';
+// import { onLoadManageAvis } from './ViewManageAvis.js.js';
+// import { onLoadManageEmployes } from './ViewManageEmploye.js.js';
+// import { onLoadDashboard } from './ViewDashboard.js.js';
+// import { onLoadReservation } from './ViewReservation.js.js';
+// import { onLoadFilms } from './ViewFilms.js.js';
+// import { onLoadMesReservations } from './ViewMesReservations.js.js';
+// import { onLoadVisiteur } from './ViewFilmsSortiesSemaine.js.js';
 
 
 

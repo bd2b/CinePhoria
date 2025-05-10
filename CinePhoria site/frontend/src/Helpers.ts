@@ -1,4 +1,4 @@
-import { baseUrl } from "./Global";
+import { baseUrl } from './Global.js';
 export const listCinemasConst = ["Paris","Bordeaux","Nantes","Lille","Toulouse","Charleroi","Liège"];
 // Fonction pour obtenir la valeur d'un cookie
 export function getCookie(name: string): string | undefined {

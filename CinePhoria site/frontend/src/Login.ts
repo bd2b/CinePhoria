@@ -1,9 +1,9 @@
-import { deleteCookie, validateEmail } from "./Helpers";
-import { dataController } from "./DataController";
-import { userDataController } from "./DataControllerUser";
-import { loginApi, logoutApi, askResetPwdApi, resetPwdApi } from "./NetworkController";
-import { confirmReserve } from "./ViewReservationPlaces";
-import { ReservationState } from "./shared-models/Reservation";
+import { deleteCookie, validateEmail } from './Helpers.js';
+import { dataController } from './DataController.js';
+import { userDataController } from './DataControllerUser.js';
+import { loginApi, logoutApi, askResetPwdApi, resetPwdApi } from './NetworkController.js';
+import { confirmReserve } from './ViewReservationPlaces.js';
+import { ReservationState } from './shared-models/Reservation.js';
 
 // HTML pour la modal de connexion
 const modalLoginLocalHTML = `

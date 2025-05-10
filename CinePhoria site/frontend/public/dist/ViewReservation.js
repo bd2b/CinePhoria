@@ -14,7 +14,7 @@ import { updateContentPlace } from './ViewReservationPlaces.js';
 import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReservationDisplay.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
-import { imageFilm } from "./Helpers.js";
+import { imageFilm } from './Helpers.js';
 export function onLoadReservation() {
     return __awaiter(this, void 0, void 0, function* () {
         // const page = window.location.pathname.split("/").pop(); // Récupère le nom de la page actuelle
