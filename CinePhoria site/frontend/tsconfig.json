@@ -19,6 +19,6 @@
     "strict": true,                                      /* Enable all strict type-checking options. */
      "skipLibCheck": true                                 /* Skip type checking all .d.ts files. */
   },
-  "include": ["src/**/*", "../backend/src/services/QRCode.js"],
+  "include": ["src/**/*", "../backend/src/services/QRCode.js", "src/jest.setup.ts"],
   "exclude": ["node_modules"]
 }

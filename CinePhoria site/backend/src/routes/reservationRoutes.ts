@@ -28,7 +28,7 @@ router.post('/setevaluation', authenticateJWT,
         reservationId: 'string',
         note : 'number', 
         evaluation: 'string', 
-        isEvaluationMustBeReview: 'number'}),
+        isEvaluationMustBeReview: 'string'}),
     
     ReservationController.setReservationEvaluationById);
 

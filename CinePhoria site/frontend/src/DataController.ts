@@ -16,17 +16,17 @@
  * - Tous les films avec des helpers également
  * Les mêmes données mais filtré selon la valeur de filterNameCinema
  */
-import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
-import { Film } from './shared-models/Film.js';
-import { ReservationState } from './shared-models/Reservation.js';
+import { Seance, TarifQualite } from './shared-models/Seance';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
+import { Film } from './shared-models/Film';
+import { ReservationState } from './shared-models/Reservation';
 import { getCookie, setCookie, datePrecedentMercredi,
-    sanitizeFilm, sanitizeSeance, sanitizeCinema, sanitizeTarifQualite } from './Helpers.js';
-import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers.js';
-import { Cinema } from './shared-models/Cinema.js';
-import { getSeancesByIdApi, getVersionApi, filmsSelectAllApi } from './NetworkController.js';
-import { baseUrl } from './Global.js';
-import { MajSite } from './shared-models/MajSite.js';
-import { majFooterVersion } from './ViewFooter.js';
+    sanitizeFilm, sanitizeSeance, sanitizeCinema, sanitizeTarifQualite } from './Helpers';
+import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isDifferenceGreaterThanHours, isUUID } from './Helpers';
+import { Cinema } from './shared-models/Cinema';
+import { getSeancesByIdApi, getVersionApi, filmsSelectAllApi } from './NetworkController';
+import { baseUrl } from './Global';
+import { MajSite } from './shared-models/MajSite';
+import { majFooterVersion } from './ViewFooter';
 
 // Promesse d'attente de la fin du chargement des données par les modules de page
 let resolveReady: () => void;

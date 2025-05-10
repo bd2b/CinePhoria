@@ -1,11 +1,11 @@
-import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewReservation.js';
-import { dataController } from './DataController.js';
+import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewReservation';
+import { dataController } from './DataController';
 
-import { isUUID, validateEmail } from './Helpers.js';
-import { SeatsForReservation, TarifForSeats, ReservationState } from './shared-models/Reservation.js';
-import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi } from './NetworkController.js';
-import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
-import { login } from './Login.js';
+import { isUUID, validateEmail } from './Helpers';
+import { SeatsForReservation, TarifForSeats, ReservationState } from './shared-models/Reservation';
+import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi } from './NetworkController';
+import { userDataController, ProfilUtilisateur } from './DataControllerUser';
+import { login } from './Login';
 
 /**
  * Fonction de niveau supérieur d'affichage du panel de choix des places
