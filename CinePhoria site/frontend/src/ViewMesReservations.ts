@@ -1,15 +1,15 @@
-import { userDataController } from "./DataControllerUser.js";
-import { dataController , dataReady} from "./DataController.js";
-import { chargerMenu } from './ViewMenu.js';
-import { chargerCinemaSites } from './ViewFooter.js';
-import { ReservationForUtilisateur, ReservationState } from "./shared-models/Reservation.js";
+import { userDataController } from "./DataControllerUser";
+import { dataController , dataReady} from "./DataController";
+import { chargerMenu } from './ViewMenu';
+import { chargerCinemaSites } from './ViewFooter';
+import { ReservationForUtilisateur, ReservationState } from "./shared-models/Reservation";
 import { getReservationForUtilisateur, setStateReservationApi, 
             setEvaluationReservationApi, cancelReserveApi,
-            getReservationQRCodeApi } from "./NetworkController.js";
+            getReservationQRCodeApi } from "./NetworkController";
 
-import { seanceCardView } from "./ViewReservation.js";
-import { Seance } from "./shared-models/Seance.js";
-import { updateTableContent } from "./ViewReservationPlaces.js";
+import { seanceCardView } from "./ViewReservation";
+import { Seance } from "./shared-models/Seance";
+import { updateTableContent } from "./ViewReservationPlaces";
 
 
 export async function onLoadMesReservations() {

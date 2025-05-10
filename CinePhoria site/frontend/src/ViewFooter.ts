@@ -1,5 +1,5 @@
-import { Cinema } from './shared-models/Cinema.js';
-import { dataController } from './DataController.js';
+import { Cinema } from './shared-models/Cinema';
+import { dataController } from './DataController';
 
 
 export async function chargerCinemaSites() {

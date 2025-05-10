@@ -1,15 +1,15 @@
 import { ReservationState, TarifForSeats } from './shared-models/Reservation';
-import { isUUID, validateEmail } from './Helpers.js';
-import { ComptePersonne } from './shared-models/Utilisateur.js';
-import { ReservationForUtilisateur, SeatsForReservation, ReservationAvis, ReservationStats } from './shared-models/Reservation.js';
+import { isUUID, validateEmail } from './Helpers';
+import { ComptePersonne } from './shared-models/Utilisateur';
+import { ReservationForUtilisateur, SeatsForReservation, ReservationAvis, ReservationStats } from './shared-models/Reservation';
 import { userDataController } from './DataControllerUser.js';
-import { handleApiError, baseUrl } from './Global.js';
-import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
-import { Mail } from './shared-models/Mail.js';
-import { Seance, SeanceDisplay } from './shared-models/Seance.js';
-import { Film } from './shared-models/Film.js';
-import { Salle } from './shared-models/Salle.js';
-import { SeanceSeule } from './shared-models/SeanceSeule.js';
+import { handleApiError, baseUrl } from './Global';
+import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error";
+import { Mail } from './shared-models/Mail';
+import { Seance, SeanceDisplay } from './shared-models/Seance';
+import { Film } from './shared-models/Film';
+import { Salle } from './shared-models/Salle';
+import { SeanceSeule } from './shared-models/SeanceSeule';
 import { MajSite } from './shared-models/MajSite';
 
 

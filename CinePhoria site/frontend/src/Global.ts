@@ -1,6 +1,6 @@
-import { userDataController, ProfilUtilisateur } from "./DataControllerUser.js";
-import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
-import { dataController } from "./DataController.js";
+import { userDataController, ProfilUtilisateur } from "./DataControllerUser";
+import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error";
+import { dataController } from "./DataController";
 // import { onLoadManageFilms } from "./ViewManageFilms.js";
 // import { onLoadManageSalles } from "./ViewManageSalles.js";
 // import { onLoadManageSeances } from "./ViewManageSeances.js";

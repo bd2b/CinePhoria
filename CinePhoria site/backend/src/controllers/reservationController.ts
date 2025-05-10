@@ -390,7 +390,7 @@ export class ReservationController {
     try {
       const reservationid = req.params.reservationid;
       const data = req.body;
-      
+      logger.info(req.body)
       const reservationAvisToUpdate: ReservationAvis = {
         id: reservationid,
         evaluation: typeof data.evaluation === 'string' ? data.evaluation : '',

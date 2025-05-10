@@ -1,18 +1,18 @@
-import { Seance, TarifQualite } from './shared-models/Seance.js';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
+import { Seance, TarifQualite } from './shared-models/Seance';  // extension en .js car le compilateur ne fait pas l'ajout de l'extension
 
-import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID, validateEmail } from './Helpers.js';
-import { DataController, dataController , dataReady} from './DataController.js';
+import { extraireMoisLettre, creerDateLocale, ajouterJours, dateProchainMardi, formatDateJJMM, formatDateLocalYYYYMMDD, isUUID, validateEmail } from './Helpers';
+import { DataController, dataController , dataReady} from './DataController';
 
 
-import { ReservationState } from './shared-models/Reservation.js';
-import { Film } from './shared-models/Film.js';
+import { ReservationState } from './shared-models/Reservation';
+import { Film } from './shared-models/Film';
 
-import { updateContentPlace } from './ViewReservationPlaces.js';
-import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReservationDisplay.js';
-import { chargerMenu } from './ViewMenu.js';
-import { chargerCinemaSites } from './ViewFooter.js';
-import { getSeatsBookedApi } from './NetworkController.js';
-import { imageFilm } from "./Helpers.js";
+import { updateContentPlace } from './ViewReservationPlaces';
+import { modalConfirmUtilisateur, updateDisplayReservation } from './ViewReservationDisplay';
+import { chargerMenu } from './ViewMenu';
+import { chargerCinemaSites } from './ViewFooter';
+import { getSeatsBookedApi } from './NetworkController';
+import { imageFilm } from "./Helpers";
 
 
 export async function onLoadReservation() {
