@@ -1,3 +1,4 @@
+import { showCustomAlert } from './Helpers.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { dataController } from './DataController.js';
@@ -61,7 +62,7 @@ const pageLoaders: Record<string, () => Promise<void>> = {
  */
 let isHandlingAuthError = false;
 
-export function handleApiError(error: any): never {
+export async function handleApiError(error: any): Promise<never> {
     console.error("🔴 Erreur API détectée :", error);
 
     if (error instanceof CinephoriaError) {
@@ -91,7 +92,7 @@ export function handleApiError(error: any): never {
 
             case CinephoriaErrorCode.API_ERROR:
                 console.error("❌ Erreur API générale :", error.message);
-                alert(`Erreur API : ${error.message}`);
+                await showCustomAlert(`Erreur API : ${error.message}`);
                 break;
 
             default:
@@ -161,5 +162,3 @@ if (page && pagesPublic.includes(page)) {
     console.log("Initialisation du DataC")
     dataController.init();
 }
-
-

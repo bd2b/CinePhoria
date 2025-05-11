@@ -1,4 +1,5 @@
 import { deleteCookie, validateEmail } from './Helpers.js';
+import { showCustomAlert } from './Helpers.js';
 import { dataController } from './DataController.js';
 import { userDataController } from './DataControllerUser.js';
 import { loginApi, logoutApi, askResetPwdApi, resetPwdApi } from './NetworkController.js';
@@ -386,7 +387,7 @@ function showNewPasswordModal(email: string) {
     resendBtn?.removeEventListener('click', async () => { });
     resendBtn?.addEventListener('click', async () => {
         askResetPwdApi(email)
-        alert("Nous vous avons renvoyé un code.");
+        await showCustomAlert("Nous vous avons renvoyé un code.");
         resendBtn.disabled = true;
         resendBtn.classList.add('inactif');
     });
@@ -400,10 +401,10 @@ function showNewPasswordModal(email: string) {
         // On appelle la fonction de validation => placeholder
         const result = await validateChange(email, codeVal, passVal);
         if (result === "OK") {
-            alert("Changement de mot de passe réussi, vous pouvez vous connecter.");
+            await showCustomAlert("Changement de mot de passe réussi, vous pouvez vous connecter.");
             closeFunc();
         } else {
-            alert("Erreur : " + result + " \nRecommencez");
+            await showCustomAlert("Erreur : " + result + " \nRecommencez");
         }
     });
 }

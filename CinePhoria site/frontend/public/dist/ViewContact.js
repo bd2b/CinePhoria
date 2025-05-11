@@ -11,6 +11,7 @@ import { validateEmail } from './Helpers.js';
 import { userDataController } from './DataControllerUser.js';
 import { Mail } from './shared-models/Mail.js';
 import { sendMailApi } from './NetworkController.js';
+import { showCustomAlert } from './Helpers.js';
 export function onClickContact() {
     var _a;
     // 1) Vérifier si un div#modal-contact existe déjà
@@ -151,28 +152,6 @@ export function onClickContact() {
     });
     // 10) Bouton Annuler
     annulerBtn === null || annulerBtn === void 0 ? void 0 : annulerBtn.addEventListener('click', closeModal);
-    // // 11) Bouton Envoyer la demande
-    // envoyerBtn?.addEventListener('click', async () => {
-    //   // Tout est déjà validé dans checkFormValidity
-    //   // => On affiche une alert ou on appelle un code d’envoi
-    //   const mailVal = mailInput?.value.trim() || '';
-    //   const titreVal = titreInput?.value.trim() || '';
-    //   const descVal = descInput?.value.trim() || '';
-    //   const mail = new Mail(mailVal, titreVal, descVal, "false");
-    //   const resultat = await sendMailApi(mail);
-    //   console.log("Resultat envoi mail = " + resultat.statut);
-    //   if (resultat.statut.startsWith("OK")) {
-    //     alert(`
-    //       Votre demande a bien été envoyée !
-    //       Mail : ${mailVal || 'Pas de mail'}
-    //       Titre : ${titreVal}
-    //       Description : ${descVal}`);
-    //   } else {
-    //     alert(`
-    //       Nous n'avons pas pu envoyer votre demande.
-    //       Merci de la renouveler ultérieurement.
-    //       `);
-    //   }
     // 11) Bouton Envoyer la demande
     envoyerBtn === null || envoyerBtn === void 0 ? void 0 : envoyerBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
         setButtonDisabled(true);
@@ -186,7 +165,7 @@ export function onClickContact() {
             // await new Promise(resolve => setTimeout(resolve, 2000));
             console.log("Resultat envoi mail = " + resultat.statut);
             if (resultat.statut.startsWith("OK")) {
-                alert(`
+                yield showCustomAlert(`
         Votre demande a bien été envoyée !
 
         Mail : ${mailVal || 'Pas de mail'}
@@ -194,13 +173,13 @@ export function onClickContact() {
         Description : ${descVal}`);
             }
             else {
-                alert(`
+                yield showCustomAlert(`
         Nous n'avons pas pu envoyer votre demande.
         Merci de la renouveler ultérieurement.`);
             }
         }
         catch (error) {
-            alert(`Erreur réseau ou serveur, veuillez réessayer.`);
+            yield showCustomAlert(`Erreur réseau ou serveur, veuillez réessayer.`);
             console.error("Erreur lors de l'envoi du mail", error);
         }
         finally {

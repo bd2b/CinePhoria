@@ -2,7 +2,7 @@ import { seanceCardView, basculerPanelChoix, basculerPanelReserve, afficherDetai
 import { dataController } from './DataController.js';
 import { updateTableContent, confirmUtilisateur , confirmMail } from './ViewReservationPlaces.js';
 
-import { isUUID, validateEmail } from './Helpers.js';
+import { isUUID, validateEmail, showCustomAlert } from './Helpers.js';
 import { TarifForSeats, ReservationForUtilisateur, ReservationState } from './shared-models/Reservation.js';
 import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, cancelReserveApi, getReservationApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
@@ -121,7 +121,7 @@ export async function afficherDetailsReservation(reservation: ReservationForUtil
                 dataController.sauverComplet();
                 // On recharge la page
                 window.location.reload();
-                alert("La reservation est annulée");
+                await showCustomAlert("La reservation est annulée");
             } else {
                 console.log("Resultat de l'annulation : ", result.message)
             }

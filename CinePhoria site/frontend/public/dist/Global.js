@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { showCustomAlert } from './Helpers.js';
 import { userDataController } from './DataControllerUser.js';
 import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { dataController } from './DataController.js';
@@ -60,41 +61,43 @@ const pageLoaders = {
  */
 let isHandlingAuthError = false;
 export function handleApiError(error) {
-    console.error("🔴 Erreur API détectée :", error);
-    if (error instanceof CinephoriaError) {
-        switch (error.code) {
-            case CinephoriaErrorCode.TOKEN_EXPIRE:
-                console.warn("🔄 Token expiré, redirection vers visiteur.html");
-            case CinephoriaErrorCode.TOKEN_REFRESH_FAIL:
-                console.warn("🔄 Token refresh expiré, redirection vers visiteur.html");
-            case CinephoriaErrorCode.AUTH_REQUIRED:
-                if (!isHandlingAuthError) {
-                    console.warn("🔄 Token expiré ou invalide, redirection vers visiteur.html");
-                    isHandlingAuthError = true;
-                    localStorage.removeItem('jwtAccessToken');
-                    const currentPage = window.location.pathname.split("/").pop();
-                    if (currentPage === "visiteur.html") {
-                        // On relance le traitement de visiteur
-                        console.log("Chargement manuel de onLoadVisiteur()");
-                        //      onLoadVisiteur();
+    return __awaiter(this, void 0, void 0, function* () {
+        console.error("🔴 Erreur API détectée :", error);
+        if (error instanceof CinephoriaError) {
+            switch (error.code) {
+                case CinephoriaErrorCode.TOKEN_EXPIRE:
+                    console.warn("🔄 Token expiré, redirection vers visiteur.html");
+                case CinephoriaErrorCode.TOKEN_REFRESH_FAIL:
+                    console.warn("🔄 Token refresh expiré, redirection vers visiteur.html");
+                case CinephoriaErrorCode.AUTH_REQUIRED:
+                    if (!isHandlingAuthError) {
+                        console.warn("🔄 Token expiré ou invalide, redirection vers visiteur.html");
+                        isHandlingAuthError = true;
+                        localStorage.removeItem('jwtAccessToken');
+                        const currentPage = window.location.pathname.split("/").pop();
+                        if (currentPage === "visiteur.html") {
+                            // On relance le traitement de visiteur
+                            console.log("Chargement manuel de onLoadVisiteur()");
+                            //      onLoadVisiteur();
+                        }
+                        else if (!pagesPublic.includes(currentPage || '')) {
+                            window.location.replace("visiteur.html");
+                        }
                     }
-                    else if (!pagesPublic.includes(currentPage || '')) {
-                        window.location.replace("visiteur.html");
-                    }
-                }
-                break;
-            case CinephoriaErrorCode.API_ERROR:
-                console.error("❌ Erreur API générale :", error.message);
-                alert(`Erreur API : ${error.message}`);
-                break;
-            default:
-                console.error("❓ Erreur inconnue :", error);
+                    break;
+                case CinephoriaErrorCode.API_ERROR:
+                    console.error("❌ Erreur API générale :", error.message);
+                    yield showCustomAlert(`Erreur API : ${error.message}`);
+                    break;
+                default:
+                    console.error("❓ Erreur inconnue :", error);
+            }
         }
-    }
-    else {
-        console.error("🚨 Erreur non gérée :", error);
-    }
-    throw error.message;
+        else {
+            console.error("🚨 Erreur non gérée :", error);
+        }
+        throw error.message;
+    });
 }
 /**
  * Mise en place du chargement de page basé sur l'évenment DOMContentLoaded qui exploite

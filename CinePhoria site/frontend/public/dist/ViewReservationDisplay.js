@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { seanceCardView, basculerPanelReserve, afficherDetailsFilm } from './ViewReservation.js';
 import { dataController } from './DataController.js';
 import { updateTableContent, confirmUtilisateur, confirmMail } from './ViewReservationPlaces.js';
+import { showCustomAlert } from './Helpers.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { cancelReserveApi, getReservationApi } from './NetworkController.js';
 import { login } from './Login.js';
@@ -121,7 +122,7 @@ export function afficherDetailsReservation(reservation) {
                     dataController.sauverComplet();
                     // On recharge la page
                     window.location.reload();
-                    alert("La reservation est annulée");
+                    yield showCustomAlert("La reservation est annulée");
                 }
                 else {
                     console.log("Resultat de l'annulation : ", result.message);

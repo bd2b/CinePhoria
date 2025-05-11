@@ -1,4 +1,5 @@
 // ViewFilm.ts
+import { showCustomAlert } from './Helpers.js';
 import { dataController, dataReady } from './DataController.js';
 import { formatDateLocalYYYYMMDD, setCookie, imageFilm } from './Helpers.js';
 import { Film } from './shared-models/Film.js';
@@ -406,18 +407,15 @@ async function afficherDetailFilm(film: Film): Promise<void> {
     if (reserveBtn) {
         reserveBtn.disabled = true;
         reserveBtn.addEventListener('click', async () => {
-
-
-
-
             if (!lastSelectedSeanceData) {
-                alert('Veuillez sélectionner une séance dans la liste.');
+                await showCustomAlert('Veuillez sélectionner une séance dans la liste.');
             } else {
-                if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
-                    "ReserveToConfirm"].includes(dataController.reservationState) &&
+                if (
+                    ["ReserveCompteToConfirm", "ReserveMailToConfirm", "ReserveToConfirm"].includes(dataController.reservationState) &&
                     isUUID(dataController.selectedReservationUUID || '') &&
-                    isUUID(dataController.selectedSeanceUUID || '')) { // Autre reservation en cours
-                    alert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle")
+                    isUUID(dataController.selectedSeanceUUID || '')
+                ) { // Autre reservation en cours
+                    await showCustomAlert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle");
                     window.location.href = 'reservation.html';
                 } else {
                     // Afficher un message
@@ -426,7 +424,7 @@ async function afficherDetailFilm(film: Film): Promise<void> {
 
                     const seanceAJour = await dataController.getSeanceFromDB([SeanceId]);
                     let numFreeSeatsActual = -1;
-                    if (seanceAJour[0].numFreeSeats) numFreeSeatsActual = parseInt(seanceAJour[0].numFreeSeats,10);
+                    if (seanceAJour[0].numFreeSeats) numFreeSeatsActual = parseInt(seanceAJour[0].numFreeSeats, 10);
 
                     if (seance && numFreeSeatsActual > 0) {
                         dataController.filterNameCinema = Cinema;
@@ -438,9 +436,9 @@ async function afficherDetailFilm(film: Film): Promise<void> {
 
                         window.location.href = 'reservation.html';
 
-                        alert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
+                        await showCustomAlert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
                     } else {
-                        alert('La seance est complete');
+                        await showCustomAlert('La séance est complète');
                     }
                 }
             }

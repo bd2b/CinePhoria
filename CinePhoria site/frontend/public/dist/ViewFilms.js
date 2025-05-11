@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 // ViewFilm.ts
+import { showCustomAlert } from './Helpers.js';
 import { dataController, dataReady } from './DataController.js';
 import { formatDateLocalYYYYMMDD, imageFilm } from './Helpers.js';
 import { ReservationState } from './shared-models/Reservation.js';
@@ -383,14 +384,13 @@ function afficherDetailFilm(film) {
             reserveBtn.disabled = true;
             reserveBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
                 if (!lastSelectedSeanceData) {
-                    alert('Veuillez sélectionner une séance dans la liste.');
+                    yield showCustomAlert('Veuillez sélectionner une séance dans la liste.');
                 }
                 else {
-                    if (["ReserveCompteToConfirm", "ReserveMailToConfirm",
-                        "ReserveToConfirm"].includes(dataController.reservationState) &&
+                    if (["ReserveCompteToConfirm", "ReserveMailToConfirm", "ReserveToConfirm"].includes(dataController.reservationState) &&
                         isUUID(dataController.selectedReservationUUID || '') &&
                         isUUID(dataController.selectedSeanceUUID || '')) { // Autre reservation en cours
-                        alert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle");
+                        yield showCustomAlert("Une autre réservation est en cours, vous devez la finaliser ou l'annuler avant d'en effectuer une nouvelle");
                         window.location.href = 'reservation.html';
                     }
                     else {
@@ -409,10 +409,10 @@ function afficherDetailFilm(film) {
                             dataController.reservationState = ReservationState.PendingChoiceSeats;
                             yield dataController.sauverEtatGlobal();
                             window.location.href = 'reservation.html';
-                            alert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
+                            yield showCustomAlert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
                         }
                         else {
-                            alert('La seance est complete');
+                            yield showCustomAlert('La séance est complète');
                         }
                     }
                 }
