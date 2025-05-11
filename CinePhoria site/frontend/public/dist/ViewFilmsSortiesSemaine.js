@@ -50,7 +50,7 @@ export function onLoadVisiteur() {
                 </div>
             </div>
             <div class="cardreservation__reserver">
-                <button class="cardreservation__reserver-button">Réservez maintenant</button>
+                <button class="cardreservation__reserver-button">Bande Annonce</button>
             </div>
           </div>
         `;
@@ -60,22 +60,6 @@ export function onLoadVisiteur() {
                 if (detailBtn) {
                     detailBtn.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
                     detailBtn.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
-                        evt.preventDefault();
-                        evt.stopPropagation();
-                        // On positionne les données pour afficher le film dans la page film
-                        dataController.selectedFilmUUID = film.id || '';
-                        console.log("Visiteur ", film.id);
-                        dataController.filterNameCinema = 'all';
-                        yield dataController.sauverEtatGlobal();
-                        window.location.href = 'films.html';
-                    }));
-                }
-                ;
-                // Modale sur affiche de film
-                const imageEl = card.querySelector('.cardreservation__image-img');
-                if (imageEl) {
-                    imageEl.style.cursor = 'pointer';
-                    imageEl.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
                         evt.preventDefault();
                         evt.stopPropagation();
                         const modalId = `modalyoutube-${film.id}`;
@@ -88,6 +72,21 @@ export function onLoadVisiteur() {
                         }
                         if (film.linkBO)
                             initModalBandeAnnonce(film.linkBO, modal);
+                    }));
+                }
+                ;
+                // Modale sur affiche de film
+                const imageEl = card.querySelector('.cardreservation__image-img');
+                if (imageEl) {
+                    imageEl.style.cursor = 'pointer';
+                    imageEl.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
+                        evt.preventDefault();
+                        evt.stopPropagation();
+                        dataController.selectedFilmUUID = film.id || '';
+                        console.log("Visiteur ", film.id);
+                        dataController.filterNameCinema = 'all';
+                        yield dataController.sauverEtatGlobal();
+                        window.location.href = 'films.html';
                     }));
                 }
             });

@@ -8,5 +8,5 @@ const express_1 = require("express");
 const configLog_1 = __importDefault(require("../config/configLog"));
 const router = (0, express_1.Router)();
 configLog_1.default.info('Declaration route /api/mail/');
-router.post('/sendmailcontact', mailController_1.MailController.sendMail);
+router.post('/sendmailcontact', mailController_1.MailController.sendMailContact);
 exports.default = router;
