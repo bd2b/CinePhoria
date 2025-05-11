@@ -69,7 +69,7 @@ export async function onLoadVisiteur() {
                 </div>
             </div>
             <div class="cardreservation__reserver">
-                <button class="cardreservation__reserver-button">Réservez maintenant</button>
+                <button class="cardreservation__reserver-button">Bande Annonce</button>
             </div>
           </div>
         `;
@@ -82,23 +82,6 @@ export async function onLoadVisiteur() {
         detailBtn.addEventListener('click', async (evt) => {
           evt.preventDefault();
           evt.stopPropagation();
-          // On positionne les données pour afficher le film dans la page film
-          dataController.selectedFilmUUID = film.id || '';
-          console.log("Visiteur ", film.id)
-          dataController.filterNameCinema = 'all';
-          await dataController.sauverEtatGlobal();
-
-          window.location.href = 'films.html';
-        });
-
-      };
-      // Modale sur affiche de film
-      const imageEl = card.querySelector('.cardreservation__image-img') as HTMLImageElement | null;
-      if (imageEl) {
-        imageEl.style.cursor = 'pointer';
-        imageEl.addEventListener('click', async (evt) => {
-          evt.preventDefault();
-          evt.stopPropagation();
           const modalId = `modalyoutube-${film.id}`;
           let modal = document.getElementById(modalId) as HTMLDivElement | null;
           if (!modal) {
@@ -108,6 +91,20 @@ export async function onLoadVisiteur() {
               document.body.appendChild(modal);
           }
           if (film.linkBO) initModalBandeAnnonce(film.linkBO, modal);
+        });
+      };
+      // Modale sur affiche de film
+      const imageEl = card.querySelector('.cardreservation__image-img') as HTMLImageElement | null;
+      if (imageEl) {
+        imageEl.style.cursor = 'pointer';
+        imageEl.addEventListener('click', async (evt) => {
+          evt.preventDefault();
+          evt.stopPropagation();
+          dataController.selectedFilmUUID = film.id || '';
+          console.log("Visiteur ", film.id);
+          dataController.filterNameCinema = 'all';
+          await dataController.sauverEtatGlobal();
+          window.location.href = 'films.html';
         });
       }
     });
