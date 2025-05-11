@@ -1,7 +1,7 @@
 import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewReservation.js';
 import { dataController } from './DataController.js';
 
-import { isUUID, validateEmail , showCustomAlert } from './Helpers.js';
+import { isUUID, validateEmail, showCustomAlert } from './Helpers.js';
 import { SeatsForReservation, TarifForSeats, ReservationState } from './shared-models/Reservation.js';
 import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
@@ -84,7 +84,7 @@ async function setReservation() {
     const qualiteFilm = dataController.seanceSelected().qualite;
     const numMaxSeats = Math.min(parseInt(dataController.seanceSelected().capacity ?? "10", 10), 8);
     const numMaxPMR = Math.min(parseInt(dataController.seanceSelected().numPMR ?? "0", 10), 8);
-    
+
 
     // Afficher le tableau de tarifs selon la qualite
     const containerTable = document.querySelector('.commande__tabtarif');
@@ -92,7 +92,7 @@ async function setReservation() {
     containerTable.innerHTML = '';
 
     if (qualiteFilm) {
-        const nodeTable = await updateTableContent(qualiteFilm, undefined , undefined, numMaxSeats ) as HTMLTableElement;
+        const nodeTable = await updateTableContent(qualiteFilm, undefined, undefined, numMaxSeats) as HTMLTableElement;
         containerTable.appendChild(nodeTable as Node);
     }
 
@@ -244,7 +244,7 @@ async function setReservation() {
 
         console.log("Liste des sièges réservés en tableau =", listSeatsBookedArray);
         console.log("MaxPMR = ", parseInt(dataController.seanceSelected().numPMR!, 10))
-        console.log("Seance = ",JSON.stringify(dataController.seanceSelected()))
+        console.log("Seance = ", JSON.stringify(dataController.seanceSelected()))
         onClickdisplayAndSeatsReserve(
             totalPlaces,
             pmrSeats,
@@ -284,7 +284,7 @@ async function setReservation() {
 
         evt.preventDefault();
         evt.stopPropagation();
-        
+
 
         console.log("Statut Reservation " + dataController.reservationState);
 
@@ -360,7 +360,7 @@ async function setReservation() {
         }
         finally {
             btnReserve.classList.remove('loading');
-            
+
         }
     });
 
@@ -421,7 +421,7 @@ async function collectEmail(selector: string): Promise<string> {
 * @param isReadOnly indique si la table est afficher en lecture seule
 * @returns Un élément <table> 
 */
-export async function updateTableContent(qualite: string, isReadOnly: boolean = false, reservationId: string = "" , numMaxSeats: number = 8): Promise<HTMLTableElement> {
+export async function updateTableContent(qualite: string, isReadOnly: boolean = false, reservationId: string = "", numMaxSeats: number = 8): Promise<HTMLTableElement> {
 
     // 1) Créer l'élément <table> et sa structure de base
     const table = document.createElement('table');
@@ -590,7 +590,7 @@ export async function updateTableContent(qualite: string, isReadOnly: boolean = 
             }
 
             // Incrémente la quantité (max 4) ou le nombre de places disponibles
-            btnAdd.addEventListener('click', async (event: MouseEvent) =>  {
+            btnAdd.addEventListener('click', async (event: MouseEvent) => {
                 event.preventDefault();
                 event.stopPropagation();
                 let currentVal = parseInt(spanPlaces.textContent ?? '0', 10) || 0;
@@ -676,7 +676,7 @@ function updateInputPMR(numMaxPMR: number): HTMLDivElement {
     const contentNumPMR = document.createElement('div');
     contentNumPMR.classList.add('content__num-pmr');
 
-    
+
 
     const btnRemovePMR = document.createElement('button');
     btnRemovePMR.classList.add('num__remove-button', 'num__remove-pmr');
@@ -778,20 +778,21 @@ export async function confirmUtilisateur() {
                     <input type="text" id="confirmUtilisateur-displayName" class="input__text" required />
                 </div>
 
-
                 <!-- Mot de passe 1 -->
                 <div class="form__group">
                     <label for="confirmUtilisateur-password1">Mot de passe :</label>
                     <input type="password" id="confirmUtilisateur-password1" required />
                 </div>
-
+                <!-- Message d'erreur de force du mot de passe -->
+                <div class="form__group">
+                    <span id="password-strength-error" class="error-message">Le mot de passe doit comporter au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.</span>
+                </div>
                 <!-- Mot de passe 2 -->
                 <div class="form__group">
                     <label for="confirmUtilisateur-password2">Confirmer le mot de passe :</label>
                     <input type="password" id="confirmUtilisateur-password2" required />
                     <span id="password-error" class="error-message"></span>
                 </div>
-
                 <!-- Bouton de validation -->
                 <button id="confirmUtilisateur-submit" class="button button-primary" disabled>
                     Valider
@@ -808,7 +809,8 @@ export async function confirmUtilisateur() {
 
     const email = dataController.selectedUtilisateurMail || '';
     console.log('===> confirmUtilisateur action, email =', email);
-    const modalConfirm = document.getElementById('modal-confirmUtilisateur') as HTMLDivElement | null;
+    // Use the modalConfirmLocal to query the modal
+    const modalConfirm = modalConfirmLocal.querySelector('#modal-confirmUtilisateur') as HTMLDivElement | null;
     const closeModalBtn = document.getElementById("close-confirmUtilisateur") as HTMLButtonElement | null;
     const confirmModalBtn = document.getElementById("confirmUtilisateur-submit") as HTMLButtonElement | null;
 
@@ -840,20 +842,24 @@ export async function confirmUtilisateur() {
      * 
      */
     async function gestionFormulaireModal() {
-
+        // Ajout de la récupération de l'email au début de la fonction
         const email = dataController.selectedUtilisateurMail || '';
-        // Sélection des éléments de la modal avec un typage strict
-
-        const displayNameInput = document.getElementById('confirmUtilisateur-displayName') as HTMLInputElement;
-        const emailInput = document.getElementById('confirmUtilisateur-email') as HTMLInputElement;
-        const password1Input = document.getElementById('confirmUtilisateur-password1') as HTMLInputElement;
-        const password2Input = document.getElementById('confirmUtilisateur-password2') as HTMLInputElement;
-        const submitButton = document.getElementById('confirmUtilisateur-submit') as HTMLButtonElement;
-        const emailError = document.getElementById('email-error') as HTMLSpanElement;
-        const passwordError = document.getElementById('password-error') as HTMLSpanElement;
+        // Sélection des éléments de la modal avec un typage strict depuis modalConfirmLocal
+        const displayNameInput = modalConfirmLocal.querySelector('#confirmUtilisateur-displayName') as HTMLInputElement;
+        const emailInput = modalConfirmLocal.querySelector('#confirmUtilisateur-email') as HTMLInputElement;
+        const password1Input = modalConfirmLocal.querySelector('#confirmUtilisateur-password1') as HTMLInputElement;
+        const password2Input = modalConfirmLocal.querySelector('#confirmUtilisateur-password2') as HTMLInputElement;
+        const submitButton = modalConfirmLocal.querySelector('#confirmUtilisateur-submit') as HTMLButtonElement;
+        const emailError = modalConfirmLocal.querySelector('#email-error') as HTMLSpanElement;
+        const passwordError = modalConfirmLocal.querySelector('#password-error') as HTMLSpanElement;
+        const passwordStrengthError = modalConfirmLocal.querySelector('#password-strength-error') as HTMLSpanElement;
+        // Fixe la hauteur minimale pour éviter le redimensionnement de la modale par les messages d'erreur
+        passwordStrengthError.style.minHeight = '1.2em';
+        passwordError.style.minHeight = '1.2em';
 
         displayNameInput.value = "";
-
+        // Initialiser le champ email
+        emailInput.value = email;
 
         /**
          * Vérifie si les mots de passe sont identiques.
@@ -881,10 +887,38 @@ export async function confirmUtilisateur() {
          */
         function validateForm(): void {
             const emailValid = validateEmail(emailInput.value);
-            const passwordsAreValid = passwordsMatch();
+            const passwordsAreValid = password1Input.value === password2Input.value && password1Input.value.length > 0;
             const fieldsFilled = areAllFieldsFilled();
-            // Activation/désactivation du bouton de soumission
-            if (!(emailValid && passwordsAreValid && fieldsFilled)) {
+
+            // Vérification de la force du mot de passe si les mots de passe sont identiques
+            let passwordStrong = false;
+            if (passwordsAreValid) {
+                passwordStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password1Input.value);
+            }
+
+            // Gestion du message d'erreur de force du mot de passe
+            // Affiche un message uniquement si les deux mots de passe sont identiques
+            if (passwordsAreValid) {
+                if (!passwordStrong) {
+                    passwordStrengthError.textContent = "Le mot de passe doit comporter au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
+                    passwordStrengthError.style.color = "red";
+                } else {
+                    passwordStrengthError.textContent = "";
+                }
+            } else {
+                // Si les mots de passe ne sont pas identiques, on n'affiche pas ce message
+                passwordStrengthError.textContent = "";
+            }
+
+            // Gestion du message d'erreur pour la correspondance des mots de passe
+            if (!passwordsAreValid && password2Input.value.length > 0) {
+                passwordError.textContent = "Les mots de passe ne correspondent pas.";
+                passwordError.style.color = "red";
+            } else {
+                passwordError.textContent = "";
+            }
+
+            if (!(emailValid && passwordStrong && passwordsAreValid && fieldsFilled)) {
                 submitButton.classList.add("inactif");
                 submitButton.disabled = true;
             } else {
@@ -910,21 +944,10 @@ export async function confirmUtilisateur() {
             }
         });
 
-        // Gestion du message d'erreur pour les mots de passe lors du blur
-        password2Input.addEventListener('blur', () => {
-            if (!passwordsMatch()) {
-                passwordError.textContent = "Les mots de passe ne correspondent pas.";
-                passwordError.style.color = "red";
-            } else {
-                passwordError.textContent = "";
-            }
-        });
-
         // Ajout d'écouteurs d'événements pour la validation en temps réel
         displayNameInput.addEventListener('input', validateForm);
         password1Input.addEventListener('input', validateForm);
         password2Input.addEventListener('input', validateForm);
-
 
         // Gestion de la soumission de la modale de confirmation de compte
         submitButton.removeEventListener('click', async (evt: MouseEvent) => { });
@@ -933,12 +956,14 @@ export async function confirmUtilisateur() {
             evt.stopPropagation();
             if (!dataController.selectedUtilisateurUUID) return;
             // On soumet la confirmation du compte
-            if (await confirmCreationCompte(dataController.selectedUtilisateurUUID,
+            if (await confirmCreationCompte(
+                dataController.selectedUtilisateurUUID,
                 emailInput.value.trim(),
                 password1Input.value.trim(),
-                displayNameInput.value.trim())) {
+                displayNameInput.value.trim()
+            )) {
                 // On ferme la modal de confirmation
-                const modalConfirm = document.getElementById('modal-confirmUtilisateur') as HTMLDivElement | null;
+                // On ferme via la variable locale pour éviter le redimensionnement visible
                 if (modalConfirm) {
                     modalConfirm.style.display = 'none';
                 }
@@ -1129,8 +1154,9 @@ un code à renseigner ci-dessous.
                         }
                         dataController.reservationState = ReservationState.ReserveToConfirm;
                         // On lance la modal de connexion
-                        await login("Veuillez vous connecter pour valider la réservation");
                         await dataController.sauverEtatGlobal();
+                        await login("Veuillez vous connecter pour valider la réservation");
+
                     };
                 } catch (error) {
                     console.log("Erreur = ", error)
@@ -1333,7 +1359,7 @@ export async function onClickdisplayAndSeatsReserve(
                     } else {
                         seatBtn.style.backgroundColor = 'lightgray';
                         // Toggle + Vérif du quota PMR / classique
-                        seatBtn.removeEventListener( 'click', async ()  => {});
+                        seatBtn.removeEventListener('click', async () => { });
                         seatBtn.addEventListener('click', async () => {
                             const isPMRSeat = (r === 0 && f < maxPMR);
 
@@ -1370,7 +1396,7 @@ export async function onClickdisplayAndSeatsReserve(
                                         alert(`Vous ne pouvez sélectionner que ${nSeats - nPMR} place(s) classiques maximum.`);
                                         return;
                                     }
-                                    
+
                                 }
 
                                 // 6) Ajout effectif de la place
