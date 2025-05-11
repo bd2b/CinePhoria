@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { baseUrl } from './Global.js';
 export const listCinemasConst = ["Paris", "Bordeaux", "Nantes", "Lille", "Toulouse", "Charleroi", "Liège"];
 // Fonction pour obtenir la valeur d'un cookie
@@ -314,4 +323,24 @@ export function sanitizeTarifQualite(obj) {
     if (!result)
         console.error("Anomalie sanitize TarifQualite");
     return result;
+}
+export function showCustomAlert(message) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise((resolve) => {
+            const overlay = document.createElement('div');
+            overlay.className = 'custom-alert-overlay';
+            const modal = document.createElement('div');
+            modal.className = 'custom-alert-modal';
+            modal.innerHTML = `<p>${message}</p>`;
+            const btn = document.createElement('button');
+            btn.textContent = 'OK';
+            btn.addEventListener('click', () => {
+                overlay.remove();
+                resolve(); // ⏹ débloque le await
+            });
+            modal.appendChild(btn);
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
+        });
+    });
 }

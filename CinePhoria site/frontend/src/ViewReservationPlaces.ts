@@ -1,7 +1,7 @@
 import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewReservation.js';
 import { dataController } from './DataController.js';
 
-import { isUUID, validateEmail } from './Helpers.js';
+import { isUUID, validateEmail , showCustomAlert } from './Helpers.js';
 import { SeatsForReservation, TarifForSeats, ReservationState } from './shared-models/Reservation.js';
 import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
@@ -278,8 +278,9 @@ async function setReservation() {
     // La validation des saisies est faites par la fonction de validation validateForm
     btnReserve.removeEventListener('click', async (evt: MouseEvent) => { });
     btnReserve.addEventListener('click', async (evt: MouseEvent) => {
-        btnReserve.classList.add('loading');
         btnReserve.disabled = true;
+        btnReserve.classList.add("inactif");
+        btnReserve.classList.add('loading');
 
         evt.preventDefault();
         evt.stopPropagation();
@@ -296,7 +297,7 @@ async function setReservation() {
         console.log(`Nombre de PMR = ${pmrSeats}`);
 
         // c) Récupérer l'email
-        const email = collectEmail('.commande__mail-input');
+        const email = await collectEmail('.commande__mail-input');
         console.log(`email = ${email}`);
 
         // d) Appel à l’API /api/reservation et traitement des résultats
@@ -349,17 +350,17 @@ async function setReservation() {
 
                 default:
                     // Cas imprévu
-                    alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
+                    await showCustomAlert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
                     break;
             }
 
         } catch (error: any) {
             console.error('Erreur lors de la création de la réservation', error);
-            alert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
+            await showCustomAlert(`Une erreur s'est produite : ${error?.message || 'inconnue'}`);
         }
         finally {
             btnReserve.classList.remove('loading');
-            btnReserve.disabled = false;
+            
         }
     });
 
@@ -407,7 +408,7 @@ function collectPMR(selector: string): number {
 /**
  * Récupère l'email
  */
-function collectEmail(selector: string): string {
+async function collectEmail(selector: string): Promise<string> {
     const input = document.querySelector(selector) as HTMLInputElement | null;
     if (!input) return '';
     return input.value.trim();
@@ -589,7 +590,7 @@ export async function updateTableContent(qualite: string, isReadOnly: boolean = 
             }
 
             // Incrémente la quantité (max 4) ou le nombre de places disponibles
-            btnAdd.addEventListener('click', (event: MouseEvent) => {
+            btnAdd.addEventListener('click', async (event: MouseEvent) =>  {
                 event.preventDefault();
                 event.stopPropagation();
                 let currentVal = parseInt(spanPlaces.textContent ?? '0', 10) || 0;
@@ -606,7 +607,7 @@ export async function updateTableContent(qualite: string, isReadOnly: boolean = 
                     spanPlaces.textContent = String(currentVal);
                     updateRowTotal();
                 } else {
-                    alert(`Vous ne pouvez pas réserver plus de ${numMaxSeats} places au total.`);
+                    await showCustomAlert(`Vous ne pouvez pas réserver plus de ${numMaxSeats} places au total.`);
                 }
             });
 
@@ -1166,7 +1167,7 @@ export async function confirmReserve() {
         try {
             console.log("Appel sur R U S", reservationId, " ", utilisateurId, " ", seanceId)
             await confirmReserveApi(reservationId, utilisateurId, seanceId);
-            alert("votre reservation est confirmée");
+            await showCustomAlert("votre reservation est confirmée");
             // On efface la reservation pending et on autorise de nouvelle reservation
             dataController.reservationState = ReservationState.PendingChoiceSeance;
             dataController.selectedReservationUUID = undefined;
@@ -1332,8 +1333,8 @@ export async function onClickdisplayAndSeatsReserve(
                     } else {
                         seatBtn.style.backgroundColor = 'lightgray';
                         // Toggle + Vérif du quota PMR / classique
-                        seatBtn.removeEventListener( 'click', () => {});
-                        seatBtn.addEventListener('click', () => {
+                        seatBtn.removeEventListener( 'click', async ()  => {});
+                        seatBtn.addEventListener('click', async () => {
                             const isPMRSeat = (r === 0 && f < maxPMR);
 
                             // Désélection ?
@@ -1344,7 +1345,7 @@ export async function onClickdisplayAndSeatsReserve(
                             } else {
                                 // 1) Vérifier la limite totale
                                 if (chosenSeats.length >= (nSeats)) {
-                                    alert(`Vous ne pouvez pas dépasser un total de ${nSeats} places.`);
+                                    await showCustomAlert(`Vous ne pouvez pas dépasser un total de ${nSeats} places.`);
                                     return;
                                 }
 

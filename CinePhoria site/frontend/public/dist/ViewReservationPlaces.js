@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewReservation.js';
 import { dataController } from './DataController.js';
-import { validateEmail } from './Helpers.js';
+import { validateEmail, showCustomAlert } from './Helpers.js';
 import { ReservationState } from './shared-models/Reservation.js';
 import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
@@ -247,8 +247,9 @@ function setReservation() {
         // La validation des saisies est faites par la fonction de validation validateForm
         btnReserve.removeEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () { }));
         btnReserve.addEventListener('click', (evt) => __awaiter(this, void 0, void 0, function* () {
-            btnReserve.classList.add('loading');
             btnReserve.disabled = true;
+            btnReserve.classList.add("inactif");
+            btnReserve.classList.add('loading');
             evt.preventDefault();
             evt.stopPropagation();
             console.log("Statut Reservation " + dataController.reservationState);
@@ -259,7 +260,7 @@ function setReservation() {
             const pmrSeats = collectPMR('.commande__pmr');
             console.log(`Nombre de PMR = ${pmrSeats}`);
             // c) Récupérer l'email
-            const email = collectEmail('.commande__mail-input');
+            const email = yield collectEmail('.commande__mail-input');
             console.log(`email = ${email}`);
             // d) Appel à l’API /api/reservation et traitement des résultats
             try {
@@ -299,17 +300,16 @@ function setReservation() {
                         break;
                     default:
                         // Cas imprévu
-                        alert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
+                        yield showCustomAlert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
                         break;
                 }
             }
             catch (error) {
                 console.error('Erreur lors de la création de la réservation', error);
-                alert(`Une erreur s'est produite : ${(error === null || error === void 0 ? void 0 : error.message) || 'inconnue'}`);
+                yield showCustomAlert(`Une erreur s'est produite : ${(error === null || error === void 0 ? void 0 : error.message) || 'inconnue'}`);
             }
             finally {
                 btnReserve.classList.remove('loading');
-                btnReserve.disabled = false;
             }
         }));
     });
@@ -358,10 +358,12 @@ function collectPMR(selector) {
  * Récupère l'email
  */
 function collectEmail(selector) {
-    const input = document.querySelector(selector);
-    if (!input)
-        return '';
-    return input.value.trim();
+    return __awaiter(this, void 0, void 0, function* () {
+        const input = document.querySelector(selector);
+        if (!input)
+            return '';
+        return input.value.trim();
+    });
 }
 /**
 * Génère le contenu d'un tableau des tarifs en fonction d'une qualité spécifiée.
@@ -508,7 +510,7 @@ export function updateTableContent(qualite_1) {
                     updateTableTotal();
                 }
                 // Incrémente la quantité (max 4) ou le nombre de places disponibles
-                btnAdd.addEventListener('click', (event) => {
+                btnAdd.addEventListener('click', (event) => __awaiter(this, void 0, void 0, function* () {
                     var _a;
                     event.preventDefault();
                     event.stopPropagation();
@@ -527,9 +529,9 @@ export function updateTableContent(qualite_1) {
                         updateRowTotal();
                     }
                     else {
-                        alert(`Vous ne pouvez pas réserver plus de ${numMaxSeats} places au total.`);
+                        yield showCustomAlert(`Vous ne pouvez pas réserver plus de ${numMaxSeats} places au total.`);
                     }
-                });
+                }));
                 // Décrémente la quantité (min 0)
                 btnRemove.addEventListener('click', (event) => {
                     var _a;
@@ -1040,7 +1042,7 @@ export function confirmReserve() {
             try {
                 console.log("Appel sur R U S", reservationId, " ", utilisateurId, " ", seanceId);
                 yield confirmReserveApi(reservationId, utilisateurId, seanceId);
-                alert("votre reservation est confirmée");
+                yield showCustomAlert("votre reservation est confirmée");
                 // On efface la reservation pending et on autorise de nouvelle reservation
                 dataController.reservationState = ReservationState.PendingChoiceSeance;
                 dataController.selectedReservationUUID = undefined;
@@ -1187,8 +1189,8 @@ export function onClickdisplayAndSeatsReserve(nSeats_1, nPMR_1, placesReserves_1
                         else {
                             seatBtn.style.backgroundColor = 'lightgray';
                             // Toggle + Vérif du quota PMR / classique
-                            seatBtn.removeEventListener('click', () => { });
-                            seatBtn.addEventListener('click', () => {
+                            seatBtn.removeEventListener('click', () => __awaiter(this, void 0, void 0, function* () { }));
+                            seatBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
                                 const isPMRSeat = (r === 0 && f < maxPMR);
                                 // Désélection ?
                                 if (chosenSeats.includes(seatId)) {
@@ -1198,7 +1200,7 @@ export function onClickdisplayAndSeatsReserve(nSeats_1, nPMR_1, placesReserves_1
                                 else {
                                     // 1) Vérifier la limite totale
                                     if (chosenSeats.length >= (nSeats)) {
-                                        alert(`Vous ne pouvez pas dépasser un total de ${nSeats} places.`);
+                                        yield showCustomAlert(`Vous ne pouvez pas dépasser un total de ${nSeats} places.`);
                                         return;
                                     }
                                     // 2) Compter combien de PMR déjà sélectionnées
@@ -1227,7 +1229,7 @@ export function onClickdisplayAndSeatsReserve(nSeats_1, nPMR_1, placesReserves_1
                                     seatBtn.style.backgroundColor = 'green';
                                 }
                                 updateValiderButton();
-                            });
+                            }));
                         }
                         rowDiv.appendChild(seatBtn);
                     }

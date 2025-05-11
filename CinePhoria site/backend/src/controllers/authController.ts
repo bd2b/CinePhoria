@@ -55,9 +55,9 @@ export class AuthController {
     // Stocker refreshToken dans un cookie httpOnly
     res.cookie('refreshToken', refreshToken, {
       // TODO a voir quand on sera en https
-      // httpOnly: true,   // empêche l'accès en JavaScript => plus sûr
-      // secure: true,    // mettre true si HTTPS en production
-      // sameSite: 'none',
+      httpOnly: true,   // empêche l'accès en JavaScript => plus sûr
+      secure: true,    // mettre true si HTTPS en production
+      sameSite: 'none',
       partitioned: true,
       maxAge: 7 * 24 * 60 * 60 * 1000 // 7 jours en ms
     });
@@ -105,9 +105,9 @@ export class AuthController {
     // 2) Invalider le cookie côté client
     res.cookie('refreshToken', '', {
       // TODO a voir quand on sera en https
-      // httpOnly: true,
-      // secure: true,  // en prod => true si HTTPS
-      // sameSite: 'none',
+      httpOnly: true,
+      secure: true,  // en prod => true si HTTPS
+      sameSite: 'none',
       expires: new Date(0) // date expirée
     });
 

@@ -353,3 +353,24 @@ export function sanitizeTarifQualite(obj: any): obj is TarifQualite {
     return result;
 }
 
+export async function showCustomAlert(message: string): Promise<void> {
+    return new Promise((resolve) => {
+      const overlay = document.createElement('div');
+      overlay.className = 'custom-alert-overlay';
+  
+      const modal = document.createElement('div');
+      modal.className = 'custom-alert-modal';
+      modal.innerHTML = `<p>${message}</p>`;
+  
+      const btn = document.createElement('button');
+      btn.textContent = 'OK';
+      btn.addEventListener('click', () => {
+        overlay.remove();
+        resolve(); // ⏹ débloque le await
+      });
+  
+      modal.appendChild(btn);
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+    });
+  }

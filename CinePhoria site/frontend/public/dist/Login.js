@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { validateEmail } from './Helpers.js';
+import { showCustomAlert } from './Helpers.js';
 import { dataController } from './DataController.js';
 import { userDataController } from './DataControllerUser.js';
 import { loginApi, askResetPwdApi, resetPwdApi } from './NetworkController.js';
@@ -369,7 +370,7 @@ function showNewPasswordModal(email) {
     resendBtn === null || resendBtn === void 0 ? void 0 : resendBtn.removeEventListener('click', () => __awaiter(this, void 0, void 0, function* () { }));
     resendBtn === null || resendBtn === void 0 ? void 0 : resendBtn.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
         askResetPwdApi(email);
-        alert("Nous vous avons renvoyé un code.");
+        yield showCustomAlert("Nous vous avons renvoyé un code.");
         resendBtn.disabled = true;
         resendBtn.classList.add('inactif');
     }));
@@ -381,11 +382,11 @@ function showNewPasswordModal(email) {
         // On appelle la fonction de validation => placeholder
         const result = yield validateChange(email, codeVal, passVal);
         if (result === "OK") {
-            alert("Changement de mot de passe réussi, vous pouvez vous connecter.");
+            yield showCustomAlert("Changement de mot de passe réussi, vous pouvez vous connecter.");
             closeFunc();
         }
         else {
-            alert("Erreur : " + result + " \nRecommencez");
+            yield showCustomAlert("Erreur : " + result + " \nRecommencez");
         }
     }));
 }
