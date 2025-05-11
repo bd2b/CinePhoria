@@ -403,6 +403,8 @@ function showNewPasswordModal(email: string) {
         if (result === "OK") {
             await showCustomAlert("Changement de mot de passe réussi, vous pouvez vous connecter.");
             closeFunc();
+            window.location.reload();
+
         } else {
             await showCustomAlert("Erreur : " + result + " \nRecommencez");
         }

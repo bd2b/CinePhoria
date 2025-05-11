@@ -684,20 +684,21 @@ export function confirmUtilisateur() {
                     <input type="text" id="confirmUtilisateur-displayName" class="input__text" required />
                 </div>
 
-
                 <!-- Mot de passe 1 -->
                 <div class="form__group">
                     <label for="confirmUtilisateur-password1">Mot de passe :</label>
                     <input type="password" id="confirmUtilisateur-password1" required />
                 </div>
-
+                <!-- Message d'erreur de force du mot de passe -->
+                <div class="form__group">
+                    <span id="password-strength-error" class="error-message">Le mot de passe doit comporter au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.</span>
+                </div>
                 <!-- Mot de passe 2 -->
                 <div class="form__group">
                     <label for="confirmUtilisateur-password2">Confirmer le mot de passe :</label>
                     <input type="password" id="confirmUtilisateur-password2" required />
                     <span id="password-error" class="error-message"></span>
                 </div>
-
                 <!-- Bouton de validation -->
                 <button id="confirmUtilisateur-submit" class="button button-primary" disabled>
                     Valider
@@ -712,7 +713,8 @@ export function confirmUtilisateur() {
         document.body.appendChild(modalConfirmLocal);
         const email = dataController.selectedUtilisateurMail || '';
         console.log('===> confirmUtilisateur action, email =', email);
-        const modalConfirm = document.getElementById('modal-confirmUtilisateur');
+        // Use the modalConfirmLocal to query the modal
+        const modalConfirm = modalConfirmLocal.querySelector('#modal-confirmUtilisateur');
         const closeModalBtn = document.getElementById("close-confirmUtilisateur");
         const confirmModalBtn = document.getElementById("confirmUtilisateur-submit");
         if (modalConfirm && closeModalBtn && confirmModalBtn) {
@@ -741,16 +743,23 @@ export function confirmUtilisateur() {
          */
         function gestionFormulaireModal() {
             return __awaiter(this, void 0, void 0, function* () {
+                // Ajout de la récupération de l'email au début de la fonction
                 const email = dataController.selectedUtilisateurMail || '';
-                // Sélection des éléments de la modal avec un typage strict
-                const displayNameInput = document.getElementById('confirmUtilisateur-displayName');
-                const emailInput = document.getElementById('confirmUtilisateur-email');
-                const password1Input = document.getElementById('confirmUtilisateur-password1');
-                const password2Input = document.getElementById('confirmUtilisateur-password2');
-                const submitButton = document.getElementById('confirmUtilisateur-submit');
-                const emailError = document.getElementById('email-error');
-                const passwordError = document.getElementById('password-error');
+                // Sélection des éléments de la modal avec un typage strict depuis modalConfirmLocal
+                const displayNameInput = modalConfirmLocal.querySelector('#confirmUtilisateur-displayName');
+                const emailInput = modalConfirmLocal.querySelector('#confirmUtilisateur-email');
+                const password1Input = modalConfirmLocal.querySelector('#confirmUtilisateur-password1');
+                const password2Input = modalConfirmLocal.querySelector('#confirmUtilisateur-password2');
+                const submitButton = modalConfirmLocal.querySelector('#confirmUtilisateur-submit');
+                const emailError = modalConfirmLocal.querySelector('#email-error');
+                const passwordError = modalConfirmLocal.querySelector('#password-error');
+                const passwordStrengthError = modalConfirmLocal.querySelector('#password-strength-error');
+                // Fixe la hauteur minimale pour éviter le redimensionnement de la modale par les messages d'erreur
+                passwordStrengthError.style.minHeight = '1.2em';
+                passwordError.style.minHeight = '1.2em';
                 displayNameInput.value = "";
+                // Initialiser le champ email
+                emailInput.value = email;
                 /**
                  * Vérifie si les mots de passe sont identiques.
                  * @returns boolean - True si les mots de passe correspondent, sinon False.
@@ -773,10 +782,37 @@ export function confirmUtilisateur() {
                  */
                 function validateForm() {
                     const emailValid = validateEmail(emailInput.value);
-                    const passwordsAreValid = passwordsMatch();
+                    const passwordsAreValid = password1Input.value === password2Input.value && password1Input.value.length > 0;
                     const fieldsFilled = areAllFieldsFilled();
-                    // Activation/désactivation du bouton de soumission
-                    if (!(emailValid && passwordsAreValid && fieldsFilled)) {
+                    // Vérification de la force du mot de passe si les mots de passe sont identiques
+                    let passwordStrong = false;
+                    if (passwordsAreValid) {
+                        passwordStrong = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(password1Input.value);
+                    }
+                    // Gestion du message d'erreur de force du mot de passe
+                    // Affiche un message uniquement si les deux mots de passe sont identiques
+                    if (passwordsAreValid) {
+                        if (!passwordStrong) {
+                            passwordStrengthError.textContent = "Le mot de passe doit comporter au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.";
+                            passwordStrengthError.style.color = "red";
+                        }
+                        else {
+                            passwordStrengthError.textContent = "";
+                        }
+                    }
+                    else {
+                        // Si les mots de passe ne sont pas identiques, on n'affiche pas ce message
+                        passwordStrengthError.textContent = "";
+                    }
+                    // Gestion du message d'erreur pour la correspondance des mots de passe
+                    if (!passwordsAreValid && password2Input.value.length > 0) {
+                        passwordError.textContent = "Les mots de passe ne correspondent pas.";
+                        passwordError.style.color = "red";
+                    }
+                    else {
+                        passwordError.textContent = "";
+                    }
+                    if (!(emailValid && passwordStrong && passwordsAreValid && fieldsFilled)) {
                         submitButton.classList.add("inactif");
                         submitButton.disabled = true;
                     }
@@ -800,16 +836,6 @@ export function confirmUtilisateur() {
                         emailError.textContent = "";
                     }
                 });
-                // Gestion du message d'erreur pour les mots de passe lors du blur
-                password2Input.addEventListener('blur', () => {
-                    if (!passwordsMatch()) {
-                        passwordError.textContent = "Les mots de passe ne correspondent pas.";
-                        passwordError.style.color = "red";
-                    }
-                    else {
-                        passwordError.textContent = "";
-                    }
-                });
                 // Ajout d'écouteurs d'événements pour la validation en temps réel
                 displayNameInput.addEventListener('input', validateForm);
                 password1Input.addEventListener('input', validateForm);
@@ -824,7 +850,7 @@ export function confirmUtilisateur() {
                     // On soumet la confirmation du compte
                     if (yield confirmCreationCompte(dataController.selectedUtilisateurUUID, emailInput.value.trim(), password1Input.value.trim(), displayNameInput.value.trim())) {
                         // On ferme la modal de confirmation
-                        const modalConfirm = document.getElementById('modal-confirmUtilisateur');
+                        // On ferme via la variable locale pour éviter le redimensionnement visible
                         if (modalConfirm) {
                             modalConfirm.style.display = 'none';
                         }
@@ -999,8 +1025,8 @@ un code à renseigner ci-dessous.
                                 }
                                 dataController.reservationState = ReservationState.ReserveToConfirm;
                                 // On lance la modal de connexion
-                                yield login("Veuillez vous connecter pour valider la réservation");
                                 yield dataController.sauverEtatGlobal();
+                                yield login("Veuillez vous connecter pour valider la réservation");
                             }
                             ;
                         }
