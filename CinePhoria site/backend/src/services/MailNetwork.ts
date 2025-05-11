@@ -9,6 +9,11 @@ import { mailToSend } from '../models/Mail';
 let isBouchon = true;
 if (modeExec === 'production') isBouchon = false;
 
+function validateEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+
 logger.info ( isBouchon ? "ENVOI DE MAIL bouchonne" : "ENVOI DE MAIL en service");
 // Ce contrôleur effectue l'envoi de mail en s'appuyant sur la configuration
 export class MailNetwork {
@@ -32,12 +37,23 @@ export class MailNetwork {
       // Préparer l’objet mail
       const mailOptions = {
         from: mailConfig.SMTP_FROM,
-        to: mail.emailDest,
-        subject: mail.subject || 'Message de Cinephoria',
+        to: `${validateEmail(mail.emailDest) ? mail.emailDest : mailConfig.SMTP_FROM}`,
+        subject: '[Cinephoria]: Demande de contact - ' + mail.subject || 'Message de Cinephoria',
         // Si isHtml => 'html' sinon 'text'
-        [mail.isHtml ? 'html' : 'text']: mail.body || '',
+        [mail.isHtml ? 'html' : 'text']: 
+        ` Bonjour,
+
+          Nous avons pris en compte votre demande au sujet de : "${mail.subject}".
+          
+          Détail de votre demande : "${mail.body}"
+          
+          ${validateEmail(mail.emailDest) ? "Nous vous répondons dans les plus brefs délais." : "Sans coordonnées de réponse, n'hésitez pas à revenir vers nous si nécessaire."} 
+          En attendant de vous revoir dans nos salles,
+          
+          L'équipe Cinephoria
+          `  || '',
         cc: mail.cc?.length ? mail.cc.join(',') : undefined,
-        bcc: mailConfig.SMTP_FROM
+        bcc: `${validateEmail(mail.emailDest) ? mailConfig.SMTP_FROM : ""}`
         // attachments: ...
       };
       logger.info( "mailOptions = " + JSON.stringify(mailOptions))

@@ -5,6 +5,6 @@ import logger from '../config/configLog';
 
 const router = Router();
 logger.info('Declaration route /api/mail/');
-router.post('/sendmailcontact',  MailController.sendMail);
+router.post('/sendmailcontact',  MailController.sendMailContact);
 
 export default router;

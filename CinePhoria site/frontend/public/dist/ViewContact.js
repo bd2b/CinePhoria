@@ -91,10 +91,10 @@ export function onClickContact() {
         }
         // b) Vérifier le titre
         const titreVal = (titreInput === null || titreInput === void 0 ? void 0 : titreInput.value.trim()) || '';
-        // “au moins un mot de 5 caractères”
+        // “au moins un mot de 3 caractères”
         // On peut faire un petit test avec un split ou un test direct
         const words = titreVal.split(/\s+/);
-        const hasLongWord = words.some((w) => w.length >= 5);
+        const hasLongWord = words.some((w) => w.length >= 3);
         if (!hasLongWord) {
             showError("Veuillez préciser le sujet de votre demande");
             setButtonDisabled(true);
@@ -104,8 +104,8 @@ export function onClickContact() {
         const descVal = (descInput === null || descInput === void 0 ? void 0 : descInput.value.trim()) || '';
         const descWords = descVal.split(/\s+/).filter(Boolean);
         // Compter combien ont au moins 5 caractères
-        const count5Chars = descWords.filter((w) => w.length >= 5).length;
-        if (count5Chars < 3) {
+        const count2Chars = descWords.filter((w) => w.length >= 2).length;
+        if (count2Chars < 3) {
             showError("Veuillez décrire plus précisément votre demande en 3 mots.");
             setButtonDisabled(true);
             return;

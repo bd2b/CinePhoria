@@ -11,15 +11,16 @@ export class MailController {
    * Exemple d'endpoint POST /api/mail/confirmUtilisateur
    * qui reçoit un objet { emailDest, subject, body, ... }
    */
-  static async sendMail(req: Request, res: Response): Promise<void> {
+  static async sendMailContact(req: Request, res: Response): Promise<void> {
     try {
       logger.info(JSON.stringify(req.body));
       // Extraire les données du body
+      // Le mail de destinataire n'est pas obligatoire
       let { mailInput } = req.body;
 
       if (
         !mailInput ||
-        typeof mailInput.emailDest !== 'string' ||
+     //   typeof mailInput.emailDest !== 'string' ||
         typeof mailInput.subject !== 'string' ||
         typeof mailInput.body !== 'string' ||
         (mailInput.emailFrom && typeof mailInput.emailFrom !== 'string') ||
@@ -29,17 +30,6 @@ export class MailController {
         return;
       }
 
-      // Vérification que mailInput est bien un objet valide
-      if (!mailInput || !mailInput.emailDest) {
-        res.status(400).json({ message: "Parametre d'appel invalide" });
-        return;
-      }
-
-      // Validation de base
-      if (!mailInput.emailDest) {
-        res.status(400).json({ message: 'emailDest est obligatoire.' });
-        return;
-      }
 
       // Construire l’objet Mail
       const mail = new Mail(

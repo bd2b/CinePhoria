@@ -104,6 +104,11 @@ body {
   text-align: center;
 }
 
+.custom-alert-modal p {
+  white-space: pre-line; /* conserve \n comme retours à la ligne */
+  text-align: left ;
+}
+
 .custom-alert-modal button {
   align-self: center;
   /* centre le bouton */
