@@ -24,16 +24,18 @@ export class AuthDAO {
         try {
 
             logger.info(`Insertion d'un nouvelle maj raison = ${majSite.message}`);
+            // A noter la date de maj est calculé par le serveur est est en utc
             const [result] = await connection.execute(
                 `
                 INSERT INTO MajSite
-                    (MAJEURE, MINEURE, BUILD, dateMaj, message)
-                    VALUES (?, ?, ?, ?, ?)`,
+                    (MAJEURE, MINEURE, BUILD, 
+                     
+                    message)
+                    VALUES (?, ?, ?, ?)`,
                 [
                     majSite.MAJEURE || null,
                     majSite.MINEURE || null,
                     majSite.BUILD || null,
-                    majSite.dateMaj ? majSite.dateMaj : (new Date() ),
                     majSite.message
                 ]
             );

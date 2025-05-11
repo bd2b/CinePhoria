@@ -2,7 +2,6 @@
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 // On suppose qu'il existe un localStorage key = "jwtToken" pour vérifier la connexion
 import { login, logout } from './Login.js'; // si vous avez besoin de l’appeler
-import { onLoadVisiteur } from './ViewFilmsSortiesSemaine.js';
 import { onClickContact } from './ViewContact.js';
 // Ou tout autre endroit où est définie la fonction login()
 

@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import { FilmDAO } from '../dao/FilmDAO';
 import logger from '../config/configLog';
 import { Film } from "../shared-models/Film";
-import { MajSite } from '../shared-models/MajSite';
 import { AuthDAO } from '../dao/AuthDAO';
 import { AuthController } from './authController';
 
