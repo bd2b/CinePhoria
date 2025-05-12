@@ -4,6 +4,9 @@
 # Fichiers secrets
 **/.env*
 
+# Fichiers minifiés
+**/*.min.js
+
 # Build artifacts
 **/build/
 **/DerivedData/
