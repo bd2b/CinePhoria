@@ -79,7 +79,7 @@ export async function chargerMenu() {
       header.style.background = 'linear-gradient(90deg, #F8F8FF 0%, rgba(178, 34, 34, 0.3) 100%)';
 
       // d) Logo
-      if (!logoHeader) { console.error("Pas de logo")}
+      if (!logoHeader) { console.error("Pas de logo") }
       logoHeader.src = "assets/camera-cinephoria-admin.png";
       break;
     }
@@ -100,7 +100,7 @@ export async function chargerMenu() {
       header.style.background = 'linear-gradient(90deg, #F8F8FF 0%, rgba(34, 139, 34, 0.25) 100%)';
 
       // d) Logo
-      if (!logoHeader) { console.error("Pas de logo")}
+      if (!logoHeader) { console.error("Pas de logo") }
       logoHeader.src = "assets/camera-cinephoria-employe.png";
       break;
     }
@@ -132,32 +132,48 @@ function buildMenuVisiteur(): void {
   mobileNav.innerHTML = '';
 
   // Construire les boutons
-
   const btnReservation = createLinkButton('Réservation', 'reservation.html');
   const btnFilms = createLinkButton('Films', 'films.html');
-  // const btnContact = createLinkButton('Contact', 'contact.html');
+  const btnContact = createActionButton('Contact');
+  const btnConnexion = createActionButton('Connexion');
+  btnConnexion.classList.add('nav__actions-button--signin');
 
-  // Bouton Contact
-  const btnContact = createLinkButton('Contact', '#');
-  btnContact.addEventListener('click', (ev) => {
-    ev.preventDefault();
-    onClickContact();
-  });
+  const actionContact =  (ev: MouseEvent) => {
+        ev.preventDefault();
+        onClickContact();
+        const mobileMenu = document.getElementById('mobileMenu')
+        if (mobileMenu) mobileMenu.classList.remove('mobile-menu--open');
+      };
+  const actionConnexion = () => {
+        login('Saisissez votre email et votre mot de passe', true);
+        const mobileMenu = document.getElementById('mobileMenu')
+        if (mobileMenu) mobileMenu.classList.remove('mobile-menu--open');
+      };
 
-  // Bouton Connexion (appelle login() quand on clique, ou ouvre modal)
-  const btnConnexion = document.createElement('button');
-  btnConnexion.classList.add('nav__actions-button', 'nav__actions-button--signin');
-  btnConnexion.textContent = 'Connexion';
-  btnConnexion.addEventListener('click', () => {
-    // Exécuter la logique de connexion
-    // ex: login() ou window.location.href="login.html"
-    login('Saisissez votre email et votre mot de passe', true);
-  });
+
+  // Clonage avec ré-attachement des listeners
+  function cloneWithListeners(source: HTMLElement): HTMLElement {
+    const clone = source.cloneNode(true) as HTMLElement;
+    if (source.textContent?.includes('Contact')) {
+      clone.addEventListener('click', (ev) => actionContact );
+    } else if (source.textContent?.includes('Connexion')) {
+      clone.addEventListener('click', actionConnexion );
+    }
+    return clone;
+  }
 
   // Ajouter dans .nav__actions
   navActions.append(btnReservation, btnFilms, btnContact, btnConnexion);
-  // Ajouter dans .mobile-menu__nav
-  mobileNav.append(btnReservation.cloneNode(true), btnFilms.cloneNode(true), btnContact.cloneNode(true), btnConnexion.cloneNode(true));
+  btnContact.addEventListener('click', actionContact);
+  btnConnexion.addEventListener('click', actionConnexion);
+
+  // Ajouter dans .mobile-menu__nav avec gestion des listeners
+  mobileNav.append(
+    cloneWithListeners(btnReservation),
+    cloneWithListeners(btnFilms),
+    cloneWithListeners(btnContact),
+    cloneWithListeners(btnConnexion)
+  );
 }
 
 /**
@@ -178,33 +194,48 @@ function buildMenuUtilisateur(): void {
   const btnMesResa = createLinkButton('Mes Réservations', 'mesreservations.html');
   const btnReserve = createLinkButton('Reservation', 'reservation.html');
   const btnFilms = createLinkButton('Films', 'films.html');
-const btnContact = createLinkButton('Contact', '#');
-
-// 2) Ajouter un écouteur qui remplace le comportement
-btnContact.addEventListener('click', (event) => {
-  event.preventDefault();  // empêche la navigation
-  onClickContact();        // ouvre la modale de contact
-});
-
-
+  const btnContact = createActionButton('Contact');
   // Bouton Déconnexion stylisé à partir des initiales
-  const initials = getUserInitials();
-  const btnDeconnexion = document.createElement('button');
-  btnDeconnexion.classList.add('nav__actions-button', 'nav__actions-button--signin');
-  btnDeconnexion.textContent = initials;
-  btnDeconnexion.addEventListener('click', async () => {
-    await logout();
-  });
+  const btnDeconnexion = createActionButton('Déconnexion');
+  btnDeconnexion.classList.add('nav__actions-button--signin');
+
+  const actionContact = (ev: MouseEvent) => {
+        ev.preventDefault();
+        onClickContact();
+        const mobileMenu = document.getElementById('mobileMenu')
+        if (mobileMenu) mobileMenu.classList.remove('mobile-menu--open');
+      }
+
+  const actionDeconnexion =  async (ev: MouseEvent) => {
+        ev.preventDefault();
+        await logout();
+        const mobileMenu = document.getElementById('mobileMenu')
+        if (mobileMenu) mobileMenu.classList.remove('mobile-menu--open');
+      }
+
+  // Clonage avec ré-attachement des listeners
+  function cloneWithListeners(source: HTMLElement): HTMLElement {
+    const clone = source.cloneNode(true) as HTMLElement;
+    if (source.textContent?.includes('Contact')) {
+      clone.addEventListener('click', actionContact);
+    } else if (source.textContent?.includes('Déconnexion')) {
+      clone.addEventListener('click',actionDeconnexion);
+    }
+    return clone;
+  }
 
   // nav__actions
   navActions.append(btnMesResa, btnReserve, btnFilms, btnContact, btnDeconnexion);
-  // mobileNav
+  btnContact.addEventListener('click', actionContact);
+  btnDeconnexion.addEventListener('click', actionDeconnexion);
+
+  // Ajouter dans .mobile-menu__nav avec gestion des listeners
   mobileNav.append(
-    btnMesResa.cloneNode(true),
-    btnReserve.cloneNode(true),
-    btnFilms.cloneNode(true),
-    btnContact.cloneNode(true),
-    btnDeconnexion.cloneNode(true)
+    cloneWithListeners(btnMesResa),
+    cloneWithListeners(btnReserve),
+    cloneWithListeners(btnFilms),
+    cloneWithListeners(btnContact),
+    cloneWithListeners(btnDeconnexion)
   );
 }
 
@@ -380,6 +411,16 @@ function createLinkButton(label: string, href: string): HTMLElement {
 }
 
 /**
+ * Crée un bouton-action pour le menu (Visiteur/Utilisateur)
+ */
+function createActionButton(label: string): HTMLElement {
+  const btn = document.createElement('button');
+  btn.classList.add('nav__actions-button', 'nav__actions-button--link');
+  btn.textContent = label;
+  return btn;
+}
+
+/**
  * Récupère les initiales depuis userDataController.displayName?
  */
 function getUserInitials(): string {
@@ -417,3 +458,19 @@ function createLevel2Item(label: string, href: string): HTMLDivElement {
 }
 
 // document.addEventListener('DOMContentLoaded', chargerMenu);
+
+document.addEventListener('click', function (e) {
+  const mobileMenu = document.getElementById('mobileMenu') as HTMLElement | null;
+  const menuButton = document.getElementById('navMobileMenu');
+  const menuClose = document.getElementById('mobileMenuClose');
+
+  if (!mobileMenu || !mobileMenu.classList.contains('mobile-menu--open')) return;
+
+  // Si on clique sur le bouton menu ou bouton close, ne rien faire ici
+  if (menuButton?.contains(e.target as Node) || menuClose?.contains(e.target as Node)) return;
+
+  // Si le clic n'est pas dans le menu, on le ferme
+  if (!mobileMenu.contains(e.target as Node)) {
+    mobileMenu.classList.remove('mobile-menu--open');
+  }
+});

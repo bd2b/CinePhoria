@@ -17,7 +17,7 @@ import { seanceCardView } from './ViewReservation.js';
 import { updateTableContent } from './ViewReservationPlaces.js';
 export function onLoadMesReservations() {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, _b;
+        var _a, _b, _c;
         console.log("=====> chargement onLoadMesReservations");
         // On verifie que l'on est connecté sinon on retourne sur la page visiteur
         try {
@@ -35,6 +35,10 @@ export function onLoadMesReservations() {
             }
             else {
                 utilisateurId = ((_b = userDataController.compte()) === null || _b === void 0 ? void 0 : _b.utilisateurid) || '';
+                const titleLeft = document.getElementById('titleLeft');
+                if (titleLeft) {
+                    titleLeft.textContent = 'Mes Reservations (' + ((_c = userDataController.compte()) === null || _c === void 0 ? void 0 : _c.utilisateurDisplayName) + ')' || 'Mes Reservations';
+                }
             }
             // On recupere les reservations de l'utilisateur
             try {

@@ -124,26 +124,40 @@ function buildMenuVisiteur() {
     // Construire les boutons
     const btnReservation = createLinkButton('Réservation', 'reservation.html');
     const btnFilms = createLinkButton('Films', 'films.html');
-    // const btnContact = createLinkButton('Contact', 'contact.html');
-    // Bouton Contact
-    const btnContact = createLinkButton('Contact', '#');
-    btnContact.addEventListener('click', (ev) => {
+    const btnContact = createActionButton('Contact');
+    const btnConnexion = createActionButton('Connexion');
+    btnConnexion.classList.add('nav__actions-button--signin');
+    const actionContact = (ev) => {
         ev.preventDefault();
         onClickContact();
-    });
-    // Bouton Connexion (appelle login() quand on clique, ou ouvre modal)
-    const btnConnexion = document.createElement('button');
-    btnConnexion.classList.add('nav__actions-button', 'nav__actions-button--signin');
-    btnConnexion.textContent = 'Connexion';
-    btnConnexion.addEventListener('click', () => {
-        // Exécuter la logique de connexion
-        // ex: login() ou window.location.href="login.html"
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenu)
+            mobileMenu.classList.remove('mobile-menu--open');
+    };
+    const actionConnexion = () => {
         login('Saisissez votre email et votre mot de passe', true);
-    });
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenu)
+            mobileMenu.classList.remove('mobile-menu--open');
+    };
+    // Clonage avec ré-attachement des listeners
+    function cloneWithListeners(source) {
+        var _a, _b;
+        const clone = source.cloneNode(true);
+        if ((_a = source.textContent) === null || _a === void 0 ? void 0 : _a.includes('Contact')) {
+            clone.addEventListener('click', (ev) => actionContact);
+        }
+        else if ((_b = source.textContent) === null || _b === void 0 ? void 0 : _b.includes('Connexion')) {
+            clone.addEventListener('click', actionConnexion);
+        }
+        return clone;
+    }
     // Ajouter dans .nav__actions
     navActions.append(btnReservation, btnFilms, btnContact, btnConnexion);
-    // Ajouter dans .mobile-menu__nav
-    mobileNav.append(btnReservation.cloneNode(true), btnFilms.cloneNode(true), btnContact.cloneNode(true), btnConnexion.cloneNode(true));
+    btnContact.addEventListener('click', actionContact);
+    btnConnexion.addEventListener('click', actionConnexion);
+    // Ajouter dans .mobile-menu__nav avec gestion des listeners
+    mobileNav.append(cloneWithListeners(btnReservation), cloneWithListeners(btnFilms), cloneWithListeners(btnContact), cloneWithListeners(btnConnexion));
 }
 /**
  * Menu de l'Utilisateur :
@@ -162,24 +176,42 @@ function buildMenuUtilisateur() {
     const btnMesResa = createLinkButton('Mes Réservations', 'mesreservations.html');
     const btnReserve = createLinkButton('Reservation', 'reservation.html');
     const btnFilms = createLinkButton('Films', 'films.html');
-    const btnContact = createLinkButton('Contact', '#');
-    // 2) Ajouter un écouteur qui remplace le comportement
-    btnContact.addEventListener('click', (event) => {
-        event.preventDefault(); // empêche la navigation
-        onClickContact(); // ouvre la modale de contact
-    });
+    const btnContact = createActionButton('Contact');
     // Bouton Déconnexion stylisé à partir des initiales
-    const initials = getUserInitials();
-    const btnDeconnexion = document.createElement('button');
-    btnDeconnexion.classList.add('nav__actions-button', 'nav__actions-button--signin');
-    btnDeconnexion.textContent = initials;
-    btnDeconnexion.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+    const btnDeconnexion = createActionButton('Déconnexion');
+    btnDeconnexion.classList.add('nav__actions-button--signin');
+    const actionContact = (ev) => {
+        ev.preventDefault();
+        onClickContact();
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenu)
+            mobileMenu.classList.remove('mobile-menu--open');
+    };
+    const actionDeconnexion = (ev) => __awaiter(this, void 0, void 0, function* () {
+        ev.preventDefault();
         yield logout();
-    }));
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenu)
+            mobileMenu.classList.remove('mobile-menu--open');
+    });
+    // Clonage avec ré-attachement des listeners
+    function cloneWithListeners(source) {
+        var _a, _b;
+        const clone = source.cloneNode(true);
+        if ((_a = source.textContent) === null || _a === void 0 ? void 0 : _a.includes('Contact')) {
+            clone.addEventListener('click', actionContact);
+        }
+        else if ((_b = source.textContent) === null || _b === void 0 ? void 0 : _b.includes('Déconnexion')) {
+            clone.addEventListener('click', actionDeconnexion);
+        }
+        return clone;
+    }
     // nav__actions
     navActions.append(btnMesResa, btnReserve, btnFilms, btnContact, btnDeconnexion);
-    // mobileNav
-    mobileNav.append(btnMesResa.cloneNode(true), btnReserve.cloneNode(true), btnFilms.cloneNode(true), btnContact.cloneNode(true), btnDeconnexion.cloneNode(true));
+    btnContact.addEventListener('click', actionContact);
+    btnDeconnexion.addEventListener('click', actionDeconnexion);
+    // Ajouter dans .mobile-menu__nav avec gestion des listeners
+    mobileNav.append(cloneWithListeners(btnMesResa), cloneWithListeners(btnReserve), cloneWithListeners(btnFilms), cloneWithListeners(btnContact), cloneWithListeners(btnDeconnexion));
 }
 /**
  * Menu de l'Administrateur :
@@ -332,6 +364,15 @@ function createLinkButton(label, href) {
     return a;
 }
 /**
+ * Crée un bouton-action pour le menu (Visiteur/Utilisateur)
+ */
+function createActionButton(label) {
+    const btn = document.createElement('button');
+    btn.classList.add('nav__actions-button', 'nav__actions-button--link');
+    btn.textContent = label;
+    return btn;
+}
+/**
  * Récupère les initiales depuis userDataController.displayName?
  */
 function getUserInitials() {
@@ -368,3 +409,17 @@ function createLevel2Item(label, href) {
     return divItem;
 }
 // document.addEventListener('DOMContentLoaded', chargerMenu);
+document.addEventListener('click', function (e) {
+    const mobileMenu = document.getElementById('mobileMenu');
+    const menuButton = document.getElementById('navMobileMenu');
+    const menuClose = document.getElementById('mobileMenuClose');
+    if (!mobileMenu || !mobileMenu.classList.contains('mobile-menu--open'))
+        return;
+    // Si on clique sur le bouton menu ou bouton close, ne rien faire ici
+    if ((menuButton === null || menuButton === void 0 ? void 0 : menuButton.contains(e.target)) || (menuClose === null || menuClose === void 0 ? void 0 : menuClose.contains(e.target)))
+        return;
+    // Si le clic n'est pas dans le menu, on le ferme
+    if (!mobileMenu.contains(e.target)) {
+        mobileMenu.classList.remove('mobile-menu--open');
+    }
+});

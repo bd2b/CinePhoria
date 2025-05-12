@@ -36,6 +36,10 @@ export async function onLoadMesReservations() {
             return;
         } else {
             utilisateurId = userDataController.compte()?.utilisateurid || '';
+            const titleLeft = document.getElementById('titleLeft');
+            if (titleLeft) {
+                titleLeft.textContent = 'Mes Reservations (' + userDataController.compte()?.utilisateurDisplayName +')' || 'Mes Reservations'
+            }
         }
         // On recupere les reservations de l'utilisateur
         try {
