@@ -11,7 +11,8 @@ import { DataControllerIntranet } from './DataControllerIntranet.js';
 import { ComptePersonne } from './shared-models/Utilisateur.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
-import { listCinemasConst, validateEmail, isPasswordValid } from './Helpers.js';
+import { listCinemasConst, validateEmail, isPasswordValid, showCustomAlert } from './Helpers.js';
+import { profilApi } from './NetworkController.js';
 // State flags
 let isEditingMode = false;
 let isCreatingMode = false;
@@ -292,20 +293,29 @@ function onSaveEmploye() {
         const { employe, password } = buildEmployeFromForm();
         if (!employe)
             return;
+        if (!employe.matricule)
+            return;
         try {
-            yield DataControllerIntranet.createOrUpdateEmploye(employe, password);
-            if (isCreatingMode) {
-                // Creation
-                console.log("Employe created => matricule", employe.matricule);
-                alert("Employe créé avec succès");
+            const comptePersonnes = yield profilApi(employe.email);
+            if (comptePersonnes && comptePersonnes[0].utilisateurid) {
+                // L'email utilisé est celui d'un employe, on renvoi un message d'erreur
+                yield showCustomAlert("Vous ne pouvez pas utiliser un email d'utilisateur comme email d'employe");
             }
             else {
-                // Modification
-                console.log("Employe updated => matricule", employe.matricule);
-                alert("Employe mis à jour avec succès");
+                yield DataControllerIntranet.createOrUpdateEmploye(employe, password);
+                if (isCreatingMode) {
+                    // Creation
+                    console.log("Employe created => matricule", employe.matricule);
+                    yield showCustomAlert("Employe créé avec succès");
+                }
+                else {
+                    // Modification
+                    console.log("Employe updated => matricule", employe.matricule);
+                    yield showCustomAlert("Employe mis à jour avec succès");
+                }
+                // On refresh la liste
+                yield rafraichirListeEmployes();
             }
-            // On refresh la liste
-            yield rafraichirListeEmployes();
         }
         catch (err) {
             let messageErreur = "";
@@ -317,7 +327,7 @@ function onSaveEmploye() {
             }
             console.error(messageErreur, err);
             const erreurSeule = err.replace(/^Error:\s*Erreur\s*:\s*/, '');
-            alert(messageErreur + " => " + erreurSeule);
+            yield showCustomAlert(messageErreur + " => " + erreurSeule);
         }
         finally {
             isEditingMode = false;

@@ -18,6 +18,12 @@ export class ComptePersonne {
   }
 }
 
+export enum TypeCompte {
+  None = "none",
+  Employe = "employe",
+  Utilisateur = "utilisateur"
+}
+
 export interface UtilisateurCompte {
   id: string;
   email?: string;

@@ -560,7 +560,7 @@ async function onClickSuppressionReservation(resa: ReservationForUtilisateur, te
         action = async () => { await cancelReserveApi(resa.reservationId) };
         messageModal = "Etes vous sûr de vouloir annuler cette réservation ?";
         titleModal = "Annulation de la reservation";
-        titleConfirme = "Je confirmer l'annulation";
+        titleConfirme = "Je confirme l'annulation";
 
     }
     if (textButton === "Effacer") {
@@ -569,7 +569,7 @@ async function onClickSuppressionReservation(resa: ReservationForUtilisateur, te
         messageModal = `Etes vous sûr de vouloir effacer cette réservation ? 
         (Nous conserverons la note anonymisée mais effacerons l'éventuel commentaire de notre site et les données de la réservation)`;
         titleModal = "Suppression de la reservation";
-        titleConfirme = "Je confirmer la suppression";
+        titleConfirme = "Je confirme la suppression";
     }
 
     // Ouvrir modal-suppressionReservation

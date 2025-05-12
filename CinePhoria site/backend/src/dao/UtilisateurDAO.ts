@@ -2,7 +2,7 @@ import * as bcrypt from 'bcrypt';
 import mysql, { FieldPacket } from 'mysql2/promise';
 import { dbConfig, nombreTentativeLoginKO , dbPool} from '../config/config';
 import logger from '../config/configLog';
-import { UtilisateurCompte, ComptePersonne } from '../shared-models/Utilisateur';
+import { UtilisateurCompte, ComptePersonne , TypeCompte } from '../shared-models/Utilisateur';
 
 
 async function hashPassword(password: string): Promise<string> {

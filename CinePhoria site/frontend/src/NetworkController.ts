@@ -368,7 +368,7 @@ export async function profilApi(identUtilisateur: string): Promise<ComptePersonn
     const endpoint = `${baseUrl}/api/utilisateur/${identUtilisateur}`;
 
     // Appel de apiRequest pour gérer l'authentification et les erreurs
-    const rawData = await apiRequest<any[]>(endpoint, 'GET', null);
+    const rawData = await apiRequest<ComptePersonne[]>(endpoint, 'GET', null, false);
 
     if (!Array.isArray(rawData)) {
         throw new Error('La réponse de l’API n’est pas un tableau.');

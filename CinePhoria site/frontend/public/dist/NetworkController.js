@@ -303,7 +303,7 @@ export function profilApi(identUtilisateur) {
     return __awaiter(this, void 0, void 0, function* () {
         const endpoint = `${baseUrl}/api/utilisateur/${identUtilisateur}`;
         // Appel de apiRequest pour gérer l'authentification et les erreurs
-        const rawData = yield apiRequest(endpoint, 'GET', null);
+        const rawData = yield apiRequest(endpoint, 'GET', null, false);
         if (!Array.isArray(rawData)) {
             throw new Error('La réponse de l’API n’est pas un tableau.');
         }
