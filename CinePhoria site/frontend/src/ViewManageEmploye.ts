@@ -4,7 +4,8 @@ import { ComptePersonne } from './shared-models/Utilisateur.js';
 
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
-import { listCinemasConst , validateEmail , isPasswordValid} from './Helpers.js';
+import { listCinemasConst, validateEmail, isPasswordValid, showCustomAlert } from './Helpers.js';
+import { profilApi } from './NetworkController.js'
 
 
 // State flags
@@ -326,21 +327,30 @@ function initListen(init: boolean) {
 async function onSaveEmploye() {
     const { employe, password } = buildEmployeFromForm();
     if (!employe) return;
+    if (!employe.matricule) return;
 
     try {
-        await DataControllerIntranet.createOrUpdateEmploye(employe, password);
+
+        const comptePersonnes = await profilApi(employe.email);
+        if (comptePersonnes && comptePersonnes[0].utilisateurid) {
+            // L'email utilisé est celui d'un employe, on renvoi un message d'erreur
+            await showCustomAlert("Vous ne pouvez pas utiliser un email d'utilisateur comme email d'employe");
+
+        } else {
+            await DataControllerIntranet.createOrUpdateEmploye(employe, password);
             if (isCreatingMode) {
                 // Creation
                 console.log("Employe created => matricule", employe.matricule);
-                alert("Employe créé avec succès");
+                await showCustomAlert("Employe créé avec succès");
 
             } else {
                 // Modification
                 console.log("Employe updated => matricule", employe.matricule);
-                alert("Employe mis à jour avec succès");
+                await showCustomAlert("Employe mis à jour avec succès");
             }
-        // On refresh la liste
-        await rafraichirListeEmployes();
+            // On refresh la liste
+            await rafraichirListeEmployes();
+        }
 
     } catch (err) {
         let messageErreur = ""
@@ -352,7 +362,7 @@ async function onSaveEmploye() {
         }
         console.error(messageErreur, err);
         const erreurSeule = (err as string).replace(/^Error:\s*Erreur\s*:\s*/, '');
-        alert(messageErreur + " => " + erreurSeule);
+        await showCustomAlert(messageErreur + " => " + erreurSeule);
 
     } finally {
         isEditingMode = false;
@@ -501,9 +511,9 @@ function setFormEditable(editable: boolean) {
         if (el) {
             if (el instanceof HTMLInputElement) {
                 el.disabled = !editable;
-              } else {
+            } else {
                 (el as HTMLElement).contentEditable = editable ? "true" : "false";
-              }
+            }
 
             el.style.border = editable ? "1px solid #000" : "none";
             el.style.background = editable ? "rgba(255, 215, 0, 0.1)" : "#FFF";
@@ -602,13 +612,13 @@ function isFormValid(): boolean {
     }
 
     // 6) Les valeurs de mots de passe doivent être de 8 caracteres avec des caractères spéciaux
-    if (fP && fP.value.trim().length > 0 && !isPasswordValid(fP.value.trim())){
+    if (fP && fP.value.trim().length > 0 && !isPasswordValid(fP.value.trim())) {
         isValid = false;
         messageAttention += "<li>Le mot de passe doit avoir 8 caractères, une majuscule, un caractère spécial et un nombre";
     }
 
     if (isValid) return true;
-    messageAttention +="</ul>"
+    messageAttention += "</ul>"
     alertMessage(messageAttention);
     return false;
 }
@@ -631,7 +641,7 @@ function isFormModified(): boolean {
     const cP = document.getElementById('confirmPassword') as HTMLInputElement;
     if (fP?.value.trim() !== firstPassword) return true;
     if (cP?.value.trim() !== confirmPassword) return true;
-    
+
 
     let listValeur = employeSelectedList.listCinemas || '';
     const tableauValeur = listValeur.split(",").map(el => el.trim());

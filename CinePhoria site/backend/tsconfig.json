@@ -1,16 +1,19 @@
 {
-    "compilerOptions": {
-      "target": "ES2020",
-      "module": "CommonJS",
-      "rootDir": "src",
-      "outDir": "dist",
-      "strict": true,
-      "esModuleInterop": true,
-      "baseUrl": ".",              // 👈 Important pour que `./` parte de `src/`
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "rootDir": "src",
+    "outDir": "dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
     "paths": {
-      "*": ["src/*"]             // 👈 Tous les imports comme 'config/...' deviennent 'src/config/...'
-    },
-    } ,
-    "exclude": ["node_modules"],
-    "include": ["src/**/*"]
+      "*": ["src/*"]
+    }
+  },
+  "exclude": ["node_modules"],
+  "include": ["src/**/*"]
 }

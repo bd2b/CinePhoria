@@ -1426,7 +1426,8 @@ BEGIN
 	END IF;
     
     -- Récupération des nombres de places reserves
-    select count(*) into v_numberPlaces from SeatsForTarif WHERE ReservationId = p_reservationId;
+   --  select count(*) into v_numberPlaces from SeatsForTarif WHERE ReservationId = p_reservationId;
+    select SUM( numberSeats) into v_numberPlaces from SeatsForTarif WHERE ReservationId = p_reservationId;
     
     -- Mise à jour des places disponibles
     UPDATE Seance

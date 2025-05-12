@@ -42,7 +42,7 @@ router.get('/getemploye/:matricule', authenticateJWT, UtilisateurController.getE
 router.delete('/deleteemploye/:matricule', authenticateJWT, UtilisateurController.deleteEmployeByMatricule);
 
 
-// GET /api/utilisateur
+// GET /api/utilisateur/:ident
 router.get('/:ident', UtilisateurController.getUtilisateur);
 
 // (Futur) GET /api/reservation/:email

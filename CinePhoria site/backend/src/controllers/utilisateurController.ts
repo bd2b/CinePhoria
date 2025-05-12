@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { UtilisateurDAO } from '../dao/UtilisateurDAO';
 import logger from '../config/configLog';
 import { MailNetwork } from '../services/MailNetwork';
-import { ComptePersonne } from '../shared-models/Utilisateur';
+import { ComptePersonne, TypeCompte } from '../shared-models/Utilisateur';
 
 export class UtilisateurController {
   static async createUtilisateur(req: Request, res: Response): Promise<void> {
@@ -110,7 +110,6 @@ export class UtilisateurController {
       res.status(500).json({ error: error.message });
     }
   };
-
 
   static async getUtilisateurByMail(req: Request, res: Response) {
     try {
