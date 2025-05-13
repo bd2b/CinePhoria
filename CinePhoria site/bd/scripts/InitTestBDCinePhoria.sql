@@ -793,6 +793,8 @@ VALUES
 --  (UUIDTarifQualite8, UUIDReservation3, 3,40.0)
 --   ;
 
+SET SQL_SAFE_UPDATES = 0;
+
 -- Mettre à jour les nombre de places
 UPDATE Seance s
 JOIN Salle sa ON s.Salleid = sa.id
@@ -817,11 +819,12 @@ SET s.numFreePMR = sa.numPMR - IFNULL(res.totalReservedPMR, 0);
 
 
 
+
 -- Mise à jour de la table MajSite
 INSERT INTO MajSite ( MAJEURE , MINEURE , BUILD,  dateMaj , message  )
 VALUES (0,0,0,NOW(),"Initialisation de la base");
 
-
+SET SQL_SAFE_UPDATES = 1;
   
   END $$
 DELIMITER ;

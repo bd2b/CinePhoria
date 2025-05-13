@@ -84,10 +84,10 @@ export class Seance {
   }
 
   // Propriétés calculées (non persistées dans JSON)
-  get titleFilm(): string | undefined { return this.film?.titleFilm; }
+  get titleFilm(): string | undefined { return this.film?.titleFilm; } // pbme
   get filmPitch(): string | undefined { return this.film?.filmPitch; }
   get genreArray(): string | undefined { return this.film?.genreArray; }
-  get duration(): string | undefined { return this.film?.duration; }
+  get duration(): string | undefined { return this.film?.duration; } // pbme
   get linkBO(): string | undefined { return this.film?.linkBO; }
   get dateSortieCinePhoria(): string | undefined { return this.film?.dateSortieCinePhoria; }
   get categorySeeing(): string | undefined { return this.film?.categorySeeing; }
@@ -97,7 +97,7 @@ export class Seance {
   get filmDescription(): string | undefined { return this.film?.filmDescription; }
   get filmAuthor(): string | undefined { return this.film?.filmAuthor; }
   get filmDistribution(): string | undefined { return this.film?.filmDistribution; }
-  get imageFilm128(): string | undefined { return this.film?.imageFilm128; }
+  get imageFilm128(): string | undefined { return this.film?.imageFilm128; } // pbme
   get imageFilm1024(): string | undefined { return this.film?.imageFilm1024; }
 }
 

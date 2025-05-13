@@ -203,6 +203,8 @@ FROM (
     INNER JOIN Film ON Seance.Filmid = Film.id
 ) AS SubQuery
 GROUP BY FilmTitre, Jour;
+
+DROP VIEW IF EXISTS ViewFilmsSeancesSalle;
 CREATE VIEW ViewFilmsSeancesSalle AS
 
 SELECT

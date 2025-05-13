@@ -297,7 +297,12 @@ function onSaveEmploye() {
             return;
         try {
             const comptePersonnes = yield profilApi(employe.email);
-            if (comptePersonnes && comptePersonnes[0].utilisateurid) {
+            let isUtilisateur = false;
+            if (comptePersonnes && comptePersonnes.length > 0) {
+                if (comptePersonnes[0].utilisateurid)
+                    isUtilisateur = true;
+            }
+            if (isUtilisateur) {
                 // L'email utilisé est celui d'un employe, on renvoi un message d'erreur
                 yield showCustomAlert("Vous ne pouvez pas utiliser un email d'utilisateur comme email d'employe");
             }

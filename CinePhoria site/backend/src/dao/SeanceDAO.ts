@@ -82,7 +82,9 @@ export class SeanceDAO {
         dateJour, hourBeginHHSMM, hourEndHHSMM, 
         bo, duration, qualite, imageFilm128,
         salleId, filmId
-      FROM ViewFilmsSeancesSalle`;
+      FROM ViewFilmsSeancesSalle
+      INNER JOIN Film ON Film.id = ViewFilmsSeancesSalle.filmId ;
+      `;
     } else {
       requete = `SELECT 
         seanceId, titleFilm, nameSalle, nameCinema, 
@@ -91,6 +93,7 @@ export class SeanceDAO {
         bo, duration, qualite, imageFilm128,
         salleId, filmId
       FROM ViewFilmsSeancesSalle
+      INNER JOIN Film ON Film.id = ViewFilmsSeancesSalle.filmId
       WHERE nameCinema in (${nameCinemaList})`;
     }
     logger.info(`Exécution de la requête : ${requete}`);

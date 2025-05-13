@@ -111,6 +111,34 @@ BEGIN
     DROP TEMPORARY TABLE tmp_seance_ids;
     SET d = d + 1;
   END WHILE;
+  
+  SET SQL_SAFE_UPDATES = 0;
+
+-- Mettre à jour les nombre de places
+UPDATE Seance s
+JOIN Salle sa ON s.Salleid = sa.id
+LEFT JOIN (
+  SELECT r.Seanceid, SUM(st.numberSeats) AS totalReserved
+  FROM Reservation r
+  JOIN SeatsForTarif st ON r.id = st.ReservationId
+  GROUP BY r.Seanceid
+) AS res ON res.Seanceid = s.id
+SET s.numFreeSeats = sa.capacity - IFNULL(res.totalReserved, 0);
+
+    
+-- Mettre à jour les nombre de places PMR
+UPDATE Seance s
+JOIN Salle sa ON s.Salleid = sa.id
+LEFT JOIN (
+  SELECT Seanceid, SUM(numberPMR) AS totalReservedPMR
+  FROM Reservation
+  GROUP BY Seanceid
+) AS res ON res.Seanceid = s.id
+SET s.numFreePMR = sa.numPMR - IFNULL(res.totalReservedPMR, 0);
+
+SET SQL_SAFE_UPDATES = 1;
+
+  
 END$$
 
 DELIMITER ;

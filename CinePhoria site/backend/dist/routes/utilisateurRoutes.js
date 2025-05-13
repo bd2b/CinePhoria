@@ -32,7 +32,7 @@ router.get('/getemployes', authMiddleware_1.authenticateJWT, utilisateurControll
 router.put('/updateemploye', authMiddleware_1.authenticateJWT, utilisateurController_1.UtilisateurController.updateEmploye);
 router.get('/getemploye/:matricule', authMiddleware_1.authenticateJWT, utilisateurController_1.UtilisateurController.getEmployeByMatricule);
 router.delete('/deleteemploye/:matricule', authMiddleware_1.authenticateJWT, utilisateurController_1.UtilisateurController.deleteEmployeByMatricule);
-// GET /api/utilisateur
+// GET /api/utilisateur/:ident
 router.get('/:ident', utilisateurController_1.UtilisateurController.getUtilisateur);
 // (Futur) GET /api/reservation/:email
 router.get('/mail/:email', utilisateurController_1.UtilisateurController.getUtilisateurByMail);
