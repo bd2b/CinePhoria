@@ -17,10 +17,10 @@ class Seance {
         return Seance.allFilms.find(f => f.id === this.filmId);
     }
     // Propriétés calculées (non persistées dans JSON)
-    get titleFilm() { return this.film?.titleFilm; }
+    get titleFilm() { return this.film?.titleFilm; } // pbme
     get filmPitch() { return this.film?.filmPitch; }
     get genreArray() { return this.film?.genreArray; }
-    get duration() { return this.film?.duration; }
+    get duration() { return this.film?.duration; } // pbme
     get linkBO() { return this.film?.linkBO; }
     get dateSortieCinePhoria() { return this.film?.dateSortieCinePhoria; }
     get categorySeeing() { return this.film?.categorySeeing; }
@@ -30,7 +30,7 @@ class Seance {
     get filmDescription() { return this.film?.filmDescription; }
     get filmAuthor() { return this.film?.filmAuthor; }
     get filmDistribution() { return this.film?.filmDistribution; }
-    get imageFilm128() { return this.film?.imageFilm128; }
+    get imageFilm128() { return this.film?.imageFilm128; } // pbme
     get imageFilm1024() { return this.film?.imageFilm1024; }
 }
 exports.Seance = Seance;

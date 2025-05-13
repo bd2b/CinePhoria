@@ -37,7 +37,7 @@ if (window.location.hostname.toUpperCase() !== 'CINEPHORIA.BD2DB.COM') document.
 //     "dashboard.html" : onLoadDashboard
 // };
 
-const pagesPublic = ["visiteur.html", "reservation.html", "films.html" , "mesreservations.html"]; // TODO manageXXXXX à supprimer
+const pagesPublic = ["visiteur.html", "reservation.html", "films.html", "mesreservations.html"]; // TODO manageXXXXX à supprimer
 
 /**
  * Structure de chargement dynamique des modules selon la page active.
@@ -71,19 +71,34 @@ export async function handleApiError(error: any): Promise<never> {
                 console.warn("🔄 Token expiré, redirection vers visiteur.html");
             case CinephoriaErrorCode.TOKEN_REFRESH_FAIL:
                 console.warn("🔄 Token refresh expiré, redirection vers visiteur.html");
+            // case CinephoriaErrorCode.AUTH_REQUIRED:
+            //     if (!isHandlingAuthError) {
+            //         console.warn("🔄 Token expiré ou invalide, redirection vers visiteur.html");
+
+            //         isHandlingAuthError = true;
+            //         localStorage.removeItem('jwtAccessToken');
+
+            //         const currentPage = window.location.pathname.split("/").pop();
+            //         if (currentPage === "visiteur.html") {
+            //             // On relance le traitement de visiteur
+            //             console.log("Chargement manuel de onLoadVisiteur()");
+            //             //      onLoadVisiteur();
+
+            //         } else if (!pagesPublic.includes(currentPage || '')) {
+            //             window.location.replace("visiteur.html");
+            //         }
+            //     }
+            //     break;
             case CinephoriaErrorCode.AUTH_REQUIRED:
                 if (!isHandlingAuthError) {
                     console.warn("🔄 Token expiré ou invalide, redirection vers visiteur.html");
-
                     isHandlingAuthError = true;
                     localStorage.removeItem('jwtAccessToken');
 
                     const currentPage = window.location.pathname.split("/").pop();
                     if (currentPage === "visiteur.html") {
-                        // On relance le traitement de visiteur
                         console.log("Chargement manuel de onLoadVisiteur()");
-                        //      onLoadVisiteur();
-
+                        (await import("./ViewFilmsSortiesSemaine.js")).onLoadVisiteur();
                     } else if (!pagesPublic.includes(currentPage || '')) {
                         window.location.replace("visiteur.html");
                     }
@@ -123,6 +138,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         await userDataController.init();
         console.log("Compte charge = ", userDataController.compte());
     }
+
     // 1) Identifier le profil qui a pu changer si lle jwt a expiré
     const profil = userDataController.profil();
     console.log("Profil charge = xxxx", profil);

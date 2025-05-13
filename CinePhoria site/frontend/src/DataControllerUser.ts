@@ -1,5 +1,5 @@
 import { ComptePersonne } from './shared-models/Utilisateur.js';
-import { profilApi } from './NetworkController.js';
+import { profilApi, isLogged } from './NetworkController.js';
 import { deleteCookie, getCookie, setCookie } from './Helpers.js';
 
 export enum ProfilUtilisateur {
@@ -12,26 +12,26 @@ export enum ProfilUtilisateur {
 export class DataControllerUser {
     private _comptes?: ComptePersonne[];
     private _ident?: string;
-    
+
 
     // Getter pour ident
     public get ident(): string | undefined {
         const ident = getCookie('ident');
         this._ident = ident;
         return getCookie('ident')
-        
+
     }
 
     // Setter pour ident
     public set ident(value: string) {
         if (value !== '') {
-        console.log("Mise a jour ident = " + value)
-        setCookie("ident", value, 1);
-        this._ident = value;
+            console.log("Mise a jour ident = " + value)
+            setCookie("ident", value, 1);
+            this._ident = value;
         } else {
-            console.log("logout de ",this._ident,)
+            console.log("logout de ", this._ident,)
             this._ident = undefined;
-            
+
         }
     }
 
@@ -45,16 +45,16 @@ export class DataControllerUser {
     public compte(): ComptePersonne | undefined {
         if (this._comptes) {
             return this._comptes[0];
-        } else 
-        return undefined;
+        } else
+            return undefined;
     }
 
     // Calcul au profil
-    public profil() : ProfilUtilisateur {
+    public profil(): ProfilUtilisateur {
         if (this.compte() === undefined) {
             return ProfilUtilisateur.Visiteur
         } else if (this.compte()?.matricule) {
-            if (this.compte()?.isAdministrateur &&  this.compte()?.isAdministrateur === 1) {
+            if (this.compte()?.isAdministrateur && this.compte()?.isAdministrateur === 1) {
                 return ProfilUtilisateur.Administrateur;
             } else {
                 return ProfilUtilisateur.Employee;
@@ -70,24 +70,33 @@ export class DataControllerUser {
         this._ident = undefined;
         this._comptes = undefined;
     }
-    
-    
+
+
 
     /** Initialisation du dataController
      * 
      */
     public async init() {
         try {
-        if (this._ident !== undefined) {
-            const comptesCharge = await profilApi(this._ident);
-            if (comptesCharge) {
-                console.log("Compte chargé pour ", this._ident);
-                this._comptes = comptesCharge
-            } 
+            if (this._ident !== undefined) {
+                try {
+                    const user: string = await isLogged();
+                    console.log("+++++ Logged = ", user);
+                } catch (e) {
+                    console.warn("❌ Utilisateur non authentifié, ident supprimé");
+                    this._ident = undefined;
+                    return;
+                }
+
+                const comptesCharge = await profilApi(this._ident);
+                if (comptesCharge) {
+                    console.log("++++++ Compte chargé pour =", this._ident);
+                    this._comptes = comptesCharge;
+                }
+            }
+        } catch {
+            this._ident = undefined;
         }
-    } catch {
-        this._ident = undefined;
-    }
     }
 
 }

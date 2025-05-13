@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { profilApi } from './NetworkController.js';
+import { profilApi, isLogged } from './NetworkController.js';
 import { deleteCookie, getCookie, setCookie } from './Helpers.js';
 export var ProfilUtilisateur;
 (function (ProfilUtilisateur) {
@@ -79,9 +79,18 @@ export class DataControllerUser {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 if (this._ident !== undefined) {
+                    try {
+                        const user = yield isLogged();
+                        console.log("+++++ Logged = ", user);
+                    }
+                    catch (e) {
+                        console.warn("❌ Utilisateur non authentifié, ident supprimé");
+                        this._ident = undefined;
+                        return;
+                    }
                     const comptesCharge = yield profilApi(this._ident);
                     if (comptesCharge) {
-                        console.log("Compte chargé pour ", this._ident);
+                        console.log("++++++ Compte chargé pour =", this._ident);
                         this._comptes = comptesCharge;
                     }
                 }

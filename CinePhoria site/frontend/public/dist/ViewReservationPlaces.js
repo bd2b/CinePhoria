@@ -11,7 +11,7 @@ import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewRes
 import { dataController } from './DataController.js';
 import { validateEmail, showCustomAlert } from './Helpers.js';
 import { ReservationState } from './shared-models/Reservation.js';
-import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi, profilApi } from './NetworkController.js';
+import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { login } from './Login.js';
 /**
@@ -264,15 +264,15 @@ function setReservation() {
             console.log(`email = ${email}`);
             // d) Appel à l’API /api/reservation et traitement des résultats
             try {
-                const comptePersonnes = yield profilApi(email);
-                if (comptePersonnes && comptePersonnes[0].matricule) {
-                    // L'email utilisé est celui d'un employe, on renvoi un message d'erreur
-                    yield showCustomAlert("Vous ne pouvez pas utiliser votre email d'employé pour effectuer une réservation");
-                    btnReserve.disabled = false;
-                    btnReserve.classList.remove("inactif");
-                    btnReserve.classList.remove('loading');
-                    return;
-                }
+                // const comptePersonnes = await profilApi(email);
+                // if (comptePersonnes && comptePersonnes[0].matricule) {
+                //     // L'email utilisé est celui d'un employe, on renvoi un message d'erreur
+                //     await showCustomAlert("Vous ne pouvez pas utiliser votre email d'employé pour effectuer une réservation");
+                //     btnReserve.disabled = false;
+                //     btnReserve.classList.remove("inactif");
+                //     btnReserve.classList.remove('loading');
+                //     return;
+                // }
                 const seanceId = dataController.seanceSelected().seanceId;
                 const listSeats = dataController.selectedListSeats || '';
                 const { statut, utilisateurId, reservationId } = yield setReservationApi(email, seanceId, tarifSeatsMap, pmrSeats, listSeats);
