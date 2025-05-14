@@ -69,7 +69,8 @@ class AuthController {
             }
             // Générer un nouveau accessToken
             const compte = decoded.compte;
-            const newAccessToken = jsonwebtoken_1.default.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: '15m' });
+            //jwt.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: '15m' });
+            const newAccessToken = jsonwebtoken_1.default.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: JWT_ACCESS_SECRET });
             res.json({ accessToken: newAccessToken });
         });
     }
