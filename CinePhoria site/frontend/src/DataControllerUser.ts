@@ -1,6 +1,7 @@
 import { ComptePersonne } from './shared-models/Utilisateur.js';
 import { profilApi, isLogged } from './NetworkController.js';
 import { deleteCookie, getCookie, setCookie } from './Helpers.js';
+import { CinephoriaError, CinephoriaErrorCode } from './shared-models/Error.js'; 
 
 export enum ProfilUtilisateur {
     Utilisateur = "mesreservations.html",
@@ -85,7 +86,7 @@ export class DataControllerUser {
                 } catch (e) {
                     console.warn("❌ Utilisateur non authentifié, ident supprimé");
                     this._ident = undefined;
-                    return;
+                    throw new CinephoriaError(CinephoriaErrorCode.AUTH_REQUIRED, "Utilisateur non authentifié");
                 }
 
                 const comptesCharge = await profilApi(this._ident);

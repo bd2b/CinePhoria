@@ -347,11 +347,6 @@ async function setReservation() {
                         await userDataController.init();
                         const pageToGo = userDataController.profil();
                         window.location.href = pageToGo;
-
-
-                        // await confirmReserve();
-                        // dataController.reservationState = ReservationState.PendingChoiceSeance;
-
                     }
                     console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
                     dataController.reservationState = ReservationState.ReserveToConfirm;

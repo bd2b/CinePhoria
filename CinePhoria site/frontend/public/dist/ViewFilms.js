@@ -116,7 +116,7 @@ function initFiltreCinema() {
                         titleLeft.innerText = `Les films de CinePhoria à ${val}`;
                     }
                 }
-                yield dataController.init();
+                // await dataController.init()
                 // Rafraichir le dropdown des genres
                 yield initFiltreGenre();
                 // Rafraichir la liste des jours

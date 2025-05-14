@@ -117,7 +117,7 @@ async function initFiltreCinema(): Promise<void> {
                     titleLeft.innerText = `Les films de CinePhoria à ${val}`;
                 }
             }
-            await dataController.init()
+            // await dataController.init()
 
             // Rafraichir le dropdown des genres
             await initFiltreGenre();

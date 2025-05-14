@@ -96,7 +96,7 @@ function refreshAccessToken() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             console.log("🔄 Tentative de refresh du token...");
-            const response = yield fetch(`${baseUrl}/api/refresh`, {
+            const response = yield fetch(`${baseUrl}/api/login/refresh`, {
                 method: 'POST',
                 // on peut mettre credentials: 'include' si le refresh nécessite le cookie
                 credentials: 'include'

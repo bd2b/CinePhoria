@@ -127,10 +127,6 @@ export async function updateCinema() {
     });
   }
 
-
-  // Le cinema est initialisé dans DataController.ts , par défaut paris
-  // await dataController.init();
-
   // Mettre à jour l'affichage initial du dropdown sur le composant titre
   updateDropdownDisplay(dataController.selectedNameCinema);
 
@@ -166,9 +162,6 @@ export async function updateCinema() {
           }
           // Mettre à jour le dataController
           dataController.filterNameCinema = cinema;
-
-          // Chargement des données
-          // await dataController.init()
 
           // Identifier le film par defaut
           const filmSeancesCandidat = trouverFilmSeancesCandidat(dataController);

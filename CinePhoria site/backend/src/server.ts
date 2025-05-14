@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import logger from './config/configLog';
 import sanitizeQueryMiddleware from './middlewares/sanitiseQueryMiddleware';
@@ -26,6 +27,8 @@ console.log(`🛠️ Mode actuel : ${modeExec} avec version ${JSON.stringify(ver
 connectDBMongo()
 
 const app = express();
+
+app.use(cookieParser()); // ✅ Important
 
 // ✅ Middleware pour la compression
 // 🔹 Active la compression gzip (ou brotli si le client le supporte)

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { profilApi, isLogged } from './NetworkController.js';
 import { deleteCookie, getCookie, setCookie } from './Helpers.js';
+import { CinephoriaError, CinephoriaErrorCode } from './shared-models/Error.js';
 export var ProfilUtilisateur;
 (function (ProfilUtilisateur) {
     ProfilUtilisateur["Utilisateur"] = "mesreservations.html";
@@ -86,7 +87,7 @@ export class DataControllerUser {
                     catch (e) {
                         console.warn("❌ Utilisateur non authentifié, ident supprimé");
                         this._ident = undefined;
-                        return;
+                        throw new CinephoriaError(CinephoriaErrorCode.AUTH_REQUIRED, "Utilisateur non authentifié");
                     }
                     const comptesCharge = yield profilApi(this._ident);
                     if (comptesCharge) {
