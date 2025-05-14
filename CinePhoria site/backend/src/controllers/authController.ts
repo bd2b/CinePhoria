@@ -85,7 +85,10 @@ export class AuthController {
       }
       // Générer un nouveau accessToken
       const compte = (decoded as any).compte;
-      const newAccessToken = jwt.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: '15m' });
+      
+      //jwt.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: '15m' });
+
+      const newAccessToken = jwt.sign( { compte }, JWT_ACCESS_SECRET, { expiresIn: JWT_ACCESS_SECRET });
       res.json({ accessToken: newAccessToken });
     });
   }
@@ -152,12 +155,4 @@ export class AuthController {
       logger.info(`Nouvelle Version =  + ${message}`)
       await AuthDAO.pushVersion(majSite);
   }
-
-
-
-
-
-
-
-// static async pushVersion(majSite: MajSite): Promise<string> {
 }

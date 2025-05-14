@@ -148,7 +148,6 @@ console.log(" Version connu ", JSON.stringify(dataController.version))
 
     container.innerHTML = '';
     cinemas.forEach((cinema) => {
-      console.log("Pied de page = ", cinema.nameCinema );
       const cinemaElement = document.createElement('div');
       cinemaElement.classList.add('container__site');
 

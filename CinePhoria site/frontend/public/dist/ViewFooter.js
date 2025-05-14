@@ -138,7 +138,6 @@ export function chargerCinemaSites() {
             ;
             container.innerHTML = '';
             cinemas.forEach((cinema) => {
-                console.log("Pied de page = ", cinema.nameCinema);
                 const cinemaElement = document.createElement('div');
                 cinemaElement.classList.add('container__site');
                 cinemaElement.innerHTML = `

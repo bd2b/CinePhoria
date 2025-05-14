@@ -674,7 +674,7 @@ export class DataController {
     }
 
     public async chargerComplet(): Promise<void> {
-        console.log("DataC: ChargerComplet multi storage");
+        console.log("DataC: ChargerComplet de tous les storages");
 
         // 1) Charger l’état global
         await this.chargerEtatGlobal();

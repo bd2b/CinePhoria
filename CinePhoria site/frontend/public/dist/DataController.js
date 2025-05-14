@@ -585,7 +585,7 @@ export class DataController {
     }
     chargerComplet() {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("DataC: ChargerComplet multi storage");
+            console.log("DataC: ChargerComplet de tous les storages");
             // 1) Charger l’état global
             yield this.chargerEtatGlobal();
             // 2) Charger les tarifs

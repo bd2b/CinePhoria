@@ -115,7 +115,7 @@ async function apiRequest<T>(
 async function refreshAccessToken() {
     try {
         console.log("🔄 Tentative de refresh du token...");
-        const response = await fetch(`${baseUrl}/api/refresh`, {
+        const response = await fetch(`${baseUrl}/api/login/refresh`, {
             method: 'POST',
             // on peut mettre credentials: 'include' si le refresh nécessite le cookie
             credentials: 'include'
