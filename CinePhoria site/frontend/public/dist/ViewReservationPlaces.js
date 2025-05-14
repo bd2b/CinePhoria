@@ -11,7 +11,7 @@ import { seanceCardView, basculerPanelChoix, updateContentPage } from './ViewRes
 import { dataController } from './DataController.js';
 import { validateEmail, showCustomAlert } from './Helpers.js';
 import { ReservationState } from './shared-models/Reservation.js';
-import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi } from './NetworkController.js';
+import { setReservationApi, confirmUtilisateurApi, confirmCompteApi, confirmReserveApi, getPlacesReservationApi, getSeatsBookedApi, profilApi } from './NetworkController.js';
 import { userDataController, ProfilUtilisateur } from './DataControllerUser.js';
 import { login } from './Login.js';
 /**
@@ -273,42 +273,57 @@ function setReservation() {
                 //     btnReserve.classList.remove('loading');
                 //     return;
                 // }
-                const seanceId = dataController.seanceSelected().seanceId;
-                const listSeats = dataController.selectedListSeats || '';
-                const { statut, utilisateurId, reservationId } = yield setReservationApi(email, seanceId, tarifSeatsMap, pmrSeats, listSeats);
-                dataController.selectedUtilisateurUUID = utilisateurId;
-                dataController.selectedReservationUUID = reservationId;
-                dataController.selectedUtilisateurMail = email;
-                switch (statut) {
-                    case 'Compte Provisoire':
-                        // L'email est inconnu -> compte créé en provisoire : il faudra confirmer l'utilisateur puis le mail et se logguer
-                        console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
-                        dataController.reservationState = ReservationState.ReserveCompteToConfirm;
-                        yield dataController.sauverEtatGlobal();
-                        yield confirmUtilisateur();
-                        break;
-                    case 'Compte Confirme':
-                        // L'email correspond à un compte valide
-                        if (userDataController.profil() === ProfilUtilisateur.Utilisateur) {
-                            // On est logue, on peut valider la reservation directement
-                            // On memorise l'utilisateur et on charge ses données de compte dans le cadre ou 
-                            userDataController.ident = emailInput.value.trim();
-                            yield userDataController.init();
-                            yield confirmReserve();
-                            // Au cas ou on n'est plus connecté on recalcule le profil
-                            yield userDataController.init();
-                            const pageToGo = userDataController.profil();
-                            window.location.href = pageToGo;
-                        }
-                        console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
-                        dataController.reservationState = ReservationState.ReserveToConfirm;
-                        yield dataController.sauverEtatGlobal();
-                        yield login("Veuillez vous connecter pour valider la réservation");
-                        break;
-                    default:
-                        // Cas imprévu
-                        yield showCustomAlert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
-                        break;
+                const comptePersonnes = yield profilApi(email);
+                let isEmploye = false;
+                if (comptePersonnes && comptePersonnes.length > 0) {
+                    if (comptePersonnes[0].matricule)
+                        isEmploye = true;
+                }
+                if (isEmploye) {
+                    // L'email utilisé est celui d'un employe, on renvoi un message d'erreur
+                    yield showCustomAlert("Vous ne pouvez pas utiliser un email d'employé pour effectuer une réservation");
+                    btnReserve.disabled = false;
+                    btnReserve.classList.remove("inactif");
+                    btnReserve.classList.remove('loading');
+                }
+                else {
+                    const seanceId = dataController.seanceSelected().seanceId;
+                    const listSeats = dataController.selectedListSeats || '';
+                    const { statut, utilisateurId, reservationId } = yield setReservationApi(email, seanceId, tarifSeatsMap, pmrSeats, listSeats);
+                    dataController.selectedUtilisateurUUID = utilisateurId;
+                    dataController.selectedReservationUUID = reservationId;
+                    dataController.selectedUtilisateurMail = email;
+                    switch (statut) {
+                        case 'Compte Provisoire':
+                            // L'email est inconnu -> compte créé en provisoire : il faudra confirmer l'utilisateur puis le mail et se logguer
+                            console.log("Compte provisoire , " + utilisateurId + " , " + reservationId);
+                            dataController.reservationState = ReservationState.ReserveCompteToConfirm;
+                            yield dataController.sauverEtatGlobal();
+                            yield confirmUtilisateur();
+                            break;
+                        case 'Compte Confirme':
+                            // L'email correspond à un compte valide
+                            if (userDataController.profil() === ProfilUtilisateur.Utilisateur) {
+                                // On est logue, on peut valider la reservation directement
+                                // On memorise l'utilisateur et on charge ses données de compte dans le cadre ou 
+                                userDataController.ident = emailInput.value.trim();
+                                yield userDataController.init();
+                                yield confirmReserve();
+                                // Au cas ou on n'est plus connecté on recalcule le profil
+                                yield userDataController.init();
+                                const pageToGo = userDataController.profil();
+                                window.location.href = pageToGo;
+                            }
+                            console.log("Compte Confirme , " + utilisateurId + " , " + reservationId);
+                            dataController.reservationState = ReservationState.ReserveToConfirm;
+                            yield dataController.sauverEtatGlobal();
+                            yield login("Veuillez vous connecter pour valider la réservation");
+                            break;
+                        default:
+                            // Cas imprévu
+                            yield showCustomAlert(`Une erreur s'est produite : statut inconnu -> ${statut} , ${utilisateurId} , ${reservationId}`);
+                            break;
+                    }
                 }
             }
             catch (error) {

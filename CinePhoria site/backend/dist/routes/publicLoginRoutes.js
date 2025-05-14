@@ -20,7 +20,7 @@ router.get('/isLogged', authMiddleware_1.authenticateJWT, (req, res) => {
     res.send(user);
 });
 // api de renouvellement de accessToken via refreshToken
-router.get('/refresh', authController_1.AuthController.refresh);
+router.post('/refresh', authController_1.AuthController.refresh);
 // api de verification du refreshToken en httpOnly 
 router.get('/refresh-token-status', authMiddleware_1.authenticateJWT, (req, res) => {
     res.json({ message: "Refresh Token valide" });

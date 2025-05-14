@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+const cookie_parser_1 = __importDefault(require("cookie-parser"));
 const configLog_1 = __importDefault(require("./config/configLog"));
 const sanitiseQueryMiddleware_1 = __importDefault(require("./middlewares/sanitiseQueryMiddleware"));
 const express_fileupload_1 = __importDefault(require("express-fileupload"));
@@ -20,6 +21,7 @@ const config_1 = require("./config/config");
 console.log(`🛠️ Mode actuel : ${config_1.modeExec} avec version ${JSON.stringify(config_1.versionCourante)}`);
 (0, config_1.connectDBMongo)();
 const app = (0, express_1.default)();
+app.use((0, cookie_parser_1.default)()); // ✅ Important
 // ✅ Middleware pour la compression
 // 🔹 Active la compression gzip (ou brotli si le client le supporte)
 app.use((0, compression_1.default)());
