@@ -540,6 +540,20 @@
 
 @media (max-width: 768px) {
 
+    .titre__filter-dropdown-complexe {
+        display: block;
+    }
+    .main__container {
+        overflow-x: hidden;
+    }
+
+    .reservation__listFilms {
+        overflow-y: hidden;
+    }
+    
+    .listFilms__simpleCard {
+        padding: 5px 0px 0px 10px;
+    }
     .reserve__form {
         
         border: 2px solid rgb(var(--primary-color), 0.2);
@@ -557,7 +571,10 @@
         display: none;
     }
 
-   
+   .reservation__panel {
+    margin: 0px;
+    padding: 0px;
+   }
 .commande__foot-tfoot tr:nth-child(1) {
     display: none;
 }

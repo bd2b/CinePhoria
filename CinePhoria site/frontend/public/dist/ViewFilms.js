@@ -19,6 +19,11 @@ import { isUUID } from './Helpers.js';
 // Filtre pour les grenres pris dans le dataControllerdataController.filterGenre;
 // Filtre sur le jour en local car pas utilisé dans d'autres pages
 let filtreJour = '';
+window.addEventListener("load", () => {
+    // Ce `load` est déclenché quand tous les assets sont rendus
+    console.log("✅ Suppression de loadingContent après load complet");
+    document.body.classList.remove("loadingContent");
+});
 export function onLoadFilms() {
     return __awaiter(this, void 0, void 0, function* () {
         //   await new Promise(resolve => window.addEventListener('load', resolve)); // ✅ attend fin chargement complet
@@ -33,7 +38,7 @@ export function onLoadFilms() {
         yield initFiltreGenre();
         yield initFiltreJour();
         // 3) Rafraîchir la liste
-        rafraichirListeFilms();
+        yield rafraichirListeFilms();
         document.querySelector("main").style.visibility = "visible";
         const filters = document.querySelector(".title__filters");
         if (filters)
@@ -48,6 +53,8 @@ export function onLoadFilms() {
         else {
             console.error("Pas d'indicateur");
         }
+        console.log("✅ Suppression de loadingContent après load complet");
+        document.body.classList.remove("loadingContent");
     });
 }
 /* -------------------------------------------

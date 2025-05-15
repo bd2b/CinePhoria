@@ -347,7 +347,7 @@ export class UtilisateurDAO {
     compte: string,
     password: string
   ): Promise<string> {
-    logger.info("debut dao login", compte, password);
+    
     const connection = await dbPool.getConnection();
 
     try {
@@ -360,7 +360,6 @@ export class UtilisateurDAO {
       );
 
       const compteData = (rows as any[])[0]; // Premier résultat
-      logger.info("Apres select");
       if (!compteData) {
         logger.info(`Compte inexistant pour ${compte}`);
         await connection.execute(

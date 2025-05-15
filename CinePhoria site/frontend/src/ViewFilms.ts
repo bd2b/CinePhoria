@@ -16,6 +16,12 @@ import { seanceCardView } from './ViewReservation.js';
 // Filtre sur le jour en local car pas utilisé dans d'autres pages
 let filtreJour = '';
 
+window.addEventListener("load", () => {
+    // Ce `load` est déclenché quand tous les assets sont rendus
+    console.log("✅ Suppression de loadingContent après load complet");
+    document.body.classList.remove("loadingContent");
+});
+
 export async function onLoadFilms() {
     //   await new Promise(resolve => window.addEventListener('load', resolve)); // ✅ attend fin chargement complet
     console.log("=====> chargement onLoadFilms");
@@ -34,13 +40,14 @@ export async function onLoadFilms() {
     await initFiltreJour();
 
     // 3) Rafraîchir la liste
-    rafraichirListeFilms();
+    await rafraichirListeFilms();
+
+    document.querySelector("main")!.style.visibility = "visible";
 
     
-    document.querySelector("main")!.style.visibility = "visible";
     const filters = document.querySelector(".title__filters") as HTMLElement | null;
     if (filters) filters.style.visibility = "visible";
-    
+
     const progress = document.getElementById("progressIndicator");
     if (progress) {
 
@@ -51,6 +58,8 @@ export async function onLoadFilms() {
     } else {
         console.error("Pas d'indicateur")
     }
+    console.log("✅ Suppression de loadingContent après load complet");
+    document.body.classList.remove("loadingContent");
 }
 
 /* -------------------------------------------
