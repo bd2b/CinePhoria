@@ -18,11 +18,23 @@ export const authenticateJWT = (req: AuthenticatedRequest, res: Response, next: 
 
   const token = authHeader.split(' ')[1];
   jwt.verify(token, JWT_ACCESS_SECRET, (err, decoded) => {
-    if (err) {
+
+    if (err || typeof decoded !== 'object' || decoded === null) {
       return res.status(403).json({ message: 'Accès interdit, token invalide ou expiré' });
     }
-   // Stocker l'utilisateur dans req.user
-    req.user = decoded as { compte: string };
+
+    const { iat, exp, compte } = decoded as jwt.JwtPayload;
+
+    const issuedAt = new Date(iat! * 1000);
+    const expiresAt = new Date(exp! * 1000);
+    const now = new Date();
+
+    logger.info(`🔐 Token reçu - compte: ${compte}`);
+    logger.info(`   iat (issued at)  = ${iat} -> ${issuedAt.toISOString()}`);
+    logger.info(`   exp (expiration) = ${exp} -> ${expiresAt.toISOString()}`);
+    logger.info(`   now              = ${now.toISOString()}`);
+
+    req.user = { compte }; // Sécurité : on ne transmet que ce qu'on attend
     next();
   });
 };

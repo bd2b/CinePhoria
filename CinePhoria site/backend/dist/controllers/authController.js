@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const crypto_1 = __importDefault(require("crypto"));
 const UtilisateurDAO_1 = require("../dao/UtilisateurDAO");
 const AuthDAO_1 = require("../dao/AuthDAO");
 const configLog_1 = __importDefault(require("../config/configLog"));
@@ -14,6 +15,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret-key
 // Durée de vie
 const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION || '15m'; // ex. 15 minutes
 const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION || '7d'; // ex. 7 jours
+configLog_1.default.info("Delai JWT = " + ACCESS_TOKEN_EXPIRATION + " " + REFRESH_TOKEN_EXPIRATION);
 const MajSite_1 = require("../shared-models/MajSite");
 class AuthController {
     /**
@@ -35,10 +37,18 @@ class AuthController {
             }
             return;
         }
+        configLog_1.default.info("typeof access = " + typeof ACCESS_TOKEN_EXPIRATION + " = " + ACCESS_TOKEN_EXPIRATION);
+        configLog_1.default.info("typeof refresh = " + typeof REFRESH_TOKEN_EXPIRATION + " = " + REFRESH_TOKEN_EXPIRATION);
+        // Vérification et parsing correct des durées d'expiration
+        const accessExp = parseInt(ACCESS_TOKEN_EXPIRATION, 10);
+        const refreshExp = parseInt(REFRESH_TOKEN_EXPIRATION, 10);
+        if (isNaN(accessExp) || isNaN(refreshExp)) {
+            throw new Error("ACCESS_TOKEN_EXPIRATION or REFRESH_TOKEN_EXPIRATION is not a valid number");
+        }
         // Générer un access token
-        const accessToken = jsonwebtoken_1.default.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
+        const accessToken = jsonwebtoken_1.default.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: accessExp });
         // Générer un refresh token
-        const refreshToken = jsonwebtoken_1.default.sign({ compte }, JWT_REFRESH_SECRET, { expiresIn: REFRESH_TOKEN_EXPIRATION });
+        const refreshToken = jsonwebtoken_1.default.sign({ compte }, JWT_REFRESH_SECRET, { expiresIn: refreshExp });
         // Stocker refreshToken dans un cookie httpOnly
         res.cookie('refreshToken', refreshToken, {
             // TODO a voir quand on sera en https
@@ -58,6 +68,10 @@ class AuthController {
      */
     static async refresh(req, res) {
         const { refreshToken } = req.cookies;
+        const accessExp = parseInt(ACCESS_TOKEN_EXPIRATION, 10);
+        if (isNaN(accessExp)) {
+            throw new Error("ACCESS_TOKEN_EXPIRATION is not a valid number");
+        }
         if (!refreshToken) {
             res.status(401).json({ message: 'Aucun refresh token' });
             return;
@@ -69,8 +83,13 @@ class AuthController {
             }
             // Générer un nouveau accessToken
             const compte = decoded.compte;
-            //jwt.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: '15m' });
-            const newAccessToken = jsonwebtoken_1.default.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: JWT_ACCESS_SECRET });
+            const payload = {
+                compte,
+                jti: crypto_1.default.randomUUID()
+            };
+            const newAccessToken = jsonwebtoken_1.default.sign(payload, JWT_ACCESS_SECRET, {
+                expiresIn: accessExp
+            });
             res.json({ accessToken: newAccessToken });
         });
     }

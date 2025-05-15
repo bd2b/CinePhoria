@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import { Request, Response } from 'express';
 import { UtilisateurDAO } from '../dao/UtilisateurDAO';
 import { AuthDAO } from '../dao/AuthDAO';
@@ -12,7 +13,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret-key
 // Durée de vie
 const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION || '15m'; // ex. 15 minutes
 const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION || '7d'; // ex. 7 jours
-logger.info ("Delai JWT = " + ACCESS_TOKEN_EXPIRATION + " " + REFRESH_TOKEN_EXPIRATION);
+logger.info("Delai JWT = " + ACCESS_TOKEN_EXPIRATION + " " + REFRESH_TOKEN_EXPIRATION);
 import { versionCourante } from '../config/config';
 import { MajSite } from '../shared-models/MajSite';
 
@@ -38,18 +39,28 @@ export class AuthController {
       }
       return;
     }
+    logger.info("typeof access = " + typeof ACCESS_TOKEN_EXPIRATION + " = " + ACCESS_TOKEN_EXPIRATION);
+    logger.info("typeof refresh = " + typeof REFRESH_TOKEN_EXPIRATION + " = " + REFRESH_TOKEN_EXPIRATION);
+
+    // Vérification et parsing correct des durées d'expiration
+    const accessExp = parseInt(ACCESS_TOKEN_EXPIRATION, 10);
+    const refreshExp = parseInt(REFRESH_TOKEN_EXPIRATION, 10);
+
+    if (isNaN(accessExp) || isNaN(refreshExp)) {
+      throw new Error("ACCESS_TOKEN_EXPIRATION or REFRESH_TOKEN_EXPIRATION is not a valid number");
+    }
 
     // Générer un access token
     const accessToken = jwt.sign(
       { compte },
       JWT_ACCESS_SECRET,
-      { expiresIn: parseInt(ACCESS_TOKEN_EXPIRATION,10) }
+      { expiresIn: accessExp }
     );
     // Générer un refresh token
     const refreshToken = jwt.sign(
       { compte },
       JWT_REFRESH_SECRET,
-      { expiresIn: parseInt(REFRESH_TOKEN_EXPIRATION,10) }
+      { expiresIn: refreshExp }
     );
 
     // Stocker refreshToken dans un cookie httpOnly
@@ -73,19 +84,38 @@ export class AuthController {
    */
   static async refresh(req: Request, res: Response): Promise<void> {
     const { refreshToken } = req.cookies;
+
+    const accessExp = parseInt(ACCESS_TOKEN_EXPIRATION, 10);
+
+    if (isNaN(accessExp)) {
+      throw new Error("ACCESS_TOKEN_EXPIRATION is not a valid number");
+    }
+
     if (!refreshToken) {
       res.status(401).json({ message: 'Aucun refresh token' });
       return;
     }
 
     jwt.verify(refreshToken, JWT_REFRESH_SECRET, (err: any, decoded: any) => {
+
+
       if (err) {
         res.status(403).json({ message: 'Refresh token invalide ou expiré' });
         return;
       }
       // Générer un nouveau accessToken
       const compte = (decoded as any).compte;
-      const newAccessToken = jwt.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
+      const payload = {
+        compte,
+        jti: crypto.randomUUID()
+      };
+
+      const newAccessToken = jwt.sign(payload, JWT_ACCESS_SECRET,
+        {
+          expiresIn: accessExp
+         
+        });
+
       res.json({ accessToken: newAccessToken });
     });
   }
@@ -128,11 +158,11 @@ export class AuthController {
     }
   }
 
-  static async pushVersion(req:Request, res:Response) {
+  static async pushVersion(req: Request, res: Response) {
     try {
       // On récupère les données dans req.body
-      
-      const data = req.body; 
+
+      const data = req.body;
       logger.info("Creation d'une mise a jour avec data = ", data);
 
       // On construit une Maj
@@ -147,9 +177,9 @@ export class AuthController {
     }
   }
 
-  static async simplePushVersion (message: string) {
-    const majSite = new MajSite({message: message});
-      logger.info(`Nouvelle Version =  + ${message}`)
-      await AuthDAO.pushVersion(majSite);
+  static async simplePushVersion(message: string) {
+    const majSite = new MajSite({ message: message });
+    logger.info(`Nouvelle Version =  + ${message}`)
+    await AuthDAO.pushVersion(majSite);
   }
 }

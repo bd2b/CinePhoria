@@ -62,13 +62,15 @@ async function apiRequest<T>(
         if (requiresAuth) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-
-        let response = await fetch(endpoint, {
+        const reqInit1: RequestInit = {
             method,
             headers,
             body: finalBody,
             credentials: requiresAuth ? 'include' : 'same-origin'
-        });
+        }
+        console.debug("ReqInit de tentative 1", reqInit1);
+
+        let response = await fetch(endpoint, reqInit1);
 
         if (requiresAuth && (response.status === 401 || response.status === 403)) {
             console.warn("🔄 Token expiré, tentative de refresh...");
@@ -76,22 +78,29 @@ async function apiRequest<T>(
             try {
                 await refreshAccessToken();
                 token = localStorage.getItem('jwtAccessToken');
+                console.debug("Nouveau Token = ", token);
 
                 if (!token) {
                     console.error("🔴 Refresh échoué, suppression du token local.");
                     throw new CinephoriaError(CinephoriaErrorCode.TOKEN_REFRESH_FAIL, "Echec du refresh, token expiré ou invalidé");
                 }
 
-                // 🔄 Re-tenter la requête avec le nouveau token
-                response = await fetch(endpoint, {
+                const retryHeaders: HeadersInit = {
+                    'Authorization': `Bearer ${token}`
+                };
+                if (!(finalBody instanceof FormData)) {
+                    retryHeaders['Content-Type'] = 'application/json';
+                    retryHeaders['Accept-Encoding'] = 'gzip, deflate, br';
+                }
+
+                const reqInit2: RequestInit = {
                     method,
-                    headers: {
-                        ...headers,
-                        'Authorization': `Bearer ${token}`
-                    },
+                    headers: retryHeaders,
                     body: finalBody,
                     credentials: 'include'
-                });
+                };
+                console.debug("ReqInit de tentative 2", reqInit2)
+                response = await fetch(endpoint, reqInit2);
 
             } catch (err) {
                 console.error("🔴 Echec du refreshToken :", err);
@@ -129,6 +138,7 @@ async function refreshAccessToken() {
         const json = await response.json();
         const { accessToken } = json;
         localStorage.setItem('jwtAccessToken', accessToken);
+        console.debug("Token reçu de refresh = ", accessToken)
         console.log("Nouveau accessToken obtenu via /api/refresh");
     } catch (err) {
         console.error("🔴 Erreur dans refreshAccessToken :", err);

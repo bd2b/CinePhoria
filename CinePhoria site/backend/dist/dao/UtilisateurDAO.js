@@ -329,7 +329,6 @@ class UtilisateurDAO {
         return data ? data : null;
     }
     static async login(compte, password) {
-        configLog_1.default.info("debut dao login", compte, password);
         const connection = await config_1.dbPool.getConnection();
         try {
             // Étape 1 : Récupérer les informations du compte
@@ -337,7 +336,6 @@ class UtilisateurDAO {
          FROM Compte 
          WHERE email = ?`, [compte]);
             const compteData = rows[0]; // Premier résultat
-            configLog_1.default.info("Apres select");
             if (!compteData) {
                 configLog_1.default.info(`Compte inexistant pour ${compte}`);
                 await connection.execute(`CALL applyLogin(?, 0, ?, ?, ?)`, [compte, 'Erreur : login - compte inexistant', config_1.nombreTentativeLoginKO, 0]);
