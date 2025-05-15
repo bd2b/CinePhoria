@@ -12,7 +12,7 @@ const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'refresh-secret-key
 // Durée de vie
 const ACCESS_TOKEN_EXPIRATION = process.env.ACCESS_TOKEN_EXPIRATION || '15m'; // ex. 15 minutes
 const REFRESH_TOKEN_EXPIRATION = process.env.REFRESH_TOKEN_EXPIRATION || '7d'; // ex. 7 jours
-
+logger.info ("Delai JWT = " + ACCESS_TOKEN_EXPIRATION + " " + REFRESH_TOKEN_EXPIRATION);
 import { versionCourante } from '../config/config';
 import { MajSite } from '../shared-models/MajSite';
 
@@ -43,13 +43,13 @@ export class AuthController {
     const accessToken = jwt.sign(
       { compte },
       JWT_ACCESS_SECRET,
-      { expiresIn: ACCESS_TOKEN_EXPIRATION }
+      { expiresIn: parseInt(ACCESS_TOKEN_EXPIRATION,10) }
     );
     // Générer un refresh token
     const refreshToken = jwt.sign(
       { compte },
       JWT_REFRESH_SECRET,
-      { expiresIn: REFRESH_TOKEN_EXPIRATION }
+      { expiresIn: parseInt(REFRESH_TOKEN_EXPIRATION,10) }
     );
 
     // Stocker refreshToken dans un cookie httpOnly
@@ -85,10 +85,7 @@ export class AuthController {
       }
       // Générer un nouveau accessToken
       const compte = (decoded as any).compte;
-      
-      //jwt.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: '15m' });
-
-      const newAccessToken = jwt.sign( { compte }, JWT_ACCESS_SECRET, { expiresIn: JWT_ACCESS_SECRET });
+      const newAccessToken = jwt.sign({ compte }, JWT_ACCESS_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRATION });
       res.json({ accessToken: newAccessToken });
     });
   }

@@ -308,6 +308,7 @@ export class DataControllerIntranet {
                             }])
                     ).values()
                 );
+                
             }
             else {
                 listSalles = Array.from(
@@ -318,7 +319,8 @@ export class DataControllerIntranet {
                                 id: s.id,
                                 nomSalle: s.nameSalle!,
                                 capacite: s.capacity!,
-                                numPMR: s.numPMR!
+                                numPMR: s.numPMR!,
+                                nameCinema : s.nameCinema!
                             }])
                     ).values()
                 );

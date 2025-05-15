@@ -98,12 +98,10 @@ async function rafraichirTableauSeances(): Promise<void> {
 
     // Charger les séances pour les cinemas autorisés
     let seances = (await DataControllerIntranet.getSeancesDisplayFilter()).filter(seance => listCinemaAuthTab.includes(seance.nameCinema!));
-
     if (filtreJour) {
         seances = seances.filter((s) =>
             s.dateJour ? formatDateLocalYYYYMMDD(new Date(s.dateJour)) === filtreJour : false)
     }
-
     // Construction de la page
     const tableSeances = await updateTableSeances(seances) as HTMLTableElement;
     container.appendChild(tableSeances);
@@ -114,6 +112,8 @@ async function rafraichirTableauSeances(): Promise<void> {
     // Mise à jour de la list des films et de salle
     listFilms = await DataControllerIntranet.getListFilmsAll();
     listSalles = (await DataControllerIntranet.getSallesByFilter()).filter(salle => listCinemaAuthTab.includes(salle.nameCinema!));
+
+
 
 }
 
@@ -136,7 +136,6 @@ async function initFiltreCinema(): Promise<void> {
     // Trouver la div de dropdown
     const dropdownContent = dropdownCinema.querySelector('.title__filter-button-drowdown-content');
     if (!dropdownContent) return;
-    console.log("Init dropdown Cinema")
 
     // Mettre à jour le titre droit
     const titleLeft = document.getElementById('titleLeft') as HTMLDivElement | null;
@@ -162,14 +161,13 @@ async function initFiltreCinema(): Promise<void> {
         link.addEventListener('click', async (ev) => {
             ev.preventDefault();
             const val = link.dataset.cinema?.trim() || '';
+            
             if (val === 'Tous les complexes') {
                 DataControllerIntranet.filterNameCinema = 'all';
             } else {
                 DataControllerIntranet.filterNameCinema = val; // ex: "Paris"
             }
             listSalles = await DataControllerIntranet.getSallesByFilter();
-
-            console.log("Choix du filtre Cinema = ", DataControllerIntranet.filterNameCinema);
 
             // Mettre à jour l'affichage du bouton
             updateDropdownDisplay(val);
@@ -266,7 +264,8 @@ export async function updateTableSeances(seancesDisplay: SeanceDisplay[]): Promi
 
 
 
-    // Pour chaque salle, on affiche une ligne de restitution des champ et un bouton éditer.
+    // Pour chaque séance, on affiche une ligne de restitution des champ et un bouton éditer.
+    
     seancesDisplay.forEach((seanceDisplay) => {
 
         const tr = document.createElement('tr');

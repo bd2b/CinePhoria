@@ -118,7 +118,6 @@ function initFiltreCinema() {
         const dropdownContent = dropdownCinema.querySelector('.title__filter-button-drowdown-content');
         if (!dropdownContent)
             return;
-        console.log("Init dropdown Cinema");
         // Mettre à jour le titre droit
         const titleLeft = document.getElementById('titleLeft');
         if (titleLeft) {
@@ -152,7 +151,6 @@ function initFiltreCinema() {
                     DataControllerIntranet.filterNameCinema = val; // ex: "Paris"
                 }
                 listSalles = yield DataControllerIntranet.getSallesByFilter();
-                console.log("Choix du filtre Cinema = ", DataControllerIntranet.filterNameCinema);
                 // Mettre à jour l'affichage du bouton
                 updateDropdownDisplay(val);
                 // Mettre à jour le titre droit
@@ -237,7 +235,7 @@ export function updateTableSeances(seancesDisplay) {
         const tbody = document.createElement('tbody');
         tbody.classList.add('liste-table__body');
         table.appendChild(tbody);
-        // Pour chaque salle, on affiche une ligne de restitution des champ et un bouton éditer.
+        // Pour chaque séance, on affiche une ligne de restitution des champ et un bouton éditer.
         seancesDisplay.forEach((seanceDisplay) => {
             var _a, _b;
             const tr = document.createElement('tr');
