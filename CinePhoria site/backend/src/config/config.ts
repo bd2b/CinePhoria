@@ -12,6 +12,11 @@ import mysql from 'mysql2/promise';
 // Exporter le mode d'exécution
 export const modeExec = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
 
+export let urlString = "";
+if (modeExec === 'développement') urlString = "http://127.0.0.1:3500/"
+if (modeExec === 'production') urlString = "https://cinephoria.bd2db.com/"
+
+
 // Exporter la version
 export const versionCourante = {
   majeure: parseInt(process.env.MAJEURE || "0", 10),

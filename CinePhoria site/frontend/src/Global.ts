@@ -42,7 +42,7 @@ const pageLoaders: Record<string, () => Promise<void>> = {
 let isHandlingAuthError = false;
 
 export async function handleApiError(error: any): Promise<never> {
-    console.error("🔴 Erreur API détectée :", error);
+    console.debug("🔴 Erreur API détectée :", error);
 
     if (error instanceof CinephoriaError) {
         switch (error.code) {
@@ -80,7 +80,10 @@ export async function handleApiError(error: any): Promise<never> {
 
             case CinephoriaErrorCode.API_ERROR:
                 console.error("❌ Erreur API générale :", error.message);
-                await showCustomAlert(`Erreur API : ${error.message}`);
+                await showCustomAlert(`Erreur rencontrée : ${error.message}`);
+                break;
+            case CinephoriaErrorCode.API_ERROR_SILENT:
+                console.error("❌ Erreur API générale silencieuse :", error.message);
                 break;
 
             default:

@@ -11,6 +11,8 @@ import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
 
 import { QRCodeDAO } from '../dao/QRCodeDAO';
 
+import { urlString } from '../config/config'
+
 
 const writeFileAsync = promisify(fs.writeFile);
 
@@ -59,18 +61,20 @@ export async function createQRCode(reservationId: string): Promise<void> {
     }
 
     // Génération du text du QRCode
-    let textQRCode = reservations[0].displayName + ",";
-    textQRCode += seances[0].nameCinema + ",";
-    textQRCode += seances[0].nameSalle + ",";
-    textQRCode += reservations[0].titleFilm + ",";
-    textQRCode += reservations[0].dateJour! + ",";
+    let textQRCode = urlString + "/viewqrcode.html?displayName=" + reservations[0].displayName + "&";
+    textQRCode += "nameCinema=" + seances[0].nameCinema + "&";
+    textQRCode += "nameSalle=" + seances[0].nameSalle + "&";
+    textQRCode += "titleFilm=" + reservations[0].titleFilm + "&";
+    textQRCode += "dateJour=" + reservations[0].dateJour! + "&";
+    textQRCode += "qualite=" + seances[0].qualite + "&";
+    textQRCode += "bo=" + seances[0].bo + "&";
     // textQRCode += formatDateLocalYYYYMMDD(reservations[0].dateJour!) + ",";
-    textQRCode += seances[0].hourBeginHHSMM + ",";
-    textQRCode += reservations[0].totalSeats + " siège(s),";
+    textQRCode += "hourBeginHHSMM=" + seances[0].hourBeginHHSMM + "&";
+    textQRCode += "totalSeats=" + reservations[0].totalSeats + "&";
     if (reservations[0].seatsReserved && reservations[0].seatsReserved !== '') {
-      textQRCode += reservations[0].seatsReserved + ",";
+      textQRCode += "seatsReserved=" + reservations[0].seatsReserved + "&";
     }
-    textQRCode += reservations[0].numberPMR + " placePMR";
+    textQRCode += "numberPMR=" + reservations[0].numberPMR;
     logger.info("Génération du QRCode " + textQRCode)
 
     // Calcul de la date d'exoiration qui est 1h après la date de début de séance
