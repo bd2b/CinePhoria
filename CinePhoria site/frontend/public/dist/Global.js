@@ -41,7 +41,7 @@ const pageLoaders = {
 let isHandlingAuthError = false;
 export function handleApiError(error) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.error("🔴 Erreur API détectée :", error);
+        console.debug("🔴 Erreur API détectée :", error);
         if (error instanceof CinephoriaError) {
             switch (error.code) {
                 case CinephoriaErrorCode.TOKEN_EXPIRE:
@@ -76,7 +76,10 @@ export function handleApiError(error) {
                     break;
                 case CinephoriaErrorCode.API_ERROR:
                     console.error("❌ Erreur API générale :", error.message);
-                    yield showCustomAlert(`Erreur API : ${error.message}`);
+                    yield showCustomAlert(`Erreur rencontrée : ${error.message}`);
+                    break;
+                case CinephoriaErrorCode.API_ERROR_SILENT:
+                    console.error("❌ Erreur API générale silencieuse :", error.message);
                     break;
                 default:
                     console.error("❓ Erreur inconnue :", error);

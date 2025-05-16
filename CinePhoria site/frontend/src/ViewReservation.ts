@@ -728,6 +728,7 @@ export function seanceCardView(seance: Seance, dateSelectionne: Date, id: string
     card.id = id;
   }
 
+  
   // === Horaire ===
   const horaireDiv = document.createElement('div');
   horaireDiv.classList.add('cardseance__horaire');

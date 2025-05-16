@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>QR Code - Réservation</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/sections/reservation-panel.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .reservation-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <div class="reservation-container">
+            <h1 style="text-align:center;" id="displayName"></h1>
+            <h2 style="text-align:center;" id="nameCinema"></h2>
+            <h2 style="text-align:center;" id="titleFilm"></h2>
+
+            <div class="modal__content" id="content__DetailReservation">
+                <div class="seances__cardseance seances__cardseance-selected">
+                    <div class="cardseance__horaire">
+                        <p class="horaire__hour horaire__hour-begin-p" id="hourBeginHHSMM"></p>
+                        <p class="horaire__hour horaire__hour-end-p" id="hourEndHHSMM"></p>
+                    </div>
+                    <div class="cardseance__datesalle">
+                        <div class="datesalle__date">
+                            <p class="date__month-p" id="month"></p>
+                            <p class="date__day-p" id="day"></p>
+                        </div>
+                        <p class="datesalle__salle-p" id="nameSalle"></p>
+                    </div>
+                    <div class="cardseance__qualitebo">
+                        <img class="qualitebo-qualite-img" id="qualiteImg" src="">
+                        <p class="qualitebo-bo-p" id="qualitebo-bo-p"></p>
+                    </div>
+                </div>
+                <h2 style="text-align:center;" id="seatsReserved"></h2>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+
+        const rawDate = params.get("dateJour");
+        let date;
+        try {
+            date = new Date(decodeURIComponent(rawDate || ''));
+            if (isNaN(date)) throw new Error("Invalid date");
+        } catch (e) {
+            console.error("Erreur lors du parsing de la date : ", e);
+            date = new Date(); // fallback si parsing échoue
+        }
+
+        const monthStr = date.toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase();
+        const dayStr = String(date.getDate());
+
+        document.getElementById('displayName').textContent = params.get("displayName") || '';
+        document.getElementById('nameCinema').textContent = params.get("nameCinema") || '';
+        document.getElementById('titleFilm').textContent = params.get("titleFilm") || '';
+        const seats = parseInt(params.get("totalSeats") || "0", 10);
+
+        document.getElementById('hourBeginHHSMM').textContent = params.get("hourBeginHHSMM") || '';
+        document.getElementById('hourEndHHSMM').textContent = params.get("hourEndHHSMM") || '';
+        document.getElementById('month').textContent = monthStr;
+        document.getElementById('day').textContent = dayStr;
+        document.getElementById('nameSalle').textContent = params.get("nameSalle") || '';
+
+        document.getElementById('seatsReserved').textContent = params.get("seatsReserved") || '';
+
+
+        const qualite = params.get("qualite");
+        if (qualite) {
+            const img = document.getElementById('qualiteImg');
+            img.src = `assets/${qualite}.png`;
+            img.alt = qualite;
+        }
+
+        document.getElementById('qualitebo-bo-p').textContent = params.get("bo") || '';
+    </script>
+</body>
+
+</html>

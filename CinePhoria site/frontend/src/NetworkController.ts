@@ -23,7 +23,8 @@ async function apiRequest<T>(
     endpoint: string,
     method: 'GET' | 'POST' | 'PUT' | 'DELETE',
     body?: any,
-    requiresAuth: boolean = true
+    requiresAuth: boolean = true,
+    isSilentError: boolean = false
 ): Promise<T> {
     try {
         let token = localStorage.getItem('jwtAccessToken');
@@ -108,14 +109,22 @@ async function apiRequest<T>(
             }
         }
 
+        const data = await response.json();
+
         if (!response.ok) {
-            const errData = await response.json();
-            throw new CinephoriaError(CinephoriaErrorCode.API_ERROR, errData.message || 'Erreur inconnue');
+            if (response.status === 400) {
+                if (isSilentError) {
+                    throw new CinephoriaError(CinephoriaErrorCode.API_ERROR_SILENT, data.message || 'Erreur inconnue');
+                } else {
+                    throw new CinephoriaError(CinephoriaErrorCode.API_ERROR, data.message || 'Erreur inconnue');
+                }
+            }
+            // Gestion d'autres statuts non-OK si besoin ici
         }
 
-        return response.json();
-
+        return data;
     } catch (error) {
+        console.log("L'erreur passe par là");
         return handleApiError(error);  // ✅ Capture et redirige via handleApiError
     }
 }
@@ -537,7 +546,8 @@ export async function askResetPwdApi(email: string): Promise<void> {
         endpoint,
         'POST',
         body,
-        false // Pas d'authentification requise
+        false, // Pas d'authentification requise
+        true   // Erreur silencieuse
     );
     console.log("Message retour", responseJSON);
     return responseJSON;

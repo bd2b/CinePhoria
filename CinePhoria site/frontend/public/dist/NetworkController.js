@@ -18,7 +18,7 @@ import { CinephoriaErrorCode, CinephoriaError } from './shared-models/Error.js';
  * - La gestion automatique du refresh token en cas d’expiration
  */
 function apiRequest(endpoint_1, method_1, body_1) {
-    return __awaiter(this, arguments, void 0, function* (endpoint, method, body, requiresAuth = true) {
+    return __awaiter(this, arguments, void 0, function* (endpoint, method, body, requiresAuth = true, isSilentError = false) {
         try {
             let token = localStorage.getItem('jwtAccessToken');
             if (requiresAuth && !token) {
@@ -92,13 +92,22 @@ function apiRequest(endpoint_1, method_1, body_1) {
                     throw err;
                 }
             }
+            const data = yield response.json();
             if (!response.ok) {
-                const errData = yield response.json();
-                throw new CinephoriaError(CinephoriaErrorCode.API_ERROR, errData.message || 'Erreur inconnue');
+                if (response.status === 400) {
+                    if (isSilentError) {
+                        throw new CinephoriaError(CinephoriaErrorCode.API_ERROR_SILENT, data.message || 'Erreur inconnue');
+                    }
+                    else {
+                        throw new CinephoriaError(CinephoriaErrorCode.API_ERROR, data.message || 'Erreur inconnue');
+                    }
+                }
+                // Gestion d'autres statuts non-OK si besoin ici
             }
-            return response.json();
+            return data;
         }
         catch (error) {
+            console.log("L'erreur passe par là");
             return handleApiError(error); // ✅ Capture et redirige via handleApiError
         }
     });
@@ -433,7 +442,8 @@ export function askResetPwdApi(email) {
         const endpoint = `${baseUrl}/api/utilisateur/askresetpwd`;
         const body = { email: email };
         console.log(body);
-        const responseJSON = yield apiRequest(endpoint, 'POST', body, false // Pas d'authentification requise
+        const responseJSON = yield apiRequest(endpoint, 'POST', body, false, // Pas d'authentification requise
+        true // Erreur silencieuse
         );
         console.log("Message retour", responseJSON);
         return responseJSON;
