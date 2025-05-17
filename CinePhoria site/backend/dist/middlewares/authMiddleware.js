@@ -22,29 +22,12 @@ const authenticateJWT = (req, res, next) => {
         const issuedAt = new Date(iat * 1000);
         const expiresAt = new Date(exp * 1000);
         const now = new Date();
-        configLog_1.default.info(`🔐 Token reçu - compte: ${compte}`);
-        configLog_1.default.info(`   iat (issued at)  = ${iat} -> ${issuedAt.toISOString()}`);
-        configLog_1.default.info(`   exp (expiration) = ${exp} -> ${expiresAt.toISOString()}`);
-        configLog_1.default.info(`   now              = ${now.toISOString()}`);
+        configLog_1.default.debug(`🔐 Token reçu - compte: ${compte}`);
+        configLog_1.default.debug(`   iat (issued at)  = ${iat} -> ${issuedAt.toISOString()}`);
+        configLog_1.default.debug(`   exp (expiration) = ${exp} -> ${expiresAt.toISOString()}`);
+        configLog_1.default.debug(`   now              = ${now.toISOString()}`);
         req.user = { compte }; // Sécurité : on ne transmet que ce qu'on attend
         next();
     });
 };
 exports.authenticateJWT = authenticateJWT;
-// export const authenticateJWT2 = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
-//   const authHeader = req.headers.authorization;
-//   if (!authHeader) {
-//     res.status(401).json({ message: 'Non autorisé, aucun token fourni' });
-//     return;
-//   }
-//   const token = authHeader.split(' ')[1]; // Format attendu : "Bearer <token>"
-//   jwt.verify(token, JWT_SECRET, (err, decoded) => {
-//     if (err) {
-//       res.status(403).json({ message: 'Accès interdit' });
-//       return;
-//     }
-//     // Stocker l'utilisateur dans req.user
-//     req.user = decoded as { compte: string };
-//     next(); 
-//   });
-// };

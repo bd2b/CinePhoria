@@ -105,6 +105,15 @@ class SeanceSeuleDAO {
         const data = rows[0];
         return data ? new SeanceSeule_1.SeanceSeule(data) : null;
     }
+    static async findByIds(seanceids) {
+        const connection = await config_1.dbPool.getConnection();
+        configLog_1.default.info('Connexion réussie à la base de données');
+        configLog_1.default.info(`SELECT * FROM Seance WHERE id in (${seanceids})`);
+        const [rows] = await connection.execute(`SELECT * FROM Seance WHERE id in (${seanceids})`);
+        connection.release();
+        // On convertit chaque record en Seance et on renvoie le premier et seul élément
+        return rows.map(row => new SeanceSeule_1.SeanceSeule(row));
+    }
 }
 exports.SeanceSeuleDAO = SeanceSeuleDAO;
 // *** générateur d'UUID

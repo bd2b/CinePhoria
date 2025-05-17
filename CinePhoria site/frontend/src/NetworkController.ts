@@ -14,6 +14,7 @@ import { MajSite } from './shared-models/MajSite.js';
 
 
 
+
 /**
  * Fonction générique de gestion de l'API qui gère
  * - L’authentification avec JWT
@@ -69,7 +70,7 @@ async function apiRequest<T>(
             body: finalBody,
             credentials: requiresAuth ? 'include' : 'same-origin'
         }
-        console.debug("ReqInit de tentative 1", reqInit1);
+        // console.debug("ReqInit de tentative 1", reqInit1);
 
         let response = await fetch(endpoint, reqInit1);
 
@@ -100,7 +101,7 @@ async function apiRequest<T>(
                     body: finalBody,
                     credentials: 'include'
                 };
-                console.debug("ReqInit de tentative 2", reqInit2)
+                // console.debug("ReqInit de tentative 2", reqInit2)
                 response = await fetch(endpoint, reqInit2);
 
             } catch (err) {
@@ -437,8 +438,8 @@ export async function getSeatsBookedApi(seanceId: string): Promise<{ siegesReser
 
 /**
  * Récupération d'une seance
- * @param seanceID 
- * @returns unn tableau de seances avec une seule séance
+ * @param un tableau de seanceID 
+ * @returns un tableau de seances 
  */
 
 export async function getSeancesByIdApi(uuids: string[]): Promise<Seance[]> {
@@ -910,6 +911,22 @@ export async function seancesseulesSelectAllApi(): Promise<SeanceSeule[]> {
         true
     );
     return responseJSON;
+}
+
+/**
+ * Récupération d'une seance
+ * @param un tableau de seanceID 
+ * @returns un tableau de seances 
+ */
+
+export async function getSeancesSeulesByIdApi(uuids: string[]): Promise<SeanceSeule[]> {
+
+    const endpoint = `${baseUrl}/api/seancesseules/seancesseules?ids=${uuids}`;
+
+    const seancesSeules = await apiRequest<SeanceSeule[]>(endpoint, 'GET', undefined); 
+    console.log("Liste des séances seules= ", seancesSeules);
+
+    return seancesSeules;
 }
 
 /**

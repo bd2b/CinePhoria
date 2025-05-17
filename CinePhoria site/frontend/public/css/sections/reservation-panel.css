@@ -6,7 +6,7 @@
     flex-direction: column;
     flex-wrap: nowrap;
     overflow-y: scroll;
-    width: 100%;
+    /* width: 100%; */
 
     text-align: center;
     /* Pour centrer le panel dans son parent */
@@ -350,7 +350,7 @@
 /* RESERVATION PANEL SEANCE */
 
 .panel__reserve {
-   /* display: flex; */
+    /* display: flex; */
     display: none;
     flex-direction: column;
     align-items: center;
@@ -543,6 +543,7 @@
     .titre__filter-dropdown-complexe {
         display: block;
     }
+
     .main__container {
         overflow-x: hidden;
     }
@@ -550,20 +551,22 @@
     .reservation__listFilms {
         overflow-y: hidden;
     }
-    
+
     .listFilms__simpleCard {
         padding: 5px 0px 0px 10px;
     }
+
     .reserve__form {
-        
+
         border: 2px solid rgb(var(--primary-color), 0.2);
         border-radius: 12px;
         padding: 10px;
         gap: 10px;
     }
-    .right__caractFilm {
+
+    /* .right__caractFilm {
         flex-direction: column;
-    }
+    } */
 
     .tabtarif__commande-table .content-id-td,
     .tabtarif__commande-table .content-id-th,
@@ -571,13 +574,17 @@
         display: none;
     }
 
-   .reservation__panel {
-    margin: 0px;
-    padding: 0px;
-   }
-.commande__foot-tfoot tr:nth-child(1) {
-    display: none;
-}
+    .reservation__panel {
+        margin: 5px;
+        padding: 5px;
+
+    }
+
+
+    .tabtarif__commande-table tfoot td.content-id-td,
+    .tabtarif__commande-table tfoot td:nth-child(1) {
+        display: none;
+    }
 
     .content-num-td {
         gap: 0px;

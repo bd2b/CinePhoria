@@ -1,33 +1,30 @@
 import { userDataController } from './DataControllerUser.js';
-import { dataController , dataReady} from './DataController.js';
+import { dataController, dataReady } from './DataController.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { ReservationForUtilisateur, ReservationState } from './shared-models/Reservation.js';
-import { getReservationForUtilisateur, setStateReservationApi, 
-            setEvaluationReservationApi, cancelReserveApi,
-            getReservationQRCodeApi } from './NetworkController.js';
+import {
+    getReservationForUtilisateur, setStateReservationApi,
+    setEvaluationReservationApi, cancelReserveApi,
+    getReservationQRCodeApi, getSeancesSeulesByIdApi
+} from './NetworkController.js';
 
 import { seanceCardView } from './ViewReservation.js';
-import { Seance } from './shared-models/Seance.js';
+import { SeanceSeule } from './shared-models/SeanceSeule.js';
 import { updateTableContent } from './ViewReservationPlaces.js';
-
 
 export async function onLoadMesReservations() {
     console.log("=====> chargement onLoadMesReservations")
 
     // On verifie que l'on est connecté sinon on retourne sur la page visiteur
     try {
-      //  await new Promise(resolve => window.addEventListener('load', resolve)); // ✅ attend fin chargement complet
-  
+
         await dataReady; // ✅ Attend que les données soient prêtes
         console.log("Données chargées, traitement de la page Mes reservations...");
-        
 
         // On charge menu et footer
         await chargerMenu(); // Header
         await chargerCinemaSites() // Footer
-
-
 
         // On verifie qu'on est bien connecté avec un utilisateur
         let utilisateurId: string;
@@ -38,17 +35,20 @@ export async function onLoadMesReservations() {
             utilisateurId = userDataController.compte()?.utilisateurid || '';
             const titleLeft = document.getElementById('titleLeft');
             if (titleLeft) {
-                titleLeft.textContent = 'Mes Reservations (' + userDataController.compte()?.utilisateurDisplayName +')' || 'Mes Reservations'
+                titleLeft.textContent = 'Mes Reservations (' + userDataController.compte()?.utilisateurDisplayName + ')' || 'Mes Reservations'
             }
         }
         // On recupere les reservations de l'utilisateur
         try {
             // On charge les reservations de cet utilisateur
             let reservations = await getReservationForUtilisateur(utilisateurId);
-            // On filtre les reservations non annulées ou non effacées 
-            reservations = reservations.filter((r) => { return ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.stateReservation as ReservationState) }
-            );
-            console.log(reservations);
+            // On filtre les reservations non annulées ou non effacées et on trie sur la date
+            // reservations = reservations.filter((r) => { return ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.stateReservation as ReservationState) });
+            reservations = reservations
+                .filter((r) => ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.stateReservation as ReservationState))
+                .sort((a, b) => new Date(b.dateJour || '').getTime() - new Date(a.dateJour || '').getTime());
+            
+            
             if (reservations.length === 0) {
                 const container = document.getElementById('mesreservations-table-container');
                 if (container) {
@@ -63,7 +63,7 @@ export async function onLoadMesReservations() {
                 const container = document.getElementById('mesreservations-table-container');
                 if (container) {
                     container.innerHTML = '';
-                    const tableDiv = updateTableMesReservations(reservations);
+                    const tableDiv = await updateTableMesReservations(reservations);
                     container.appendChild(tableDiv);
                 }
             }
@@ -78,7 +78,7 @@ export async function onLoadMesReservations() {
         console.log("Erreur recupération des reservations = ", error)
     }
 }
-export function updateTableMesReservations(reservations: ReservationForUtilisateur[]): HTMLDivElement {
+export async function updateTableMesReservations(reservations: ReservationForUtilisateur[]): Promise<HTMLDivElement> {
     // Container global
     const container = document.createElement('div');
     container.classList.add('tab__mesreservations-liste');
@@ -104,20 +104,26 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
     tbody.classList.add('liste-table__body');
     table.appendChild(tbody);
 
+    // On précharge les seances des réservations de l'utilisateur
+    const uuids = reservations
+        .map(resa => resa.seanceId)
+        .filter((id): id is string => typeof id === 'string');
+
+    const seances = await getSeancesSeulesByIdApi(uuids);
+
     // Pour chaque reservation
     reservations.forEach((resa) => {
 
         const resaSeanceId = resa.seanceId!;
         if (!resaSeanceId) {
             console.error("resa.seanceId est undefined ou null !");
-        } else {
-            console.log("resaSeanceId =", resaSeanceId);
         }
 
         // Vérifie `find()`
-        let seance = dataController.allSeances.find((s) => s.seanceId === resaSeanceId);
-        if (!seance ) {
-            console.error(`❌ Pas de séance trouvée pour seanceId = ${resaSeanceId}`);
+
+        let seance = seances.find((s) => s.id === resaSeanceId);
+        if (!seance) {
+            console.error(`❌ Pas de séance seule trouvée pour seanceId = ${resaSeanceId}`);
             return;
         }
 
@@ -125,6 +131,7 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
 
         // 1) Date => bouton pour modal détail
         const tdDate = document.createElement('td');
+        //    tdDate.innerHTML = '<span class="td-label">Date :</span> ';
         const dateBtn = document.createElement('button');
         dateBtn.classList.add('tab__mesreservations-liste-button');
         dateBtn.textContent = formatDateDDMMYYYY(new Date(resa.dateJour || ''));
@@ -136,15 +143,14 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
 
         // 2) Film
         const tdFilm = document.createElement('td');
-        tdFilm.textContent = resa.titleFilm || '';
+        tdFilm.innerHTML = '<span class="td-label">Film :</span> ' + (resa.titleFilm || '');
         tr.appendChild(tdFilm);
 
         // 3) Complexe
         const tdComplexe = document.createElement('td');
-        tdComplexe.textContent = resa.nameCinema || '';
+        tdComplexe.innerHTML = '<span class="td-label">Complexe :</span> ' + (resa.nameCinema || '');
         tr.appendChild(tdComplexe);
 
-        console.log("-------" + resa.dateJour + "-" + seance.hourBeginHHSMM);
         // Statut dynamique
         let statutResa = resa.stateReservation as ReservationState;
 
@@ -177,17 +183,17 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
         }
         // 4) & 5) => Selon l’état
         if (statutResa === ReservationState.ReserveConfirmed) {
-
             // Fusion de 2 colonnes
             const tdFused = document.createElement('td');
             tdFused.setAttribute('colspan', '2');
+            tdFused.innerHTML = '<span class="td-label">Evaluation :</span> Vous pourrez apporter une note et un avis après avoir vu le film';
             tdFused.style.backgroundColor = '#fff7dc'; // léger jaune
-            tdFused.textContent = 'Vous pourrez apporter une note et un avis après avoir vu le film';
             tr.appendChild(tdFused);
         } else if (statutResa === ReservationState.DoneUnevaluated) {
             // Fused => bouton "Donnez nous votre avis"
             const tdFused = document.createElement('td');
             tdFused.setAttribute('colspan', '2');
+            tdFused.innerHTML = '<span class="td-label">Evaluation :</span> ';
             const btnAvis = document.createElement('button');
             btnAvis.textContent = 'Donnez nous votre avis sur ce film ✎'; // icone Unicode
             btnAvis.classList.add('tab__mesreservations-liste-button');
@@ -199,7 +205,7 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
         } else if (statutResa === ReservationState.DoneEvaluated) {
             // Col note
             const tdNote = document.createElement('td');
-            tdNote.textContent = resa.note?.toString() || '0';
+            tdNote.innerHTML = '<span class="td-label">Note :</span> ' + (resa.note?.toString() || '0');
             // Clic => modifEvaluation
             tdNote.style.cursor = 'pointer';
             tdNote.addEventListener('click', () => {
@@ -209,7 +215,7 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
 
             // Col commentaire
             const tdComment = document.createElement('td');
-            tdComment.textContent = resa.evaluation || '';
+            tdComment.innerHTML = '<span class="td-label">Vos Commentaires :</span> ' + (resa.evaluation || '');
             tdComment.style.cursor = 'pointer';
             // Si isEvalReview => grisé + survol
             console.log("Eval = " + resa.isEvaluationMustBeReview);
@@ -227,23 +233,25 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
             // Éventuellement, autres états => un <td colSpan="2"> vide
             const tdFused = document.createElement('td');
             tdFused.setAttribute('colspan', '2');
-            tdFused.textContent = ''; // ou "Réservation annulée ?" etc.
+            tdFused.innerHTML = '<span class="td-label">Evaluation :</span> ';
             tr.appendChild(tdFused);
         }
 
         // 6) Places
         const tdPlaces = document.createElement('td');
-        tdPlaces.textContent = resa.totalSeats?.toString() || '0';
+        tdPlaces.innerHTML = '<span class="td-label">Places :</span> ' + (resa.totalSeats?.toString() || '0');
         tr.appendChild(tdPlaces);
 
         // 7) Montant
         const tdPrice = document.createElement('td');
         const price = resa.totalPrice?.toFixed(2) || '0.00';
-        tdPrice.textContent = `${price} €`;
+        tdPrice.innerHTML = '<span class="td-label">Montant :</span> ' + `${price} €`;
         tr.appendChild(tdPrice);
 
         // 8) Col suppression et affichage QRCode
         const tdSuppr = document.createElement('td');
+        tdSuppr.setAttribute("data-label", " ");
+
         const btnSuppr = document.createElement('button');
         btnSuppr.classList.add("button");
 
@@ -260,7 +268,6 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
                 const btnQRCode = document.createElement('button');
                 btnQRCode.classList.add("button");
                 btnQRCode.textContent = "QRCode";
-                btnQRCode.style.marginRight = "5px";
                 btnQRCode.addEventListener('click', async () => {
                     onClickDisplayQRCode(await getReservationQRCodeApi(resa.reservationId));
                 });
@@ -271,10 +278,25 @@ export function updateTableMesReservations(reservations: ReservationForUtilisate
             btnSuppr.textContent = textButton;
             btnSuppr.addEventListener('click', () => {
                 onClickSuppressionReservation(resa, textButton);
-                
             });
             tdSuppr.appendChild(btnSuppr);
 
+            // Centre quans on est en mobile
+            if (window.innerWidth < 768) {
+                tdSuppr.style.textAlign = "center";
+                tdSuppr.style.display = "flex";
+                tdSuppr.style.flexDirection = "row";
+                tdSuppr.style.justifyContent = "center";
+                tdSuppr.style.alignItems = "center";
+                tdSuppr.style.gap = "8px";
+            } else {
+                // Ajoute une marge entre les boutons quand ils ne sont pas en flex
+                Array.from(tdSuppr.children).forEach((btn, index, arr) => {
+                    if (btn instanceof HTMLElement) {
+                        btn.style.marginRight = index < arr.length - 1 ? "5px" : "0";
+                    }
+                });
+            }
             tr.appendChild(tdSuppr);
         }
         tbody.appendChild(tr);
@@ -295,11 +317,11 @@ function formatDateDDMMYYYY(date?: Date): string {
 
 // ---------- Fonctions d'action isolées ---------- //
 
-async function onClickDetailReservation(resa: ReservationForUtilisateur, p_seance: Seance) {
-    let seance = p_seance;
+async function onClickDetailReservation(resa: ReservationForUtilisateur, p_seance: SeanceSeule) {
+    let seanceSeule = p_seance;
     // On met a jour la seance dans le cache
-    await dataController.updateSeances([seance.seanceId]);
-    seance = dataController.seanceById(p_seance.seanceId);
+    await dataController.updateSeances([seanceSeule.id]);
+    const seance = dataController.seanceById(p_seance.id);
     const modalDetailLocalHTML = `  
         <div class="modal__content-wrapper">
             <div class="modal__title">
@@ -334,8 +356,8 @@ async function onClickDetailReservation(resa: ReservationForUtilisateur, p_seanc
             if (event.target === modalDetailLocal) closeModal();
         });
 
-        
-        const selectedSeance = seanceCardView(seance, new Date(resa.dateJour || ''), "" , false);
+
+        const selectedSeance = seanceCardView(seance, new Date(resa.dateJour || ''), "", false);
         modalContent.appendChild(selectedSeance);
 
         const tableauPlaces = await updateTableContent(seance.qualite || '', true, resa.reservationId);
@@ -347,7 +369,7 @@ async function onClickDetailReservation(resa: ReservationForUtilisateur, p_seanc
             modalContent.appendChild(nombrePMR);
         }
 
-        if (resa.seatsReserved && resa.seatsReserved !== '' ) {
+        if (resa.seatsReserved && resa.seatsReserved !== '') {
             const pluriel = resa.seatsReserved.includes(",") ? "s" : "";
             const seatsBooked = document.createElement('p');
             seatsBooked.textContent = `Siège${pluriel} réservé${pluriel} : ${resa.seatsReserved}`;
@@ -499,7 +521,7 @@ function onClickEvaluationReservation(resa: ReservationForUtilisateur, isModif: 
     });
 }
 
-async function onClickDisplayQRCode ( qrcodeElement: HTMLImageElement) {
+async function onClickDisplayQRCode(qrcodeElement: HTMLImageElement) {
     // HTML de la modale pour confirmer la suppression
     const modalDisplayQRCodeLocalHTML = `
     <div class="modal__content-wrapper">
@@ -517,13 +539,13 @@ async function onClickDisplayQRCode ( qrcodeElement: HTMLImageElement) {
 
     // Injecter la modale
     let modal = document.getElementById('modal-DisplayQRCodeLocal') as HTMLDivElement | null;
-    if (!modal)  modal = document.createElement('div');
+    if (!modal) modal = document.createElement('div');
     modal.classList.add("modal");
-    modal.setAttribute("id","modal-DisplayQRCodeLocal" );
+    modal.setAttribute("id", "modal-DisplayQRCodeLocal");
     modal.innerHTML = '';
     modal.innerHTML = modalDisplayQRCodeLocalHTML;
     document.body.appendChild(modal);
-    
+
     const qrcodeImg = document.getElementById("qrcode-img");
     if (!qrcodeImg) return;
     qrcodeImg.appendChild(qrcodeElement);
@@ -543,7 +565,7 @@ async function onClickDisplayQRCode ( qrcodeElement: HTMLImageElement) {
     });
 
     modal.style.display = 'flex';
-    
+
 }
 
 async function onClickSuppressionReservation(resa: ReservationForUtilisateur, textButton: string) {

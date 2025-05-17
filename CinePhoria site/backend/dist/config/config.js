@@ -8,12 +8,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dbPool = exports.connectDBMongo = exports.ConfigMongo = exports.nombreTentativeLoginKO = exports.jwtTK = exports.mailConfig = exports.dbConfig = exports.versionCourante = exports.modeExec = void 0;
+exports.dbPool = exports.connectDBMongo = exports.ConfigMongo = exports.nombreTentativeLoginKO = exports.jwtTK = exports.mailConfig = exports.dbConfig = exports.versionCourante = exports.urlString = exports.modeExec = void 0;
 const configLog_1 = __importDefault(require("../config/configLog"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const promise_1 = __importDefault(require("mysql2/promise"));
 // Exporter le mode d'exécution
 exports.modeExec = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
+exports.urlString = "";
+if (exports.modeExec === 'développement')
+    exports.urlString = "http://127.0.0.1:3500/";
+if (exports.modeExec === 'production')
+    exports.urlString = "https://cinephoria.bd2db.com/";
 // Exporter la version
 exports.versionCourante = {
     majeure: parseInt(process.env.MAJEURE || "0", 10),

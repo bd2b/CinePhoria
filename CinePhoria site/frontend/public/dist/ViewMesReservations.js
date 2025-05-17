@@ -12,7 +12,7 @@ import { dataController, dataReady } from './DataController.js';
 import { chargerMenu } from './ViewMenu.js';
 import { chargerCinemaSites } from './ViewFooter.js';
 import { ReservationState } from './shared-models/Reservation.js';
-import { getReservationForUtilisateur, setStateReservationApi, setEvaluationReservationApi, cancelReserveApi, getReservationQRCodeApi } from './NetworkController.js';
+import { getReservationForUtilisateur, setStateReservationApi, setEvaluationReservationApi, cancelReserveApi, getReservationQRCodeApi, getSeancesSeulesByIdApi } from './NetworkController.js';
 import { seanceCardView } from './ViewReservation.js';
 import { updateTableContent } from './ViewReservationPlaces.js';
 export function onLoadMesReservations() {
@@ -21,7 +21,6 @@ export function onLoadMesReservations() {
         console.log("=====> chargement onLoadMesReservations");
         // On verifie que l'on est connecté sinon on retourne sur la page visiteur
         try {
-            //  await new Promise(resolve => window.addEventListener('load', resolve)); // ✅ attend fin chargement complet
             yield dataReady; // ✅ Attend que les données soient prêtes
             console.log("Données chargées, traitement de la page Mes reservations...");
             // On charge menu et footer
@@ -44,9 +43,11 @@ export function onLoadMesReservations() {
             try {
                 // On charge les reservations de cet utilisateur
                 let reservations = yield getReservationForUtilisateur(utilisateurId);
-                // On filtre les reservations non annulées ou non effacées 
-                reservations = reservations.filter((r) => { return ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.stateReservation); });
-                console.log(reservations);
+                // On filtre les reservations non annulées ou non effacées et on trie sur la date
+                // reservations = reservations.filter((r) => { return ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.stateReservation as ReservationState) });
+                reservations = reservations
+                    .filter((r) => ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.stateReservation))
+                    .sort((a, b) => new Date(b.dateJour || '').getTime() - new Date(a.dateJour || '').getTime());
                 if (reservations.length === 0) {
                     const container = document.getElementById('mesreservations-table-container');
                     if (container) {
@@ -61,7 +62,7 @@ export function onLoadMesReservations() {
                     const container = document.getElementById('mesreservations-table-container');
                     if (container) {
                         container.innerHTML = '';
-                        const tableDiv = updateTableMesReservations(reservations);
+                        const tableDiv = yield updateTableMesReservations(reservations);
                         container.appendChild(tableDiv);
                     }
                 }
@@ -76,185 +77,207 @@ export function onLoadMesReservations() {
     });
 }
 export function updateTableMesReservations(reservations) {
-    // Container global
-    const container = document.createElement('div');
-    container.classList.add('tab__mesreservations-liste');
-    // Table
-    const table = document.createElement('table');
-    table.classList.add('tab__mesreservations-liste-table');
-    // THEAD
-    const thead = document.createElement('thead');
-    const trHead = document.createElement('tr');
-    const cols = ['Date', 'Film', 'Complexe', 'Note', 'Vos Commentaires', 'Places', 'Montant', ''];
-    cols.forEach((col) => {
-        const th = document.createElement('th');
-        th.textContent = col;
-        trHead.appendChild(th);
-    });
-    thead.appendChild(trHead);
-    table.appendChild(thead);
-    // TBODY
-    const tbody = document.createElement('tbody');
-    tbody.classList.add('liste-table__body');
-    table.appendChild(tbody);
-    // Pour chaque reservation
-    reservations.forEach((resa) => {
-        var _a, _b, _c;
-        const resaSeanceId = resa.seanceId;
-        if (!resaSeanceId) {
-            console.error("resa.seanceId est undefined ou null !");
-        }
-        else {
-            console.log("resaSeanceId =", resaSeanceId);
-        }
-        // Vérifie `find()`
-        let seance = dataController.allSeances.find((s) => s.seanceId === resaSeanceId);
-        if (!seance) {
-            console.error(`❌ Pas de séance trouvée pour seanceId = ${resaSeanceId}`);
-            return;
-        }
-        const tr = document.createElement('tr');
-        // 1) Date => bouton pour modal détail
-        const tdDate = document.createElement('td');
-        const dateBtn = document.createElement('button');
-        dateBtn.classList.add('tab__mesreservations-liste-button');
-        dateBtn.textContent = formatDateDDMMYYYY(new Date(resa.dateJour || ''));
-        dateBtn.addEventListener('click', () => {
-            onClickDetailReservation(resa, seance);
+    return __awaiter(this, void 0, void 0, function* () {
+        // Container global
+        const container = document.createElement('div');
+        container.classList.add('tab__mesreservations-liste');
+        // Table
+        const table = document.createElement('table');
+        table.classList.add('tab__mesreservations-liste-table');
+        // THEAD
+        const thead = document.createElement('thead');
+        const trHead = document.createElement('tr');
+        const cols = ['Date', 'Film', 'Complexe', 'Note', 'Vos Commentaires', 'Places', 'Montant', ''];
+        cols.forEach((col) => {
+            const th = document.createElement('th');
+            th.textContent = col;
+            trHead.appendChild(th);
         });
-        tdDate.appendChild(dateBtn);
-        tr.appendChild(tdDate);
-        // 2) Film
-        const tdFilm = document.createElement('td');
-        tdFilm.textContent = resa.titleFilm || '';
-        tr.appendChild(tdFilm);
-        // 3) Complexe
-        const tdComplexe = document.createElement('td');
-        tdComplexe.textContent = resa.nameCinema || '';
-        tr.appendChild(tdComplexe);
-        console.log("-------" + resa.dateJour + "-" + seance.hourBeginHHSMM);
-        // Statut dynamique
-        let statutResa = resa.stateReservation;
-        if (statutResa === ReservationState.ReserveConfirmed) {
-            // ACtualisation du statut de la réservation si l'heure de la reservation est dans le passé
-            const dateVar = new Date(resa.dateJour);
-            if (!dateVar)
-                return;
-            // Variable heure : "HH:MM"
-            const heureVar = seance.hourBeginHHSMM || "00:00";
-            // const heureVar = "08:00";
-            // Convertir heureVar en nombre
-            const [hh, mm] = heureVar.split(':').map(Number);
-            // Créer une date en combinant dateVar (année/mois/jour) avec l'heureVar (HH:MM)
-            const dateHeureLimite = new Date(dateVar.getFullYear(), dateVar.getMonth(), dateVar.getDate(), hh, mm);
-            // Vérifier si la date actuelle est avant ou après la date et heure de la séance
-            if ((new Date()) > dateHeureLimite) {
-                // La reservation est passée
-                statutResa = ReservationState.DoneUnevaluated;
-                // Mise a jour en asynchrone
-                setStateReservationApi(resa.reservationId, ReservationState.DoneUnevaluated);
+        thead.appendChild(trHead);
+        table.appendChild(thead);
+        // TBODY
+        const tbody = document.createElement('tbody');
+        tbody.classList.add('liste-table__body');
+        table.appendChild(tbody);
+        // On précharge les seances des réservations de l'utilisateur
+        const uuids = reservations
+            .map(resa => resa.seanceId)
+            .filter((id) => typeof id === 'string');
+        const seances = yield getSeancesSeulesByIdApi(uuids);
+        // Pour chaque reservation
+        reservations.forEach((resa) => {
+            var _a, _b, _c;
+            const resaSeanceId = resa.seanceId;
+            if (!resaSeanceId) {
+                console.error("resa.seanceId est undefined ou null !");
             }
-        }
-        // 4) & 5) => Selon l’état
-        if (statutResa === ReservationState.ReserveConfirmed) {
-            // Fusion de 2 colonnes
-            const tdFused = document.createElement('td');
-            tdFused.setAttribute('colspan', '2');
-            tdFused.style.backgroundColor = '#fff7dc'; // léger jaune
-            tdFused.textContent = 'Vous pourrez apporter une note et un avis après avoir vu le film';
-            tr.appendChild(tdFused);
-        }
-        else if (statutResa === ReservationState.DoneUnevaluated) {
-            // Fused => bouton "Donnez nous votre avis"
-            const tdFused = document.createElement('td');
-            tdFused.setAttribute('colspan', '2');
-            const btnAvis = document.createElement('button');
-            btnAvis.textContent = 'Donnez nous votre avis sur ce film ✎'; // icone Unicode
-            btnAvis.classList.add('tab__mesreservations-liste-button');
-            btnAvis.addEventListener('click', () => {
-                onClickEvaluationReservation(resa);
+            // Vérifie `find()`
+            let seance = seances.find((s) => s.id === resaSeanceId);
+            if (!seance) {
+                console.error(`❌ Pas de séance seule trouvée pour seanceId = ${resaSeanceId}`);
+                return;
+            }
+            const tr = document.createElement('tr');
+            // 1) Date => bouton pour modal détail
+            const tdDate = document.createElement('td');
+            //    tdDate.innerHTML = '<span class="td-label">Date :</span> ';
+            const dateBtn = document.createElement('button');
+            dateBtn.classList.add('tab__mesreservations-liste-button');
+            dateBtn.textContent = formatDateDDMMYYYY(new Date(resa.dateJour || ''));
+            dateBtn.addEventListener('click', () => {
+                onClickDetailReservation(resa, seance);
             });
-            tdFused.appendChild(btnAvis);
-            tr.appendChild(tdFused);
-        }
-        else if (statutResa === ReservationState.DoneEvaluated) {
-            // Col note
-            const tdNote = document.createElement('td');
-            tdNote.textContent = ((_a = resa.note) === null || _a === void 0 ? void 0 : _a.toString()) || '0';
-            // Clic => modifEvaluation
-            tdNote.style.cursor = 'pointer';
-            tdNote.addEventListener('click', () => {
-                onClickEvaluationReservation(resa, true);
-            });
-            tr.appendChild(tdNote);
-            // Col commentaire
-            const tdComment = document.createElement('td');
-            tdComment.textContent = resa.evaluation || '';
-            tdComment.style.cursor = 'pointer';
-            // Si isEvalReview => grisé + survol
-            console.log("Eval = " + resa.isEvaluationMustBeReview);
-            if (resa.isEvaluationMustBeReview) {
-                tdComment.style.backgroundColor = '#f0f0f0';
-                tdComment.title = 'Votre commentaire sera publié après relecture';
+            tdDate.appendChild(dateBtn);
+            tr.appendChild(tdDate);
+            // 2) Film
+            const tdFilm = document.createElement('td');
+            tdFilm.innerHTML = '<span class="td-label">Film :</span> ' + (resa.titleFilm || '');
+            tr.appendChild(tdFilm);
+            // 3) Complexe
+            const tdComplexe = document.createElement('td');
+            tdComplexe.innerHTML = '<span class="td-label">Complexe :</span> ' + (resa.nameCinema || '');
+            tr.appendChild(tdComplexe);
+            // Statut dynamique
+            let statutResa = resa.stateReservation;
+            if (statutResa === ReservationState.ReserveConfirmed) {
+                // ACtualisation du statut de la réservation si l'heure de la reservation est dans le passé
+                const dateVar = new Date(resa.dateJour);
+                if (!dateVar)
+                    return;
+                // Variable heure : "HH:MM"
+                const heureVar = seance.hourBeginHHSMM || "00:00";
+                // const heureVar = "08:00";
+                // Convertir heureVar en nombre
+                const [hh, mm] = heureVar.split(':').map(Number);
+                // Créer une date en combinant dateVar (année/mois/jour) avec l'heureVar (HH:MM)
+                const dateHeureLimite = new Date(dateVar.getFullYear(), dateVar.getMonth(), dateVar.getDate(), hh, mm);
+                // Vérifier si la date actuelle est avant ou après la date et heure de la séance
+                if ((new Date()) > dateHeureLimite) {
+                    // La reservation est passée
+                    statutResa = ReservationState.DoneUnevaluated;
+                    // Mise a jour en asynchrone
+                    setStateReservationApi(resa.reservationId, ReservationState.DoneUnevaluated);
+                }
+            }
+            // 4) & 5) => Selon l’état
+            if (statutResa === ReservationState.ReserveConfirmed) {
+                // Fusion de 2 colonnes
+                const tdFused = document.createElement('td');
+                tdFused.setAttribute('colspan', '2');
+                tdFused.innerHTML = '<span class="td-label">Evaluation :</span> Vous pourrez apporter une note et un avis après avoir vu le film';
+                tdFused.style.backgroundColor = '#fff7dc'; // léger jaune
+                tr.appendChild(tdFused);
+            }
+            else if (statutResa === ReservationState.DoneUnevaluated) {
+                // Fused => bouton "Donnez nous votre avis"
+                const tdFused = document.createElement('td');
+                tdFused.setAttribute('colspan', '2');
+                tdFused.innerHTML = '<span class="td-label">Evaluation :</span> ';
+                const btnAvis = document.createElement('button');
+                btnAvis.textContent = 'Donnez nous votre avis sur ce film ✎'; // icone Unicode
+                btnAvis.classList.add('tab__mesreservations-liste-button');
+                btnAvis.addEventListener('click', () => {
+                    onClickEvaluationReservation(resa);
+                });
+                tdFused.appendChild(btnAvis);
+                tr.appendChild(tdFused);
+            }
+            else if (statutResa === ReservationState.DoneEvaluated) {
+                // Col note
+                const tdNote = document.createElement('td');
+                tdNote.innerHTML = '<span class="td-label">Note :</span> ' + (((_a = resa.note) === null || _a === void 0 ? void 0 : _a.toString()) || '0');
+                // Clic => modifEvaluation
+                tdNote.style.cursor = 'pointer';
+                tdNote.addEventListener('click', () => {
+                    onClickEvaluationReservation(resa, true);
+                });
+                tr.appendChild(tdNote);
+                // Col commentaire
+                const tdComment = document.createElement('td');
+                tdComment.innerHTML = '<span class="td-label">Vos Commentaires :</span> ' + (resa.evaluation || '');
+                tdComment.style.cursor = 'pointer';
+                // Si isEvalReview => grisé + survol
+                console.log("Eval = " + resa.isEvaluationMustBeReview);
+                if (resa.isEvaluationMustBeReview) {
+                    tdComment.style.backgroundColor = '#f0f0f0';
+                    tdComment.title = 'Votre commentaire sera publié après relecture';
+                }
+                else {
+                    tdComment.title = 'Votre commentaire a été validé. Vous pouvez le modifier, il sera republié après relecture';
+                }
+                tdComment.addEventListener('click', () => {
+                    onClickEvaluationReservation(resa, true);
+                });
+                tr.appendChild(tdComment);
             }
             else {
-                tdComment.title = 'Votre commentaire a été validé. Vous pouvez le modifier, il sera republié après relecture';
+                // Éventuellement, autres états => un <td colSpan="2"> vide
+                const tdFused = document.createElement('td');
+                tdFused.setAttribute('colspan', '2');
+                tdFused.innerHTML = '<span class="td-label">Evaluation :</span> ';
+                tr.appendChild(tdFused);
             }
-            tdComment.addEventListener('click', () => {
-                onClickEvaluationReservation(resa, true);
-            });
-            tr.appendChild(tdComment);
-        }
-        else {
-            // Éventuellement, autres états => un <td colSpan="2"> vide
-            const tdFused = document.createElement('td');
-            tdFused.setAttribute('colspan', '2');
-            tdFused.textContent = ''; // ou "Réservation annulée ?" etc.
-            tr.appendChild(tdFused);
-        }
-        // 6) Places
-        const tdPlaces = document.createElement('td');
-        tdPlaces.textContent = ((_b = resa.totalSeats) === null || _b === void 0 ? void 0 : _b.toString()) || '0';
-        tr.appendChild(tdPlaces);
-        // 7) Montant
-        const tdPrice = document.createElement('td');
-        const price = ((_c = resa.totalPrice) === null || _c === void 0 ? void 0 : _c.toFixed(2)) || '0.00';
-        tdPrice.textContent = `${price} €`;
-        tr.appendChild(tdPrice);
-        // 8) Col suppression et affichage QRCode
-        const tdSuppr = document.createElement('td');
-        const btnSuppr = document.createElement('button');
-        btnSuppr.classList.add("button");
-        let textButton = "";
-        if (statutResa === ReservationState.ReserveConfirmed) {
-            textButton = "Annuler";
-        }
-        else if ([ReservationState.DoneEvaluated, ReservationState.DoneUnevaluated].includes(statutResa)) {
-            textButton = "Effacer";
-        }
-        if (textButton !== "") {
+            // 6) Places
+            const tdPlaces = document.createElement('td');
+            tdPlaces.innerHTML = '<span class="td-label">Places :</span> ' + (((_b = resa.totalSeats) === null || _b === void 0 ? void 0 : _b.toString()) || '0');
+            tr.appendChild(tdPlaces);
+            // 7) Montant
+            const tdPrice = document.createElement('td');
+            const price = ((_c = resa.totalPrice) === null || _c === void 0 ? void 0 : _c.toFixed(2)) || '0.00';
+            tdPrice.innerHTML = '<span class="td-label">Montant :</span> ' + `${price} €`;
+            tr.appendChild(tdPrice);
+            // 8) Col suppression et affichage QRCode
+            const tdSuppr = document.createElement('td');
+            tdSuppr.setAttribute("data-label", " ");
+            const btnSuppr = document.createElement('button');
+            btnSuppr.classList.add("button");
+            let textButton = "";
             if (statutResa === ReservationState.ReserveConfirmed) {
-                const btnQRCode = document.createElement('button');
-                btnQRCode.classList.add("button");
-                btnQRCode.textContent = "QRCode";
-                btnQRCode.style.marginRight = "5px";
-                btnQRCode.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
-                    onClickDisplayQRCode(yield getReservationQRCodeApi(resa.reservationId));
-                }));
-                tdSuppr.appendChild(btnQRCode);
+                textButton = "Annuler";
             }
-            // btnSuppr.textContent = '🗑️'; // icone poubelle
-            btnSuppr.textContent = textButton;
-            btnSuppr.addEventListener('click', () => {
-                onClickSuppressionReservation(resa, textButton);
-            });
-            tdSuppr.appendChild(btnSuppr);
-            tr.appendChild(tdSuppr);
-        }
-        tbody.appendChild(tr);
+            else if ([ReservationState.DoneEvaluated, ReservationState.DoneUnevaluated].includes(statutResa)) {
+                textButton = "Effacer";
+            }
+            if (textButton !== "") {
+                if (statutResa === ReservationState.ReserveConfirmed) {
+                    const btnQRCode = document.createElement('button');
+                    btnQRCode.classList.add("button");
+                    btnQRCode.textContent = "QRCode";
+                    btnQRCode.addEventListener('click', () => __awaiter(this, void 0, void 0, function* () {
+                        onClickDisplayQRCode(yield getReservationQRCodeApi(resa.reservationId));
+                    }));
+                    tdSuppr.appendChild(btnQRCode);
+                }
+                // btnSuppr.textContent = '🗑️'; // icone poubelle
+                btnSuppr.textContent = textButton;
+                btnSuppr.addEventListener('click', () => {
+                    onClickSuppressionReservation(resa, textButton);
+                });
+                tdSuppr.appendChild(btnSuppr);
+                // Centre quans on est en mobile
+                if (window.innerWidth < 768) {
+                    tdSuppr.style.textAlign = "center";
+                    tdSuppr.style.display = "flex";
+                    tdSuppr.style.flexDirection = "row";
+                    tdSuppr.style.justifyContent = "center";
+                    tdSuppr.style.alignItems = "center";
+                    tdSuppr.style.gap = "8px";
+                }
+                else {
+                    // Ajoute une marge entre les boutons quand ils ne sont pas en flex
+                    Array.from(tdSuppr.children).forEach((btn, index, arr) => {
+                        if (btn instanceof HTMLElement) {
+                            btn.style.marginRight = index < arr.length - 1 ? "5px" : "0";
+                        }
+                    });
+                }
+                tr.appendChild(tdSuppr);
+            }
+            tbody.appendChild(tr);
+        });
+        container.appendChild(table);
+        return container;
     });
-    container.appendChild(table);
-    return container;
 }
 /** format date dd/mm/yyyy */
 function formatDateDDMMYYYY(date) {
@@ -268,10 +291,10 @@ function formatDateDDMMYYYY(date) {
 // ---------- Fonctions d'action isolées ---------- //
 function onClickDetailReservation(resa, p_seance) {
     return __awaiter(this, void 0, void 0, function* () {
-        let seance = p_seance;
+        let seanceSeule = p_seance;
         // On met a jour la seance dans le cache
-        yield dataController.updateSeances([seance.seanceId]);
-        seance = dataController.seanceById(p_seance.seanceId);
+        yield dataController.updateSeances([seanceSeule.id]);
+        const seance = dataController.seanceById(p_seance.id);
         const modalDetailLocalHTML = `  
         <div class="modal__content-wrapper">
             <div class="modal__title">

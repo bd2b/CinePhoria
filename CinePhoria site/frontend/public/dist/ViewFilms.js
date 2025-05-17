@@ -416,7 +416,7 @@ function afficherDetailFilm(film) {
                             dataController.reservationState = ReservationState.PendingChoiceSeats;
                             yield dataController.sauverEtatGlobal();
                             window.location.href = 'reservation.html';
-                            yield showCustomAlert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
+                            // await showCustomAlert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
                         }
                         else {
                             yield showCustomAlert('La séance est complète');

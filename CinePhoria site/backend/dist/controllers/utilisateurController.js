@@ -118,18 +118,14 @@ class UtilisateurController {
     ;
     static async sendCodeReset(req, res) {
         try {
-            configLog_1.default.info("Début sendCodeReset");
             const { email } = req.body;
-            configLog_1.default.info("Début sendCodeReset 2");
             // Validation des données d'entrée
             if (!email) {
                 res.status(400).json({ message: 'Données manquantes ou invalides.' });
                 return;
             }
-            configLog_1.default.info("Début sendCodeReset 3");
             // Appel au DAO pour Recupérer le code de confirmation
             const result = await UtilisateurDAO_1.UtilisateurDAO.createCodeConfirm(email, 'reset');
-            configLog_1.default.info("Début sendCodeReset 4");
             // Gestion du résultat
             if (result.startsWith('Erreur')) {
                 res.status(400).json({ message: result });

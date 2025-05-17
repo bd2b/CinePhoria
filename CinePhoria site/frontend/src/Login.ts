@@ -235,7 +235,7 @@ export async function login(invite: string = "Veuillez vous connecter...", enabl
                     console.log("ident stockée = ", userDataController.ident)
 
                     await userDataController.init();
-                    console.log("Compte charge = ", userDataController.compte());
+                    // console.log("Compte charge = ", userDataController.compte());
 
                     const pageToGo = userDataController.profil();
                     console.log("Page redirigée", pageToGo);

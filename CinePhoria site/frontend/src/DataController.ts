@@ -394,7 +394,13 @@ export class DataController {
 
     // Premier jour de projection du film
     public premierJour(filmId: string): Date {
-        return new Date(this.seancesFilm(filmId)[0].dateJour || '');
+        if (this.seancesFilm(filmId).length > 0) {
+            const dateFilm = this.seancesFilm(filmId)[0].dateJour;
+            if (dateFilm) {
+                return new Date(dateFilm)
+            }
+        }
+        return new Date();
     }
     // Les séances d'un film pour un jour donne
     public seancesFilmJour(filmId: string, date: Date = new Date()): Seance[] {

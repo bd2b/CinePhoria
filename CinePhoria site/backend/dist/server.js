@@ -141,7 +141,4 @@ else {
         console.log(`🛠️ Serveur HTTP (développement) démarré sur le port ${httpsPort}`);
     });
 }
-// app.listen(PORT, () => {
-//   logger.info(`Backend démarré sur le port ${PORT}`);
-// });
 configLog_1.default.info('Serveur TypeScript en cours d’exécution...');

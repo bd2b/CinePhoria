@@ -445,7 +445,7 @@ async function afficherDetailFilm(film: Film): Promise<void> {
 
                         window.location.href = 'reservation.html';
 
-                        await showCustomAlert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
+                        // await showCustomAlert(`Séance sélectionnée :\nJour : ${Jour}\nCinéma : ${Cinema}\nHoraire : ${Horaire}\nQualité : ${Qualite}\nTarifs : ${Tarifs}`);
                     } else {
                         await showCustomAlert('La séance est complète');
                     }

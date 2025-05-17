@@ -13,6 +13,10 @@ configLog_1.default.info('Declaration route GET /api/seancesseules/');
 router.get('/', authMiddleware_1.authenticateJWT, seanceseuleController_1.SeanceSeuleController.getAllSeanceSeules);
 configLog_1.default.info('Declaration route POST /api/seancesseules');
 router.post('/', authMiddleware_1.authenticateJWT, seanceseuleController_1.SeanceSeuleController.createSeanceSeule);
+/**
+ * Récupération d'un tableau de seance
+ */
+router.get('/seancesseules', seanceseuleController_1.SeanceSeuleController.getSeancesSeulesById);
 configLog_1.default.info('Declaration route GET /api/seancesseules/:id');
 router.get('/:id', authMiddleware_1.authenticateJWT, seanceseuleController_1.SeanceSeuleController.getSeanceSeuleById);
 configLog_1.default.info('Declaration route PUT /api/seancesseules/:id');

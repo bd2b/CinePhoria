@@ -14,6 +14,11 @@ router.get('/', authenticateJWT , SeanceSeuleController.getAllSeanceSeules);
 logger.info('Declaration route POST /api/seancesseules');
 router.post('/', authenticateJWT, SeanceSeuleController.createSeanceSeule);
 
+/** 
+ * Récupération d'un tableau de seance
+ */
+router.get('/seancesseules', SeanceSeuleController.getSeancesSeulesById);
+
 logger.info('Declaration route GET /api/seancesseules/:id');
 router.get('/:id', authenticateJWT , SeanceSeuleController.getSeanceSeuleById);
 
@@ -22,5 +27,7 @@ router.put('/:id', authenticateJWT, SeanceSeuleController.updateSeanceSeule);
 
 logger.info('Declaration route DELETE /api/seancesseules/:id');
 router.delete('/:id', authenticateJWT, SeanceSeuleController.deleteSeanceSeule);
+
+
 
 export default router;

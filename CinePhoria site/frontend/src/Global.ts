@@ -111,7 +111,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         if (ident !== undefined) {
             console.log("Identification chargee = ", ident);
             await userDataController.init();
-            console.log("Compte charge = ", userDataController.compte());
+            // console.log("Compte charge = ", userDataController.compte());
             const profil = userDataController.profil();
             console.log("Profil charge = ", profil);
         } else {
