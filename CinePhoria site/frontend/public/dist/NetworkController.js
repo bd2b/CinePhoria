@@ -59,7 +59,7 @@ function apiRequest(endpoint_1, method_1, body_1) {
                 body: finalBody,
                 credentials: requiresAuth ? 'include' : 'same-origin'
             };
-            console.debug("ReqInit de tentative 1", reqInit1);
+            // console.debug("ReqInit de tentative 1", reqInit1);
             let response = yield fetch(endpoint, reqInit1);
             if (requiresAuth && (response.status === 401 || response.status === 403)) {
                 console.warn("🔄 Token expiré, tentative de refresh...");
@@ -84,7 +84,7 @@ function apiRequest(endpoint_1, method_1, body_1) {
                         body: finalBody,
                         credentials: 'include'
                     };
-                    console.debug("ReqInit de tentative 2", reqInit2);
+                    // console.debug("ReqInit de tentative 2", reqInit2)
                     response = yield fetch(endpoint, reqInit2);
                 }
                 catch (err) {
@@ -365,8 +365,8 @@ export function getSeatsBookedApi(seanceId) {
 }
 /**
  * Récupération d'une seance
- * @param seanceID
- * @returns unn tableau de seances avec une seule séance
+ * @param un tableau de seanceID
+ * @returns un tableau de seances
  */
 export function getSeancesByIdApi(uuids) {
     return __awaiter(this, void 0, void 0, function* () {
@@ -713,6 +713,19 @@ export function seancesseulesSelectAllApi() {
         // Requête authentifiée
         const responseJSON = yield apiRequest(endpoint, 'GET', undefined, true);
         return responseJSON;
+    });
+}
+/**
+ * Récupération d'une seance
+ * @param un tableau de seanceID
+ * @returns un tableau de seances
+ */
+export function getSeancesSeulesByIdApi(uuids) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const endpoint = `${baseUrl}/api/seancesseules/seancesseules?ids=${uuids}`;
+        const seancesSeules = yield apiRequest(endpoint, 'GET', undefined);
+        console.log("Liste des séances seules= ", seancesSeules);
+        return seancesSeules;
     });
 }
 /**

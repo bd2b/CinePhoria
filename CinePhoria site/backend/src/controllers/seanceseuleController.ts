@@ -28,6 +28,28 @@ export class SeanceSeuleController {
         }
       }
 
+      static async getSeancesSeulesById(req: Request, res: Response) {
+          try {
+            // Recuperation des ids de seance
+            
+            const idsParam = req.query.ids as any;
+            if (!idsParam || (typeof idsParam !== 'string' && !Array.isArray(idsParam))) {
+              res.status(400).json({ message: 'Le paramètre "ids" est requis et doit être une chaîne ou un tableau de chaînes.' });
+              return;
+            }
+      
+            const idsArray = Array.isArray(idsParam) ? idsParam : idsParam.split(',').map(id => id.trim());
+          
+            // Transformer en chaîne de caractères avec des guillemets doubles
+            const idsFormatted = idsArray.map(id => `"${id}"`).join(',');
+            const seances = await SeanceSeuleDAO.findByIds(idsFormatted);
+            
+            res.json(seances);
+          } catch (error: any) {
+            res.status(500).json({ error: error.message });
+          }
+        }
+
   // POST => create a SeanceSeule
   static async createSeanceSeule(req: Request, res: Response) {
     try {

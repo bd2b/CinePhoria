@@ -7,6 +7,7 @@ var CinephoriaErrorCode;
     CinephoriaErrorCode["TOKEN_REFRESH_FAIL"] = "TOKEN_REFRESH_FAIL";
     CinephoriaErrorCode["AUTH_REQUIRED"] = "AUTH_REQUIRED";
     CinephoriaErrorCode["API_ERROR"] = "API_ERROR";
+    CinephoriaErrorCode["API_ERROR_SILENT"] = "API_ERROR_SILENT";
     CinephoriaErrorCode["UNKNOWN"] = "UNKNOWN";
 })(CinephoriaErrorCode || (exports.CinephoriaErrorCode = CinephoriaErrorCode = {}));
 class CinephoriaError extends Error {

@@ -228,7 +228,7 @@ export function login() {
                         userDataController.ident = emailInput.value.trim();
                         console.log("ident stockée = ", userDataController.ident);
                         yield userDataController.init();
-                        console.log("Compte charge = ", userDataController.compte());
+                        // console.log("Compte charge = ", userDataController.compte());
                         const pageToGo = userDataController.profil();
                         console.log("Page redirigée", pageToGo);
                         window.location.href = pageToGo;

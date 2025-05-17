@@ -262,6 +262,7 @@ border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content:space-between;
+    width: 100%;
     font-size: var(--caption-font-size)
 }
 .caractFilm__public-p {

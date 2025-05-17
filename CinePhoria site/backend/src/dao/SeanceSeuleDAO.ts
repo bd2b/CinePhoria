@@ -1,6 +1,6 @@
 import { SeanceSeule } from "../shared-models/SeanceSeule";
 
-import { dbConfig , dbPool} from "../config/config";
+import { dbConfig, dbPool } from "../config/config";
 import logger from '../config/configLog';
 
 import { formatDateLocalYYYYMMDD } from '../shared-models/HelpersCommon';
@@ -14,11 +14,11 @@ export class SeanceSeuleDAO {
         logger.info('Exécution de la requête : SELECT * FROM Seance');
         const [rows] = await connection.execute('SELECT * FROM Seance');
         connection.release();
-    
+
         // On convertit chaque record en SeanceSeule
         return (rows as any[]).map(row => new SeanceSeule(row));
-    
-      }
+
+    }
 
     // Create
     static async createSeanceSeule(seanceseule: SeanceSeule): Promise<string> {
@@ -34,10 +34,10 @@ export class SeanceSeuleDAO {
     (id, filmId, salleId, dateJour, hourBeginHHSMM, hourEndHHSMM, qualite, bo, numFreeSeats, numFreePMR, alertAvailibility)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
-                    newId, 
+                    newId,
                     seanceseule.filmId || null,
                     seanceseule.salleId || null,
-                    seanceseule.dateJour || null ,
+                    seanceseule.dateJour || null,
                     seanceseule.hourBeginHHSMM || "",
                     seanceseule.hourEndHHSMM || "",
                     seanceseule.qualite || "",
@@ -45,7 +45,7 @@ export class SeanceSeuleDAO {
                     seanceseule.numFreeSeats || "",
                     seanceseule.numFreePMR || "",
                     seanceseule.alertAvailibility || ""
-                    
+
                 ]
             );
             connection.release();
@@ -60,26 +60,26 @@ export class SeanceSeuleDAO {
     // Update
     static async updateSeanceSeule(id: string, salleseule: SeanceSeule): Promise<boolean> {
         // Gérer le probleme de mise à jour de champ date en MySQL qui attend 'yyyy-mm-dd'
-        
+
         const connection = await dbPool.getConnection();
         try {
             logger.info(`Mise à jour de la seanceseule ${id}`);
             const [result] = await connection.execute(
-            `UPDATE Seance SET
+                `UPDATE Seance SET
              filmId=?, salleId=?, dateJour=?, hourBeginHHSMM=?, hourEndHHSMM=?, 
              qualite=?, bo=?, numFreeSeats=?, numFreePMR=?, alertAvailibility=?
             
                 WHERE id=?`,
-                [   salleseule.filmId || null,
-                    salleseule.salleId || null,
-                    salleseule.dateJour || null ,
-                    salleseule.hourBeginHHSMM || "",
-                    salleseule.hourEndHHSMM || "",
-                    salleseule.qualite || "",
-                    salleseule.bo || "",
-                    salleseule.numFreeSeats || "",
-                    salleseule.numFreePMR || "",
-                    salleseule.alertAvailibility || "",
+                [salleseule.filmId || null,
+                salleseule.salleId || null,
+                salleseule.dateJour || null,
+                salleseule.hourBeginHHSMM || "",
+                salleseule.hourEndHHSMM || "",
+                salleseule.qualite || "",
+                salleseule.bo || "",
+                salleseule.numFreeSeats || "",
+                salleseule.numFreePMR || "",
+                salleseule.alertAvailibility || "",
                     id
 
                 ]
@@ -119,11 +119,22 @@ export class SeanceSeuleDAO {
         logger.info('Connexion réussie à la base de données');
         const [rows] = await connection.execute('SELECT * FROM Seance WHERE id = ?', [id]);
         connection.release();
-    
+
         const data = (rows as any[])[0];
         return data ? new SeanceSeule(data) : null;
-      }
-    
+    }
+
+    static async findByIds(seanceids: string): Promise<SeanceSeule[]> {
+        const connection = await dbPool.getConnection();
+        logger.info('Connexion réussie à la base de données');
+        logger.info(`SELECT * FROM Seance WHERE id in (${seanceids})`)
+        const [rows] = await connection.execute(`SELECT * FROM Seance WHERE id in (${seanceids})`);
+        connection.release();
+
+        // On convertit chaque record en Seance et on renvoie le premier et seul élément
+        return (rows as any[]).map(row => new SeanceSeule(row));
+    }
+
 }
 
 // *** générateur d'UUID

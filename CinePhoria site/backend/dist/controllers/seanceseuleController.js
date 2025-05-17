@@ -31,6 +31,24 @@ class SeanceSeuleController {
             res.status(500).json({ error: error.message });
         }
     }
+    static async getSeancesSeulesById(req, res) {
+        try {
+            // Recuperation des ids de seance
+            const idsParam = req.query.ids;
+            if (!idsParam || (typeof idsParam !== 'string' && !Array.isArray(idsParam))) {
+                res.status(400).json({ message: 'Le paramètre "ids" est requis et doit être une chaîne ou un tableau de chaînes.' });
+                return;
+            }
+            const idsArray = Array.isArray(idsParam) ? idsParam : idsParam.split(',').map(id => id.trim());
+            // Transformer en chaîne de caractères avec des guillemets doubles
+            const idsFormatted = idsArray.map(id => `"${id}"`).join(',');
+            const seances = await SeanceSeuleDAO_1.SeanceSeuleDAO.findByIds(idsFormatted);
+            res.json(seances);
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
     // POST => create a SeanceSeule
     static async createSeanceSeule(req, res) {
         try {

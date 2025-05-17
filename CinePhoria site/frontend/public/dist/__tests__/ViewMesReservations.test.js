@@ -49,7 +49,7 @@ describe('updateTableMesReservations', () => {
             hourBeginHHSMM: '18:00'
         });
     });
-    it('génère une table HTML avec une réservation', () => {
+    it('génère une table HTML avec une réservation', () => __awaiter(void 0, void 0, void 0, function* () {
         const fakeReservation = {
             utilisateurId: 'aaaaa-aaaa-aa',
             reservationId: 'res1',
@@ -64,15 +64,15 @@ describe('updateTableMesReservations', () => {
             totalPrice: 12.5,
             isEvaluationMustBeReview: false
         };
-        const div = updateTableMesReservations([fakeReservation]);
+        const div = yield updateTableMesReservations([fakeReservation]);
         const rows = div.querySelectorAll('tbody tr');
         expect(rows.length).toBe(1);
         expect(div.textContent).toContain('Film Test');
         expect(div.textContent).toContain('Cinéma Test');
         expect(div.textContent).toContain('4');
         expect(div.textContent).toContain('Excellent');
-    });
-    it('affiche le bouton pour déposer un avis si la réservation est passée et non évaluée', () => {
+    }));
+    it('affiche le bouton pour déposer un avis si la réservation est passée et non évaluée', () => __awaiter(void 0, void 0, void 0, function* () {
         const pastDate = '2023-05-10';
         const fakeReservation = {
             utilisateurId: 'aaaaa-aaaa-aa',
@@ -85,13 +85,13 @@ describe('updateTableMesReservations', () => {
             totalSeats: 1,
             totalPrice: 8.0,
         };
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = yield updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
         // Cherche le bouton avis
         const avisButton = [...table.querySelectorAll('button')]
             .find((btn) => btn.textContent === 'Donnez nous votre avis sur ce film ✎');
         expect(avisButton).toBeTruthy();
-    });
+    }));
     it('permet de déposer un avis et appelle l\'API de sauvegarde', () => __awaiter(void 0, void 0, void 0, function* () {
         const fakeReservation = {
             utilisateurId: 'aaaaa-aaaa-aa',
@@ -134,7 +134,7 @@ describe('updateTableMesReservations', () => {
                 </div>
             </div>
         `;
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = yield updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
         // Clic sur le bouton pour ouvrir la modale
         const avisButton = [...table.querySelectorAll('button')].find(b => { var _a; return (_a = b.textContent) === null || _a === void 0 ? void 0 : _a.includes('Donnez nous votre avis'); });
@@ -210,7 +210,7 @@ describe('updateTableMesReservations', () => {
                 </div>
             </div>
         `;
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = yield updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
         // Ajoute manuellement le bouton "Modifier votre avis" dans le DOM
         const btn = document.createElement('button');
@@ -262,7 +262,7 @@ describe('interaction : click sur bouton date', () => {
             totalPrice: 12.5,
             isEvaluationMustBeReview: false
         };
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = yield updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
         const button = table.querySelector('button.tab__mesreservations-liste-button');
         expect(button).toBeTruthy();
@@ -298,7 +298,7 @@ describe('interaction : click sur bouton QRCode', () => {
             totalPrice: 12.5,
         };
         // Met à jour le tableau
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = yield updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
         // Cherche le bouton QRCode
         const qrButton = [...table.querySelectorAll('button')]
@@ -332,7 +332,7 @@ describe('interaction : bouton Annuler', () => {
             totalSeats: 2,
             totalPrice: 12.5,
         };
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = yield updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
         const annulerBtn = [...table.querySelectorAll('button')].find(b => b.textContent === 'Annuler');
         expect(annulerBtn).toBeTruthy();

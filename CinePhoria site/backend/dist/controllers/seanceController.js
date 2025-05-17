@@ -31,11 +31,11 @@ class SeanceController {
         try {
             // Recuperation des ids de seance
             const idsParam = req.query.ids;
-            if (!idsParam || typeof idsParam !== 'string') {
-                res.status(400).json({ message: 'Le paramètre "ids" est requis et doit être une chaîne.' });
+            if (!idsParam || (typeof idsParam !== 'string' && !Array.isArray(idsParam))) {
+                res.status(400).json({ message: 'Le paramètre "ids" est requis et doit être une chaîne ou un tableau de chaînes.' });
                 return;
             }
-            const idsArray = idsParam.split(',').map(id => id.trim());
+            const idsArray = Array.isArray(idsParam) ? idsParam : idsParam.split(',').map(id => id.trim());
             // Transformer en chaîne de caractères avec des guillemets doubles
             const idsFormatted = idsArray.map(id => `"${id}"`).join(',');
             const seances = await SeanceDAO_1.SeanceDAO.findByIds(idsFormatted);

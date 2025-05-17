@@ -240,7 +240,7 @@
     align-items: left;
     justify-content: start;
     gap: 10px;
-    width: 100%;
+    /* width: 100%; */
     height: 100%;
     padding-top: 10px;
 }
@@ -405,8 +405,9 @@
     }
 
     .right__description-p {
-        visibility: hidden;
-        height: 0px;
+        width: auto;
+        /* visibility: hidden;
+        height: 0px; */
     }
 
     .right__author-p {

@@ -47,6 +47,7 @@ const QRCode_1 = __importDefault(require("../models/QRCode"));
 const SeanceDAO_1 = require("../dao/SeanceDAO");
 const ReservationDAO_1 = require("../dao/ReservationDAO");
 const QRCodeDAO_1 = require("../dao/QRCodeDAO");
+const config_1 = require("../config/config");
 const writeFileAsync = (0, util_1.promisify)(fs.writeFile);
 async function generateQRCode(textQRCode, reservationId, dateExpiration) {
     // Stockage du QRCode dans Mongo, fonction interne au controller
@@ -82,18 +83,20 @@ async function createQRCode(reservationId) {
             throw new Error(`Aucune seance trouvée pour ${reservationId}`);
         }
         // Génération du text du QRCode
-        let textQRCode = reservations[0].displayName + ",";
-        textQRCode += seances[0].nameCinema + ",";
-        textQRCode += seances[0].nameSalle + ",";
-        textQRCode += reservations[0].titleFilm + ",";
-        textQRCode += reservations[0].dateJour + ",";
+        let textQRCode = config_1.urlString + "/viewqrcode.html?displayName=" + reservations[0].displayName + "&";
+        textQRCode += "nameCinema=" + seances[0].nameCinema + "&";
+        textQRCode += "nameSalle=" + seances[0].nameSalle + "&";
+        textQRCode += "titleFilm=" + reservations[0].titleFilm + "&";
+        textQRCode += "dateJour=" + reservations[0].dateJour + "&";
+        textQRCode += "qualite=" + seances[0].qualite + "&";
+        textQRCode += "bo=" + seances[0].bo + "&";
         // textQRCode += formatDateLocalYYYYMMDD(reservations[0].dateJour!) + ",";
-        textQRCode += seances[0].hourBeginHHSMM + ",";
-        textQRCode += reservations[0].totalSeats + " siège(s),";
+        textQRCode += "hourBeginHHSMM=" + seances[0].hourBeginHHSMM + "&";
+        textQRCode += "totalSeats=" + reservations[0].totalSeats + "&";
         if (reservations[0].seatsReserved && reservations[0].seatsReserved !== '') {
-            textQRCode += reservations[0].seatsReserved + ",";
+            textQRCode += "seatsReserved=" + reservations[0].seatsReserved + "&";
         }
-        textQRCode += reservations[0].numberPMR + " placePMR";
+        textQRCode += "numberPMR=" + reservations[0].numberPMR;
         configLog_1.default.info("Génération du QRCode " + textQRCode);
         // Calcul de la date d'exoiration qui est 1h après la date de début de séance
         const [hh, mm] = seances[0].hourBeginHHSMM.split(':').map(Number);

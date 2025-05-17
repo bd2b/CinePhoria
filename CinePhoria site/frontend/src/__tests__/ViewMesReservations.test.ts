@@ -50,7 +50,7 @@ import { ReservationForUtilisateur } from '../shared-models/Reservation.js';
 
 
 
-describe('updateTableMesReservations', () => {
+describe('updateTableMesReservations',  () => {
     beforeEach(() => {
         const dom = new JSDOM('<!DOCTYPE html><body></body>');
         global.document = dom.window.document;
@@ -63,7 +63,7 @@ describe('updateTableMesReservations', () => {
 
     });
 
-    it('génère une table HTML avec une réservation', () => {
+    it('génère une table HTML avec une réservation', async () => {
         const fakeReservation: ReservationForUtilisateur = {
             utilisateurId: 'aaaaa-aaaa-aa',
             reservationId: 'res1',
@@ -79,7 +79,7 @@ describe('updateTableMesReservations', () => {
             isEvaluationMustBeReview: false
         };
 
-        const div = updateTableMesReservations([fakeReservation]);
+        const div = await updateTableMesReservations([fakeReservation]);
         const rows = div.querySelectorAll('tbody tr');
         expect(rows.length).toBe(1);
         expect(div.textContent).toContain('Film Test');
@@ -88,7 +88,7 @@ describe('updateTableMesReservations', () => {
         expect(div.textContent).toContain('Excellent');
     });
 
-    it('affiche le bouton pour déposer un avis si la réservation est passée et non évaluée', () => {
+    it('affiche le bouton pour déposer un avis si la réservation est passée et non évaluée', async () => {
         const pastDate = '2023-05-10';
         const fakeReservation: ReservationForUtilisateur = {
             utilisateurId: 'aaaaa-aaaa-aa',
@@ -102,7 +102,7 @@ describe('updateTableMesReservations', () => {
             totalPrice: 8.0,
         };
 
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = await updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
 
         // Cherche le bouton avis
@@ -157,7 +157,7 @@ describe('updateTableMesReservations', () => {
             </div>
         `;
 
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = await updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
 
         // Clic sur le bouton pour ouvrir la modale
@@ -245,7 +245,7 @@ describe('updateTableMesReservations', () => {
             </div>
         `;
 
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = await updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
 
         // Ajoute manuellement le bouton "Modifier votre avis" dans le DOM
@@ -314,7 +314,7 @@ describe('interaction : click sur bouton date', () => {
             isEvaluationMustBeReview: false
         };
 
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = await updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
 
         const button = table.querySelector('button.tab__mesreservations-liste-button') as HTMLButtonElement;
@@ -357,7 +357,7 @@ describe('interaction : click sur bouton QRCode', () => {
         };
 
         // Met à jour le tableau
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = await updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
 
         // Cherche le bouton QRCode
@@ -401,7 +401,7 @@ describe('interaction : bouton Annuler', () => {
             totalPrice: 12.5,
         };
 
-        const table = updateTableMesReservations([fakeReservation]);
+        const table = await updateTableMesReservations([fakeReservation]);
         document.body.appendChild(table);
 
 
