@@ -39,7 +39,12 @@
     display: block;
   }
 
-  
+  .title__consignes {
+    display: flex;
+    background-color: #f1f1f1;
+    margin: 20px;
+    padding: 20px;
+  }
 
 /* ------------------------------------------------
    TABLE "Mes seances"
