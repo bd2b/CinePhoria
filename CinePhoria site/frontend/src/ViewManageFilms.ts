@@ -1,7 +1,7 @@
 import { dataController } from './DataController.js';
 import { DataControllerIntranet } from './DataControllerIntranet.js';
 
-import { formatDateLocalYYYYMMDD, imageFilm, dateProchainMercredi } from './Helpers.js';
+import { formatDateLocalYYYYMMDD, imageFilm, dateProchainMercredi, showCustomAlert } from './Helpers.js';
 import { Film } from './shared-models/Film.js';
 
 import { chargerMenu } from './ViewMenu.js';
@@ -363,7 +363,7 @@ function initListen(init: boolean) {
  * Finally réinitialise la page
  */
 async function onSaveFilm() {
-    const film = buildFilmFromForm();
+    const film = await buildFilmFromForm();
     if (!film) return;
 
     try {
@@ -450,7 +450,7 @@ async function onSaveFilm() {
 /**
  * Construit un Film à partir des champs (DOM) dans la div form-detailfilm
  */
-function buildFilmFromForm(): Film | undefined {
+async function buildFilmFromForm(): Promise<Film | undefined> {
 
     if (filmSelectedList === undefined) return undefined
     const film = filmSelectedList;
@@ -476,7 +476,15 @@ function buildFilmFromForm(): Film | undefined {
     if (descEl) film.filmDescription = descEl.textContent?.trim() || '';
 
     const linkEl = document.getElementById('linkBO');
-    if (linkEl) film.linkBO = linkEl.textContent?.trim() || '';
+    if (linkEl && linkEl.textContent?.toLowerCase().includes("watch?v=")) {
+        const embedUrl = linkEl.textContent?.replace("watch?v=", "embed/");
+        film.linkBO = embedUrl;
+        await showCustomAlert(
+            `L'url est adaptée pour la publication sur le site : 
+            ${embedUrl} `);
+    } else {
+        if (linkEl) film.linkBO = linkEl.textContent?.trim() || '';
+    }
 
     const dureeEl = document.getElementById('duration');
     if (dureeEl) film.duration = dureeEl.textContent?.trim() || '';
