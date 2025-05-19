@@ -58,17 +58,26 @@ export class DataController {
             return this._allSeances.filter(seance => seance.nameCinema === this._filterNameCinema);
         }
     }
+    get filmsAll() {
+        const dateMax = new Date();
+        dateMax.setDate((dateMax).getDate() + 90);
+        const films = this.extractFilmsFromSeances(new Date(), dateMax, true);
+        console.log("Extract", films);
+        return films;
+    }
     // 🏆 Variable calculée : retourne les films filtrés par cinéma ayant une séeance dans les 90 jours
     get films() {
         const dateMax = new Date();
         dateMax.setDate((dateMax).getDate() + 90);
-        return this.extractFilmsFromSeances(new Date(), dateMax);
+        const films = this.extractFilmsFromSeances(new Date(), dateMax);
+        console.log("Extract", films);
+        return films;
     }
     // 🏆 Variable calculée : retourne les films qui ont une date de sortie au dernier mercredi 
-    // ou les films du catalogue trie par date de sortie
+    // ou les films du catalogue trie par date de sortie pour tous les cinemas
     get filmsSortiesRecentes() {
         const precedentMercredi = datePrecedentMercredi();
-        const filmsMercredi = this.films.filter((f) => {
+        const filmsMercredi = this.filmsAll.filter((f) => {
             if (!f.dateSortieCinePhoria)
                 return false;
             const sortieDate = new Date(f.dateSortieCinePhoria);
@@ -304,10 +313,20 @@ export class DataController {
    * Extraction des films du tableau seance (filtré sur filterNameCinema) ayant une séance entre deux dates,
    * @param dateInf : Date inférieur initialisée par défaut à la date du jour
    * @param dateSup : Date supérieur initialisée par défaut à la date du jour
+   * @param withAllCinema : true force à partir de toutes les séances, false prend les séances qui sont filtrés par
+   * le cinema selectionne dans le traitement Reservation
    * cela donne par défaut les films qui ont une séance à aujourd'hui et possibilité de gérer une plage de date quelconque
    */
-    extractFilmsFromSeances(dateInf = new Date(), dateSup = new Date()) {
-        const filmIds = new Set(this.seances
+    extractFilmsFromSeances(dateInf = new Date(), dateSup = new Date(), withAllCinema = false) {
+        console.log("Nombre de seances", this.seances.length);
+        let seances;
+        if (withAllCinema) {
+            seances = this._allSeances;
+        }
+        else {
+            seances = this.seances;
+        }
+        const filmIds = new Set(seances
             .filter(seance => {
             const dateStr = seance.dateJour;
             if (!dateStr)
