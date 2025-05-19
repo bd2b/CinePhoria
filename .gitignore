@@ -3,6 +3,7 @@
 
 # Fichiers secrets
 **/.env*
+.env*
 
 # Fichiers minifiés
 **/*.min.js
