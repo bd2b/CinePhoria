@@ -21,6 +21,8 @@ const config_1 = require("./config/config");
 console.log(`🛠️ Mode actuel : ${config_1.modeExec} avec version ${JSON.stringify(config_1.versionCourante)}`);
 (0, config_1.connectDBMongo)();
 const app = (0, express_1.default)();
+// Suppression de la signature
+app.disable('x-powered-by');
 app.use((0, cookie_parser_1.default)()); // ✅ Important
 // ✅ Middleware pour la compression
 // 🔹 Active la compression gzip (ou brotli si le client le supporte)
@@ -46,6 +48,16 @@ app.use((0, compression_1.default)());
 //   methods: "GET,POST,PUT,DELETE,OPTIONS",
 //   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
 // }));
+// Middleware pour bloquer les embarquements de iFRAME
+app.use((req, res, next) => {
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    next();
+});
+// Content-Security-Policy (CSP)
+app.use((req, res, next) => {
+    res.setHeader("Content-Security-Policy", "frame-ancestors 'self';");
+    next();
+});
 // Middleware de protection contre les injections
 app.use(sanitiseQueryMiddleware_1.default); // Appliquer à toutes les routes
 // ✅ Configuration CORS pour accepter localhost:3000
