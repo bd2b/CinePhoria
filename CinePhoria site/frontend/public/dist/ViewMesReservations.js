@@ -46,7 +46,7 @@ export function onLoadMesReservations() {
                 // On filtre les reservations non annulées ou non effacées et on trie sur la date
                 // reservations = reservations.filter((r) => { return ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.stateReservation as ReservationState) });
                 reservations = reservations
-                    .filter((r) => ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.stateReservation))
+                    .filter((r) => ![ReservationState.ReserveCanceled, ReservationState.ReserveDeleted].includes(r.statereservation))
                     .sort((a, b) => new Date(b.dateJour || '').getTime() - new Date(a.dateJour || '').getTime());
                 if (reservations.length === 0) {
                     const container = document.getElementById('mesreservations-table-container');
@@ -138,7 +138,7 @@ export function updateTableMesReservations(reservations) {
             tdComplexe.innerHTML = '<span class="td-label">Complexe :</span> ' + (resa.nameCinema || '');
             tr.appendChild(tdComplexe);
             // Statut dynamique
-            let statutResa = resa.stateReservation;
+            let statutResa = resa.statereservation;
             if (statutResa === ReservationState.ReserveConfirmed) {
                 // ACtualisation du statut de la réservation si l'heure de la reservation est dans le passé
                 const dateVar = new Date(resa.dateJour);
