@@ -28,6 +28,9 @@ connectDBMongo()
 
 const app = express();
 
+// Suppression de la signature
+app.disable('x-powered-by');
+
 app.use(cookieParser()); // ✅ Important
 
 // ✅ Middleware pour la compression
@@ -57,6 +60,17 @@ app.use(compression());
 //   methods: "GET,POST,PUT,DELETE,OPTIONS",
 //   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
 // }));
+
+// Middleware pour bloquer les embarquements de iFRAME
+app.use((req, res, next) => {
+  res.setHeader("X-Frame-Options", "SAMEORIGIN"); 
+  next();
+});
+// Content-Security-Policy (CSP)
+app.use((req, res, next) => {
+  res.setHeader("Content-Security-Policy", "frame-ancestors 'self';");
+  next();
+});
 
 // Middleware de protection contre les injections
 app.use(sanitizeQueryMiddleware); // Appliquer à toutes les routes
