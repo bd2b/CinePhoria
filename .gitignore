@@ -4,6 +4,13 @@
 # Fichiers secrets
 **/.env*
 .env*
+./env/*
+
+# Fichiers de déploiement
+**/*.yml
+
+# Fichiers Docker
+**/Dockerfile*
 
 # Fichiers minifiés
 **/*.min.js

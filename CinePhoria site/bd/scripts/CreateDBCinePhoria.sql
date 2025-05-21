@@ -1,3 +1,4 @@
+SET NAMES utf8mb4;
 CREATE TABLE Cinema (
   nameCinema  varchar(100) NOT NULL, 
   adresse     varchar(255) NOT NULL, 

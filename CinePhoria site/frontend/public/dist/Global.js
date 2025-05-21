@@ -13,9 +13,13 @@ import { CinephoriaErrorCode, CinephoriaError } from "./shared-models/Error.js";
 import { dataController } from './DataController.js';
 // L'url de base est l'url d'appel des fichiers statiques
 export const baseUrl = `${window.location.protocol}//${window.location.hostname}${window.location.port ? ':' + window.location.port : ''}`;
+console.log("Base URL = ", baseUrl);
 const page = window.location.pathname.split("/").pop(); // 🔹 Ajout ici
-if (window.location.hostname.toUpperCase() !== 'CINEPHORIA.BD2DB.COM')
+// if (window.location.hostname.toUpperCase() !== 'CINEPHORIA.BD2DB.COM') document.title = document.title + " - dev";
+if (window.location.hostname === '127.0.0.1' && window.location.port === "3500")
     document.title = document.title + " - dev";
+if (window.location.hostname === '127.0.0.1' && window.location.port === "3600")
+    document.title = document.title + " - stag";
 const pagesPublic = ["visiteur.html", "reservation.html", "films.html"];
 const pagesDataController = ["visiteur.html", "reservation.html", "films.html", "mesreservations.html"];
 /**

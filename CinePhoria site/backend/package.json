@@ -6,7 +6,9 @@
     "build": "tsc",
     "deploy:prod": "./deploy-prod.sh",
     "start": "node dist/server.js",
-    "dev": "ts-node-dev --respawn src/server.ts"
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "deploy:staging": "cd .. && ansible-playbook cicd/deploy-staging.yml",
+    "deploy:staging-forcedb": "cd .. && ansible-playbook cicd/deploy-staging.yml -e recreate_db=true"
   },
   "keywords": [],
   "author": "",

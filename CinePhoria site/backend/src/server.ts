@@ -12,15 +12,28 @@ import fs from 'fs';
 import path from 'path';
 
 import dotenv from 'dotenv';
-dotenv.config({ path: './.env' });
-logger.info("Valeurs env après chargement :" + process.env.MAJEURE + process.env.MINEURE + process.env.BUILD);
+export function loadEnv(): void {
+  const possiblePaths = [
+    path.resolve(__dirname, '../../env/.env'), // dev (src/server.ts)
+    path.resolve(__dirname, '../env/.env'),    // prod Docker (dist/server.js)
+    path.resolve(process.cwd(), 'env/.env'),   // fallback général
+  ];
 
-
-
+  for (const envPath of possiblePaths) {
+    if (fs.existsSync(envPath)) {
+      dotenv.config({ path: envPath });
+      console.log(`✅ Fichier .env chargé depuis : ${envPath}`);
+      return;
+    }
+  }
+  console.error('❌ Aucun fichier .env trouvé');
+}
+loadEnv();
+logger.info("Version env après chargement :" + process.env.MAJEURE + " - " + process.env.MINEURE + " - " + process.env.BUILD);
 
 
 // Connexion à la base MongoDB
-import { connectDBMongo , modeExec , versionCourante} from './config/config';
+import { connectDBMongo , modeExec , urlString, versionCourante} from './config/config';
 
 console.log(`🛠️ Mode actuel : ${modeExec} avec version ${JSON.stringify(versionCourante)}`);
 
@@ -34,32 +47,8 @@ app.disable('x-powered-by');
 app.use(cookieParser()); // ✅ Important
 
 // ✅ Middleware pour la compression
-// 🔹 Active la compression gzip (ou brotli si le client le supporte)
+// 🔹 Active la compression gzip
 app.use(compression());
-
-
-// 🔵 CORS doit venir immédiatement après l'initialisation d'app
-// app.use(cors({
-//   origin: (origin, callback) => {
-
-//     if (!origin) {
-//       // Les requêtes sans Origin sont acceptées
-//       callback(null, true);
-//     } else if (origin.startsWith('http://localhost') || origin.startsWith('http://127.0.0.1')) {
-//       // Accepté pour développement
-//       logger.info("Origine 222= " + origin)
-//       callback(null, true);
-//     } else if (origin.startsWith('https://cinephoria.bd2db.com')) {
-//       callback(null, true);
-//     } else {
-//       //  callback(null, true);
-//       // ----- callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   credentials: true,
-//   methods: "GET,POST,PUT,DELETE,OPTIONS",
-//   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-// }));
 
 // Middleware pour bloquer les embarquements de iFRAME
 app.use((req, res, next) => {
@@ -74,28 +63,6 @@ app.use((req, res, next) => {
 
 // Middleware de protection contre les injections
 app.use(sanitizeQueryMiddleware); // Appliquer à toutes les routes
-
-
-// ✅ Configuration CORS pour accepter localhost:3000
-// app.use(cors({
-//   origin: 'http://localhost:3500', // Autorise uniquement le frontend
-//   credentials: true, // Permet les cookies et sessions si besoin
-//   methods: "GET,POST,PUT,DELETE,OPTIONS",
-//   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-// }));
-
-// app.use(cors({
-//   origin: (origin, callback) => {
-//     if (!origin || origin.startsWith('http://localhost')) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error('Not allowed by CORS'));
-//     }
-//   },
-//   credentials: true,
-//   methods: "GET,POST,PUT,DELETE,OPTIONS",
-//   allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization"
-// }));
 
 // ✅ Middleware pour tester l'origine (DEBUG)
 // app.use((req, res, next) => {
@@ -114,9 +81,6 @@ app.use(fileUpload({
 
 // ✅ Middleware JSON (Obligatoire pour Express)
 app.use(express.json());
-
-
-
 
 
 import filmRoutes from './routes/filmRoutes';
@@ -139,13 +103,12 @@ app.use('/api/seancesseules', seanceseuleRoutes);
 app.use('/api/reservation', reservationRoutes);
 app.use('/api/utilisateur', utilisateurRoutes);
 app.use('/api/incidents', incidentRoutes);
-
+app.use('/api/login', loginRoutes);
 app.use('/api/mail', mailRoutes);
 
-app.use('/api/login', loginRoutes);
-
 // Route pour servir les fichiers statics
-const frontPath = (modeExec === 'développement')
+// cas particulier le mode developpement PROD et STAGING pareil
+const frontPath = (modeExec === 'developpement')
   ? path.join(__dirname, '../../frontend/public/')
   : path.join(__dirname, '../public');
 
@@ -162,8 +125,14 @@ app.use(express.static(frontPath));
 //   res.sendFile(path.join(frontPath));
 // });
 
-const httpsPort = 3500;
-const httpPort = 3000;
+// Dev ou PROD
+let httpsPort = 3500;
+let httpPort = 3000;
+if (modeExec === 'stagging') {
+  httpsPort = 3600
+  httpPort = 3100
+}
+
 
 if (modeExec === 'production') {
   const sslKeyPath = process.env.SSL_KEY_PATH || '/usr/src/app/ssl/private.key';
@@ -175,7 +144,7 @@ if (modeExec === 'production') {
 
   const httpsServer = https.createServer(credentials, app);
   httpsServer.listen(httpsPort, () => {
-    console.log(`✅ Serveur HTTPS (production) démarré sur le port ${httpsPort}`);
+    console.log(`✅ Serveur HTTPS (production) démarré sur ${urlString}:${httpsPort}`);
   });
 
   const httpServer = http.createServer((req, res) => {
@@ -188,7 +157,7 @@ if (modeExec === 'production') {
   });
 } else {
   app.listen(httpsPort, () => {
-    console.log(`🛠️ Serveur HTTP (développement) démarré sur le port ${httpsPort}`);
+    console.log(`🛠️ Serveur HTTP (développement ou staging) démarré sur le port ${httpsPort}`);
   });
 }
 

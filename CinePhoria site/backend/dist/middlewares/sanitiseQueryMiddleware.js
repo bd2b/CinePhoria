@@ -12,24 +12,22 @@ const sanitizeQueryMiddleware = (req, res, next) => {
         /[';]/g, // Caractères utilisés pour l'injection SQL. On autorise les "" pour les valeurs string mais pas les ''
         /(\b(UNION|SELECT|DROP|INSERT|DELETE|UPDATE|ALTER|CREATE|EXEC)\b)/gi, // Commandes SQL
     ];
-    let mustContinue = true;
     // Parcourt chaque clé dans req.query
     for (const key in req.query) {
         const value = req.query[key];
         if (typeof value === 'string') {
-            dangerousPatterns.forEach((pattern) => {
+            for (const pattern of dangerousPatterns) {
                 if (pattern.test(value)) {
-                    // Journalisation pour le débogage ou la sécurité
-                    mustContinue = false;
                     configLog_1.default.warn(`Tentative d'injection détectée dans le paramètre "${key}": ${value} par le pattern ${pattern}`);
-                    res.status(400).json({ message: `Paramètre "${key}" contient un contenu non autorisé.` });
-                    return;
+                    if (!res.headersSent) {
+                        res.status(400).json({ message: `Paramètre "${key}" contient un contenu non autorisé.` });
+                        return;
+                    }
+                    return; // Empêche d'autres réponses ou erreurs
                 }
-            });
+            }
         }
     }
-    if (mustContinue) {
-        next(); // Poursuit la requête si tout est correct
-    }
+    return next(); // Poursuit la requête si tout est correct
 };
 exports.default = sanitizeQueryMiddleware;

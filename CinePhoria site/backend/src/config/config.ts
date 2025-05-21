@@ -10,12 +10,11 @@ import mongoose from 'mongoose';
 import mysql from 'mysql2/promise'; 
 
 // Exporter le mode d'exécution
-export const modeExec = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
+export const modeExec = process.env.ENVIRONNEMENT;
+logger.info(`Execution en mode ${modeExec}`);
 
-export let urlString = "";
-if (modeExec === 'développement') urlString = "http://127.0.0.1:3500/"
-if (modeExec === 'production') urlString = "https://cinephoria.bd2db.com/"
-
+export const urlString = process.env.URLSTRING;
+logger.info(`URL = ${urlString}`);
 
 // Exporter la version
 export const versionCourante = {
@@ -63,6 +62,7 @@ export const nombreTentativeLoginKO = parseInt(process.env.MAX_TENTATIVE_LOGIN_K
 export const ConfigMongo = {
   mongoUri: process.env.MONGO_URI || '',
 };
+logger.info("Mongo URI", ConfigMongo);
 
 export const connectDBMongo = async () => {
   try {

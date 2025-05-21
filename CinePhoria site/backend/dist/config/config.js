@@ -13,12 +13,10 @@ const configLog_1 = __importDefault(require("../config/configLog"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const promise_1 = __importDefault(require("mysql2/promise"));
 // Exporter le mode d'exécution
-exports.modeExec = process.env.DEVELOPPEMENT === 'true' ? 'développement' : 'production';
-exports.urlString = "";
-if (exports.modeExec === 'développement')
-    exports.urlString = "http://127.0.0.1:3500/";
-if (exports.modeExec === 'production')
-    exports.urlString = "https://cinephoria.bd2db.com/";
+exports.modeExec = process.env.ENVIRONNEMENT;
+configLog_1.default.info(`Execution en mode ${exports.modeExec}`);
+exports.urlString = process.env.URLSTRING;
+configLog_1.default.info(`URL = ${exports.urlString}`);
 // Exporter la version
 exports.versionCourante = {
     majeure: parseInt(process.env.MAJEURE || "0", 10),
@@ -57,6 +55,7 @@ exports.nombreTentativeLoginKO = parseInt(process.env.MAX_TENTATIVE_LOGIN_KO_BEF
 exports.ConfigMongo = {
     mongoUri: process.env.MONGO_URI || '',
 };
+configLog_1.default.info("Mongo URI", exports.ConfigMongo);
 const connectDBMongo = async () => {
     try {
         await mongoose_1.default.connect(exports.ConfigMongo.mongoUri);
