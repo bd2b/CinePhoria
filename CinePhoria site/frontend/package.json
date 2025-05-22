@@ -6,9 +6,8 @@
     "test": "jest",
     "build": "tsc",
     "start": "tsc --watch",
-     "bundle-js": "./bundle-main.sh",
-      "build-js": "./build-js.sh"
-
+    "bundle-js": "./bundle-main.sh",
+    "build-js": "./build-js.sh"
   },
   "keywords": [],
   "author": "",
@@ -29,10 +28,12 @@
   "dependencies": {
     "@types/chart.js": "^2.9.41",
     "@types/mongoose": "^5.11.96",
+    "@types/selenium-webdriver": "^4.1.28",
     "@types/uuid": "^10.0.0",
     "bcrypt": "^5.1.1",
     "chart.js": "^4.4.9",
     "mongoose": "^8.13.2",
+    "selenium-webdriver": "^4.32.0",
     "uuid": "^11.1.0",
     "winston": "^3.17.0"
   }
